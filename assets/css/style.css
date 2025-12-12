@@ -4653,3 +4653,94 @@ body {
     font-size: 0.75rem;
     font-weight: 600;
 }
+
+/* Order notification (bottom left) */
+.order-notification {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 9999;
+    min-width: 300px;
+    max-width: 400px;
+    background: rgba(26, 26, 46, 0.95);
+    border: 1px solid var(--knd-neon-blue);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 191, 255, 0.3);
+    backdrop-filter: blur(10px);
+    transform: translateX(-120%);
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.order-notification.show {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.order-notification-success {
+    border-color: #25d366;
+    box-shadow: 0 8px 32px rgba(37, 211, 102, 0.3);
+}
+
+.order-notification-content {
+    display: flex;
+    align-items: center;
+    color: var(--knd-white);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.order-notification-success .order-notification-content i {
+    color: #25d366;
+}
+
+.order-notification-info .order-notification-content i {
+    color: var(--knd-neon-blue);
+}
+
+/* Order item row styles */
+.order-item-row {
+    transition: all 0.3s ease;
+}
+
+.order-item-row:hover {
+    background: rgba(26, 26, 46, 0.8) !important;
+    border-color: var(--knd-neon-blue) !important;
+}
+
+.qty-btn {
+    min-width: 35px;
+    height: 35px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qty-display {
+    color: var(--knd-white);
+    font-size: 1rem;
+}
+
+.remove-item-btn {
+    min-width: 35px;
+    height: 35px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .order-notification {
+        min-width: 250px;
+        max-width: 90%;
+        bottom: 10px;
+        left: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+}

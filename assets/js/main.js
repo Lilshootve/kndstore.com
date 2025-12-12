@@ -216,6 +216,43 @@ function updateOrderBadge() {
     }
 }
 
+// Función para mostrar notificación en la parte inferior izquierda
+function showOrderNotification(message, type = 'success') {
+    // Eliminar notificación anterior si existe
+    const existing = document.getElementById('order-notification');
+    if (existing) {
+        existing.remove();
+    }
+
+    // Crear elemento de notificación
+    const notification = document.createElement('div');
+    notification.id = 'order-notification';
+    notification.className = `order-notification order-notification-${type}`;
+    notification.innerHTML = `
+        <div class="order-notification-content">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'} me-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Mostrar con animación
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    // Ocultar después de 3 segundos
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 300);
+    }, 3000);
+}
+
 // Listeners para botones "Añadir al pedido"
 document.addEventListener('click', function (e) {
     const btn = e.target.closest('.add-to-order');
@@ -233,19 +270,12 @@ document.addEventListener('click', function (e) {
     const items = addItemToOrder({ id, name, price });
     updateOrderBadge();
 
-    // Pequeña notificación simple (sin SweetAlert por ahora)
-    if (window.Swal) {
-        Swal.fire({
-            icon: 'success',
-            title: 'Añadido al pedido',
-            text: name + ' se agregó a tu pedido.',
-            timer: 1200,
-            showConfirmButton: false,
-            position: 'top-end'
-        });
-    } else {
-        console.log('Producto añadido al pedido:', name);
-    }
+    // Mostrar notificación en la parte inferior izquierda
+    const item = items.find(i => i.id === id);
+    const message = item.qty > 1 
+        ? `${name} añadido (${item.qty} en pedido)`
+        : `${name} añadido al pedido`;
+    showOrderNotification(message, 'success');
 });
 
 // Inicializar badge al cargar

@@ -108,6 +108,33 @@ document.addEventListener('DOMContentLoaded', function () {
         return '$' + amount.toFixed(2);
     }
 
+    function saveOrderItems(items) {
+        localStorage.setItem(ORDER_KEY, JSON.stringify(items));
+    }
+
+    function updateItemQuantity(itemId, change) {
+        const items = loadOrderItems();
+        const index = items.findIndex(i => i.id === itemId);
+        
+        if (index === -1) return items;
+        
+        items[index].qty += change;
+        
+        if (items[index].qty <= 0) {
+            items.splice(index, 1);
+        }
+        
+        saveOrderItems(items);
+        return items;
+    }
+
+    function removeItem(itemId) {
+        const items = loadOrderItems();
+        const filtered = items.filter(i => i.id !== itemId);
+        saveOrderItems(filtered);
+        return filtered;
+    }
+
     function renderOrderItems() {
         const items = loadOrderItems();
         const container = document.getElementById('order-items-container');
@@ -131,23 +158,95 @@ document.addEventListener('DOMContentLoaded', function () {
             total += lineTotal;
 
             const div = document.createElement('div');
-            div.className = 'd-flex justify-content-between align-items-center mb-2';
+            div.className = 'order-item-row d-flex justify-content-between align-items-center mb-3 p-3';
+            div.style.border = '1px solid rgba(0, 191, 255, 0.3)';
+            div.style.borderRadius = '10px';
+            div.style.background = 'rgba(26, 26, 46, 0.5)';
             div.innerHTML = `
-                <div>
-                    <strong>${item.name}</strong>
-                    <div class="text-muted small">Cantidad: ${item.qty} · Precio: ${formatPrice(item.price)}</div>
+                <div class="flex-grow-1">
+                    <strong class="d-block mb-1">${item.name}</strong>
+                    <div class="text-muted small mb-2">Precio unitario: ${formatPrice(item.price)}</div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-outline-neon qty-btn" data-action="decrease" data-id="${item.id}" ${item.qty <= 1 ? 'disabled' : ''}>
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="qty-display" style="min-width: 40px; text-align: center; font-weight: 600;">${item.qty}</span>
+                        <button class="btn btn-sm btn-outline-neon qty-btn" data-action="increase" data-id="${item.id}">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="fw-bold">
-                    ${formatPrice(lineTotal)}
+                <div class="d-flex flex-column align-items-end gap-2">
+                    <div class="fw-bold" style="font-size: 1.1rem; color: var(--knd-neon-blue);">
+                        ${formatPrice(lineTotal)}
+                    </div>
+                    <button class="btn btn-sm btn-danger remove-item-btn" data-id="${item.id}" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             `;
             container.appendChild(div);
         });
 
         totalEl.textContent = formatPrice(total);
+        
+        // Agregar listeners para los botones
+        container.querySelectorAll('.qty-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const itemId = parseInt(this.dataset.id, 10);
+                const action = this.dataset.action;
+                const change = action === 'increase' ? 1 : -1;
+                
+                updateItemQuantity(itemId, change);
+                renderOrderItems();
+                updateOrderBadge();
+            });
+        });
+
+        container.querySelectorAll('.remove-item-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const itemId = parseInt(this.dataset.id, 10);
+                const item = items.find(i => i.id === itemId);
+                
+                if (confirm(`¿Eliminar "${item.name}" del pedido?`)) {
+                    removeItem(itemId);
+                    renderOrderItems();
+                    updateOrderBadge();
+                }
+            });
+        });
+    }
+
+    function updateOrderBadge() {
+        const items = loadOrderItems();
+        const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
+        const badge = document.querySelector('#order-count');
+        if (badge) {
+            if (totalQty > 0) {
+                badge.textContent = totalQty;
+                badge.style.display = 'inline-flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    }
+
+    function updateOrderBadge() {
+        const items = loadOrderItems();
+        const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
+        const badge = document.querySelector('#order-count');
+        if (badge) {
+            if (totalQty > 0) {
+                badge.textContent = totalQty;
+                badge.style.display = 'inline-flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
     }
 
     renderOrderItems();
+    updateOrderBadge();
 
     // Envío a WhatsApp
     const sendBtn = document.getElementById('send-whatsapp-order');
