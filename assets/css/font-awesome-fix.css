@@ -29,6 +29,7 @@
 }
 
 /* Asegurar que los iconos dentro de category-icon SIEMPRE usen Font Awesome */
+/* Esta regla tiene máxima prioridad para anular cualquier fallback */
 .category-icon .fas,
 .category-icon .fab,
 .category-icon .far,
@@ -40,23 +41,50 @@
     width: 1em !important;
     height: 1em !important;
     line-height: 1 !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    speak: none !important;
+    font-variant: normal !important;
+    text-transform: none !important;
 }
 
-/* Anular fallbacks para iconos de categorías - siempre mostrar Font Awesome */
+/* Anular fallbacks para iconos de categorías - SIEMPRE mostrar Font Awesome */
+/* Asegurar que los iconos de categorías NUNCA usen fallbacks, incluso si fontawesome-fallback está activa */
 .fontawesome-fallback .category-icon .fas,
 .fontawesome-fallback .category-icon .fab,
 .fontawesome-fallback .category-icon .far,
 .fontawesome-fallback .category-icon .fa {
     font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Brands', 'Font Awesome 6 Regular', sans-serif !important;
     font-weight: 900 !important;
+    font-style: normal !important;
+    display: inline-block !important;
+    width: 1em !important;
+    height: 1em !important;
+    line-height: 1 !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    /* Anular cualquier regla de fallback que cambie la fuente */
 }
 
-.fontawesome-fallback .category-icon .fa-rocket::before,
-.fontawesome-fallback .category-icon .fa-gamepad::before,
-.fontawesome-fallback .category-icon .fa-headset::before,
-.fontawesome-fallback .category-icon .fa-code::before,
-.fontawesome-fallback .category-icon .fa-microchip::before {
-    content: "" !important; /* Eliminar emojis de fallback en categorías */
+/* Asegurar que el contenido ::before de Font Awesome se mantenga para iconos de categorías */
+.category-icon .fas::before,
+.category-icon .fab::before,
+.category-icon .far::before,
+.category-icon .fa::before {
+    font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Brands', 'Font Awesome 6 Regular', sans-serif !important;
+    font-weight: 900 !important;
+}
+
+/* Anular cualquier fallback que intente eliminar el contenido de los iconos de categorías */
+.fontawesome-fallback .category-icon .fas::before,
+.fontawesome-fallback .category-icon .fab::before,
+.fontawesome-fallback .category-icon .far::before,
+.fontawesome-fallback .category-icon .fa::before {
+    font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Brands', 'Font Awesome 6 Regular', sans-serif !important;
+    font-weight: 900 !important;
+    /* NO eliminar el content - dejar que Font Awesome lo maneje */
 }
 
 .category-card:hover .category-icon {
@@ -64,14 +92,15 @@
     transform: scale(1.1);
 }
 
-/* Fallback visual para iconos que no cargan */
-.category-icon:empty::before,
-.category-icon i:empty::before {
+/* Fallback visual para iconos que no cargan - solo si el elemento está realmente vacío */
+.category-icon:empty::before {
     content: "□";
     font-size: 2rem;
     color: var(--knd-neon-blue);
     opacity: 0.5;
 }
+
+/* NO aplicar fallback a elementos <i> dentro de category-icon - Font Awesome usa ::before */
 
 /* Animación de carga para iconos */
 @keyframes iconLoad {
@@ -99,13 +128,21 @@
 }
 
 /* Fallback simple para cuando Font Awesome no carga */
-.fontawesome-fallback .fas,
-.fontawesome-fallback .fab,
-.fontawesome-fallback .far {
+/* EXCEPTO para iconos de categorías - estos siempre usan Font Awesome */
+.fontawesome-fallback .fas:not(.category-icon .fas),
+.fontawesome-fallback .fab:not(.category-icon .fab),
+.fontawesome-fallback .far:not(.category-icon .far) {
     font-family: Arial, sans-serif !important;
     font-size: 1em;
     line-height: 1.2;
     display: inline-block;
+}
+
+/* Asegurar que los iconos de categorías NUNCA usen el fallback de Arial */
+.fontawesome-fallback .category-icon .fas,
+.fontawesome-fallback .category-icon .fab,
+.fontawesome-fallback .category-icon .far {
+    font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Brands', 'Font Awesome 6 Regular', sans-serif !important;
 }
 
 .fontawesome-fallback .fa-rocket::before { content: "🚀"; }

@@ -83,7 +83,7 @@ foreach ($PRODUCTS as $slug => $producto) {
             <div class="col-lg-2 col-md-4 col-6 mb-3">
                 <a href="/products.php?categoria=accesorios" class="category-card">
                     <div class="category-icon">
-                        <i class="fas fa-gears"></i>
+                        <i class="fas fa-cogs"></i>
                     </div>
                     <h5>Accesorios</h5>
                 </a>
