@@ -23,7 +23,7 @@ function isCurrentPage($page) {
 
 // Función para generar meta tags
 function generateMetaTags($title = '', $description = '', $keywords = '') {
-    $defaultDescription = 'Tu tienda galáctica de productos únicos y tecnología de vanguardia. Descubre un universo de posibilidades.';
+    $defaultDescription = 'KND Store (Knowledge ‘N Development): tu tienda galáctica de servicios digitales, gaming y tecnología de vanguardia, impulsada por conocimiento y desarrollo constante.';
     $defaultKeywords = 'KND Store, tienda galáctica, productos únicos, tecnología, vanguardia';
     
     $meta = '';

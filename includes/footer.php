@@ -82,6 +82,9 @@ function generateFooter() {
     $footer .= '            <hr class="my-5" style="border-color: rgba(138, 43, 226, 0.2);">' . "\n";
     $footer .= '            ' . "\n";
     $footer .= '            <div class="text-center pt-3">' . "\n";
+    $footer .= '                <p class="mb-1" style="opacity: 0.7; font-size: 0.9rem;">' . "\n";
+    $footer .= '                    ' . (defined('KND_MEANING_TEXT') ? KND_MEANING_TEXT : 'KND = <strong>Knowledge ‘N Development</strong> — conocimiento convertido en soluciones digitales rápidas, seguras e innovadoras.') . "\n";
+    $footer .= '                </p>' . "\n";
     $footer .= '                <p class="mb-0" style="opacity: 0.7;">' . "\n";
     $footer .= '                    &copy; ' . date('Y') . ' KND STORE. Todos los derechos reservados.' . "\n";
     $footer .= '                </p>' . "\n";

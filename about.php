@@ -34,7 +34,7 @@ require_once 'includes/footer.php';
                     <span class="text-gradient">NOSOTROS</span>
                 </h1>
                 <p class="hero-subtitle">
-                    La historia galáctica detrás de la tienda más badass del universo
+                    KND = <strong>Knowledge ‘N Development</strong> — conocimiento y desarrollo al servicio de tu universo digital.
                 </p>
             </div>
         </div>
@@ -68,6 +68,33 @@ require_once 'includes/footer.php';
                          class="img-fluid"
                          style="max-width: 100%; height: auto; border-radius: 16px; opacity: 0.9; box-shadow: 0 10px 35px rgba(0, 0, 0, 0.45);">
                 </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ¿Qué significa KND? -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h2 class="section-title text-center mb-4">
+                    ¿Qué significa <span class="text-gradient">KND</span>?
+                </h2>
+                <p class="mb-3">
+                    <strong>KND</strong> nace de <strong>Knowledge ‘N Development</strong>. Es nuestra forma de decir que todo lo que hacemos parte de una idea muy simple: 
+                    convertir conocimiento real en desarrollo constante, soluciones inteligentes y experiencias digitales de alto nivel.
+                </p>
+                <p class="mb-3">
+                    En KND Store, el <em>knowledge</em> no es solo teoría. Es la base para diseñar builds, optimizar PCs, crear contenido digital y ofrecer servicios que 
+                    realmente resuelven problemas del día a día de gamers y creadores. Cada servicio que ves en el catálogo es el resultado de años de prueba, error,
+                    aprendizaje y mejora continua.
+                </p>
+                <p class="mb-0">
+                    El <em>development</em> es nuestra segunda mitad: nunca nos quedamos quietos. Ajustamos procesos, pulimos herramientas y actualizamos todo lo que 
+                    haga falta para que tu experiencia siempre se sienta un paso por delante. <strong>Knowledge ‘N Development</strong> es, en resumen, la filosofía que 
+                    impulsa todo el universo KND.
+                </p>
             </div>
         </div>
     </div>
