@@ -67,7 +67,7 @@ foreach ($PRODUCTS as $slug => $producto) {
             <div class="col-lg-2 col-md-4 col-6 mb-3">
                 <a href="/products.php?categoria=tecnologia" class="category-card">
                     <div class="category-icon">
-                        <i class="fa-solid fa-chalkboard"></i>
+                        <i class="fas fa-chalkboard"></i>
                     </div>
                     <h5>Tecnología</h5>
                 </a>
@@ -75,7 +75,7 @@ foreach ($PRODUCTS as $slug => $producto) {
             <div class="col-lg-2 col-md-4 col-6 mb-3">
                 <a href="/products.php?categoria=gaming" class="category-card">
                     <div class="category-icon">
-                        <i class="fa-solid fa-gamepad"></i>
+                        <i class="fas fa-gamepad"></i>
                     </div>
                     <h5>Gaming</h5>
                 </a>
@@ -83,7 +83,7 @@ foreach ($PRODUCTS as $slug => $producto) {
             <div class="col-lg-2 col-md-4 col-6 mb-3">
                 <a href="/products.php?categoria=accesorios" class="category-card">
                     <div class="category-icon">
-                        <i class="fa-solid fa-gears"></i>
+                        <i class="fas fa-gears"></i>
                     </div>
                     <h5>Accesorios</h5>
                 </a>
@@ -91,7 +91,7 @@ foreach ($PRODUCTS as $slug => $producto) {
             <div class="col-lg-2 col-md-4 col-6 mb-3">
                 <a href="/products.php?categoria=software" class="category-card">
                     <div class="category-icon">
-                        <i class="fa-solid fa-microchip"></i>
+                        <i class="fas fa-microchip"></i>
                     </div>
                     <h5>Software</h5>
                 </a>
@@ -99,7 +99,7 @@ foreach ($PRODUCTS as $slug => $producto) {
             <div class="col-lg-2 col-md-4 col-6 mb-3">
                 <a href="/products.php?categoria=hardware" class="category-card">
                     <div class="category-icon">
-                        <i class="fa-solid fa-wrench"></i>
+                        <i class="fas fa-wrench"></i>
                     </div>
                     <h5>Hardware</h5>
                 </a>
