@@ -1088,6 +1088,7 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
     overflow: hidden;
     z-index: 1;
+    clear: both;
 }
 
 /* Divider visual entre navbar y hero */
@@ -4686,21 +4687,20 @@ body {
 
 /* Announcement Bar - Barra de anuncios neón */
 .knd-announcement-bar {
-    position: sticky;
-    top: 120px; /* Justo debajo del navbar */
+    position: relative;
     width: 100%;
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 40, 0.9) 100%);
     border-bottom: 2px solid var(--knd-electric-purple);
     overflow: hidden;
     padding: 10px 0;
-    z-index: 998;
+    z-index: 5;
     box-shadow: 0 2px 10px rgba(138, 43, 226, 0.3);
 }
 
 .knd-announcement-track {
-    display: inline-block;
     white-space: nowrap;
-    animation: scroll-announcement 30s linear infinite;
+    display: inline-block;
+    animation: knd-announcement-scroll 25s linear infinite;
     color: var(--knd-neon-blue);
     font-weight: 600;
     font-size: 0.9rem;
@@ -4714,7 +4714,7 @@ body {
     animation-play-state: paused;
 }
 
-@keyframes scroll-announcement {
+@keyframes knd-announcement-scroll {
     0% {
         transform: translateX(0);
     }
@@ -4726,7 +4726,6 @@ body {
 @media (max-width: 768px) {
     .knd-announcement-bar {
         padding: 8px 0;
-        margin-top: 120px;
     }
     
     .knd-announcement-track {
