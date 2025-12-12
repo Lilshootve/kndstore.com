@@ -4724,3 +4724,408 @@ body {
         font-size: 0.85rem;
     }
 }
+
+/* ============================================
+   DEATH ROLL PAGE STYLES
+   ============================================ */
+
+/* Hero específico para Death Roll */
+.deathroll-hero {
+    background: linear-gradient(135deg, 
+        rgba(0, 0, 0, 0.95) 0%, 
+        rgba(20, 20, 40, 0.9) 50%, 
+        rgba(0, 0, 0, 0.95) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.deathroll-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(ellipse at center, 
+            rgba(138, 43, 226, 0.2) 0%, 
+            transparent 60%),
+        radial-gradient(ellipse at 80% 20%, 
+            rgba(0, 191, 255, 0.15) 0%, 
+            transparent 50%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.deathroll-hero .container {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-subtitle-mini {
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.8);
+    font-family: 'Inter', sans-serif;
+}
+
+/* Card glassmorphism para Death Roll */
+.deathroll-card-glass {
+    background: rgba(26, 26, 46, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 191, 255, 0.3);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(138, 43, 226, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.deathroll-card-glass:hover {
+    border-color: rgba(138, 43, 226, 0.5);
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.6),
+        0 0 30px rgba(138, 43, 226, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: translateY(-5px);
+}
+
+.deathroll-card-glass h3 {
+    color: var(--knd-white);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.deathroll-card-glass ul li {
+    color: var(--knd-white);
+    margin-bottom: 0.5rem;
+}
+
+/* Feature cards para Death Roll */
+.knd-feature-card {
+    background: rgba(26, 26, 46, 0.9);
+    border: 1px solid var(--knd-neon-blue);
+    border-radius: 15px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    height: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.knd-feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 191, 255, 0.3);
+    border-color: var(--knd-electric-purple);
+}
+
+.knd-feature-card h4 {
+    color: var(--knd-white);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.knd-feature-card h4 i {
+    color: var(--knd-neon-blue);
+}
+
+.knd-feature-card p {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+}
+
+/* Step cards para el proceso de juego */
+.knd-step-card {
+    background: rgba(26, 26, 46, 0.9);
+    border: 1px solid var(--knd-neon-blue);
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.knd-step-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(0, 191, 255, 0.1), 
+        transparent);
+    transition: left 0.5s ease;
+}
+
+.knd-step-card:hover::before {
+    left: 100%;
+}
+
+.knd-step-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(0, 191, 255, 0.4);
+    border-color: var(--knd-electric-purple);
+}
+
+.knd-step-number {
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    background: linear-gradient(135deg, var(--knd-neon-blue), var(--knd-electric-purple));
+    color: var(--knd-white);
+    border-radius: 50%;
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 15px rgba(0, 191, 255, 0.4);
+}
+
+.knd-step-card h5 {
+    color: var(--knd-white);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.knd-step-card p {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Loot cards con diferentes rarezas */
+.knd-loot-card {
+    background: rgba(26, 26, 46, 0.9);
+    border-radius: 15px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    height: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.knd-loot-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, currentColor, transparent);
+}
+
+.knd-loot-card h5 {
+    color: var(--knd-white);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.knd-loot-card ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.knd-loot-card ul li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.knd-loot-card ul li::before {
+    content: '▶';
+    position: absolute;
+    left: 0;
+    color: var(--knd-neon-blue);
+    font-size: 0.8rem;
+}
+
+/* Loot común (estándar) */
+.knd-loot-common {
+    border: 1px solid rgba(200, 200, 200, 0.5);
+}
+
+.knd-loot-common::before {
+    color: rgba(200, 200, 200, 0.8);
+}
+
+.knd-loot-common:hover {
+    border-color: rgba(200, 200, 200, 0.8);
+    box-shadow: 0 8px 20px rgba(200, 200, 200, 0.2);
+    transform: translateY(-5px);
+}
+
+/* Loot raro */
+.knd-loot-rare {
+    border: 1px solid rgba(0, 191, 255, 0.6);
+}
+
+.knd-loot-rare::before {
+    color: var(--knd-neon-blue);
+}
+
+.knd-loot-rare:hover {
+    border-color: var(--knd-neon-blue);
+    box-shadow: 0 8px 20px rgba(0, 191, 255, 0.3);
+    transform: translateY(-5px);
+}
+
+/* Loot épico/legendario */
+.knd-loot-legendary {
+    border: 1px solid rgba(138, 43, 226, 0.6);
+}
+
+.knd-loot-legendary::before {
+    color: var(--knd-electric-purple);
+}
+
+.knd-loot-legendary:hover {
+    border-color: var(--knd-electric-purple);
+    box-shadow: 0 8px 20px rgba(138, 43, 226, 0.4);
+    transform: translateY(-5px);
+}
+
+/* Disclaimer card */
+.knd-disclaimer-card {
+    background: rgba(26, 26, 46, 0.9);
+    border: 2px solid rgba(255, 193, 7, 0.5);
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 
+        0 4px 15px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(255, 193, 7, 0.1);
+}
+
+.knd-disclaimer-card h3 {
+    color: var(--knd-white);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+}
+
+.knd-disclaimer-card h3 i {
+    color: #ffc107;
+}
+
+.knd-disclaimer-card ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.knd-disclaimer-card ul li {
+    padding: 0.75rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+}
+
+.knd-disclaimer-card ul li::before {
+    content: '⚠';
+    position: absolute;
+    left: 0;
+    color: #ffc107;
+    font-size: 1rem;
+}
+
+.knd-disclaimer-card ul li a {
+    color: var(--knd-neon-blue);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.knd-disclaimer-card ul li a:hover {
+    color: var(--knd-electric-purple);
+    text-decoration: underline;
+}
+
+/* Discord notification */
+.discord-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(88, 101, 242, 0.95);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+    z-index: 1050;
+    animation: slideInRight 0.3s ease-out;
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive adjustments para Death Roll */
+@media (max-width: 768px) {
+    .deathroll-hero {
+        padding: 2rem 0;
+    }
+    
+    .deathroll-card-glass {
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .knd-step-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .knd-step-number {
+        width: 50px;
+        height: 50px;
+        line-height: 50px;
+        font-size: 1.5rem;
+    }
+    
+    .knd-feature-card,
+    .knd-loot-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .discord-notification {
+        bottom: 10px;
+        right: 10px;
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-subtitle-mini {
+        font-size: 1rem;
+    }
+    
+    .knd-step-number {
+        width: 45px;
+        height: 45px;
+        line-height: 45px;
+        font-size: 1.3rem;
+    }
+    
+    .knd-feature-card h4,
+    .knd-loot-card h5,
+    .knd-step-card h5 {
+        font-size: 1.1rem;
+    }
+}
