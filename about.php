@@ -63,9 +63,7 @@ require_once 'includes/footer.php';
             </div>
             <div class="col-lg-6 text-center">
                 <div>
-                    <div style="font-size: 4rem; color: #00bfff;">
-                        KND
-                    </div>
+                    <img src="/assets/images/background%20design%20knd.png" alt="KND background design" class="img-fluid" style="max-width: 100%; height: auto;">
                 </div>
             </div>
         </div>
