@@ -1075,6 +1075,74 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Hero Section */
+/* Barra de anuncios neón */
+.knd-announcement-bar {
+    position: relative;
+    width: 100%;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 40, 0.9) 100%);
+    border-top: 2px solid var(--knd-electric-purple);
+    border-bottom: 2px solid var(--knd-neon-blue);
+    overflow: hidden;
+    padding: 12px 0;
+    z-index: 999;
+    margin-top: 120px;
+    box-shadow: 
+        0 2px 15px rgba(138, 43, 226, 0.4),
+        0 -2px 15px rgba(0, 191, 255, 0.3),
+        inset 0 0 20px rgba(0, 191, 255, 0.1);
+}
+
+.knd-announcement-track {
+    white-space: nowrap;
+    display: inline-block;
+    animation: knd-announcement-scroll 30s linear infinite;
+    color: var(--knd-neon-blue);
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 
+        0 0 10px rgba(0, 191, 255, 0.8),
+        0 0 20px rgba(0, 191, 255, 0.6),
+        0 0 30px rgba(0, 191, 255, 0.4);
+    will-change: transform;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.knd-announcement-track:hover {
+    animation-play-state: paused;
+}
+
+.knd-announcement-track span {
+    display: inline-block;
+    padding: 0 50px;
+}
+
+@keyframes knd-announcement-scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+@media (max-width: 768px) {
+    .knd-announcement-bar {
+        padding: 10px 0;
+        margin-top: 120px;
+    }
+    
+    .knd-announcement-track {
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+    
+    .knd-announcement-track span {
+        padding: 0 30px;
+    }
+}
+
 .hero-section {
     min-height: 50vh !important;
     display: flex;
@@ -1082,13 +1150,12 @@ h1, h2, h3, h4, h5, h6 {
     justify-content: center;
     position: relative;
     padding: 3rem 1rem;
-    padding-top: 140px; /* Más espacio para separación visual */
+    padding-top: 20px; /* Menos padding ya que la barra de anuncios ocupa espacio */
     margin-top: 0;
     margin-bottom: 0;
     width: 100%;
     overflow: hidden;
     z-index: 1;
-    clear: both;
 }
 
 /* Divider visual entre navbar y hero */
@@ -4683,54 +4750,6 @@ body {
     padding: 0 6px;
     font-size: 0.75rem;
     font-weight: 600;
-}
-
-/* Announcement Bar - Barra de anuncios neón */
-.knd-announcement-bar {
-    position: relative;
-    width: 100%;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 40, 0.9) 100%);
-    border-bottom: 2px solid var(--knd-electric-purple);
-    overflow: hidden;
-    padding: 10px 0;
-    z-index: 5;
-    box-shadow: 0 2px 10px rgba(138, 43, 226, 0.3);
-}
-
-.knd-announcement-track {
-    white-space: nowrap;
-    display: inline-block;
-    animation: knd-announcement-scroll 25s linear infinite;
-    color: var(--knd-neon-blue);
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    text-shadow: 0 0 10px rgba(0, 191, 255, 0.8);
-    will-change: transform;
-}
-
-.knd-announcement-track:hover {
-    animation-play-state: paused;
-}
-
-@keyframes knd-announcement-scroll {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-50%);
-    }
-}
-
-@media (max-width: 768px) {
-    .knd-announcement-bar {
-        padding: 8px 0;
-    }
-    
-    .knd-announcement-track {
-        font-size: 0.75rem;
-    }
 }
 
 /* Order notification (bottom left) */
