@@ -475,7 +475,6 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 50%;
     overflow: hidden;
     background: rgba(138, 43, 226, 0.05);
-    border: 1px solid var(--knd-electric-purple);
 }
 
 .logo-container::before {
