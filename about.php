@@ -63,7 +63,10 @@ require_once 'includes/footer.php';
             </div>
             <div class="col-lg-6 text-center">
                 <div>
-                    <img src="/assets/images/background%20design%20knd.png" alt="KND background design" class="img-fluid" style="max-width: 100%; height: auto;">
+                    <img src="/assets/images/background%20design%20knd.png"
+                         alt="KND background design"
+                         class="img-fluid"
+                         style="max-width: 100%; height: auto; border-radius: 16px; opacity: 0.9; box-shadow: 0 10px 35px rgba(0, 0, 0, 0.45);">
                 </div>
             </div>
         </div>
