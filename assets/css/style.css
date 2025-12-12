@@ -418,12 +418,11 @@ h1, h2, h3, h4, h5, h6 {
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
         0 3px 15px rgba(0, 0, 0, 0.7),
         0 0 20px rgba(0, 0, 0, 0.8);
-    position: fixed;
+    position: sticky;
     top: 0;
     width: 100%;
     z-index: 1000;
     height: 120px;
-    position: relative;
 }
 
 /* Efecto de escaneo tech */
