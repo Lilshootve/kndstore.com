@@ -41,6 +41,7 @@ foreach ($PRODUCTS as $slug => $producto) {
 <div id="particles-bg"></div>
 
 <?php echo generateNavigation(); ?>
+<?php echo renderAnnouncementBar(); ?>
 
 <!-- Hero Section -->
 <section class="hero-section py-5">

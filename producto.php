@@ -29,6 +29,7 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
 <div id="particles-bg"></div>
 
 <?php echo generateNavigation(); ?>
+<?php echo renderAnnouncementBar(); ?>
 
 <!-- Hero Section -->
 <section class="hero-section py-5">

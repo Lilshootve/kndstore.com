@@ -10,6 +10,7 @@ echo generateHeader('Tu Pedido', 'Revisa y confirma tu pedido en KND Store');
 <div id="particles-bg"></div>
 
 <?php echo generateNavigation(); ?>
+<?php echo renderAnnouncementBar(); ?>
 
 <section class="order-section py-5">
     <div class="container">
