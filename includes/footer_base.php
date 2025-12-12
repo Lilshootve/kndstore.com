@@ -34,6 +34,7 @@
           <li class="mb-3"><a href="/contact.php" class="text-decoration-none" style="opacity: 0.8;">Contacto</a></li>
           <li class="mb-3"><a href="/faq.php" class="text-decoration-none" style="opacity: 0.8;">FAQ</a></li>
           <li class="mb-3"><a href="/privacy.php" class="text-decoration-none" style="opacity: 0.8;">Política de Privacidad</a></li>
+          <li class="mb-3"><a href="/terms.php" class="text-decoration-none" style="opacity: 0.8;">Términos y Condiciones</a></li>
         </ul>
       </div>
                 

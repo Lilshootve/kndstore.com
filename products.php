@@ -195,12 +195,25 @@ foreach ($PRODUCTS as $slug => $producto) {
                                             <span class="product-price-original">$<?php echo number_format($producto['precio'], 2); ?></span>
                                             <span class="product-price-offer">$2.50</span>
                                         </span>
+                                        <?php $precio_real = 2.50; ?>
                                     <?php else: ?>
                                         <span class="product-price">$<?php echo number_format($producto['precio'], 2); ?></span>
+                                        <?php $precio_real = $producto['precio']; ?>
                                     <?php endif; ?>
-                                    <a href="/producto.php?slug=<?php echo $producto['slug']; ?>" class="btn btn-outline-neon btn-sm btn-details">
-                                        Ver detalles
-                                    </a>
+                                    <div class="d-flex gap-2">
+                                        <a href="/producto.php?slug=<?php echo $producto['slug']; ?>" class="btn btn-outline-neon btn-sm btn-details">
+                                            Ver detalles
+                                        </a>
+                                        <button 
+                                            type="button"
+                                            class="btn btn-primary btn-sm add-to-order"
+                                            data-id="<?php echo (int)$producto['id']; ?>"
+                                            data-name="<?php echo htmlspecialchars($producto['nombre'], ENT_QUOTES, 'UTF-8'); ?>"
+                                            data-price="<?php echo number_format($precio_real, 2, '.', ''); ?>"
+                                        >
+                                            Añadir al pedido
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

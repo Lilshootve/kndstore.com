@@ -534,6 +534,13 @@ function generateNavigation() {
     $nav .= '                <li class="nav-item">' . "\n";
     $nav .= '                    <a class="nav-link' . ($current_page == 'contact.php' ? ' active' : '') . '" href="/contact.php">Contacto</a>' . "\n";
     $nav .= '                </li>' . "\n";
+    $nav .= '                <li class="nav-item">' . "\n";
+    $nav .= '                    <a class="nav-link' . ($current_page == 'order.php' ? ' active' : '') . '" href="/order.php">' . "\n";
+    $nav .= '                        <i class="fas fa-shopping-cart me-1"></i>' . "\n";
+    $nav .= '                        Pedido' . "\n";
+    $nav .= '                        <span id="order-count" class="badge rounded-pill bg-primary ms-1" style="display:none; min-width: 20px; justify-content: center; align-items: center;"></span>' . "\n";
+    $nav .= '                    </a>' . "\n";
+    $nav .= '                </li>' . "\n";
     $nav .= '            </ul>' . "\n";
     $nav .= '        </div>' . "\n";
     $nav .= '    </div>' . "\n";

@@ -163,4 +163,90 @@ document.addEventListener('DOMContentLoaded', () => {
 // Inicializar cuando la ventana se cargue completamente
 window.addEventListener('load', () => {
     // Font Awesome se verifica en header.php
-}); 
+});
+
+// ====== Gestor de pedido simple (localStorage) ======
+const KND_ORDER_KEY = 'knd_order_items';
+
+function loadOrderItems() {
+    try {
+        const raw = localStorage.getItem(KND_ORDER_KEY);
+        if (!raw) return [];
+        return JSON.parse(raw);
+    } catch (e) {
+        console.error('Error leyendo pedido desde localStorage', e);
+        return [];
+    }
+}
+
+function saveOrderItems(items) {
+    localStorage.setItem(KND_ORDER_KEY, JSON.stringify(items));
+}
+
+function addItemToOrder(item) {
+    const items = loadOrderItems();
+    const index = items.findIndex(i => i.id === item.id);
+    if (index !== -1) {
+        items[index].qty += 1;
+    } else {
+        items.push({ ...item, qty: 1 });
+    }
+    saveOrderItems(items);
+    return items;
+}
+
+function getOrderTotal(items) {
+    return items.reduce((sum, item) => {
+        return sum + (item.price * item.qty);
+    }, 0);
+}
+
+// Actualizar un pequeño indicador (opcional) del número de items en el pedido
+function updateOrderBadge() {
+    const items = loadOrderItems();
+    const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
+    const badge = document.querySelector('#order-count');
+    if (badge) {
+        if (totalQty > 0) {
+            badge.textContent = totalQty;
+            badge.style.display = 'inline-flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+}
+
+// Listeners para botones "Añadir al pedido"
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.add-to-order');
+    if (!btn) return;
+
+    const id = parseInt(btn.dataset.id, 10);
+    const name = btn.dataset.name;
+    const price = parseFloat(btn.dataset.price);
+
+    if (!id || !name || isNaN(price)) {
+        console.warn('Datos de producto inválidos para el pedido', btn.dataset);
+        return;
+    }
+
+    const items = addItemToOrder({ id, name, price });
+    updateOrderBadge();
+
+    // Pequeña notificación simple (sin SweetAlert por ahora)
+    if (window.Swal) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Añadido al pedido',
+            text: name + ' se agregó a tu pedido.',
+            timer: 1200,
+            showConfirmButton: false,
+            position: 'top-end'
+        });
+    } else {
+        console.log('Producto añadido al pedido:', name);
+    }
+});
+
+// Inicializar badge al cargar
+document.addEventListener('DOMContentLoaded', updateOrderBadge); 

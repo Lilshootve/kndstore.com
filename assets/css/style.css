@@ -4585,3 +4585,71 @@ body {
 }
 
 /* Categorías */
+
+/* Order Section Styles */
+.order-section {
+    padding-top: 120px;
+    min-height: 100vh;
+}
+
+.knd-card {
+    background: rgba(26, 26, 46, 0.9);
+    border: 1px solid var(--knd-neon-blue);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.knd-card:hover {
+    border-color: var(--knd-electric-purple);
+    box-shadow: 0 10px 30px rgba(0, 191, 255, 0.2);
+}
+
+.knd-card .card-header {
+    background: linear-gradient(135deg, rgba(0, 191, 255, 0.1), rgba(138, 43, 226, 0.1));
+    border-bottom: 1px solid var(--knd-neon-blue);
+    padding: 1.5rem;
+}
+
+.knd-card .card-header h4 {
+    color: var(--knd-white);
+    font-family: 'Orbitron', sans-serif;
+    margin: 0;
+}
+
+.knd-card .card-body {
+    padding: 1.5rem;
+    color: var(--knd-white);
+}
+
+/* Gap utility (Bootstrap 5 already has this, but adding for compatibility) */
+.gap-2 {
+    gap: 0.5rem !important;
+}
+
+/* Product footer styles for order button */
+.product-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.product-footer .d-flex {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Order badge in navigation */
+#order-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
