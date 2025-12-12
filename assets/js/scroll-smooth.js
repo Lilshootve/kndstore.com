@@ -49,6 +49,10 @@ document.addEventListener('DOMContentLoaded', function() {
             <button class="scroll-nav-btn" id="scroll-contact" title="Contacto">
                 <i class="fas fa-envelope"></i>
             </button>
+            <a href="/order.php" class="scroll-nav-btn scroll-nav-link" id="scroll-order" title="Mi Pedido">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="scroll-nav-badge" id="scroll-order-count" style="display: none;"></span>
+            </a>
         `;
         document.body.appendChild(nav);
         
@@ -57,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const productsBtn = document.getElementById('scroll-products');
         const aboutBtn = document.getElementById('scroll-about');
         const contactBtn = document.getElementById('scroll-contact');
+        const orderBtn = document.getElementById('scroll-order');
         
         if (topBtn) {
             topBtn.addEventListener('click', function(e) {
@@ -110,7 +115,55 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+        
+        // El botón de pedido es un enlace, no necesita event listener adicional
+        // Pero actualizamos el badge si existe
+        updateOrderBadgeInScrollNav();
     }
+    
+    // Función para actualizar el badge del pedido en la barra lateral
+    function updateOrderBadgeInScrollNav() {
+        try {
+            const ORDER_KEY = 'knd_order_items';
+            const raw = localStorage.getItem(ORDER_KEY);
+            if (!raw) {
+                const badge = document.getElementById('scroll-order-count');
+                if (badge) badge.style.display = 'none';
+                return;
+            }
+            
+            const items = JSON.parse(raw);
+            const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
+            const badge = document.getElementById('scroll-order-count');
+            
+            if (badge) {
+                if (totalQty > 0) {
+                    badge.textContent = totalQty;
+                    badge.style.display = 'inline-flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        } catch (e) {
+            console.error('Error actualizando badge en scroll nav', e);
+        }
+    }
+    
+    // Actualizar badge cuando se carga la página
+    setTimeout(updateOrderBadgeInScrollNav, 500);
+    
+    // Escuchar cambios en localStorage para actualizar el badge
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'knd_order_items') {
+            updateOrderBadgeInScrollNav();
+        }
+    });
+    
+    // Actualizar badge periódicamente (por si se modifica desde la misma página)
+    setInterval(updateOrderBadgeInScrollNav, 1000);
+    
+    // Exponer función globalmente para que main.js pueda llamarla
+    window.updateOrderBadgeInScrollNav = updateOrderBadgeInScrollNav;
     
     // Crear indicador de progreso
     function createScrollProgress() {

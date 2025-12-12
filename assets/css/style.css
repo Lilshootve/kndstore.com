@@ -4340,6 +4340,38 @@ body {
     box-shadow: 0 0 25px rgba(0, 191, 255, 0.5);
 }
 
+/* Estilos para el enlace de pedido en scroll-nav */
+.scroll-nav-link {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.scroll-nav-link:hover {
+    text-decoration: none;
+    color: white;
+}
+
+.scroll-nav-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4444;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 2px solid var(--knd-black);
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+}
+
 /* Indicador de progreso de scroll */
 .scroll-progress {
     position: fixed;

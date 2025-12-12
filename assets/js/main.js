@@ -205,6 +205,8 @@ function getOrderTotal(items) {
 function updateOrderBadge() {
     const items = loadOrderItems();
     const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
+    
+    // Actualizar badge en el navbar
     const badge = document.querySelector('#order-count');
     if (badge) {
         if (totalQty > 0) {
@@ -212,6 +214,17 @@ function updateOrderBadge() {
             badge.style.display = 'inline-flex';
         } else {
             badge.style.display = 'none';
+        }
+    }
+    
+    // Actualizar badge en la barra lateral de scroll
+    const scrollBadge = document.getElementById('scroll-order-count');
+    if (scrollBadge) {
+        if (totalQty > 0) {
+            scrollBadge.textContent = totalQty;
+            scrollBadge.style.display = 'inline-flex';
+        } else {
+            scrollBadge.style.display = 'none';
         }
     }
 }
@@ -279,4 +292,10 @@ document.addEventListener('click', function (e) {
 });
 
 // Inicializar badge al cargar
-document.addEventListener('DOMContentLoaded', updateOrderBadge); 
+document.addEventListener('DOMContentLoaded', function() {
+    updateOrderBadge();
+    // También actualizar badge en scroll nav si existe la función
+    if (typeof window.updateOrderBadgeInScrollNav === 'function') {
+        setTimeout(window.updateOrderBadgeInScrollNav, 100);
+    }
+}); 
