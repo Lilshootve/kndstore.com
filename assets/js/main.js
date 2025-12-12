@@ -27,14 +27,7 @@ function initScrollEffects() {
         });
     });
     
-    // Efecto parallax para el hero
-    window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        const hero = document.querySelector('.hero-section');
-        if (hero) {
-            hero.style.transform = `translateY(${scrolled * 0.5}px)`;
-        }
-    });
+    // Efecto parallax desactivado para evitar que el hero se sobreponga sobre otras secciones
 }
 
 // Panel de personalización de colores

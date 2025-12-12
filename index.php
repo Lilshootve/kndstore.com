@@ -1,20 +1,9 @@
 <?php
-// Configuración de sesión ANTES de cargar config.php
-if (session_status() == PHP_SESSION_NONE) {
-    ini_set('session.cookie_httponly', 1);
-    ini_set('session.use_only_cookies', 1);
-    ini_set('session.cookie_secure', 1); // Habilitado para HTTPS en producción
-    session_start();
-} else {
-    // Si la sesión ya está activa, solo la iniciamos
-    if (session_status() == PHP_SESSION_NONE) {
-        session_start();
-    }
-}
-
-require_once 'includes/config.php';
-require_once 'includes/header.php';
-require_once 'includes/footer.php';
+require_once __DIR__ . '/includes/session.php';
+require_once __DIR__ . '/includes/config.php';
+require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/includes/footer.php';
+require_once __DIR__ . '/includes/products-data.php';
 
 // Iniciar timer de rendimiento
 $startTime = startPerformanceTimer();
@@ -102,59 +91,59 @@ setCacheHeaders('html');
         <h2 class="section-title">Productos Destacados</h2>
         <div class="row">
             <?php
-            // Productos destacados reales de KND Store
-            $featuredProducts = [
-                [
-                    'name' => 'Formateo y limpieza de PC (Remoto)',
-                    'description' => 'Recupera el rendimiento de tu PC desde la comodidad de tu nave.',
-                    'price' => 10.00,
-                    'image' => 'assets/images/productos/formateo-limpieza-pc-remoto.png',
-                    'url' => '/producto/formateo-limpieza-pc'
-                ],
-                [
-                    'name' => 'Asesoría para PC Gamer (Presupuesto personalizado)',
-                    'description' => '¿Tienes $300 o $3000? Te armamos la build perfecta.',
-                    'price' => 5.00,
-                    'image' => 'assets/images/productos/asesoria-pc-gamer-presupuesto.png',
-                    'url' => '/producto/asesoria-pc-gamer'
-                ],
-                [
-                    'name' => 'Avatar gamer personalizado',
-                    'description' => 'Crea tu imagen digital con estilo galáctico.',
-                    'price' => 6.00,
-                    'image' => 'assets/images/productos/avatar-gamer-personalizado.png',
-                    'url' => '/producto/avatar-personalizado'
-                ],
-                [
-                    'name' => 'Wallpaper personalizado IA',
-                    'description' => 'Tu fondo, tu nave. Generado a medida.',
-                    'price' => 4.00,
-                    'image' => 'assets/images/productos/wallpaper-personalizado-knd.png',
-                    'url' => '/producto/wallpaper-personalizado'
-                ]
+            // Productos destacados - slugs de productos destacados
+            $featuredSlugs = [
+                'formateo-limpieza-pc',
+                'asesoria-pc-gamer',
+                'avatar-personalizado',
+                'wallpaper-personalizado'
             ];
             
-            foreach ($featuredProducts as $product): ?>
+            foreach ($featuredSlugs as $slug):
+                if (!isset($PRODUCTS[$slug])) continue;
+                $product = $PRODUCTS[$slug];
+                // Determinar precio real (oferta para Avatar y Wallpaper)
+                if (in_array($product['nombre'], ['Avatar gamer personalizado', 'Wallpaper personalizado IA'])) {
+                    $precio_real = 2.50;
+                } else {
+                    $precio_real = $product['precio'];
+                }
+            ?>
                 <div class="col-lg-6 col-md-6 mb-4">
                     <div class="product-card">
-                        <?php if (in_array($product['name'], ['Avatar gamer personalizado', 'Wallpaper personalizado IA'])): ?>
+                        <?php if (in_array($product['nombre'], ['Avatar gamer personalizado', 'Wallpaper personalizado IA'])): ?>
                             <div class="product-offer-badge">Oferta</div>
                         <?php endif; ?>
                         <div class="product-image">
-                            <img src="<?php echo $product['image']; ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                            <img src="<?php echo $product['imagen']; ?>" alt="<?php echo htmlspecialchars($product['nombre']); ?>">
                         </div>
                         <div class="product-info">
-                            <h3><?php echo htmlspecialchars($product['name']); ?></h3>
-                            <p><?php echo htmlspecialchars($product['description']); ?></p>
-                            <div class="product-price">
-                                <?php if (in_array($product['name'], ['Avatar gamer personalizado', 'Wallpaper personalizado IA'])): ?>
-                                    <span class="product-price-original"><?php echo formatPrice($product['price']); ?></span>
-                                    <span class="product-price-offer">$2.50</span>
+                            <h3><?php echo htmlspecialchars($product['nombre']); ?></h3>
+                            <p><?php echo htmlspecialchars(strip_tags($product['descripcion'])); ?></p>
+                            <div class="product-footer">
+                                <?php if (in_array($product['nombre'], ['Avatar gamer personalizado', 'Wallpaper personalizado IA'])): ?>
+                                    <span class="product-price">
+                                        <span class="product-price-original">$<?php echo number_format($product['precio'], 2); ?></span>
+                                        <span class="product-price-offer">$2.50</span>
+                                    </span>
                                 <?php else: ?>
-                                    <?php echo formatPrice($product['price']); ?>
+                                    <span class="product-price">$<?php echo number_format($product['precio'], 2); ?></span>
                                 <?php endif; ?>
+                                <div class="d-flex gap-2">
+                                    <a href="/producto.php?slug=<?php echo $product['slug']; ?>" class="btn btn-outline-neon btn-sm btn-details">
+                                        Ver detalles
+                                    </a>
+                                    <button 
+                                        type="button"
+                                        class="btn btn-primary btn-sm add-to-order"
+                                        data-id="<?php echo (int)$product['id']; ?>"
+                                        data-name="<?php echo htmlspecialchars($product['nombre'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-price="<?php echo number_format($precio_real, 2, '.', ''); ?>"
+                                    >
+                                        Añadir al pedido
+                                    </button>
+                                </div>
                             </div>
-                            <a href="/producto.php?slug=<?php echo str_replace(['/producto/', '/'], '', $product['url']); ?>" class="btn btn-primary">Ver Detalles</a>
                         </div>
                     </div>
                 </div>
