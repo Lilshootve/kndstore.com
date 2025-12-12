@@ -1055,56 +1055,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Hero Section */
-/* Barra de anuncios neón */
-.knd-announcement-bar {
-    position: relative;
-    z-index: 5;
-    width: 100%;
-    overflow: hidden;
-    padding: 8px 0; /* un poco más alta */
-    margin: 0;
-    background: linear-gradient(90deg, rgba(0, 191, 255, 0.15), rgba(138, 43, 226, 0.25), rgba(0, 191, 255, 0.15));
-    border-top: 1px solid rgba(0, 191, 255, 0.7);
-    border-bottom: 1px solid rgba(138, 43, 226, 0.7);
-    box-shadow: 0 0 12px rgba(0, 191, 255, 0.45);
-    backdrop-filter: blur(8px);
-}
-
-.knd-announcement-track {
-    white-space: nowrap;
-    display: inline-block;
-    animation: knd-announcement-scroll 30s linear infinite;
-    font-size: 0.9rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #00e5ff;
-    text-shadow: 0 0 6px rgba(0, 229, 255, 0.8);
-}
-
-.knd-announcement-track:hover {
-    animation-play-state: paused;
-}
-
-.knd-announcement-track span {
-    padding-left: 100%;
-    display: inline-block;
-}
-
-@keyframes knd-announcement-scroll {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-}
-
-@media (max-width: 768px) {
-    .knd-announcement-bar {
-        padding: 6px 0;
-    }
-    
-    .knd-announcement-track {
-        font-size: 0.8rem;
-        letter-spacing: 0.1em;
-    }
-}
 
 /* Ajustar hero para que no quede demasiado lejos */
 .hero-section {

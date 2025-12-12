@@ -19,13 +19,6 @@ setCacheHeaders('html');
 
 <?php echo generateNavigation(); ?>
 
-<!-- Barra de anuncios neón -->
-<div class="knd-announcement-bar">
-    <div class="knd-announcement-track">
-        <span>🚀 OFERTAS ESPECIALES • Avatar y Wallpaper a solo $2.50 • Envío digital instantáneo • Soporte 24/7 • 🚀 OFERTAS ESPECIALES • Avatar y Wallpaper a solo $2.50 • Envío digital instantáneo • Soporte 24/7 • 🚀 OFERTAS ESPECIALES • Avatar y Wallpaper a solo $2.50 • Envío digital instantáneo • Soporte 24/7 •</span>
-    </div>
-</div>
-
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="container">
