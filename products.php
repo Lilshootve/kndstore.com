@@ -188,7 +188,7 @@ foreach ($PRODUCTS as $slug => $producto) {
                             </div>
                             <div class="product-info">
                                 <h5 class="product-title"><?php echo htmlspecialchars($producto['nombre']); ?></h5>
-                                <p class="product-description"><?php echo htmlspecialchars($producto['descripcion']); ?></p>
+                                <p class="product-description"><?php echo $producto['descripcion']; ?></p>
                                 <div class="product-footer">
                                     <?php if (in_array($producto['nombre'], ['Avatar gamer personalizado', 'Wallpaper personalizado IA'])): ?>
                                         <span class="product-price">

@@ -126,7 +126,7 @@ setCacheHeaders('html');
                         </div>
                         <div class="product-info">
                             <h3><?php echo htmlspecialchars($product['nombre']); ?></h3>
-                            <p><?php echo htmlspecialchars(strip_tags($product['descripcion'])); ?></p>
+                            <p><?php echo strip_tags($product['descripcion']); ?></p>
                             <div class="product-footer">
                                 <?php if (in_array($product['nombre'], ['Avatar gamer personalizado', 'Wallpaper personalizado IA'])): ?>
                                     <span class="product-price">
