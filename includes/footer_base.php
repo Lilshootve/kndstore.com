@@ -28,23 +28,23 @@
                 <div class="col-lg-2 col-md-4">
         <h5 class="mb-4">NAVEGACIÓN</h5>
         <ul class="list-unstyled">
-          <li class="mb-3"><a href="index.php" class="text-decoration-none" style="opacity: 0.8;">Inicio</a></li>
-          <li class="mb-3"><a href="products.php" class="text-decoration-none" style="opacity: 0.8;">Productos</a></li>
-          <li class="mb-3"><a href="about.php" class="text-decoration-none" style="opacity: 0.8;">Sobre Nosotros</a></li>
-          <li class="mb-3"><a href="contact.php" class="text-decoration-none" style="opacity: 0.8;">Contacto</a></li>
-          <li class="mb-3"><a href="faq.php" class="text-decoration-none" style="opacity: 0.8;">FAQ</a></li>
-          <li class="mb-3"><a href="Privacy_policy.php" class="text-decoration-none" style="opacity: 0.8;">Política de Privacidad</a></li>
+          <li class="mb-3"><a href="/index.php" class="text-decoration-none" style="opacity: 0.8;">Inicio</a></li>
+          <li class="mb-3"><a href="/products.php" class="text-decoration-none" style="opacity: 0.8;">Productos</a></li>
+          <li class="mb-3"><a href="/about.php" class="text-decoration-none" style="opacity: 0.8;">Sobre Nosotros</a></li>
+          <li class="mb-3"><a href="/contact.php" class="text-decoration-none" style="opacity: 0.8;">Contacto</a></li>
+          <li class="mb-3"><a href="/faq.php" class="text-decoration-none" style="opacity: 0.8;">FAQ</a></li>
+          <li class="mb-3"><a href="/privacy.php" class="text-decoration-none" style="opacity: 0.8;">Política de Privacidad</a></li>
         </ul>
       </div>
                 
                 <div class="col-lg-3 col-md-4">
                     <h5 class="mb-4">CATEGORÍAS</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-3"><a href="products.php?categoria=steam" class="text-decoration-none" style="opacity: 0.8;">Tarjetas Steam</a></li>
-                        <li class="mb-3"><a href="products.php?categoria=psn" class="text-decoration-none" style="opacity: 0.8;">PlayStation Network</a></li>
-                        <li class="mb-3"><a href="products.php?categoria=xbox" class="text-decoration-none" style="opacity: 0.8;">Xbox Live</a></li>
-                        <li class="mb-3"><a href="products.php?categoria=nintendo" class="text-decoration-none" style="opacity: 0.8;">Nintendo eShop</a></li>
-                        <li class="mb-3"><a href="products.php?categoria=mobile" class="text-decoration-none" style="opacity: 0.8;">Mobile Gaming</a></li>
+                        <li class="mb-3"><a href="/products.php?categoria=tecnologia" class="text-decoration-none" style="opacity: 0.8;">Servicios de Tecnología</a></li>
+                        <li class="mb-3"><a href="/products.php?categoria=gaming" class="text-decoration-none" style="opacity: 0.8;">Servicios Gaming</a></li>
+                        <li class="mb-3"><a href="/products.php?categoria=accesorios" class="text-decoration-none" style="opacity: 0.8;">Accesorios Digitales</a></li>
+                        <li class="mb-3"><a href="/products.php?categoria=software" class="text-decoration-none" style="opacity: 0.8;">Software y Packs</a></li>
+                        <li class="mb-3"><a href="/products.php?categoria=hardware" class="text-decoration-none" style="opacity: 0.8;">Asesoría Hardware</a></li>
                     </ul>
                 </div>
                 
@@ -53,7 +53,7 @@
                     <ul class="list-unstyled">
                         <li class="mb-3 d-flex align-items-center">
                             <i class="fas fa-envelope me-3" style="color: var(--neon-accents);"></i>
-                            <span style="opacity: 0.8;">soporte@kndstore.com</span>
+                            <span style="opacity: 0.8;">support@kndstore.com</span>
                         </li>
                         <li class="mb-3 d-flex align-items-center">
                             <i class="fas fa-headset me-3" style="color: var(--neon-accents);"></i>
@@ -61,7 +61,7 @@
                         </li>
                         <li class="mb-3 d-flex align-items-center">
                             <i class="fab fa-discord me-3" style="color: var(--neon-accents);"></i>
-                            <span style="opacity: 0.8;">Discord: KND_Store</span>
+                            <span style="opacity: 0.8;">Discord: knd_store</span>
                         </li>
                     </ul>
                     
