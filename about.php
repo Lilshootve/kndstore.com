@@ -34,7 +34,7 @@ require_once 'includes/footer.php';
                     <span class="text-gradient">NOSOTROS</span>
                 </h1>
                 <p class="hero-subtitle">
-<                    KND = <strong>Knowledge ‘N Development</strong> — conocimiento y desarrollo al servicio de tu universo digital.
+                    Knowledge 'N Development — conocimiento y desarrollo al servicio de tu universo digital.
                 </p>
             </div>
         </div>
