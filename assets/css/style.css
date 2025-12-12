@@ -77,40 +77,9 @@ h1, h2, h3, h4, h5, h6 {
     margin-top: 20px;
 }
 
-.hero-section::before {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: 0;
-    right: 0;
-    height: 10px;
-    background: linear-gradient(to bottom,
-        rgba(0, 0, 0, 0.8) 0%,
-        rgba(0, 0, 0, 0.4) 50%,
-        transparent 100%);
-    z-index: 1;
-}
+/* .hero-section::before eliminado para evitar conflictos con la barra de anuncios */
 
-/* Divider visual prominente entre navbar y hero - Tech Futurista */
-.hero-section::after {
-    content: '';
-    position: absolute;
-    top: 124px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, 
-        transparent 0%, 
-        var(--knd-electric-purple) 25%, 
-        var(--knd-neon-blue) 50%, 
-        var(--knd-electric-purple) 75%, 
-        transparent 100%);
-    box-shadow: 
-        0 0 15px rgba(138, 43, 226, 0.6),
-        0 0 25px rgba(0, 191, 255, 0.4),
-        0 2px 8px rgba(0, 0, 0, 0.8);
-    z-index: 2;
-}
+/* Divider visual eliminado - la barra de anuncios actúa como separador */
 
 /* Privacy Policy Page Styles */
 .privacy-hero-section {
@@ -1092,10 +1061,15 @@ h1, h2, h3, h4, h5, h6 {
         inset 0 0 20px rgba(0, 191, 255, 0.1);
 }
 
+.knd-announcement-wrapper {
+    width: 100%;
+    overflow: hidden;
+}
+
 .knd-announcement-track {
-    white-space: nowrap;
     display: inline-block;
-    animation: knd-announcement-scroll 30s linear infinite;
+    white-space: nowrap;
+    animation: knd-announcement-scroll 25s linear infinite;
     color: var(--knd-neon-blue);
     font-weight: 700;
     font-size: 0.95rem;
@@ -1109,20 +1083,20 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Orbitron', sans-serif;
 }
 
-.knd-announcement-track:hover {
+.knd-announcement-bar:hover .knd-announcement-track {
     animation-play-state: paused;
 }
 
 .knd-announcement-track span {
     display: inline-block;
-    padding: 0 50px;
+    padding-right: 100px;
 }
 
 @keyframes knd-announcement-scroll {
-    0% {
+    from {
         transform: translateX(0);
     }
-    100% {
+    to {
         transform: translateX(-50%);
     }
 }
@@ -1149,8 +1123,8 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     justify-content: center;
     position: relative;
-    padding: 3rem 1rem;
-    padding-top: 20px; /* Menos padding ya que la barra de anuncios ocupa espacio */
+    padding: 2rem 1rem;
+    padding-top: 1rem;
     margin-top: 0;
     margin-bottom: 0;
     width: 100%;
@@ -1158,29 +1132,7 @@ h1, h2, h3, h4, h5, h6 {
     z-index: 1;
 }
 
-/* Divider visual entre navbar y hero */
-.hero-section::before {
-    content: '';
-    position: absolute;
-    top: 128px;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, 
-        transparent 0%, 
-        var(--knd-neon-blue) 10%, 
-        var(--knd-electric-purple) 25%, 
-        #ffffff 50%, 
-        var(--knd-electric-purple) 75%, 
-        var(--knd-neon-blue) 90%, 
-        transparent 100%);
-    box-shadow: 
-        0 0 20px rgba(0, 191, 255, 0.7),
-        0 0 40px rgba(138, 43, 226, 0.5),
-        0 3px 12px rgba(0, 0, 0, 0.9),
-        0 0 15px rgba(255, 255, 255, 0.1);
-    z-index: 2;
-}
+/* Divider visual eliminado - ahora la barra de anuncios actúa como separador */
 
 .hero-section .container {
     width: 100%;
