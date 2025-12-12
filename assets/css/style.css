@@ -1058,35 +1058,25 @@ h1, h2, h3, h4, h5, h6 {
 /* Barra de anuncios neón */
 .knd-announcement-bar {
     position: relative;
+    z-index: 5;
     width: 100%;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 40, 0.9) 100%);
-    border-top: 2px solid var(--knd-electric-purple);
-    border-bottom: 2px solid var(--knd-neon-blue);
     overflow: hidden;
-    padding: 12px 0;
-    z-index: 999;
-    margin-top: 120px;
-    box-shadow: 
-        0 2px 15px rgba(138, 43, 226, 0.4),
-        0 -2px 15px rgba(0, 191, 255, 0.3),
-        inset 0 0 20px rgba(0, 191, 255, 0.1);
+    padding: 4px 0;              /* barra finita */
+    margin: 0;                   /* sin espacios extra */
+    background: rgba(5, 10, 25, 0.75); /* fondo semi-transparente, no un bloque sólido */
+    border-top: 1px solid rgba(138, 43, 226, 0.7);   /* línea neón superior */
+    border-bottom: 1px solid rgba(0, 191, 255, 0.7); /* línea neón inferior */
+    backdrop-filter: blur(6px);
 }
 
 .knd-announcement-track {
     white-space: nowrap;
     display: inline-block;
-    animation: knd-announcement-scroll 30s linear infinite;
-    color: var(--knd-neon-blue);
-    font-weight: 700;
-    font-size: 0.95rem;
+    animation: knd-announcement-scroll 25s linear infinite;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    text-shadow: 
-        0 0 10px rgba(0, 191, 255, 0.8),
-        0 0 20px rgba(0, 191, 255, 0.6),
-        0 0 30px rgba(0, 191, 255, 0.4);
-    will-change: transform;
-    font-family: 'Orbitron', sans-serif;
+    color: #00bfff;
 }
 
 .knd-announcement-track:hover {
@@ -1094,35 +1084,28 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .knd-announcement-track span {
+    padding-left: 100%;
     display: inline-block;
-    padding: 0 50px;
 }
 
 @keyframes knd-announcement-scroll {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-50%);
-    }
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
 }
 
 @media (max-width: 768px) {
     .knd-announcement-bar {
-        padding: 10px 0;
-        margin-top: 120px;
+        padding: 4px 0;
+        margin: 0;
     }
     
     .knd-announcement-track {
-        font-size: 0.8rem;
-        letter-spacing: 1px;
-    }
-    
-    .knd-announcement-track span {
-        padding: 0 30px;
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
     }
 }
 
+/* Ajustar el hero para que no quede demasiado separado del header */
 .hero-section {
     min-height: 50vh !important;
     display: flex;
@@ -1130,7 +1113,7 @@ h1, h2, h3, h4, h5, h6 {
     justify-content: center;
     position: relative;
     padding: 2rem 1rem;
-    padding-top: 10px;
+    padding-top: 3rem;   /* si ya tiene más, bájalo a aprox 3rem */
     margin-top: 0;
     margin-bottom: 0;
     width: 100%;
