@@ -72,15 +72,45 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
                         <?php if (isset($product['limited']) && $product['limited']): ?>
                             <div class="product-limited-badge">LIMITED</div>
                         <?php endif; ?>
-                        <div class="product-image">
-                            <?php 
-                            $mainImage = $product['imagen'];
-                            if (isset($product['variants']) && !empty($product['variants'])) {
+                        <?php 
+                        // Recopilar todas las imágenes disponibles para el lightbox
+                        $allImages = [];
+                        $mainImage = $product['imagen'];
+                        
+                        // Si hay gallery, usar esas imágenes
+                        if (isset($product['gallery']) && !empty($product['gallery'])) {
+                            $allImages = array_values($product['gallery']);
+                            $mainImage = $allImages[0];
+                        } 
+                        // Si hay variants, recopilar todas las imágenes de los variants
+                        elseif (isset($product['variants']) && !empty($product['variants'])) {
+                            foreach ($product['variants'] as $variant) {
+                                if (isset($variant['imagen']) && !in_array($variant['imagen'], $allImages)) {
+                                    $allImages[] = $variant['imagen'];
+                                }
+                            }
+                            if (!empty($allImages)) {
+                                $mainImage = $allImages[0];
+                            } else {
                                 $firstVariant = reset($product['variants']);
                                 $mainImage = $firstVariant['imagen'];
+                                $allImages = [$mainImage];
                             }
-                            ?>
-                            <img src="/<?php echo htmlspecialchars($mainImage); ?>" alt="<?php echo htmlspecialchars($product['nombre']); ?>">
+                        } else {
+                            $allImages = [$mainImage];
+                        }
+                        
+                        // Codificar la ruta para URL
+                        $imageUrl = rawurlencode($mainImage);
+                        $imageUrl = str_replace('%2F', '/', $imageUrl);
+                        ?>
+                        <div class="product-image" style="cursor: pointer; position: relative;" 
+                             onclick="openImageLightbox(<?php echo htmlspecialchars(json_encode($allImages), ENT_QUOTES | JSON_HEX_APOS | JSON_HEX_QUOT); ?>)">
+                            <img src="/<?php echo $imageUrl; ?>" alt="<?php echo htmlspecialchars($product['nombre']); ?>"
+                                 onerror="this.onerror=null; this.src='/<?php echo htmlspecialchars($product['imagen']); ?>';">
+                            <div class="image-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.3); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; pointer-events: none;">
+                                <i class="fas fa-expand fa-2x text-white"></i>
+                            </div>
                         </div>
                         <div class="product-info">
                             <h3><?php echo htmlspecialchars($product['nombre']); ?></h3>
@@ -126,21 +156,46 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
                 <div class="col-lg-6 col-md-6 mb-4">
                     <div class="product-card product-card-limited position-relative">
                         <div class="product-limited-badge">LIMITED</div>
-                        <div class="product-image position-relative">
-                            <?php 
-                            $mainImage = $product['imagen'];
-                            if (isset($product['gallery']) && isset($product['gallery']['front'])) {
-                                $mainImage = $product['gallery']['front'];
-                            } elseif (isset($product['variants']) && !empty($product['variants'])) {
-                                $firstVariant = reset($product['variants']);
-                                if (isset($firstVariant['imagen'])) {
-                                    $mainImage = $firstVariant['imagen'];
+                        <?php 
+                        // Recopilar todas las imágenes disponibles para el lightbox
+                        $allImages = [];
+                        $mainImage = $product['imagen'];
+                        
+                        // Si hay gallery, usar esas imágenes
+                        if (isset($product['gallery']) && !empty($product['gallery'])) {
+                            $allImages = array_values($product['gallery']);
+                            $mainImage = $allImages[0];
+                        } 
+                        // Si hay variants, recopilar todas las imágenes de los variants
+                        elseif (isset($product['variants']) && !empty($product['variants'])) {
+                            foreach ($product['variants'] as $variant) {
+                                if (isset($variant['imagen']) && !in_array($variant['imagen'], $allImages)) {
+                                    $allImages[] = $variant['imagen'];
                                 }
                             }
-                            ?>
-                            <img src="/<?php echo htmlspecialchars($mainImage); ?>" alt="<?php echo htmlspecialchars($product['nombre']); ?>" 
+                            if (!empty($allImages)) {
+                                $mainImage = $allImages[0];
+                            } else {
+                                $firstVariant = reset($product['variants']);
+                                $mainImage = $firstVariant['imagen'];
+                                $allImages = [$mainImage];
+                            }
+                        } else {
+                            $allImages = [$mainImage];
+                        }
+                        
+                        // Codificar la ruta para URL
+                        $imageUrl = rawurlencode($mainImage);
+                        $imageUrl = str_replace('%2F', '/', $imageUrl);
+                        ?>
+                        <div class="product-image position-relative" style="cursor: pointer;" 
+                             onclick="openImageLightbox(<?php echo htmlspecialchars(json_encode($allImages), ENT_QUOTES | JSON_HEX_APOS | JSON_HEX_QUOT); ?>)">
+                            <img src="/<?php echo $imageUrl; ?>" alt="<?php echo htmlspecialchars($product['nombre']); ?>" 
                                  onerror="this.onerror=null; this.src='/<?php echo htmlspecialchars($product['imagen']); ?>';"
-                                 style="width: 100%; height: 300px; object-fit: cover;">
+                                 style="width: 100%; height: 300px; object-fit: cover; transition: transform 0.3s ease;">
+                            <div class="image-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.3); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; pointer-events: none;">
+                                <i class="fas fa-expand fa-2x text-white"></i>
+                            </div>
                         </div>
                         <div class="product-info">
                             <h3><?php echo htmlspecialchars($product['nombre']); ?></h3>
@@ -273,6 +328,211 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
         </div>
     </div>
 </section>
+
+<style>
+/* Lightbox para imágenes */
+.image-lightbox {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    overflow: auto;
+}
+
+.image-lightbox.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    margin: auto;
+    animation: zoomIn 0.3s ease;
+}
+
+.lightbox-content img {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 10px 50px rgba(0, 191, 255, 0.3);
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10000;
+    transition: color 0.3s ease;
+}
+
+.lightbox-close:hover {
+    color: var(--knd-neon-blue);
+}
+
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #fff;
+    font-size: 30px;
+    cursor: pointer;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    z-index: 10000;
+}
+
+.lightbox-nav:hover {
+    background: rgba(0, 191, 255, 0.7);
+    color: #fff;
+}
+
+.lightbox-prev {
+    left: 20px;
+}
+
+.lightbox-next {
+    right: 20px;
+}
+
+.lightbox-counter {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+.product-image:hover .image-overlay {
+    opacity: 1 !important;
+}
+
+.product-image:hover img {
+    transform: scale(1.05);
+}
+
+.product-image {
+    transition: all 0.3s ease;
+}
+</style>
+
+<!-- Lightbox Modal -->
+<div id="image-lightbox" class="image-lightbox">
+    <span class="lightbox-close" onclick="closeImageLightbox()">&times;</span>
+    <span class="lightbox-nav lightbox-prev" onclick="changeLightboxImage(-1)">&#10094;</span>
+    <span class="lightbox-nav lightbox-next" onclick="changeLightboxImage(1)">&#10095;</span>
+    <div class="lightbox-content">
+        <img id="lightbox-image" src="" alt="Imagen ampliada">
+    </div>
+    <div class="lightbox-counter">
+        <span id="lightbox-counter-text">1 / 1</span>
+    </div>
+</div>
+
+<script>
+// Variables globales para el lightbox
+let lightboxImages = [];
+let currentLightboxIndex = 0;
+
+// Abrir lightbox con imagen
+function openImageLightbox(imagesArray) {
+    if (!imagesArray || imagesArray.length === 0) {
+        console.error('No hay imágenes para mostrar');
+        return;
+    }
+    
+    lightboxImages = imagesArray;
+    currentLightboxIndex = 0;
+    
+    const lightbox = document.getElementById('image-lightbox');
+    const lightboxImg = document.getElementById('lightbox-image');
+    const counter = document.getElementById('lightbox-counter-text');
+    
+    // Codificar la ruta correctamente para URLs (manejar espacios y caracteres especiales)
+    let firstImage = lightboxImages[0];
+    // Usar encodeURIComponent pero mantener las barras /
+    firstImage = firstImage.split('/').map(part => encodeURIComponent(part)).join('/');
+    lightboxImg.src = '/' + firstImage;
+    counter.textContent = `1 / ${lightboxImages.length}`;
+    
+    lightbox.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Mostrar/ocultar navegación según cantidad de imágenes
+    const prevBtn = document.querySelector('.lightbox-prev');
+    const nextBtn = document.querySelector('.lightbox-next');
+    if (lightboxImages.length > 1) {
+        prevBtn.style.display = 'block';
+        nextBtn.style.display = 'block';
+    } else {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+    }
+}
+
+// Cerrar lightbox
+function closeImageLightbox() {
+    const lightbox = document.getElementById('image-lightbox');
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Cambiar imagen en el lightbox
+function changeLightboxImage(direction) {
+    currentLightboxIndex += direction;
+    
+    if (currentLightboxIndex < 0) {
+        currentLightboxIndex = lightboxImages.length - 1;
+    } else if (currentLightboxIndex >= lightboxImages.length) {
+        currentLightboxIndex = 0;
+    }
+    
+    const lightboxImg = document.getElementById('lightbox-image');
+    const counter = document.getElementById('lightbox-counter-text');
+    
+    // Codificar la ruta correctamente para URLs (manejar espacios y caracteres especiales)
+    let imagePath = lightboxImages[currentLightboxIndex];
+    // Usar encodeURIComponent pero mantener las barras /
+    imagePath = imagePath.split('/').map(part => encodeURIComponent(part)).join('/');
+    lightboxImg.src = '/' + imagePath;
+    counter.textContent = `${currentLightboxIndex + 1} / ${lightboxImages.length}`;
+}
+
+// Cerrar con tecla ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeImageLightbox();
+    } else if (e.key === 'ArrowLeft') {
+        changeLightboxImage(-1);
+    } else if (e.key === 'ArrowRight') {
+        changeLightboxImage(1);
+    }
+});
+
+// Cerrar al hacer clic fuera de la imagen
+document.getElementById('image-lightbox').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageLightbox();
+    }
+});
+</script>
 
 <script src="/assets/js/navigation-extend.js"></script>
 
