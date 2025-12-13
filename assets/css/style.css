@@ -50,29 +50,8 @@ h1, h2, h3, h4, h5, h6 {
         var(--knd-light-blue) 100%);
 }
 
-/* Hero background overlay para mejor contraste */
-.hero-section::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-        radial-gradient(ellipse at center top, 
-            rgba(0, 191, 255, 0.15) 0%, 
-            transparent 40%),
-        linear-gradient(to bottom,
-            rgba(0, 0, 0, 0.4) 0%,
-            rgba(0, 0, 0, 0.2) 15%,
-            transparent 30%,
-            transparent 100%);
-    z-index: 0;
-    pointer-events: none;
-}
-
-/* Hero background overlay para mejor contraste */
-.hero-section::after {
+/* Hero background overlay para mejor contraste (solo para hero general, no para about-hero-bg) */
+.hero-section:not(.about-hero-bg)::after {
     content: '';
     position: absolute;
     top: 0;
@@ -1139,7 +1118,10 @@ body.about-page,
     background-repeat: no-repeat;
     background-attachment: fixed;
     position: relative;
-    min-height: 60vh;
+    min-height: 85vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .about-hero-bg::before {
@@ -1165,42 +1147,29 @@ body.about-page,
     z-index: 2;
 }
 
-/* Secciones de about con overlay para legibilidad */
-.about-page section {
+/* Secciones de about - overlay solo donde es necesario */
+.about-page section:not(.about-hero-bg) {
     position: relative;
     z-index: 1;
 }
 
-.about-page section::before {
+.about-page section.bg-dark-epic:not(.about-hero-bg)::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.6);
     z-index: -1;
     pointer-events: none;
 }
 
-.about-page section.bg-dark-epic::before {
-    background: rgba(0, 0, 0, 0.6);
-}
-
-.about-history-visual {
-    min-height: 300px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 191, 255, 0.05);
-    border-radius: 16px;
-    border: 1px solid rgba(0, 191, 255, 0.2);
-}
 
 @media (max-width: 768px) {
     .about-hero-bg {
         background-attachment: scroll;
-        min-height: 50vh;
+        min-height: 70vh;
     }
     
     .about-page::before {
