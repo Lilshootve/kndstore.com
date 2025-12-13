@@ -51,17 +51,29 @@ echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise�
                     <div class="card bg-dark border-primary h-100 product-card">
                         <?php 
                         $displayImage = $product['imagen'];
+                        $allImages = [$product['imagen']]; // Array para el lightbox
                         if (isset($product['gallery']) && !empty($product['gallery'])) {
                             $firstGallery = reset($product['gallery']);
                             $displayImage = $firstGallery;
+                            $allImages = array_values($product['gallery']); // Todas las imágenes de la gallery
                         }
                         ?>
-                        <div class="product-image" style="height: 250px; overflow: hidden;">
-                            <img src="/<?php echo htmlspecialchars($displayImage); ?>" 
+                        <div class="product-image" style="height: 250px; overflow: hidden; cursor: pointer; position: relative;" 
+                             onclick="openImageLightbox(<?php echo htmlspecialchars(json_encode($allImages), ENT_QUOTES | JSON_HEX_APOS | JSON_HEX_QUOT); ?>)">
+                            <?php 
+                            // Usar rawurlencode para codificar correctamente la ruta (incluye espacios y #)
+                            $imageUrl = rawurlencode($displayImage);
+                            // Pero mantener las barras / sin codificar
+                            $imageUrl = str_replace('%2F', '/', $imageUrl);
+                            ?>
+                            <img src="/<?php echo $imageUrl; ?>" 
                                  alt="<?php echo htmlspecialchars($product['nombre']); ?>"
                                  class="w-100"
-                                 style="height: 100%; object-fit: cover;"
-                                 onerror="this.onerror=null; this.src='/<?php echo htmlspecialchars($product['imagen']); ?>';">
+                                 style="height: 100%; object-fit: cover; transition: transform 0.3s ease;"
+                                 onerror="console.error('Error cargando imagen:', this.src); this.onerror=null; this.style.background='#2c2c2c'; this.style.display='flex'; this.style.alignItems='center'; this.style.justifyContent='center'; this.innerHTML='<i class=\'fas fa-image fa-3x text-muted\'></i>';">
+                            <div class="image-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.3); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
+                                <i class="fas fa-expand fa-2x text-white"></i>
+                            </div>
                         </div>
                         <div class="card-body text-center">
                             <h4 class="text-white mb-3"><?php echo htmlspecialchars($product['nombre']); ?></h4>
@@ -186,7 +198,221 @@ echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise�
     </div>
 </section>
 
+<style>
+/* Lightbox para imágenes */
+.image-lightbox {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    overflow: auto;
+}
+
+.image-lightbox.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    margin: auto;
+    animation: zoomIn 0.3s ease;
+}
+
+.lightbox-content img {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 10px 50px rgba(0, 191, 255, 0.3);
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10000;
+    transition: color 0.3s ease;
+}
+
+.lightbox-close:hover {
+    color: var(--knd-neon-blue);
+}
+
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #fff;
+    font-size: 30px;
+    cursor: pointer;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    z-index: 10000;
+}
+
+.lightbox-nav:hover {
+    background: rgba(0, 191, 255, 0.7);
+    color: #fff;
+}
+
+.lightbox-prev {
+    left: 20px;
+}
+
+.lightbox-next {
+    right: 20px;
+}
+
+.lightbox-counter {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+.product-image:hover .image-overlay {
+    opacity: 1 !important;
+}
+
+.product-image:hover img {
+    transform: scale(1.05);
+}
+
+.product-image {
+    transition: all 0.3s ease;
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+</style>
+
+<!-- Lightbox Modal -->
+<div id="image-lightbox" class="image-lightbox">
+    <span class="lightbox-close" onclick="closeImageLightbox()">&times;</span>
+    <span class="lightbox-nav lightbox-prev" onclick="changeLightboxImage(-1)">&#10094;</span>
+    <span class="lightbox-nav lightbox-next" onclick="changeLightboxImage(1)">&#10095;</span>
+    <div class="lightbox-content">
+        <img id="lightbox-image" src="" alt="Imagen ampliada">
+    </div>
+    <div class="lightbox-counter">
+        <span id="lightbox-counter-text">1 / 1</span>
+    </div>
+</div>
+
 <script>
+// Variables globales para el lightbox
+let lightboxImages = [];
+let currentLightboxIndex = 0;
+
+// Abrir lightbox con imagen
+function openImageLightbox(imagesArray) {
+    if (!imagesArray || imagesArray.length === 0) {
+        console.error('No hay imágenes para mostrar');
+        return;
+    }
+    
+    lightboxImages = imagesArray;
+    currentLightboxIndex = 0;
+    
+    const lightbox = document.getElementById('image-lightbox');
+    const lightboxImg = document.getElementById('lightbox-image');
+    const counter = document.getElementById('lightbox-counter-text');
+    
+    // Codificar la ruta correctamente para URLs (manejar espacios y caracteres especiales)
+    let firstImage = lightboxImages[0];
+    // Usar encodeURIComponent pero mantener las barras /
+    firstImage = firstImage.split('/').map(part => encodeURIComponent(part)).join('/');
+    lightboxImg.src = '/' + firstImage;
+    counter.textContent = `1 / ${lightboxImages.length}`;
+    
+    lightbox.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Mostrar/ocultar navegación según cantidad de imágenes
+    const prevBtn = document.querySelector('.lightbox-prev');
+    const nextBtn = document.querySelector('.lightbox-next');
+    if (lightboxImages.length > 1) {
+        prevBtn.style.display = 'block';
+        nextBtn.style.display = 'block';
+    } else {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+    }
+}
+
+// Cerrar lightbox
+function closeImageLightbox() {
+    const lightbox = document.getElementById('image-lightbox');
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Cambiar imagen en el lightbox
+function changeLightboxImage(direction) {
+    currentLightboxIndex += direction;
+    
+    if (currentLightboxIndex < 0) {
+        currentLightboxIndex = lightboxImages.length - 1;
+    } else if (currentLightboxIndex >= lightboxImages.length) {
+        currentLightboxIndex = 0;
+    }
+    
+    const lightboxImg = document.getElementById('lightbox-image');
+    const counter = document.getElementById('lightbox-counter-text');
+    
+    // Codificar la ruta correctamente para URLs (manejar espacios y caracteres especiales)
+    let imagePath = lightboxImages[currentLightboxIndex];
+    // Usar encodeURIComponent pero mantener las barras /
+    imagePath = imagePath.split('/').map(part => encodeURIComponent(part)).join('/');
+    lightboxImg.src = '/' + imagePath;
+    counter.textContent = `${currentLightboxIndex + 1} / ${lightboxImages.length}`;
+}
+
+// Cerrar con tecla ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeImageLightbox();
+    } else if (e.key === 'ArrowLeft') {
+        changeLightboxImage(-1);
+    } else if (e.key === 'ArrowRight') {
+        changeLightboxImage(1);
+    }
+});
+
+// Cerrar al hacer clic fuera de la imagen
+document.getElementById('image-lightbox').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageLightbox();
+    }
+});
+
 // Guardar brief en localStorage cuando se hace clic en el botón
 document.addEventListener('DOMContentLoaded', function() {
     const saveBriefBtn = document.getElementById('save-brief-btn');
