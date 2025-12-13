@@ -66,9 +66,11 @@ echo generateHeader('Tu Pedido', 'Revisa y confirma tu pedido en KND Store');
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Tipo de entrega</label>
-                                <select name="delivery_type" class="form-select" required>
+                                <select name="delivery_type" class="form-select" id="delivery-type-select">
                                     <option value="Digital / remoto">Digital / remoto</option>
+                                    <option value="Delivery coordinado">Delivery coordinado (Apparel)</option>
                                 </select>
+                                <small class="text-muted">Se actualizará automáticamente si hay productos apparel en el pedido.</small>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Notas adicionales</label>
@@ -157,6 +159,21 @@ document.addEventListener('DOMContentLoaded', function () {
             const lineTotal = item.price * item.qty;
             total += lineTotal;
 
+            // Construir información adicional (variants, brief)
+            let additionalInfo = '';
+            if (item.variants) {
+                additionalInfo = `<div class="text-info small mb-1">`;
+                if (item.variants.size) additionalInfo += `Talla: ${item.variants.size}`;
+                if (item.variants.color) additionalInfo += ` | Color: ${item.variants.color}`;
+                additionalInfo += `</div>`;
+            }
+            if (item.type === 'apparel') {
+                additionalInfo += `<div class="text-warning small"><i class="fas fa-truck me-1"></i> + Delivery coordinado</div>`;
+            }
+            if (item.brief) {
+                additionalInfo += `<div class="text-muted small mt-1"><i class="fas fa-file-alt me-1"></i> Brief incluido</div>`;
+            }
+
             const div = document.createElement('div');
             div.className = 'order-item-row d-flex justify-content-between align-items-center mb-3 p-3';
             div.style.border = '1px solid rgba(0, 191, 255, 0.3)';
@@ -166,7 +183,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="flex-grow-1">
                     <strong class="d-block mb-1">${item.name}</strong>
                     <div class="text-muted small mb-2">Precio unitario: ${formatPrice(item.price)}</div>
-                    <div class="d-flex align-items-center gap-2">
+                    ${additionalInfo}
+                    <div class="d-flex align-items-center gap-2 mt-2">
                         <button class="btn btn-sm btn-outline-neon qty-btn" data-action="decrease" data-id="${item.id}" ${item.qty <= 1 ? 'disabled' : ''}>
                             <i class="fas fa-minus"></i>
                         </button>
@@ -229,24 +247,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 badge.style.display = 'none';
             }
         }
-    }
-
-    function updateOrderBadge() {
-        const items = loadOrderItems();
-        const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
-        const badge = document.querySelector('#order-count');
-        if (badge) {
-            if (totalQty > 0) {
-                badge.textContent = totalQty;
-                badge.style.display = 'inline-flex';
-            } else {
-                badge.style.display = 'none';
-            }
+        // Actualizar también el badge de scroll nav si existe
+        if (window.updateOrderBadgeInScrollNav && typeof window.updateOrderBadgeInScrollNav === 'function') {
+            window.updateOrderBadgeInScrollNav();
         }
     }
 
     renderOrderItems();
     updateOrderBadge();
+    
+    // Actualizar delivery type si hay apparel en el pedido
+    function checkDeliveryType() {
+        const items = loadOrderItems();
+        const hasApparel = items.some(item => item.type === 'apparel');
+        const deliverySelect = document.getElementById('delivery-type-select');
+        if (deliverySelect && hasApparel) {
+            deliverySelect.value = 'Delivery coordinado';
+        }
+    }
+    checkDeliveryType();
 
     // Envío a WhatsApp
     const sendBtn = document.getElementById('send-whatsapp-order');
@@ -272,17 +291,52 @@ document.addEventListener('DOMContentLoaded', function () {
             msg += '%0A*Servicios solicitados:*%0A';
 
             let total = 0;
+            let hasApparel = false;
+            let hasService = false;
+            
             items.forEach(item => {
                 const lineTotal = item.price * item.qty;
                 total += lineTotal;
                 msg += `- ${item.name} (x${item.qty}) - $${lineTotal.toFixed(2)}%0A`;
+                
+                // Agregar variants si es apparel
+                if (item.variants) {
+                    if (item.variants.size) msg += `  Talla: ${item.variants.size}%0A`;
+                    if (item.variants.color) msg += `  Color: ${item.variants.color}%0A`;
+                    hasApparel = true;
+                }
+                
+                // Agregar brief si es service
+                if (item.brief) {
+                    msg += `  Brief:%0A`;
+                    if (item.brief.estilo) msg += `    Estilo: ${item.brief.estilo}%0A`;
+                    if (item.brief.colores) msg += `    Colores: ${item.brief.colores}%0A`;
+                    if (item.brief.texto) msg += `    Texto: ${item.brief.texto}%0A`;
+                    if (item.brief.referencias) msg += `    Referencias: ${item.brief.referencias}%0A`;
+                    if (item.brief.detalles) msg += `    Detalles: ${item.brief.detalles}%0A`;
+                    hasService = true;
+                }
+                
+                if (item.type === 'apparel') hasApparel = true;
+                if (item.type === 'service') hasService = true;
             });
 
             msg += `%0A*Total:* $${total.toFixed(2)}%0A`;
             if (payment) msg += `*Método de pago:* ${payment}%0A`;
-            if (deliveryType) msg += `*Tipo de entrega:* ${deliveryType}%0A`;
+            
+            // Actualizar delivery type si hay apparel
+            if (hasApparel) {
+                msg += `*Tipo de entrega:* Delivery coordinado (Apparel)%0A`;
+            } else if (deliveryType) {
+                msg += `*Tipo de entrega:* ${deliveryType}%0A`;
+            }
+            
             if (notes) msg += `%0A*Notas adicionales:* ${notes}%0A`;
 
+            if (hasApparel || hasService) {
+                msg += '%0A*Nota importante:* Te contactaremos por WhatsApp/medios para coordinar delivery y/o detalles del diseño.%0A';
+            }
+            
             msg += '%0AEnvíame el comprobante de pago por aquí cuando lo tengas listo.';
 
             // Reemplaza este número con tu número de WhatsApp real

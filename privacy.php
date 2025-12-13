@@ -91,6 +91,8 @@ require_once __DIR__ . '/includes/footer.php';
                     <ul class="text-white mb-3">
                         <li>Procesar y completar tus pedidos y solicitudes de servicios.</li>
                         <li>Entregar productos digitales (claves, archivos, servicios remotos) a través de los canales acordados.</li>
+                        <li><strong>Coordinación de delivery:</strong> Para productos físicos (apparel), utilizamos tus datos de contacto (WhatsApp, email) únicamente para coordinar la entrega, método de pago y dirección de envío.</li>
+                        <li><strong>Servicios de diseño personalizado:</strong> Utilizamos la información del brief (estilo, colores, referencias) para crear el diseño solicitado y comunicarnos contigo durante el proceso.</li>
                         <li>Comunicarnos contigo sobre el estado de tus pedidos, actualizaciones de servicios, y soporte técnico.</li>
                         <li>Gestionar tu cuenta y preferencias de usuario (si aplica).</li>
                     </ul>

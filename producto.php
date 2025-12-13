@@ -54,27 +54,153 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
             <!-- Imagen del Producto -->
             <div class="col-lg-6 mb-4">
                 <div class="product-image-container">
-                    <img src="<?php echo $producto['imagen']; ?>" 
-                         alt="<?php echo htmlspecialchars($producto['nombre']); ?>" 
-                         class="product-detail-image">
+                    <?php if (isset($producto['gallery']) && !empty($producto['gallery'])): ?>
+                        <!-- Gallery para productos con múltiples imágenes -->
+                        <div id="product-gallery">
+                            <div class="main-image mb-3">
+                                <img src="/<?php echo htmlspecialchars($producto['gallery']['front'] ?? $producto['imagen']); ?>" 
+                                     alt="<?php echo htmlspecialchars($producto['nombre']); ?>" 
+                                     class="product-detail-image" id="main-product-image">
+                            </div>
+                            <div class="gallery-thumbnails d-flex gap-2">
+                                <?php foreach ($producto['gallery'] as $view => $image): ?>
+                                    <img src="/<?php echo htmlspecialchars($image); ?>" 
+                                         alt="<?php echo htmlspecialchars($view); ?>" 
+                                         class="gallery-thumb <?php echo $view === 'front' ? 'active' : ''; ?>"
+                                         data-view="<?php echo htmlspecialchars($view); ?>"
+                                         style="width: 80px; height: 80px; object-fit: cover; cursor: pointer; border: 2px solid transparent;"
+                                         onclick="changeMainImage('<?php echo htmlspecialchars($image); ?>', this)">
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <img src="/<?php echo $producto['imagen']; ?>" 
+                             alt="<?php echo htmlspecialchars($producto['nombre']); ?>" 
+                             class="product-detail-image" id="main-product-image">
+                    <?php endif; ?>
                 </div>
             </div>
             
             <!-- Información del Producto -->
             <div class="col-lg-6">
                 <div class="product-info-container">
-                    <h1 class="product-title"><?php echo htmlspecialchars($producto['nombre']); ?></h1>
+                    <h1 class="product-title">
+                        <?php echo htmlspecialchars($producto['nombre']); ?>
+                        <?php if (isset($producto['limited']) && $producto['limited']): ?>
+                            <span class="badge bg-danger ms-2">LIMITED</span>
+                        <?php endif; ?>
+                    </h1>
                     
                     <div class="product-price-container">
                         <span class="product-price">$<?php echo number_format($producto['precio'], 2); ?></span>
+                        <?php if (isset($producto['tipo']) && $producto['tipo'] === 'apparel'): ?>
+                            <small class="text-muted d-block">+ Delivery</small>
+                        <?php endif; ?>
                     </div>
                     
                     <div class="product-description">
                         <?php echo $producto['descripcion']; ?>
                     </div>
                     
+                    <?php if (isset($producto['tipo']) && $producto['tipo'] === 'apparel' && isset($producto['variants'])): ?>
+                        <!-- Variants para Apparel -->
+                        <div class="product-variants mt-4">
+                            <h5 class="mb-3">Selecciona tu variante:</h5>
+                            
+                            <!-- Selector de Color -->
+                            <?php if (count($producto['variants']) > 1): ?>
+                                <div class="mb-3">
+                                    <label class="form-label">Color</label>
+                                    <select id="variant-color" class="form-select">
+                                        <option value="">Selecciona un color</option>
+                                        <?php foreach ($producto['variants'] as $colorKey => $variant): ?>
+                                            <option value="<?php echo htmlspecialchars($colorKey); ?>" 
+                                                    data-image="<?php echo htmlspecialchars($variant['imagen']); ?>">
+                                                <?php echo ucfirst($colorKey); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            <?php else: ?>
+                                <?php 
+                                $firstVariant = reset($producto['variants']);
+                                $defaultColor = key($producto['variants']);
+                                ?>
+                                <input type="hidden" id="variant-color" value="<?php echo htmlspecialchars($defaultColor); ?>">
+                            <?php endif; ?>
+                            
+                            <!-- Selector de Talla -->
+                            <div class="mb-3">
+                                <label class="form-label">Talla</label>
+                                <select id="variant-size" class="form-select" required>
+                                    <option value="">Selecciona una talla</option>
+                                    <?php 
+                                    $sizes = ['S', 'M', 'L', 'XL'];
+                                    if (isset($producto['variants'])) {
+                                        $firstVariant = reset($producto['variants']);
+                                        if (isset($firstVariant['sizes'])) {
+                                            $sizes = $firstVariant['sizes'];
+                                        }
+                                    }
+                                    foreach ($sizes as $size): ?>
+                                        <option value="<?php echo htmlspecialchars($size); ?>"><?php echo htmlspecialchars($size); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            
+                            <?php if (isset($producto['tipo']) && $producto['tipo'] === 'apparel'): ?>
+                                <div class="alert alert-info mt-3" style="background: rgba(0, 191, 255, 0.1); border-color: var(--knd-neon-blue);">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Delivery:</strong> Se coordina por WhatsApp/medios de contacto luego de la compra.
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if (isset($producto['tipo']) && $producto['tipo'] === 'service'): ?>
+                        <div class="alert alert-warning mt-3" style="background: rgba(255, 193, 7, 0.1); border-color: #ffc107;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Disclaimer:</strong> No aceptamos contenido protegido por derechos de autor o marcas registradas sin autorización del titular.
+                        </div>
+                        <div class="mt-3">
+                            <a href="/custom-design.php" class="btn btn-outline-neon">
+                                <i class="fas fa-palette me-2"></i> Completar Brief
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                    
                     <div class="product-actions mt-4">
                         <div class="row">
+                            <?php if (isset($producto['tipo']) && $producto['tipo'] === 'apparel'): ?>
+                                <div class="col-12 mb-3">
+                                    <button 
+                                        type="button"
+                                        class="btn btn-primary btn-lg w-100 add-to-order"
+                                        data-id="<?php echo (int)$producto['id']; ?>"
+                                        data-name="<?php echo htmlspecialchars($producto['nombre'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-price="<?php echo number_format($producto['precio'], 2, '.', ''); ?>"
+                                        data-type="apparel"
+                                        id="add-apparel-btn"
+                                    >
+                                        <i class="fas fa-shopping-cart me-2"></i>
+                                        Añadir al pedido
+                                    </button>
+                                </div>
+                            <?php else: ?>
+                                <div class="col-md-6 mb-3">
+                                    <button 
+                                        type="button"
+                                        class="btn btn-primary btn-lg w-100 add-to-order"
+                                        data-id="<?php echo (int)$producto['id']; ?>"
+                                        data-name="<?php echo htmlspecialchars($producto['nombre'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-price="<?php echo number_format($producto['precio'], 2, '.', ''); ?>"
+                                        data-type="<?php echo isset($producto['tipo']) ? htmlspecialchars($producto['tipo']) : 'digital'; ?>"
+                                    >
+                                        <i class="fas fa-shopping-cart me-2"></i>
+                                        Añadir al pedido
+                                    </button>
+                                </div>
+                            <?php endif; ?>
                             <div class="col-md-6 mb-3">
                                 <a href="<?php echo $link_whatsapp; ?>" 
                                    class="btn btn-whatsapp btn-lg w-100" 
@@ -82,13 +208,6 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                                     <i class="fab fa-whatsapp me-2"></i>
                                     Solicitar por WhatsApp
                                 </a>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <button class="btn btn-discord btn-lg w-100" 
-                                        onclick="copyDiscordServer()">
-                                    <i class="fab fa-discord me-2"></i>
-                                    Contactar por Discord
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -98,6 +217,12 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                             <i class="fas fa-tag me-2"></i>
                             <?php echo ucfirst($producto['categoria']); ?>
                         </div>
+                        <?php if (isset($producto['tipo'])): ?>
+                            <div class="category-badge mt-2">
+                                <i class="fas fa-layer-group me-2"></i>
+                                <?php echo ucfirst($producto['tipo']); ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -132,6 +257,50 @@ function copyDiscordServer() {
         alert('Servidor Discord: knd_store');
     });
 }
+
+// Cambiar imagen principal en gallery
+function changeMainImage(imageSrc, thumbElement) {
+    document.getElementById('main-product-image').src = '/' + imageSrc;
+    document.querySelectorAll('.gallery-thumb').forEach(thumb => {
+        thumb.classList.remove('active');
+        thumb.style.border = '2px solid transparent';
+    });
+    thumbElement.classList.add('active');
+    thumbElement.style.border = '2px solid var(--knd-neon-blue)';
+}
+
+// Manejar cambio de color en variants
+document.addEventListener('DOMContentLoaded', function() {
+    const colorSelect = document.getElementById('variant-color');
+    const mainImage = document.getElementById('main-product-image');
+    
+    if (colorSelect && mainImage) {
+        colorSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption && selectedOption.dataset.image) {
+                mainImage.src = '/' + selectedOption.dataset.image;
+            }
+        });
+    }
+    
+    // Validar variants antes de agregar al pedido (apparel)
+    const addApparelBtn = document.getElementById('add-apparel-btn');
+    if (addApparelBtn) {
+        addApparelBtn.addEventListener('click', function() {
+            const color = document.getElementById('variant-color')?.value;
+            const size = document.getElementById('variant-size')?.value;
+            
+            if (!size) {
+                alert('Por favor selecciona una talla antes de agregar al pedido.');
+                return;
+            }
+            
+            // Agregar metadata de variants al botón
+            this.dataset.variantColor = color || '';
+            this.dataset.variantSize = size;
+        });
+    }
+});
 </script>
 
 <?php 

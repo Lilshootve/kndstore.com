@@ -20,6 +20,8 @@ $PRODUCTS = [
 
         'slug' => 'formateo-limpieza-pc',
 
+        'tipo' => 'digital',
+
     ],
 
     'instalacion-windows-drivers' => [
@@ -37,6 +39,8 @@ $PRODUCTS = [
         'categoria' => 'tecnologia',
 
         'slug' => 'instalacion-windows-drivers',
+
+        'tipo' => 'digital',
 
     ],
 
@@ -56,6 +60,8 @@ $PRODUCTS = [
 
         'slug' => 'optimizacion-gamer',
 
+        'tipo' => 'digital',
+
     ],
 
     'activacion-juegos-giftcards' => [
@@ -73,6 +79,8 @@ $PRODUCTS = [
         'categoria' => 'gaming',
 
         'slug' => 'activacion-juegos-giftcards',
+
+        'tipo' => 'digital',
 
     ],
 
@@ -92,6 +100,8 @@ $PRODUCTS = [
 
         'slug' => 'asesoria-pc-gamer',
 
+        'tipo' => 'digital',
+
     ],
 
     'death-roll-crate' => [
@@ -109,6 +119,8 @@ $PRODUCTS = [
         'categoria' => 'gaming',
 
         'slug' => 'death-roll-crate',
+
+        'tipo' => 'digital',
 
     ],
 
@@ -128,6 +140,8 @@ $PRODUCTS = [
 
         'slug' => 'wallpaper-personalizado',
 
+        'tipo' => 'digital',
+
     ],
 
     'avatar-personalizado' => [
@@ -145,6 +159,8 @@ $PRODUCTS = [
         'categoria' => 'accesorios',
 
         'slug' => 'avatar-personalizado',
+
+        'tipo' => 'digital',
 
     ],
 
@@ -164,6 +180,8 @@ $PRODUCTS = [
 
         'slug' => 'icon-pack-knd',
 
+        'tipo' => 'digital',
+
     ],
 
     'instalacion-software' => [
@@ -181,6 +199,8 @@ $PRODUCTS = [
         'categoria' => 'software',
 
         'slug' => 'instalacion-software',
+
+        'tipo' => 'digital',
 
     ],
 
@@ -200,6 +220,8 @@ $PRODUCTS = [
 
         'slug' => 'pc-ready-pack',
 
+        'tipo' => 'digital',
+
     ],
 
     'tutorial-knd' => [
@@ -217,6 +239,8 @@ $PRODUCTS = [
         'categoria' => 'software',
 
         'slug' => 'tutorial-knd',
+
+        'tipo' => 'digital',
 
     ],
 
@@ -236,6 +260,8 @@ $PRODUCTS = [
 
         'slug' => 'compatibilidad-piezas',
 
+        'tipo' => 'digital',
+
     ],
 
     'simulacion-build' => [
@@ -253,6 +279,8 @@ $PRODUCTS = [
         'categoria' => 'hardware',
 
         'slug' => 'simulacion-build',
+
+        'tipo' => 'digital',
 
     ],
 
@@ -272,6 +300,161 @@ $PRODUCTS = [
 
         'slug' => 'analisis-pc',
 
+        'tipo' => 'digital',
+
+    ],
+
+    // ====== APPAREL PRODUCTS ======
+    
+    'hoodie-knd-style' => [
+        'id' => 16,
+        'nombre' => 'Hoodie KND Style',
+        'descripcion' => 'Hoodie oficial KND con diseño galáctico único.<br><br>Características:<br>• Material premium<br>• Diseño exclusivo KND<br>• Disponible en 3 colores<br>• Tallas S/M/L/XL<br>• + Delivery coordinado',
+        'precio' => 59.99,
+        'imagen' => 'assets/images/Cloths/Hoodie Desing 001 MAGENTA.png',
+        'categoria' => 'apparel',
+        'slug' => 'hoodie-knd-style',
+        'tipo' => 'apparel',
+        'variants' => [
+            'magenta' => [
+                'imagen' => 'assets/images/Cloths/Hoodie Desing 001 MAGENTA.png',
+                'sizes' => ['S', 'M', 'L', 'XL']
+            ],
+            'black' => [
+                'imagen' => 'assets/images/Cloths/Hoodie Desing 001 NEGRA.png',
+                'sizes' => ['S', 'M', 'L', 'XL']
+            ],
+            'turquoise' => [
+                'imagen' => 'assets/images/Cloths/Hoodie Desing 001 TURQUESA.png',
+                'sizes' => ['S', 'M', 'L', 'XL']
+            ]
+        ]
+    ],
+
+    'tshirt-knd-oversize' => [
+        'id' => 17,
+        'nombre' => 'T-Shirt KND Oversize',
+        'descripcion' => 'T-Shirt oversize con estilo KND galáctico.<br><br>Características:<br>• Corte oversize cómodo<br>• Diseño exclusivo KND<br>• Disponible en 3 colores<br>• Tallas S/M/L/XL<br>• + Delivery coordinado',
+        'precio' => 34.99,
+        'imagen' => 'assets/images/Cloths/T-shirt Desing 001 MAGENTA.png',
+        'categoria' => 'apparel',
+        'slug' => 'tshirt-knd-oversize',
+        'tipo' => 'apparel',
+        'variants' => [
+            'magenta' => [
+                'imagen' => 'assets/images/Cloths/T-shirt Desing 001 MAGENTA.png',
+                'sizes' => ['S', 'M', 'L', 'XL']
+            ],
+            'black' => [
+                'imagen' => 'assets/images/Cloths/T-shirt Desing 001 NEGRA.png',
+                'sizes' => ['S', 'M', 'L', 'XL']
+            ],
+            'turquoise' => [
+                'imagen' => 'assets/images/Cloths/T-shirt Desing 001 TURQUESA.png',
+                'sizes' => ['S', 'M', 'L', 'XL']
+            ]
+        ]
+    ],
+
+    'hoodie-knd-black-edition' => [
+        'id' => 18,
+        'nombre' => 'Hoodie KND Black Edition',
+        'descripcion' => 'Edición especial negra con diseño premium.<br><br>Características:<br>• Material premium<br>• Diseño exclusivo Black Edition<br>• Tallas S/M/L/XL<br>• + Delivery coordinado',
+        'precio' => 64.99,
+        'imagen' => 'assets/images/Cloths/Hoodie BLACK FRONT.png',
+        'categoria' => 'apparel',
+        'slug' => 'hoodie-knd-black-edition',
+        'tipo' => 'apparel',
+        'gallery' => [
+            'front' => 'assets/images/Cloths/Hoodie BLACK FRONT.png',
+            'back' => 'assets/images/Cloths/Hoodie BLACK BACK.png',
+            'side' => 'assets/images/Cloths/Hoodie BLACK SIDE.png'
+        ],
+        'variants' => [
+            'black' => [
+                'imagen' => 'assets/images/Cloths/Hoodie BLACK FRONT.png',
+                'sizes' => ['S', 'M', 'L', 'XL']
+            ]
+        ]
+    ],
+
+    'hoodie-anime-style' => [
+        'id' => 19,
+        'nombre' => 'Hoodie Anime Style (Limited Drop)',
+        'descripcion' => 'Edición limitada con diseño anime único.<br><br>Características:<br>• Edición LIMITADA<br>• Diseño anime exclusivo<br>• Colorway Tri-Tone<br>• Tallas S/M/L/XL<br>• + Delivery coordinado',
+        'precio' => 74.99,
+        'imagen' => 'assets/images/Cloths/Hoodie Anime PINK FRONT.PNG',
+        'categoria' => 'apparel',
+        'slug' => 'hoodie-anime-style',
+        'tipo' => 'apparel',
+        'limited' => true,
+        'gallery' => [
+            'front' => 'assets/images/Cloths/Hoodie Anime PINK FRONT.PNG',
+            'back' => 'assets/images/Cloths/Hoodie Anime PINK BACK.PNG'
+        ],
+        'variants' => [
+            'tri-tone' => [
+                'imagen' => 'assets/images/Cloths/Hoodie Anime PINK FRONT.PNG',
+                'sizes' => ['S', 'M', 'L', 'XL']
+            ]
+        ]
+    ],
+
+    'hoodie-donut-style' => [
+        'id' => 20,
+        'nombre' => 'Hoodie Donut Style (Limited Drop)',
+        'descripcion' => 'Edición limitada con diseño donut único.<br><br>Características:<br>• Edición LIMITADA<br>• Diseño donut exclusivo<br>• Colorway Tri-Tone<br>• Tallas S/M/L/XL<br>• + Delivery coordinado',
+        'precio' => 74.99,
+        'imagen' => 'assets/images/Cloths/Hoodie Donut Front.png',
+        'categoria' => 'apparel',
+        'slug' => 'hoodie-donut-style',
+        'tipo' => 'apparel',
+        'limited' => true,
+        'gallery' => [
+            'front' => 'assets/images/Cloths/Hoodie Donut Front.png',
+            'back' => 'assets/images/Cloths/Hoodie Donut Back.png'
+        ],
+        'variants' => [
+            'tri-tone' => [
+                'imagen' => 'assets/images/Cloths/Hoodie Donut Front.png',
+                'sizes' => ['S', 'M', 'L', 'XL']
+            ]
+        ]
+    ],
+
+    // ====== CUSTOM SERVICES ======
+
+    'custom-tshirt-design' => [
+        'id' => 21,
+        'nombre' => 'Custom T-Shirt Design (Service)',
+        'descripcion' => 'Diseño personalizado de T-Shirt según tus especificaciones.<br><br>Incluye:<br>• Diseño personalizado único<br>• Mockup profesional<br>• Archivos editables<br>• Revisión básica incluida<br>• Entrega digital del diseño<br>• Coordinación por WhatsApp',
+        'precio' => 24.99,
+        'imagen' => 'assets/images/productos/custom-tshirt-design.png',
+        'categoria' => 'accesorios',
+        'slug' => 'custom-tshirt-design',
+        'tipo' => 'service'
+    ],
+
+    'custom-hoodie-design' => [
+        'id' => 22,
+        'nombre' => 'Custom Hoodie Design (Service)',
+        'descripcion' => 'Diseño personalizado de Hoodie según tus especificaciones.<br><br>Incluye:<br>• Diseño personalizado único<br>• Mockup profesional<br>• Archivos editables<br>• Revisión básica incluida<br>• Entrega digital del diseño<br>• Coordinación por WhatsApp',
+        'precio' => 34.99,
+        'imagen' => 'assets/images/productos/custom-hoodie-design.png',
+        'categoria' => 'accesorios',
+        'slug' => 'custom-hoodie-design',
+        'tipo' => 'service'
+    ],
+
+    'custom-full-outfit-concept' => [
+        'id' => 23,
+        'nombre' => 'Custom Full Outfit Concept (Service)',
+        'descripcion' => 'Concepto completo de outfit personalizado (hoodie + t-shirt + variaciones).<br><br>Incluye:<br>• Concepto completo de outfit<br>• Diseño de hoodie + t-shirt<br>• Variaciones de color<br>• Mockups profesionales<br>• Archivos editables<br>• Revisión básica incluida<br>• Entrega digital<br>• Coordinación por WhatsApp',
+        'precio' => 69.99,
+        'imagen' => 'assets/images/productos/custom-full-outfit-concept.png',
+        'categoria' => 'accesorios',
+        'slug' => 'custom-full-outfit-concept',
+        'tipo' => 'service'
     ],
 
 ];

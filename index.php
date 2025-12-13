@@ -29,6 +29,7 @@ setCacheHeaders('html');
                     <span class="text-gradient">KND Store</span>
                 </h1>
                 <p class="hero-subtitle">
+                    Digital Goods • Apparel • Custom Design Services<br>
                     Tu tienda galáctica de productos únicos y tecnología de vanguardia. 
                     Descubre un universo de posibilidades con nuestro catálogo exclusivo.
                 </p>

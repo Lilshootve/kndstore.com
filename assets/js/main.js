@@ -267,20 +267,60 @@ document.addEventListener('click', function (e) {
     const id = parseInt(btn.dataset.id, 10);
     const name = btn.dataset.name;
     const price = parseFloat(btn.dataset.price);
+    const type = btn.dataset.type || 'digital';
 
     if (!id || !name || isNaN(price)) {
         console.warn('Datos de producto inválidos para el pedido', btn.dataset);
         return;
     }
 
-    const items = addItemToOrder({ id, name, price });
+    // Para productos apparel, capturar variants (talla/color)
+    let variants = null;
+    if (type === 'apparel') {
+        const color = btn.dataset.variantColor || document.getElementById('variant-color')?.value || '';
+        const size = btn.dataset.variantSize || document.getElementById('variant-size')?.value || '';
+        
+        if (!size) {
+            alert('Por favor selecciona una talla antes de agregar al pedido.');
+            return;
+        }
+        
+        variants = { color, size };
+    }
+
+    // Para productos service, capturar brief si existe
+    let brief = null;
+    if (type === 'service') {
+        const briefData = localStorage.getItem('knd_custom_design_brief');
+        if (briefData) {
+            try {
+                brief = JSON.parse(briefData);
+            } catch (e) {
+                console.error('Error parsing brief:', e);
+            }
+        }
+    }
+
+    const itemData = { id, name, price, type };
+    if (variants) itemData.variants = variants;
+    if (brief) itemData.brief = brief;
+
+    const items = addItemToOrder(itemData);
     updateOrderBadge();
 
     // Mostrar notificación en la parte inferior izquierda
     const item = items.find(i => i.id === id);
-    const message = item.qty > 1 
+    let message = item.qty > 1 
         ? `${name} añadido (${item.qty} en pedido)`
         : `${name} añadido al pedido`;
+    
+    if (variants && variants.size) {
+        message += ` - Talla: ${variants.size}`;
+        if (variants.color) {
+            message += `, Color: ${variants.color}`;
+        }
+    }
+    
     showOrderNotification(message, 'success');
 });
 

@@ -79,7 +79,95 @@ require_once __DIR__ . '/includes/footer.php';
                     </ul>
                     <div class="alert alert-warning bg-dark border-warning">
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Importante:</strong> KND Store <strong>NO</strong> realiza envíos físicos. Todos nuestros productos y servicios se entregan de forma digital e instantánea.
+                        <strong>Importante:</strong> KND Store ofrece servicios digitales, productos físicos (apparel) y servicios personalizables. Los servicios digitales se entregan de forma instantánea. Los productos físicos requieren coordinación de delivery.
+                    </div>
+                </div>
+
+                <hr class="my-5" style="border-color: rgba(138, 43, 226, 0.3);">
+
+                <!-- Apparel (Productos Físicos) -->
+                <div class="mb-5">
+                    <h2 class="section-title mb-4">
+                        <i class="fas fa-tshirt me-2"></i>
+                        Productos Apparel (Ropa)
+                    </h2>
+                    <p class="text-white mb-3">
+                        <strong>KND Store</strong> ofrece productos físicos de ropa (hoodies, t-shirts) bajo las siguientes condiciones:
+                    </p>
+                    <h3 class="text-white mb-3 mt-4">
+                        <i class="fas fa-truck me-2"></i>
+                        Delivery Coordinado
+                    </h3>
+                    <ul class="text-white mb-3">
+                        <li>El <strong>delivery se coordina por WhatsApp o medios de contacto</strong> después de la compra.</li>
+                        <li>Los tiempos de entrega son estimados y pueden variar según la ubicación y disponibilidad.</li>
+                        <li>El cliente debe proporcionar datos de contacto precisos para la coordinación del delivery.</li>
+                        <li><strong>KND Store</strong> no se hace responsable por retrasos causados por información incorrecta del cliente.</li>
+                    </ul>
+                    <h3 class="text-white mb-3 mt-4">
+                        <i class="fas fa-ruler me-2"></i>
+                        Tallas y Cambios
+                    </h3>
+                    <ul class="text-white mb-3">
+                        <li>Las tallas disponibles son: S, M, L, XL. Consulta la guía de tallas en cada producto.</li>
+                        <li>Aceptamos <strong>cambios y devoluciones dentro de los primeros 7 días</strong> después de la entrega, siempre que el producto esté en su estado original (sin usar, con etiquetas).</li>
+                        <li>Los costos de envío para cambios/devoluciones corren por cuenta del cliente, salvo error de <strong>KND Store</strong>.</li>
+                    </ul>
+                    <h3 class="text-white mb-3 mt-4">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Responsabilidad por Datos de Contacto
+                    </h3>
+                    <p class="text-white mb-3">
+                        El cliente es responsable de proporcionar información de contacto correcta y actualizada. <strong>KND Store</strong> utilizará estos datos únicamente para coordinar la entrega y comunicación relacionada con el pedido.
+                    </p>
+                </div>
+
+                <hr class="my-5" style="border-color: rgba(138, 43, 226, 0.3);">
+
+                <!-- Custom Design Services -->
+                <div class="mb-5">
+                    <h2 class="section-title mb-4">
+                        <i class="fas fa-palette me-2"></i>
+                        Servicios de Diseño Personalizado (Custom Design)
+                    </h2>
+                    <p class="text-white mb-3">
+                        <strong>KND Store</strong> ofrece servicios de diseño personalizado para T-Shirts, Hoodies y conceptos completos de outfit.
+                    </p>
+                    <h3 class="text-white mb-3 mt-4">
+                        <i class="fas fa-file-alt me-2"></i>
+                        Alcance del Servicio
+                    </h3>
+                    <ul class="text-white mb-3">
+                        <li>Diseño personalizado según las especificaciones del cliente (brief).</li>
+                        <li>Entrega digital del diseño en formato editable y mockups profesionales.</li>
+                        <li><strong>No incluye impresión física</strong> del producto (solo el diseño digital).</li>
+                        <li>Revisión básica incluida (una ronda de modificaciones menores).</li>
+                    </ul>
+                    <h3 class="text-white mb-3 mt-4">
+                        <i class="fas fa-edit me-2"></i>
+                        Revisiones y Modificaciones
+                    </h3>
+                    <ul class="text-white mb-3">
+                        <li>Se incluye <strong>una revisión básica</strong> para ajustes menores (colores, texto, posición).</li>
+                        <li>Cambios mayores o rediseños completos pueden requerir un cargo adicional, a coordinar con el cliente.</li>
+                        <li>Los tiempos de entrega pueden variar según la complejidad del diseño.</li>
+                    </ul>
+                    <h3 class="text-white mb-3 mt-4">
+                        <i class="fas fa-box me-2"></i>
+                        Entregables
+                    </h3>
+                    <ul class="text-white mb-3">
+                        <li>Archivos editables del diseño (formato vectorial o raster según corresponda).</li>
+                        <li>Mockups profesionales del diseño aplicado al producto.</li>
+                        <li>Versiones en diferentes resoluciones si aplica.</li>
+                    </ul>
+                    <h3 class="text-white mb-3 mt-4">
+                        <i class="fas fa-copyright me-2"></i>
+                        Política de Contenido
+                    </h3>
+                    <div class="alert alert-danger bg-dark border-danger">
+                        <i class="fas fa-ban me-2"></i>
+                        <strong>No aceptamos contenido protegido por derechos de autor o marcas registradas sin autorización del titular.</strong> El cliente es responsable de garantizar que el contenido proporcionado (referencias, texto, imágenes) no infrinja derechos de terceros. <strong>KND Store</strong> se reserva el derecho de rechazar proyectos que violen esta política.
                     </div>
                 </div>
 

@@ -8,11 +8,20 @@ require_once __DIR__ . '/includes/products-data.php';
 // Filtros
 $categoria_filtro = isset($_GET['categoria']) ? $_GET['categoria'] : '';
 $busqueda = isset($_GET['busqueda']) ? $_GET['busqueda'] : '';
+$tipo_filtro = isset($_GET['type']) ? $_GET['type'] : '';
 
 // Filtrar productos
 $productos_filtrados = [];
 foreach ($PRODUCTS as $slug => $producto) {
         $pasa_filtro = true;
+        
+        // Filtro por tipo (digital/apparel/service)
+        if ($tipo_filtro) {
+            $producto_tipo = isset($producto['tipo']) ? $producto['tipo'] : 'digital';
+            if ($producto_tipo !== $tipo_filtro) {
+                $pasa_filtro = false;
+            }
+        }
         
         // Filtro por categoría
         if ($categoria_filtro && $producto['categoria'] !== $categoria_filtro) {
@@ -52,7 +61,7 @@ foreach ($PRODUCTS as $slug => $producto) {
                     <span class="text-gradient">Catálogo</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Servicios digitales y tecnología galáctica para tu nave
+                    Digital Goods • Apparel • Custom Design Services
                 </p>
             </div>
         </div>
@@ -108,12 +117,41 @@ foreach ($PRODUCTS as $slug => $producto) {
     </div>
 </section>
 
-<!-- Filtros y Búsqueda -->
+<!-- Filtros por Tipo -->
 <section class="filters-section py-4 bg-dark-epic">
     <div class="container">
+        <div class="row mb-3">
+            <div class="col-12">
+                <ul class="nav nav-pills justify-content-center" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo !$tipo_filtro ? 'active' : ''; ?>" href="/products.php">
+                            <i class="fas fa-th me-2"></i> All
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $tipo_filtro === 'digital' ? 'active' : ''; ?>" href="/products.php?type=digital">
+                            <i class="fas fa-download me-2"></i> Digital
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $tipo_filtro === 'apparel' ? 'active' : ''; ?>" href="/products.php?type=apparel">
+                            <i class="fas fa-tshirt me-2"></i> Apparel
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $tipo_filtro === 'service' ? 'active' : ''; ?>" href="/products.php?type=service">
+                            <i class="fas fa-palette me-2"></i> Services
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
         <div class="row">
             <div class="col-lg-8 mx-auto">
                 <form method="GET" action="/products.php" class="search-form">
+                    <?php if ($tipo_filtro): ?>
+                        <input type="hidden" name="type" value="<?php echo htmlspecialchars($tipo_filtro); ?>">
+                    <?php endif; ?>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <input type="text" name="busqueda" value="<?php echo htmlspecialchars($busqueda); ?>" 
@@ -210,6 +248,7 @@ foreach ($PRODUCTS as $slug => $producto) {
                                             data-id="<?php echo (int)$producto['id']; ?>"
                                             data-name="<?php echo htmlspecialchars($producto['nombre'], ENT_QUOTES, 'UTF-8'); ?>"
                                             data-price="<?php echo number_format($precio_real, 2, '.', ''); ?>"
+                                            data-type="<?php echo isset($producto['tipo']) ? htmlspecialchars($producto['tipo']) : 'digital'; ?>"
                                         >
                                             Añadir al pedido
                                         </button>
