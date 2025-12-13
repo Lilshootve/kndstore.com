@@ -28,7 +28,10 @@ require_once __DIR__ . '/includes/footer.php';
                 </p>
                 <div class="mt-4 d-flex flex-wrap gap-3">
                     <a href="#crates" class="btn btn-primary btn-lg">
-                        <i class="fas fa-dice me-2"></i> Ver Crates Disponibles
+                        <i class="fas fa-dice me-2"></i> Ver Crates
+                    </a>
+                    <a href="#rules" class="btn btn-outline-neon btn-lg">
+                        <i class="fas fa-scroll me-2"></i> Reglas
                     </a>
                     <button class="btn btn-outline-neon btn-lg" onclick="copyDiscordServer()">
                         <i class="fab fa-discord me-2"></i> Jugar en Discord
@@ -51,7 +54,7 @@ require_once __DIR__ . '/includes/footer.php';
                         <li class="mb-2"><i class="fas fa-check-circle me-2 text-success"></i> Recibes tu loot digital.</li>
                     </ul>
                     <p class="small text-warning mb-0">
-                        No es gambling con dinero dentro del sitio.  
+                        Servicio digital con experiencia de minijuego; no es apuestas dentro del sitio.  
                         Tú compras un servicio digital (Death Roll Crate) y el minijuego decide el tipo de recompensa.
                     </p>
                 </div>
@@ -163,7 +166,7 @@ require_once __DIR__ . '/includes/footer.php';
                     <i class="fas fa-box me-2"></i> Crates & Tiers
                 </h2>
                 <p class="text-white mb-3" style="font-size: 1.1rem;">
-                    Elige tu nivel de riesgo y recompensa. Cada crate garantiza un tier mínimo, 
+                    Elige tu nivel de experiencia. Cada crate garantiza un tier mínimo, 
                     pero puedes <strong>upgradear</strong> si la suerte está de tu lado.
                 </p>
             </div>
@@ -174,21 +177,21 @@ require_once __DIR__ . '/includes/footer.php';
                 <div class="knd-crate-card knd-crate-starter">
                     <div class="crate-header">
                         <h4><i class="fas fa-box-open me-2"></i> Starter Crate</h4>
-                        <div class="crate-price">$2.00</div>
+                        <div class="crate-price">$2.50</div>
                     </div>
                     <div class="crate-tier">
                         <span class="tier-badge tier-common">Tier Garantizado: Common</span>
                     </div>
                     <div class="crate-upgrade">
                         <i class="fas fa-arrow-up me-2"></i>
-                        <strong>Posible upgrade:</strong> Rare (30% chance)
+                        <strong>Si ganas:</strong> Upgrade a Rare
                     </div>
                     <div class="crate-rewards">
                         <h6 class="mb-2">Ejemplos de recompensas:</h6>
                         <ul class="mb-0 text-white">
-                            <li>Wallpapers digitales estándar</li>
-                            <li>Avatares base</li>
-                            <li>Descuentos menores (5-10%)</li>
+                            <li>Wallpaper Pack exclusivo Death Roll</li>
+                            <li>Avatar + Banner Death Roll (edición sesión)</li>
+                            <li>Cupón $2 para próxima compra (expira 7 días)</li>
                         </ul>
                     </div>
                     <a href="/producto.php?slug=death-roll-crate" class="btn btn-outline-light btn-sm w-100 mt-3">
@@ -201,22 +204,19 @@ require_once __DIR__ . '/includes/footer.php';
                 <div class="knd-crate-card knd-crate-pro">
                     <div class="crate-header">
                         <h4><i class="fas fa-box me-2"></i> Pro Crate</h4>
-                        <div class="crate-price">$5.00</div>
+                        <div class="crate-price">$7.50</div>
                     </div>
                     <div class="crate-tier">
                         <span class="tier-badge tier-rare">Tier Garantizado: Rare</span>
                     </div>
                     <div class="crate-upgrade">
                         <i class="fas fa-arrow-up me-2"></i>
-                        <strong>Posible upgrade:</strong> Epic (25% chance)
+                        <strong>Si ganas:</strong> Upgrade a Epic
                     </div>
                     <div class="crate-rewards">
                         <h6 class="mb-2">Ejemplos de recompensas:</h6>
                         <ul class="mb-0 text-white">
-                            <li>Avatares personalizados</li>
-                            <li>Icon packs edición KND</li>
-                            <li>Descuentos relevantes (15-20%)</li>
-                            <li>Claves de juegos menores</li>
+                            <li>Avatar personalizado (elige estilo: neon / anime / sci-fi / minimal)</li>
                         </ul>
                     </div>
                     <a href="/producto.php?slug=death-roll-crate" class="btn btn-primary btn-sm w-100 mt-3">
@@ -229,23 +229,26 @@ require_once __DIR__ . '/includes/footer.php';
                 <div class="knd-crate-card knd-crate-titan">
                     <div class="crate-header">
                         <h4><i class="fas fa-gem me-2"></i> Titan Crate</h4>
-                        <div class="crate-price">$10.00</div>
+                        <div class="crate-price">$15.00</div>
                     </div>
                     <div class="crate-tier">
                         <span class="tier-badge tier-epic">Tier Garantizado: Epic</span>
                     </div>
                     <div class="crate-upgrade">
                         <i class="fas fa-arrow-up me-2"></i>
-                        <strong>Posible upgrade:</strong> Legendary (20% chance)
+                        <strong>Si ganas:</strong> Epic + bonus digital
                     </div>
                     <div class="crate-rewards">
                         <h6 class="mb-2">Ejemplos de recompensas:</h6>
                         <ul class="mb-0 text-white">
-                            <li>Diseños a medida (avatar + wallpaper)</li>
-                            <li>Créditos extra para futuros pedidos</li>
-                            <li>Slots prioritarios para soporte</li>
-                            <li>Claves de juegos premium</li>
+                            <li>Epic Bundle: Avatar + Wallpaper personalizado (matching)</li>
+                            <li>Créditos KND $5</li>
+                            <li>Prioridad de entrega</li>
                         </ul>
+                    </div>
+                    <div class="alert alert-warning bg-dark border-warning p-2 mt-2 mb-0" style="font-size: 0.85rem;">
+                        <i class="fas fa-star me-1"></i>
+                        <strong>Legendary:</strong> Solo en eventos/promociones limitadas
                     </div>
                     <a href="/producto.php?slug=death-roll-crate" class="btn btn-primary btn-sm w-100 mt-3">
                         <i class="fas fa-shopping-cart me-2"></i> Comprar Titan
@@ -253,10 +256,22 @@ require_once __DIR__ . '/includes/footer.php';
                 </div>
             </div>
         </div>
+        <div class="row mt-4">
+            <div class="col-lg-8 mx-auto">
+                <div class="knd-upgrade-info">
+                    <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i> Cómo se determina el upgrade</h5>
+                    <ul class="text-white mb-0">
+                        <li>Se ejecuta el Death Roll visible en Discord</li>
+                        <li>Resultado documentado (logs/capturas)</li>
+                        <li>Upgrade según reglas del canal oficial</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
-<!-- Sección: Tipos de recompensas -->
+<!-- Sección: Recompensas por Rareza -->
 <section class="py-5">
     <div class="container">
         <div class="row justify-content-center mb-4">
@@ -265,8 +280,7 @@ require_once __DIR__ . '/includes/footer.php';
                     <i class="fas fa-treasure-chest me-2"></i> Recompensas por Rareza
                 </h2>
                 <p class="text-white mb-3" style="font-size: 1.1rem;">
-                    No es un "todo o nada". Siempre recibes algo, pero los resultados altos desbloquean 
-                    <strong>recompensas más raras y personalizadas</strong>.
+                    Siempre recibes una recompensa digital; lo que cambia es la rareza/valor percibido.
                 </p>
             </div>
         </div>
@@ -274,40 +288,45 @@ require_once __DIR__ . '/includes/footer.php';
             <div class="col-md-3">
                 <div class="knd-loot-card knd-loot-common">
                     <h5>Common</h5>
+                    <p class="small text-white mb-2" style="opacity: 0.8;">Siempre ganas algo (costo ~$0)</p>
+                    <p class="small text-white mb-2"><strong>Incluye 1 (rotativo):</strong></p>
                     <ul class="mb-0 text-white">
-                        <li>Wallpapers digitales</li>
-                        <li>Avatares base</li>
-                        <li>Descuentos menores</li>
+                        <li>Wallpaper Pack exclusivo Death Roll (no vendible aparte)</li>
+                        <li>Avatar + Banner Death Roll (edición sesión)</li>
+                        <li>Cupón $2 para próxima compra (expira 7 días)</li>
                     </ul>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="knd-loot-card knd-loot-rare">
                     <h5>Rare</h5>
+                    <p class="small text-white mb-2" style="opacity: 0.8;">Vale la pena (costo bajo)</p>
                     <ul class="mb-0 text-white">
-                        <li>Avatares personalizados</li>
-                        <li>Icon packs edición KND</li>
-                        <li>Descuentos relevantes</li>
+                        <li>Avatar personalizado (elige estilo: neon / anime / sci-fi / minimal)</li>
                     </ul>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="knd-loot-card knd-loot-epic">
                     <h5>Epic</h5>
+                    <p class="small text-white mb-2" style="opacity: 0.8;">Premium (costo medido)</p>
+                    <p class="small text-white mb-2"><strong>Epic Bundle fijo:</strong></p>
                     <ul class="mb-0 text-white">
-                        <li>Diseños a medida</li>
-                        <li>Créditos extra</li>
-                        <li>Slots prioritarios</li>
+                        <li>Avatar personalizado</li>
+                        <li>Wallpaper personalizado (matching)</li>
+                        <li>Créditos KND $5</li>
+                        <li>Prioridad de entrega</li>
                     </ul>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="knd-loot-card knd-loot-legendary">
                     <h5>Legendary</h5>
+                    <p class="small text-warning mb-2"><strong>Solo en eventos / promociones limitadas</strong></p>
+                    <p class="small text-white mb-2">Cap recomendado: 2-3 al mes</p>
+                    <p class="small text-white mb-2">Si se alcanza cap:</p>
                     <ul class="mb-0 text-white">
-                        <li>Pack completo personalizado</li>
-                        <li>Créditos premium</li>
-                        <li>Acceso VIP a servicios</li>
+                        <li>Legendary = Epic Bundle + bonus digital</li>
                     </ul>
                 </div>
             </div>
@@ -334,22 +353,30 @@ require_once __DIR__ . '/includes/footer.php';
                 <div class="knd-operational-card">
                     <h5><i class="fas fa-shipping-fast me-2"></i> Tiempos de Entrega (SLA)</h5>
                     <ul class="text-white mb-0">
-                        <li><strong>Horario activo (Lun-Vie 9:00-21:00):</strong> Entrega en 5-30 minutos después de confirmar el resultado del Death Roll.</li>
-                        <li><strong>Horario extendido (Sáb-Dom 10:00-20:00):</strong> Entrega en 1-2 horas.</li>
-                        <li><strong>Fuera de horario:</strong> Entrega máxima de 24 horas desde la confirmación del resultado.</li>
-                        <li><strong>Casos especiales:</strong> Si el loot requiere diseño personalizado, el tiempo puede extenderse hasta 48 horas (se notifica previamente).</li>
+                        <li><strong>Entrega típica:</strong> 5-30 min en horario activo</li>
+                        <li><strong>Máximo:</strong> 24 horas desde la confirmación del resultado</li>
+                        <li><strong>Canales:</strong> Discord / WhatsApp</li>
                     </ul>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="knd-operational-card">
-                    <h5><i class="fas fa-check-circle me-2"></i> Confirmación y Capturas</h5>
+                    <h5><i class="fas fa-check-circle me-2"></i> Confirmación y Transparencia</h5>
                     <ul class="text-white mb-0">
-                        <li><strong>Confirmación requerida:</strong> Debes confirmar la recepción del loot digital para cerrar el proceso.</li>
-                        <li><strong>Capturas de pantalla:</strong> Se solicita captura del resultado del Death Roll y de la entrega del loot para registro y transparencia.</li>
-                        <li><strong>Disputas:</strong> Si hay algún problema con la entrega, contacta dentro de las primeras 48 horas con las capturas correspondientes.</li>
-                        <li><strong>Historial:</strong> Todas las rondas quedan documentadas en el canal de Discord para consulta posterior.</li>
+                        <li><strong>Confirmación:</strong> Puede requerir confirmación/captura si aplica (ej. pagos externos)</li>
+                        <li><strong>Transparencia:</strong> Historial y registro por sesión</li>
+                        <li><strong>Disputas:</strong> Contacta dentro de 48 horas con capturas</li>
                     </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-lg-8 mx-auto">
+                <div class="knd-disclaimer-card">
+                    <p class="text-white mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Disclaimer legal:</strong> Servicio digital con experiencia de minijuego; no es apuestas dentro del sitio.
+                    </p>
                 </div>
             </div>
         </div>
@@ -365,7 +392,7 @@ require_once __DIR__ . '/includes/footer.php';
                     <h3 class="mb-3"><i class="fas fa-exclamation-triangle me-2"></i> Reglas y Disclaimer</h3>
                     <ul class="text-white">
                         <li>Death Roll es un <strong>minijuego recreativo</strong> asociado a un servicio digital (Crate).</li>
-                        <li>No es un casino online ni un sistema de apuestas con dinero dentro del sitio.</li>
+                        <li>No es un sistema de apuestas con dinero dentro del sitio.</li>
                         <li>El valor económico de las recompensas puede variar según el resultado de la ronda.</li>
                         <li>Las reglas detalladas pueden actualizarse y se comunicarán en el canal oficial de Discord.</li>
                         <li>Al participar, aceptas los <a href="/terms.php" class="text-primary text-decoration-none">Términos y Condiciones</a> de KND Store.</li>
@@ -416,6 +443,45 @@ function copyDiscordServer() {
 <style>
 /* Estilos adicionales para Death Roll Page */
 
+/* Upgrade Info Card */
+.knd-upgrade-info {
+    background: rgba(26, 26, 46, 0.7);
+    border: 1px solid rgba(0, 191, 255, 0.3);
+    border-radius: 15px;
+    padding: 1.5rem;
+    backdrop-filter: blur(5px);
+}
+
+.knd-upgrade-info h5 {
+    color: var(--knd-white);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+}
+
+.knd-upgrade-info h5 i {
+    color: var(--knd-neon-blue);
+}
+
+.knd-upgrade-info ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.knd-upgrade-info ul li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.knd-upgrade-info ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--knd-neon-blue);
+    font-weight: 700;
+}
+
 /* Crates Cards */
 .knd-crate-card {
     background: rgba(26, 26, 46, 0.9);
@@ -448,7 +514,7 @@ function copyDiscordServer() {
 
 .knd-crate-starter:hover {
     border-color: rgba(200, 200, 200, 0.8);
-    box-shadow: 0 8px 20px rgba(200, 200, 200, 0.2);
+    box-shadow: 0 8px 20px rgba(200, 200, 200, 0.2), 0 0 15px rgba(200, 200, 200, 0.1);
     transform: translateY(-5px);
 }
 
@@ -462,7 +528,7 @@ function copyDiscordServer() {
 
 .knd-crate-pro:hover {
     border-color: var(--knd-neon-blue);
-    box-shadow: 0 8px 20px rgba(0, 191, 255, 0.3);
+    box-shadow: 0 8px 20px rgba(0, 191, 255, 0.3), 0 0 20px rgba(0, 191, 255, 0.2);
     transform: translateY(-5px);
 }
 
@@ -476,7 +542,7 @@ function copyDiscordServer() {
 
 .knd-crate-titan:hover {
     border-color: var(--knd-electric-purple);
-    box-shadow: 0 8px 20px rgba(138, 43, 226, 0.4);
+    box-shadow: 0 8px 20px rgba(138, 43, 226, 0.4), 0 0 25px rgba(138, 43, 226, 0.3);
     transform: translateY(-5px);
 }
 
@@ -514,6 +580,7 @@ function copyDiscordServer() {
     font-size: 0.9rem;
     font-weight: 600;
     font-family: 'Orbitron', sans-serif;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .tier-common {
@@ -526,18 +593,21 @@ function copyDiscordServer() {
     background: rgba(0, 191, 255, 0.2);
     color: var(--knd-neon-blue);
     border: 1px solid rgba(0, 191, 255, 0.5);
+    box-shadow: 0 0 10px rgba(0, 191, 255, 0.3);
 }
 
 .tier-epic {
     background: rgba(138, 43, 226, 0.2);
     color: var(--knd-electric-purple);
     border: 1px solid rgba(138, 43, 226, 0.5);
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
 }
 
 .tier-legendary {
     background: rgba(255, 215, 0, 0.2);
     color: #ffd700;
     border: 1px solid rgba(255, 215, 0, 0.5);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
 }
 
 .crate-upgrade {
@@ -567,6 +637,7 @@ function copyDiscordServer() {
     padding-left: 1.5rem;
     position: relative;
     color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
 }
 
 .crate-rewards ul li::before {
@@ -577,7 +648,56 @@ function copyDiscordServer() {
     font-size: 0.8rem;
 }
 
-/* Loot Epic (nuevo) */
+/* Loot Cards con glow mejorado */
+.knd-loot-card {
+    background: rgba(26, 26, 46, 0.9);
+    border-radius: 15px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    height: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.knd-loot-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, currentColor, transparent);
+}
+
+.knd-loot-common {
+    border: 1px solid rgba(200, 200, 200, 0.5);
+}
+
+.knd-loot-common::before {
+    color: rgba(200, 200, 200, 0.8);
+}
+
+.knd-loot-common:hover {
+    border-color: rgba(200, 200, 200, 0.8);
+    box-shadow: 0 8px 20px rgba(200, 200, 200, 0.2);
+    transform: translateY(-5px);
+}
+
+.knd-loot-rare {
+    border: 1px solid rgba(0, 191, 255, 0.6);
+}
+
+.knd-loot-rare::before {
+    color: var(--knd-neon-blue);
+}
+
+.knd-loot-rare:hover {
+    border-color: var(--knd-neon-blue);
+    box-shadow: 0 8px 20px rgba(0, 191, 255, 0.3), 0 0 15px rgba(0, 191, 255, 0.2);
+    transform: translateY(-5px);
+}
+
 .knd-loot-epic {
     border: 1px solid rgba(138, 43, 226, 0.6);
 }
@@ -588,8 +708,50 @@ function copyDiscordServer() {
 
 .knd-loot-epic:hover {
     border-color: var(--knd-electric-purple);
-    box-shadow: 0 8px 20px rgba(138, 43, 226, 0.4);
+    box-shadow: 0 8px 20px rgba(138, 43, 226, 0.4), 0 0 20px rgba(138, 43, 226, 0.3);
     transform: translateY(-5px);
+}
+
+.knd-loot-legendary {
+    border: 1px solid rgba(255, 215, 0, 0.6);
+}
+
+.knd-loot-legendary::before {
+    color: #ffd700;
+}
+
+.knd-loot-legendary:hover {
+    border-color: #ffd700;
+    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4), 0 0 25px rgba(255, 215, 0, 0.3);
+    transform: translateY(-5px);
+}
+
+.knd-loot-card h5 {
+    color: var(--knd-white);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.knd-loot-card ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.knd-loot-card ul li {
+    padding: 0.4rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+}
+
+.knd-loot-card ul li::before {
+    content: '▶';
+    position: absolute;
+    left: 0;
+    color: var(--knd-neon-blue);
+    font-size: 0.8rem;
 }
 
 /* Operational Cards */
@@ -634,9 +796,10 @@ function copyDiscordServer() {
     font-weight: 700;
 }
 
-/* Responsive para crates */
+/* Responsive */
 @media (max-width: 768px) {
-    .knd-crate-card {
+    .knd-crate-card,
+    .knd-loot-card {
         margin-bottom: 1.5rem;
     }
     
