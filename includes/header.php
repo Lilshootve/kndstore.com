@@ -97,7 +97,7 @@ function generateCommonAssets() {
                         const content = computedStyle.getPropertyValue("content");
                         
                         if (document.body && testElement.parentNode === document.body) {
-                            document.body.removeChild(testElement);
+                        document.body.removeChild(testElement);
                         }
                         
                         // Verificar si realmente está cargado
@@ -106,7 +106,7 @@ function generateCommonAssets() {
                         if (!isLoaded) {
                             console.warn("Font Awesome no detectado, aplicando fallbacks...");
                             if (document.body && !document.body.classList.contains("fontawesome-fallback")) {
-                                document.body.classList.add("fontawesome-fallback");
+                            document.body.classList.add("fontawesome-fallback");
                             }
                         } else {
                             console.log("Font Awesome detectado correctamente");
@@ -309,7 +309,7 @@ function generateCommonAssets() {
                         const content = computedStyle.getPropertyValue("content");
                         
                         if (document.body && testElement.parentNode === document.body) {
-                            document.body.removeChild(testElement);
+                        document.body.removeChild(testElement);
                         }
                         
                         // Verificar si realmente está cargado
@@ -318,7 +318,7 @@ function generateCommonAssets() {
                         if (!isLoaded) {
                             console.warn("Font Awesome no detectado, aplicando fallbacks...");
                             if (document.body && !document.body.classList.contains("fontawesome-fallback")) {
-                                document.body.classList.add("fontawesome-fallback");
+                            document.body.classList.add("fontawesome-fallback");
                             }
                         } else {
                             console.log("Font Awesome detectado correctamente");

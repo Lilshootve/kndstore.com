@@ -12,25 +12,25 @@ $busqueda = isset($_GET['busqueda']) ? $_GET['busqueda'] : '';
 // Filtrar productos
 $productos_filtrados = [];
 foreach ($PRODUCTS as $slug => $producto) {
-    $pasa_filtro = true;
-
-    // Filtro por categoría
-    if ($categoria_filtro && $producto['categoria'] !== $categoria_filtro) {
-        $pasa_filtro = false;
-    }
-
-    // Filtro por búsqueda
-    if ($busqueda) {
+        $pasa_filtro = true;
+        
+        // Filtro por categoría
+        if ($categoria_filtro && $producto['categoria'] !== $categoria_filtro) {
+            $pasa_filtro = false;
+        }
+        
+        // Filtro por búsqueda
+        if ($busqueda) {
         $texto_busqueda = mb_strtolower($busqueda, 'UTF-8');
         $texto_producto = mb_strtolower(strip_tags($producto['nombre'] . ' ' . $producto['descripcion']), 'UTF-8');
         if (mb_strpos($texto_producto, $texto_busqueda) === false) {
-            $pasa_filtro = false;
+                $pasa_filtro = false;
+            }
         }
-    }
-
-    if ($pasa_filtro) {
+        
+        if ($pasa_filtro) {
         $producto['slug'] = $slug;
-        $productos_filtrados[] = $producto;
+            $productos_filtrados[] = $producto;
     }
 }
 ?>
@@ -201,9 +201,9 @@ foreach ($PRODUCTS as $slug => $producto) {
                                         <?php $precio_real = $producto['precio']; ?>
                                     <?php endif; ?>
                                     <div class="d-flex gap-2">
-                                        <a href="/producto.php?slug=<?php echo $producto['slug']; ?>" class="btn btn-outline-neon btn-sm btn-details">
-                                            Ver detalles
-                                        </a>
+                                    <a href="/producto.php?slug=<?php echo $producto['slug']; ?>" class="btn btn-outline-neon btn-sm btn-details">
+                                        Ver detalles
+                                    </a>
                                         <button 
                                             type="button"
                                             class="btn btn-primary btn-sm add-to-order"
