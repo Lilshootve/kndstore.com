@@ -34,7 +34,7 @@
         const apparelLink = document.createElement('a');
         apparelLink.className = 'nav-link' + (currentPage === 'apparel.php' ? ' active' : '');
         apparelLink.href = '/apparel.php';
-        apparelLink.innerHTML = '<i class="fas fa-tshirt me-1"></i> Apparel';
+        apparelLink.textContent = 'Apparel';
         apparelItem.appendChild(apparelLink);
         
         // Crear item Custom Design
@@ -43,7 +43,7 @@
         const customLink = document.createElement('a');
         customLink.className = 'nav-link' + (currentPage === 'custom-design.php' ? ' active' : '');
         customLink.href = '/custom-design.php';
-        customLink.innerHTML = '<i class="fas fa-palette me-1"></i> Custom Design';
+        customLink.textContent = 'Custom Design';
         customItem.appendChild(customLink);
         
         // Insertar después de "Sobre Nosotros" y antes de "Contacto"

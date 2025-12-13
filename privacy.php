@@ -466,6 +466,8 @@ require_once __DIR__ . '/includes/footer.php';
     </div>
 </section>
 
+<script src="/assets/js/navigation-extend.js"></script>
+
 <?php 
 echo generateFooter();
 echo generateScripts();

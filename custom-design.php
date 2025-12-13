@@ -10,7 +10,7 @@ $serviceProducts = array_filter($PRODUCTS, function($product) {
     return isset($product['tipo']) && $product['tipo'] === 'service';
 });
 
-echo generateHeader('Custom Design Lab', 'Servicios de diseño personalizado - KND Store');
+echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de diseño personalizado. KND Store: Digital Goods • Apparel • Custom Design Services');
 ?>
 
 <div id="particles-bg"></div>

@@ -17,7 +17,7 @@ require_once 'includes/header.php';
 require_once 'includes/footer.php';
 ?>
 
-<?php echo generateHeader('FAQ', 'Preguntas Frecuentes - KND Store - Tu tienda galáctica de productos únicos'); ?>
+<?php echo generateHeader('FAQ', 'Preguntas Frecuentes - KND Store. Digital Goods • Apparel • Custom Design Services'); ?>
 
 <!-- Particles Background -->
 <div id="particles-bg"></div>
@@ -214,6 +214,8 @@ require_once 'includes/footer.php';
         </div>
     </div>
 </section>
+
+<script src="/assets/js/navigation-extend.js"></script>
 
 <?php
 echo generateFooter();

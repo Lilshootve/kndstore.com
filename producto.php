@@ -23,7 +23,7 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
 
 ?>
 
-<?php echo generateHeader($producto['nombre'], 'Detalles del servicio ' . $producto['nombre'] . ' - KND Store'); ?>
+<?php echo generateHeader($producto['nombre'], $producto['nombre'] . ' - KND Store. Digital Goods • Apparel • Custom Design Services'); ?>
 
 <!-- Particles Background -->
 <div id="particles-bg"></div>
@@ -319,6 +319,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<script src="/assets/js/navigation-extend.js"></script>
 
 <?php 
 echo generateFooter();

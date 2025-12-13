@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<?php echo generateHeader('Contacto', 'Establece contacto intergaláctico con KND Store - El Consejo Técnico está listo para recibir tu señal'); ?>
+<?php echo generateHeader('Contacto', 'Contacto - KND Store. Digital Goods • Apparel • Custom Design Services. Establece contacto intergaláctico con nosotros'); ?>
 
 <!-- Particles Background -->
 <div id="particles-bg"></div>
@@ -290,6 +290,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </section>
+
+<script src="/assets/js/navigation-extend.js"></script>
 
 <?php 
 echo generateFooter();

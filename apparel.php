@@ -22,7 +22,7 @@ foreach ($apparelProducts as $slug => $product) {
     }
 }
 
-echo generateHeader('KND Apparel', 'Ropa galáctica oficial KND - Hoodies, T-Shirts y ediciones limitadas');
+echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodies, T-Shirts y ediciones limitadas. Digital Goods • Apparel • Custom Design Services');
 ?>
 
 <div id="particles-bg"></div>

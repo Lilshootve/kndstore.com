@@ -5,7 +5,7 @@ require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 ?>
 
-<?php echo generateHeader('Sobre Nosotros', 'Descubre la historia galáctica detrás de KND Store - Knowledge \'N Development'); ?>
+<?php echo generateHeader('Sobre Nosotros', 'Sobre KND Store - Knowledge \'N Development. Digital Goods • Apparel • Custom Design Services'); ?>
 
 <!-- Particles Background -->
 <div id="particles-bg"></div>
@@ -410,6 +410,8 @@ require_once __DIR__ . '/includes/footer.php';
     }
 }
 </style>
+
+<script src="/assets/js/navigation-extend.js"></script>
 
 <?php 
 echo generateFooter();

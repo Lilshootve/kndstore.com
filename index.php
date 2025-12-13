@@ -12,7 +12,7 @@ $startTime = startPerformanceTimer();
 setCacheHeaders('html');
 ?>
 
-<?php echo generateHeader('Inicio', 'Tu tienda galáctica de productos únicos y tecnología de vanguardia'); ?>
+<?php echo generateHeader('Inicio', 'KND Store - Digital Goods • Apparel • Custom Design Services. Tu tienda galáctica de productos únicos y tecnología de vanguardia'); ?>
 
 <!-- Particles Background -->
 <div id="particles-bg"></div>

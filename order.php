@@ -4,7 +4,7 @@ require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 
-echo generateHeader('Tu Pedido', 'Revisa y confirma tu pedido en KND Store');
+echo generateHeader('Tu Pedido', 'Tu Pedido - KND Store. Revisa y confirma tu pedido de Digital Goods, Apparel o Custom Design Services');
 ?>
 
 <div id="particles-bg"></div>
@@ -349,7 +349,9 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<?php
+<script src="/assets/js/navigation-extend.js"></script>
+
+<?php 
 echo generateFooter();
 echo generateScripts();
 ?>

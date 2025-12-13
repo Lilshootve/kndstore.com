@@ -44,7 +44,7 @@ foreach ($PRODUCTS as $slug => $producto) {
 }
 ?>
 
-<?php echo generateHeader('Catálogo', 'Catálogo y Servicios - KND Store - Tecnología, Gaming, Software y más'); ?>
+<?php echo generateHeader('Catálogo', 'Catálogo completo - KND Store: Digital Goods • Apparel • Custom Design Services. Tecnología, Gaming, Software, Ropa y más'); ?>
 
 <!-- Particles Background -->
 <div id="particles-bg"></div>
@@ -269,6 +269,8 @@ foreach ($PRODUCTS as $slug => $producto) {
         <?php endif; ?>
     </div>
 </section>
+
+<script src="/assets/js/navigation-extend.js"></script>
 
 <?php
 echo generateFooter();
