@@ -57,20 +57,34 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                     <?php if (isset($producto['gallery']) && !empty($producto['gallery'])): ?>
                         <!-- Gallery para productos con múltiples imágenes -->
                         <div id="product-gallery">
+                            <?php 
+                            $firstGalleryImage = $producto['gallery']['front'] ?? reset($producto['gallery']);
+                            $firstGalleryKey = isset($producto['gallery']['front']) ? 'front' : key($producto['gallery']);
+                            ?>
                             <div class="main-image mb-3">
-                                <img src="/<?php echo htmlspecialchars($producto['gallery']['front'] ?? $producto['imagen']); ?>" 
+                                <img src="/<?php echo htmlspecialchars($firstGalleryImage); ?>" 
                                      alt="<?php echo htmlspecialchars($producto['nombre']); ?>" 
                                      class="product-detail-image" id="main-product-image"
                                      onerror="this.onerror=null; this.src='/<?php echo htmlspecialchars($producto['imagen']); ?>';">
                             </div>
                             <div class="gallery-thumbnails d-flex gap-2">
                                 <?php foreach ($producto['gallery'] as $view => $image): ?>
-                                    <img src="/<?php echo htmlspecialchars($image); ?>" 
-                                         alt="<?php echo htmlspecialchars($view); ?>" 
-                                         class="gallery-thumb <?php echo $view === 'front' ? 'active' : ''; ?>"
-                                         data-view="<?php echo htmlspecialchars($view); ?>"
-                                         style="width: 80px; height: 80px; object-fit: cover; cursor: pointer; border: 2px solid transparent;"
-                                         onclick="changeMainImage('<?php echo htmlspecialchars($image); ?>', this)">
+                                    <?php 
+                                    $viewLabel = ucfirst($view);
+                                    if ($view === 'espanol') $viewLabel = 'Español';
+                                    if ($view === 'japones') $viewLabel = 'Japonés';
+                                    if ($view === 'tshirt') $viewLabel = 'T-Shirt';
+                                    if ($view === 'hoodie') $viewLabel = 'Hoodie';
+                                    ?>
+                                    <div class="text-center">
+                                        <img src="/<?php echo htmlspecialchars($image); ?>" 
+                                             alt="<?php echo htmlspecialchars($viewLabel); ?>" 
+                                             class="gallery-thumb <?php echo $view === $firstGalleryKey ? 'active' : ''; ?>"
+                                             data-view="<?php echo htmlspecialchars($view); ?>"
+                                             style="width: 80px; height: 80px; object-fit: cover; cursor: pointer; border: 2px solid transparent; border-radius: 8px;"
+                                             onclick="changeMainImage('<?php echo htmlspecialchars($image); ?>', this)">
+                                        <small class="text-white-50 d-block mt-1" style="font-size: 0.7rem;"><?php echo $viewLabel; ?></small>
+                                    </div>
                                 <?php endforeach; ?>
                             </div>
                         </div>
@@ -266,8 +280,10 @@ function changeMainImage(imageSrc, thumbElement) {
         thumb.classList.remove('active');
         thumb.style.border = '2px solid transparent';
     });
-    thumbElement.classList.add('active');
-    thumbElement.style.border = '2px solid var(--knd-neon-blue)';
+    if (thumbElement) {
+        thumbElement.classList.add('active');
+        thumbElement.style.border = '2px solid var(--knd-neon-blue)';
+    }
 }
 
 // Manejar cambio de color en variants

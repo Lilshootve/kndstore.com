@@ -429,7 +429,7 @@ $PRODUCTS = [
         'nombre' => 'Custom T-Shirt Design (Service)',
         'descripcion' => 'Diseño personalizado de T-Shirt según tus especificaciones.<br><br>Incluye:<br>• Diseño personalizado único<br>• Mockup profesional<br>• Archivos editables<br>• Revisión básica incluida<br>• Entrega digital del diseño<br>• Coordinación por WhatsApp',
         'precio' => 24.99,
-        'imagen' => 'assets/images/productos/custom-tshirt-design.png',
+        'imagen' => 'assets/images/Cloths/T-shirt Desing Custom Francisco A #1.png',
         'categoria' => 'accesorios',
         'slug' => 'custom-tshirt-design',
         'tipo' => 'service'
@@ -440,10 +440,14 @@ $PRODUCTS = [
         'nombre' => 'Custom Hoodie Design (Service)',
         'descripcion' => 'Diseño personalizado de Hoodie según tus especificaciones.<br><br>Incluye:<br>• Diseño personalizado único<br>• Mockup profesional<br>• Archivos editables<br>• Revisión básica incluida<br>• Entrega digital del diseño<br>• Coordinación por WhatsApp',
         'precio' => 34.99,
-        'imagen' => 'assets/images/productos/custom-hoodie-design.png',
+        'imagen' => 'assets/images/Cloths/Hoodie Desing CUSTOM Francsico A.png',
         'categoria' => 'accesorios',
         'slug' => 'custom-hoodie-design',
-        'tipo' => 'service'
+        'tipo' => 'service',
+        'gallery' => [
+            'espanol' => 'assets/images/Cloths/Hoodie Desing CUSTOM Francsico A.png',
+            'japones' => 'assets/images/Cloths/Hoodie Desing CUSTOM Francsico A JAPONESSE.png'
+        ]
     ],
 
     'custom-full-outfit-concept' => [
@@ -451,10 +455,14 @@ $PRODUCTS = [
         'nombre' => 'Custom Full Outfit Concept (Service)',
         'descripcion' => 'Concepto completo de outfit personalizado (hoodie + t-shirt + variaciones).<br><br>Incluye:<br>• Concepto completo de outfit<br>• Diseño de hoodie + t-shirt<br>• Variaciones de color<br>• Mockups profesionales<br>• Archivos editables<br>• Revisión básica incluida<br>• Entrega digital<br>• Coordinación por WhatsApp',
         'precio' => 69.99,
-        'imagen' => 'assets/images/productos/custom-full-outfit-concept.png',
+        'imagen' => 'assets/images/Cloths/T-shirt Desing Custom Francisco A #1.png',
         'categoria' => 'accesorios',
         'slug' => 'custom-full-outfit-concept',
-        'tipo' => 'service'
+        'tipo' => 'service',
+        'gallery' => [
+            'tshirt' => 'assets/images/Cloths/T-shirt Desing Custom Francisco A #1.png',
+            'hoodie' => 'assets/images/Cloths/Hoodie Desing CUSTOM Francsico A.png'
+        ]
     ],
 
 ];

@@ -216,8 +216,15 @@ foreach ($PRODUCTS as $slug => $producto) {
                                 <div class="product-offer-badge">Oferta</div>
                             <?php endif; ?>
                             <div class="product-image">
-                                <img src="<?php echo $producto['imagen']; ?>" alt="<?php echo htmlspecialchars($producto['nombre']); ?>" 
-                                     onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjMmMyYzJjIi8+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjI4MCIgaGVpZ2h0PSIxODAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwYmZmZiIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxjaXJjbGUgY3g9IjE1MCIgY3k9IjEwMCIgcj0iMzAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwYmZmZiIgc3Ryb2tlLXdpZHRoPSIzIi8+CjxwYXRoIGQ9Ik0xMzAgODAgTDE3MCA4MCBNMTMwIDEyMCBMMTcwIDEyMCIgc3Ryb2tlPSIjMDBiZmZmIiBzdHJva2Utd2lkdGg9IjIiLz4KPHN2ZyB4PSIxMjAiIHk9IjE0MCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjIwIj4KICA8dGV4dCBmaWxsPSIjMDBiZmZmIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPk5vIEltYWdlbjwvdGV4dD4KPC9zdmc+'; this.style.background='#2c2c2c';">
+                                <?php 
+                                $displayImage = $producto['imagen'];
+                                if (isset($producto['gallery']) && !empty($producto['gallery'])) {
+                                    $firstGallery = reset($producto['gallery']);
+                                    $displayImage = $firstGallery;
+                                }
+                                ?>
+                                <img src="/<?php echo htmlspecialchars($displayImage); ?>" alt="<?php echo htmlspecialchars($producto['nombre']); ?>" 
+                                     onerror="this.onerror=null; this.src='/<?php echo htmlspecialchars($producto['imagen']); ?>';">
                                 <div class="product-overlay">
                                     <a href="/producto.php?slug=<?php echo $producto['slug']; ?>" class="btn btn-primary">
                                         <i class="fas fa-eye me-2"></i>Ver detalles

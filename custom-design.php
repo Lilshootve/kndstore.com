@@ -48,16 +48,27 @@ echo generateHeader('Custom Design Lab', 'Servicios de diseño personalizado - K
         <div class="row">
             <?php foreach ($serviceProducts as $slug => $product): ?>
                 <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card bg-dark border-primary h-100">
+                    <div class="card bg-dark border-primary h-100 product-card">
+                        <?php 
+                        $displayImage = $product['imagen'];
+                        if (isset($product['gallery']) && !empty($product['gallery'])) {
+                            $firstGallery = reset($product['gallery']);
+                            $displayImage = $firstGallery;
+                        }
+                        ?>
+                        <div class="product-image" style="height: 250px; overflow: hidden;">
+                            <img src="/<?php echo htmlspecialchars($displayImage); ?>" 
+                                 alt="<?php echo htmlspecialchars($product['nombre']); ?>"
+                                 class="w-100"
+                                 style="height: 100%; object-fit: cover;"
+                                 onerror="this.onerror=null; this.src='/<?php echo htmlspecialchars($product['imagen']); ?>';">
+                        </div>
                         <div class="card-body text-center">
-                            <div class="mb-3">
-                                <i class="fas fa-palette fa-3x text-primary"></i>
-                            </div>
                             <h4 class="text-white mb-3"><?php echo htmlspecialchars($product['nombre']); ?></h4>
                             <div class="product-price mb-3">
                                 $<?php echo number_format($product['precio'], 2); ?>
                             </div>
-                            <div class="text-white-50 mb-4" style="min-height: 100px;">
+                            <div class="text-white-50 mb-4" style="min-height: 80px;">
                                 <?php echo strip_tags($product['descripcion']); ?>
                             </div>
                             <a href="/producto.php?slug=<?php echo $slug; ?>" class="btn btn-primary w-100">
