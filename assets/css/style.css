@@ -1072,6 +1072,43 @@ h1, h2, h3, h4, h5, h6 {
     z-index: 1;
 }
 
+/* Hero con imagen de fondo para home */
+.hero-home-bg {
+    background-image: url('/assets/images/hero-background.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    position: relative;
+}
+
+.hero-home-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.7) 0%,
+        rgba(0, 0, 0, 0.5) 50%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+    z-index: 0;
+}
+
+.hero-home-bg .container {
+    position: relative;
+    z-index: 2;
+}
+
+@media (max-width: 768px) {
+    .hero-home-bg {
+        background-attachment: scroll;
+    }
+}
+
 .hero-section .container {
     width: 100%;
     max-width: 1200px;

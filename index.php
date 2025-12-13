@@ -20,7 +20,7 @@ setCacheHeaders('html');
 <?php echo generateNavigation(); ?>
 
 <!-- Hero Section -->
-<section class="hero-section">
+<section class="hero-section hero-home-bg">
     <div class="container">
         <div class="row align-items-center min-vh-100">
             <div class="col-lg-6">
