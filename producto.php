@@ -60,7 +60,8 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                             <div class="main-image mb-3">
                                 <img src="/<?php echo htmlspecialchars($producto['gallery']['front'] ?? $producto['imagen']); ?>" 
                                      alt="<?php echo htmlspecialchars($producto['nombre']); ?>" 
-                                     class="product-detail-image" id="main-product-image">
+                                     class="product-detail-image" id="main-product-image"
+                                     onerror="this.onerror=null; this.src='/<?php echo htmlspecialchars($producto['imagen']); ?>';">
                             </div>
                             <div class="gallery-thumbnails d-flex gap-2">
                                 <?php foreach ($producto['gallery'] as $view => $image): ?>

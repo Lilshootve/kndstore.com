@@ -124,16 +124,23 @@ echo generateHeader('KND Apparel', 'Ropa galáctica oficial KND - Hoodies, T-Shi
         <div class="row">
             <?php foreach ($limitedDrops as $slug => $product): ?>
                 <div class="col-lg-6 col-md-6 mb-4">
-                    <div class="product-card product-card-limited">
+                    <div class="product-card product-card-limited position-relative">
                         <div class="product-limited-badge">LIMITED</div>
-                        <div class="product-image">
+                        <div class="product-image position-relative">
                             <?php 
                             $mainImage = $product['imagen'];
-                            if (isset($product['gallery']['front'])) {
+                            if (isset($product['gallery']) && isset($product['gallery']['front'])) {
                                 $mainImage = $product['gallery']['front'];
+                            } elseif (isset($product['variants']) && !empty($product['variants'])) {
+                                $firstVariant = reset($product['variants']);
+                                if (isset($firstVariant['imagen'])) {
+                                    $mainImage = $firstVariant['imagen'];
+                                }
                             }
                             ?>
-                            <img src="/<?php echo htmlspecialchars($mainImage); ?>" alt="<?php echo htmlspecialchars($product['nombre']); ?>">
+                            <img src="/<?php echo htmlspecialchars($mainImage); ?>" alt="<?php echo htmlspecialchars($product['nombre']); ?>" 
+                                 onerror="this.onerror=null; this.src='/<?php echo htmlspecialchars($product['imagen']); ?>';"
+                                 style="width: 100%; height: 300px; object-fit: cover;">
                         </div>
                         <div class="product-info">
                             <h3><?php echo htmlspecialchars($product['nombre']); ?></h3>

@@ -383,18 +383,18 @@ $PRODUCTS = [
         'nombre' => 'Hoodie Anime Style (Limited Drop)',
         'descripcion' => 'Edición limitada con diseño anime único.<br><br>Características:<br>• Edición LIMITADA<br>• Diseño anime exclusivo<br>• Colorway Tri-Tone<br>• Tallas S/M/L/XL<br>• + Delivery coordinado',
         'precio' => 74.99,
-        'imagen' => 'assets/images/Cloths/Hoodie Anime PINK FRONT.PNG',
+        'imagen' => 'assets/images/Cloths/Hoodie Anime PINK FRONT.png',
         'categoria' => 'apparel',
         'slug' => 'hoodie-anime-style',
         'tipo' => 'apparel',
         'limited' => true,
         'gallery' => [
-            'front' => 'assets/images/Cloths/Hoodie Anime PINK FRONT.PNG',
-            'back' => 'assets/images/Cloths/Hoodie Anime PINK BACK.PNG'
+            'front' => 'assets/images/Cloths/Hoodie Anime PINK FRONT.png',
+            'back' => 'assets/images/Cloths/Hoodie Anime PINK BACK.png'
         ],
         'variants' => [
             'tri-tone' => [
-                'imagen' => 'assets/images/Cloths/Hoodie Anime PINK FRONT.PNG',
+                'imagen' => 'assets/images/Cloths/Hoodie Anime PINK FRONT.png',
                 'sizes' => ['S', 'M', 'L', 'XL']
             ]
         ]
