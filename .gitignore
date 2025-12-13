@@ -1,3 +1,4 @@
 includes/config.php
 includes/config-local.php
+includes/secrets.local.php
 
