@@ -50,8 +50,9 @@ h1, h2, h3, h4, h5, h6 {
         var(--knd-light-blue) 100%);
 }
 
-/* Hero background overlay para mejor contraste (solo para hero general, no para about-hero-bg) */
-.hero-section:not(.about-hero-bg)::after {
+/* Hero background overlay para mejor contraste */
+/* Hero background overlay - solo uno necesario */
+.hero-section::after {
     content: '';
     position: absolute;
     top: 0;
@@ -1118,10 +1119,9 @@ body.about-page,
     background-repeat: no-repeat;
     background-attachment: fixed;
     position: relative;
-    min-height: 85vh;
+    min-height: 100vh;
     display: flex;
     align-items: center;
-    justify-content: center;
 }
 
 .about-hero-bg::before {
@@ -1145,31 +1145,19 @@ body.about-page,
 .about-hero-bg .container {
     position: relative;
     z-index: 2;
+    width: 100%;
 }
 
 /* Secciones de about - overlay solo donde es necesario */
-.about-page section:not(.about-hero-bg) {
+.about-page section {
     position: relative;
     z-index: 1;
 }
 
-.about-page section.bg-dark-epic:not(.about-hero-bg)::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: -1;
-    pointer-events: none;
-}
-
-
 @media (max-width: 768px) {
     .about-hero-bg {
         background-attachment: scroll;
-        min-height: 70vh;
+        min-height: 50vh;
     }
     
     .about-page::before {

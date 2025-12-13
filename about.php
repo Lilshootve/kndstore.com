@@ -16,9 +16,9 @@ require_once __DIR__ . '/includes/footer.php';
 <div class="about-page">
 
 <!-- Hero Section -->
-<section class="hero-section py-5 about-hero-bg">
+<section class="hero-section about-hero-bg">
     <div class="container">
-        <div class="row">
+        <div class="row align-items-center min-vh-100">
             <div class="col-12 text-center">
                 <h1 class="hero-title">
                     <span class="text-gradient">SOBRE</span><br>
