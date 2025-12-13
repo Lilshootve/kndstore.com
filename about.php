@@ -1,20 +1,8 @@
 <?php
-// Configuración de sesión ANTES de cargar config.php
-if (session_status() == PHP_SESSION_NONE) {
-    ini_set('session.cookie_httponly', 1);
-    ini_set('session.use_only_cookies', 1);
-    ini_set('session.cookie_secure', 0); // Cambiar a 1 en producción con HTTPS
-    session_start();
-} else {
-    // Si la sesión ya está activa, solo la iniciamos
-    if (session_status() == PHP_SESSION_NONE) {
-        session_start();
-    }
-}
-
-require_once 'includes/config.php';
-require_once 'includes/header.php';
-require_once 'includes/footer.php';
+require_once __DIR__ . '/includes/session.php';
+require_once __DIR__ . '/includes/config.php';
+require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/includes/footer.php';
 ?>
 
 <?php echo generateHeader('Sobre Nosotros', 'Descubre la historia galáctica detrás de KND Store - La tienda más badass de la galaxia'); ?>
@@ -24,8 +12,11 @@ require_once 'includes/footer.php';
 
 <?php echo generateNavigation(); ?>
 
+<!-- Wrapper para aplicar fondo a toda la página -->
+<div class="about-page">
+
 <!-- Hero Section -->
-<section class="hero-section py-5">
+<section class="hero-section py-5 about-hero-bg">
     <div class="container">
         <div class="row">
             <div class="col-12 text-center">
@@ -62,11 +53,8 @@ require_once 'includes/footer.php';
                 </div>
             </div>
             <div class="col-lg-6 text-center">
-                <div>
-                    <img src="/assets/images/background%20design%20knd.png"
-                         alt="KND background design"
-                         class="img-fluid"
-                         style="max-width: 100%; height: auto; border-radius: 16px; opacity: 0.9; box-shadow: 0 10px 35px rgba(0, 0, 0, 0.45);">
+                <div class="about-history-visual">
+                    <!-- Imagen removida - ahora es fondo de la página -->
                 </div>
             </div>
         </div>
@@ -333,6 +321,7 @@ Contactar
     </div>
 </section>
 
+</div> <!-- Cierre de .about-page -->
 
 <?php 
 echo generateFooter();
