@@ -46,56 +46,14 @@ echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise�
             <i class="fas fa-layer-group me-2"></i> Planes de Diseño
         </h2>
         
-        <!-- Nota sobre ejemplos -->
-        <div class="alert alert-warning mb-5" style="background: rgba(255, 193, 7, 0.15); border: 2px solid #ffc107; border-radius: 10px; padding: 20px;">
-            <div class="d-flex align-items-start">
-                <i class="fas fa-info-circle fa-2x text-warning me-3 mt-1"></i>
-                <div>
-                    <h5 class="text-warning mb-2">
-                        <strong>Nota Importante sobre los Ejemplos Mostrados</strong>
-                    </h5>
-                    <p class="text-white mb-2" style="line-height: 1.8;">
-                        Los diseños que se muestran en esta página son <strong>únicamente ejemplos ilustrativos</strong> de nuestro trabajo. 
-                        Estos diseños fueron creados para <strong>uso personal y no comercial</strong>.
-                    </p>
-                    <p class="text-white mb-0" style="line-height: 1.8;">
-                        <strong>KND Store</strong> no utiliza ni comercializa diseños que infrinjan derechos de autor o marcas registradas. 
-                        Todos los servicios de diseño personalizado que ofrecemos son <strong>creaciones originales</strong> basadas en las especificaciones 
-                        y referencias proporcionadas por el cliente, siempre respetando los derechos de propiedad intelectual.
-                    </p>
-                </div>
-            </div>
-        </div>
-        
         <div class="row">
             <?php foreach ($serviceProducts as $slug => $product): ?>
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card bg-dark border-primary h-100 product-card">
-                        <?php 
-                        $displayImage = $product['imagen'];
-                        $allImages = [$product['imagen']]; // Array para el lightbox
-                        if (isset($product['gallery']) && !empty($product['gallery'])) {
-                            $firstGallery = reset($product['gallery']);
-                            $displayImage = $firstGallery;
-                            $allImages = array_values($product['gallery']); // Todas las imágenes de la gallery
-                        }
-                        ?>
-                        <div class="product-image" style="height: 250px; overflow: hidden; cursor: pointer; position: relative;" 
-                             onclick="openImageLightbox(<?php echo htmlspecialchars(json_encode($allImages), ENT_QUOTES | JSON_HEX_APOS | JSON_HEX_QUOT); ?>)">
-                            <?php 
-                            // Usar rawurlencode para codificar correctamente la ruta (incluye espacios y #)
-                            $imageUrl = rawurlencode($displayImage);
-                            // Pero mantener las barras / sin codificar
-                            $imageUrl = str_replace('%2F', '/', $imageUrl);
-                            ?>
-                            <img src="/<?php echo $imageUrl; ?>" 
-                                 alt="<?php echo htmlspecialchars($product['nombre']); ?>"
-                                 class="w-100"
-                                 style="height: 100%; object-fit: cover; transition: transform 0.3s ease;"
-                                 onerror="console.error('Error cargando imagen:', this.src); this.onerror=null; this.style.background='#2c2c2c'; this.style.display='flex'; this.style.alignItems='center'; this.style.justifyContent='center'; this.innerHTML='<i class=\'fas fa-image fa-3x text-muted\'></i>';">
-                            <div class="image-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.3); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
-                                <i class="fas fa-expand fa-2x text-white"></i>
-                            </div>
+                        <!-- Service Visual Placeholder -->
+                        <div class="service-placeholder" style="height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(0, 191, 255, 0.1) 0%, rgba(138, 43, 226, 0.1) 100%); border-bottom: 2px solid var(--knd-electric-purple);">
+                            <i class="fas fa-wand-magic-sparkles fa-4x text-primary mb-3" style="opacity: 0.6;"></i>
+                            <span class="text-white-50 small" style="font-size: 0.85rem;">Original Design Service</span>
                         </div>
                         <div class="card-body text-center">
                             <h4 class="text-white mb-3"><?php echo htmlspecialchars($product['nombre']); ?></h4>
@@ -143,8 +101,8 @@ echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise�
                                 <input type="text" name="texto" class="form-control" placeholder="Texto o nombre que quieres en el diseño">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Referencias</label>
-                                <textarea name="referencias" class="form-control" rows="4" placeholder="Describe referencias visuales, estilos que te gustan, o enlaces a imágenes de inspiración"></textarea>
+                                <label class="form-label">Referencias de estilo (no personajes ni marcas)</label>
+                                <textarea name="referencias" class="form-control" rows="4" placeholder="Describe referencias visuales de estilo, estilos que te gustan, o enlaces a imágenes de inspiración (sin personajes ni marcas protegidas)"></textarea>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Detalles extra</label>
@@ -152,9 +110,15 @@ echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise�
                             </div>
                     <div class="alert alert-warning" style="background: rgba(255, 193, 7, 0.1); border-color: #ffc107;">
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Disclaimer:</strong> No aceptamos contenido protegido por derechos de autor o marcas registradas sin autorización del titular. 
-                        Todos los diseños que creamos son <strong>originales</strong> y basados en las especificaciones del cliente, respetando siempre los derechos de propiedad intelectual.
+                        <strong>Propiedad Intelectual & Producción:</strong>
+                        Este servicio incluye <strong>diseño gráfico original</strong> y <strong>producción impresa bajo pedido</strong>.
+                        No realizamos ni imprimimos diseños que reproduzcan personajes, marcas, logotipos o material protegido por derechos de autor sin autorización verificable del titular.
                     </div>
+                    
+                    <p class="text-white-50 small mb-0">
+                        Si el brief contiene referencias no autorizadas, <strong>KND Store</strong> podrá ajustar la propuesta creativa o rechazar el pedido antes de producción,
+                        sin obligación de replicar la referencia original.
+                    </p>
                             <button type="button" id="save-brief-btn" class="btn btn-primary w-100">
                                 <i class="fas fa-save me-2"></i> Guardar Brief (se agregará a tu pedido)
                             </button>
@@ -221,221 +185,7 @@ echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise�
     </div>
 </section>
 
-<style>
-/* Lightbox para imágenes */
-.image-lightbox {
-    display: none;
-    position: fixed;
-    z-index: 9999;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.95);
-    overflow: auto;
-}
-
-.image-lightbox.active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.lightbox-content {
-    position: relative;
-    max-width: 90%;
-    max-height: 90%;
-    margin: auto;
-    animation: zoomIn 0.3s ease;
-}
-
-.lightbox-content img {
-    max-width: 100%;
-    max-height: 90vh;
-    object-fit: contain;
-    border-radius: 10px;
-    box-shadow: 0 10px 50px rgba(0, 191, 255, 0.3);
-}
-
-.lightbox-close {
-    position: absolute;
-    top: 20px;
-    right: 35px;
-    color: #fff;
-    font-size: 40px;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 10000;
-    transition: color 0.3s ease;
-}
-
-.lightbox-close:hover {
-    color: var(--knd-neon-blue);
-}
-
-.lightbox-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #fff;
-    font-size: 30px;
-    cursor: pointer;
-    padding: 15px;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    transition: all 0.3s ease;
-    z-index: 10000;
-}
-
-.lightbox-nav:hover {
-    background: rgba(0, 191, 255, 0.7);
-    color: #fff;
-}
-
-.lightbox-prev {
-    left: 20px;
-}
-
-.lightbox-next {
-    right: 20px;
-}
-
-.lightbox-counter {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #fff;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 14px;
-}
-
-.product-image:hover .image-overlay {
-    opacity: 1 !important;
-}
-
-.product-image:hover img {
-    transform: scale(1.05);
-}
-
-.product-image {
-    transition: all 0.3s ease;
-}
-
-@keyframes zoomIn {
-    from {
-        transform: scale(0.8);
-        opacity: 0;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-</style>
-
-<!-- Lightbox Modal -->
-<div id="image-lightbox" class="image-lightbox">
-    <span class="lightbox-close" onclick="closeImageLightbox()">&times;</span>
-    <span class="lightbox-nav lightbox-prev" onclick="changeLightboxImage(-1)">&#10094;</span>
-    <span class="lightbox-nav lightbox-next" onclick="changeLightboxImage(1)">&#10095;</span>
-    <div class="lightbox-content">
-        <img id="lightbox-image" src="" alt="Imagen ampliada">
-    </div>
-    <div class="lightbox-counter">
-        <span id="lightbox-counter-text">1 / 1</span>
-    </div>
-</div>
-
 <script>
-// Variables globales para el lightbox
-let lightboxImages = [];
-let currentLightboxIndex = 0;
-
-// Abrir lightbox con imagen
-function openImageLightbox(imagesArray) {
-    if (!imagesArray || imagesArray.length === 0) {
-        console.error('No hay imágenes para mostrar');
-        return;
-    }
-    
-    lightboxImages = imagesArray;
-    currentLightboxIndex = 0;
-    
-    const lightbox = document.getElementById('image-lightbox');
-    const lightboxImg = document.getElementById('lightbox-image');
-    const counter = document.getElementById('lightbox-counter-text');
-    
-    // Codificar la ruta correctamente para URLs (manejar espacios y caracteres especiales)
-    let firstImage = lightboxImages[0];
-    // Usar encodeURIComponent pero mantener las barras /
-    firstImage = firstImage.split('/').map(part => encodeURIComponent(part)).join('/');
-    lightboxImg.src = '/' + firstImage;
-    counter.textContent = `1 / ${lightboxImages.length}`;
-    
-    lightbox.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    
-    // Mostrar/ocultar navegación según cantidad de imágenes
-    const prevBtn = document.querySelector('.lightbox-prev');
-    const nextBtn = document.querySelector('.lightbox-next');
-    if (lightboxImages.length > 1) {
-        prevBtn.style.display = 'block';
-        nextBtn.style.display = 'block';
-    } else {
-        prevBtn.style.display = 'none';
-        nextBtn.style.display = 'none';
-    }
-}
-
-// Cerrar lightbox
-function closeImageLightbox() {
-    const lightbox = document.getElementById('image-lightbox');
-    lightbox.classList.remove('active');
-    document.body.style.overflow = '';
-}
-
-// Cambiar imagen en el lightbox
-function changeLightboxImage(direction) {
-    currentLightboxIndex += direction;
-    
-    if (currentLightboxIndex < 0) {
-        currentLightboxIndex = lightboxImages.length - 1;
-    } else if (currentLightboxIndex >= lightboxImages.length) {
-        currentLightboxIndex = 0;
-    }
-    
-    const lightboxImg = document.getElementById('lightbox-image');
-    const counter = document.getElementById('lightbox-counter-text');
-    
-    // Codificar la ruta correctamente para URLs (manejar espacios y caracteres especiales)
-    let imagePath = lightboxImages[currentLightboxIndex];
-    // Usar encodeURIComponent pero mantener las barras /
-    imagePath = imagePath.split('/').map(part => encodeURIComponent(part)).join('/');
-    lightboxImg.src = '/' + imagePath;
-    counter.textContent = `${currentLightboxIndex + 1} / ${lightboxImages.length}`;
-}
-
-// Cerrar con tecla ESC
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeImageLightbox();
-    } else if (e.key === 'ArrowLeft') {
-        changeLightboxImage(-1);
-    } else if (e.key === 'ArrowRight') {
-        changeLightboxImage(1);
-    }
-});
-
-// Cerrar al hacer clic fuera de la imagen
-document.getElementById('image-lightbox').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeImageLightbox();
-    }
-});
-
 // Guardar brief en localStorage cuando se hace clic en el botón
 document.addEventListener('DOMContentLoaded', function() {
     const saveBriefBtn = document.getElementById('save-brief-btn');
