@@ -45,6 +45,28 @@ echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise�
         <h2 class="section-title text-center mb-5">
             <i class="fas fa-layer-group me-2"></i> Planes de Diseño
         </h2>
+        
+        <!-- Nota sobre ejemplos -->
+        <div class="alert alert-warning mb-5" style="background: rgba(255, 193, 7, 0.15); border: 2px solid #ffc107; border-radius: 10px; padding: 20px;">
+            <div class="d-flex align-items-start">
+                <i class="fas fa-info-circle fa-2x text-warning me-3 mt-1"></i>
+                <div>
+                    <h5 class="text-warning mb-2">
+                        <strong>Nota Importante sobre los Ejemplos Mostrados</strong>
+                    </h5>
+                    <p class="text-white mb-2" style="line-height: 1.8;">
+                        Los diseños que se muestran en esta página son <strong>únicamente ejemplos ilustrativos</strong> de nuestro trabajo. 
+                        Estos diseños fueron creados para <strong>uso personal y no comercial</strong>.
+                    </p>
+                    <p class="text-white mb-0" style="line-height: 1.8;">
+                        <strong>KND Store</strong> no utiliza ni comercializa diseños que infrinjan derechos de autor o marcas registradas. 
+                        Todos los servicios de diseño personalizado que ofrecemos son <strong>creaciones originales</strong> basadas en las especificaciones 
+                        y referencias proporcionadas por el cliente, siempre respetando los derechos de propiedad intelectual.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
         <div class="row">
             <?php foreach ($serviceProducts as $slug => $product): ?>
                 <div class="col-lg-4 col-md-6 mb-4">
@@ -128,10 +150,11 @@ echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise�
                                 <label class="form-label">Detalles extra</label>
                                 <textarea name="detalles" class="form-control" rows="3" placeholder="Cualquier detalle adicional que quieras especificar"></textarea>
                             </div>
-                            <div class="alert alert-warning" style="background: rgba(255, 193, 7, 0.1); border-color: #ffc107;">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>Disclaimer:</strong> No aceptamos contenido protegido por derechos de autor o marcas registradas sin autorización del titular.
-                            </div>
+                    <div class="alert alert-warning" style="background: rgba(255, 193, 7, 0.1); border-color: #ffc107;">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Disclaimer:</strong> No aceptamos contenido protegido por derechos de autor o marcas registradas sin autorización del titular. 
+                        Todos los diseños que creamos son <strong>originales</strong> y basados en las especificaciones del cliente, respetando siempre los derechos de propiedad intelectual.
+                    </div>
                             <button type="button" id="save-brief-btn" class="btn btn-primary w-100">
                                 <i class="fas fa-save me-2"></i> Guardar Brief (se agregará a tu pedido)
                             </button>
