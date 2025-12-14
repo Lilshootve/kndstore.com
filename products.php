@@ -217,19 +217,36 @@ foreach ($PRODUCTS as $slug => $producto) {
                             <?php endif; ?>
                             <div class="product-image">
                                 <?php 
-                                $displayImage = $producto['imagen'];
-                                if (isset($producto['gallery']) && !empty($producto['gallery'])) {
-                                    $firstGallery = reset($producto['gallery']);
-                                    $displayImage = $firstGallery;
-                                }
+                                $producto_tipo = isset($producto['tipo']) ? $producto['tipo'] : 'digital';
+                                
+                                if ($producto_tipo === 'service'): 
+                                    // Placeholder visual para servicios (sin imágenes de ejemplo)
                                 ?>
-                                <img src="/<?php echo htmlspecialchars($displayImage); ?>" alt="<?php echo htmlspecialchars($producto['nombre']); ?>" 
-                                     onerror="this.onerror=null; this.src='/<?php echo htmlspecialchars($producto['imagen']); ?>';">
-                                <div class="product-overlay">
-                                    <a href="/producto.php?slug=<?php echo $producto['slug']; ?>" class="btn btn-primary">
-                                        <i class="fas fa-eye me-2"></i>Ver detalles
-                                    </a>
-                                </div>
+                                    <div class="service-placeholder" style="height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(0, 191, 255, 0.1) 0%, rgba(138, 43, 226, 0.1) 100%); border-bottom: 2px solid var(--knd-electric-purple);">
+                                        <i class="fas fa-wand-magic-sparkles fa-4x text-primary mb-3" style="opacity: 0.6;"></i>
+                                        <span class="text-white-50 small" style="font-size: 0.85rem;">Original Design Service</span>
+                                    </div>
+                                    <div class="product-overlay">
+                                        <a href="/producto.php?slug=<?php echo $producto['slug']; ?>" class="btn btn-primary">
+                                            <i class="fas fa-eye me-2"></i>Ver detalles
+                                        </a>
+                                    </div>
+                                <?php else: 
+                                    // Imagen normal para productos digital/apparel
+                                    $displayImage = $producto['imagen'];
+                                    if (isset($producto['gallery']) && !empty($producto['gallery'])) {
+                                        $firstGallery = reset($producto['gallery']);
+                                        $displayImage = $firstGallery;
+                                    }
+                                ?>
+                                    <img src="/<?php echo htmlspecialchars($displayImage); ?>" alt="<?php echo htmlspecialchars($producto['nombre']); ?>" 
+                                         onerror="this.onerror=null; this.src='/<?php echo htmlspecialchars($producto['imagen']); ?>';">
+                                    <div class="product-overlay">
+                                        <a href="/producto.php?slug=<?php echo $producto['slug']; ?>" class="btn btn-primary">
+                                            <i class="fas fa-eye me-2"></i>Ver detalles
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                             <div class="product-info">
                                 <h5 class="product-title"><?php echo htmlspecialchars($producto['nombre']); ?></h5>

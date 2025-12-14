@@ -105,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                            id="name" 
                                            name="name" 
                                            value="<?php echo htmlspecialchars($name ?? ''); ?>"
+                                           placeholder="Introduce tu nombre completo aquí"
                                            required>
                                 </div>
                             </div>
@@ -119,6 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                            id="email" 
                                            name="email" 
                                            value="<?php echo htmlspecialchars($email ?? ''); ?>"
+                                           placeholder="tu@email.com (correo electrónico donde te responderemos)"
                                            required>
                                 </div>
                             </div>
@@ -135,6 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                        id="subject" 
                                        name="subject" 
                                        value="<?php echo htmlspecialchars($subject ?? ''); ?>"
+                                       placeholder="Ej: Consulta sobre productos, Soporte técnico, Información de pedidos, etc."
                                        required>
                             </div>
                         </div>
@@ -149,6 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                           id="message" 
                                           name="message" 
                                           rows="6" 
+                                          placeholder="Escribe tu mensaje aquí. Describe tu consulta, problema o solicitud con el mayor detalle posible para poder ayudarte mejor."
                                           required><?php echo htmlspecialchars($message ?? ''); ?></textarea>
                             </div>
                         </div>
