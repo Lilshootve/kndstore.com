@@ -189,6 +189,83 @@ require_once __DIR__ . '/includes/footer.php';
 
                 <hr class="my-5" style="border-color: rgba(138, 43, 226, 0.3);">
 
+                <!-- Política de Cookies -->
+                <div class="mb-5" id="cookies-policy">
+                    <h2 class="section-title mb-4">
+                        <i class="fas fa-file-contract me-2"></i>
+                        Política de Cookies
+                    </h2>
+                    <p class="text-white mb-3">
+                        Esta sección explica cómo utilizamos cookies y tecnologías similares en <strong>KND Store</strong>, así como tus opciones para gestionarlas.
+                    </p>
+                    <p class="text-white-50 small mb-4">
+                        <strong>Última actualización:</strong>
+                        <?php echo date('d/m/Y'); ?>
+                    </p>
+
+                    <h3 class="text-white mb-3 mt-4">
+                        <i class="fas fa-question-circle me-2"></i>
+                        ¿Qué son las cookies?
+                    </h3>
+                    <p class="text-white mb-3">
+                        Las cookies son pequeños archivos de texto que se almacenan en tu dispositivo cuando visitas nuestro sitio web. Nos permiten recordar tu dispositivo, tus preferencias y entender cómo interactúas con nuestro contenido.
+                    </p>
+
+                    <h3 class="text-white mb-3 mt-4">
+                        <i class="fas fa-layer-group me-2"></i>
+                        Categorías de cookies que utilizamos
+                    </h3>
+                    <ul class="text-white mb-3">
+                        <li><strong>Necesarias (siempre activas):</strong> Imprescindibles para que el sitio funcione (seguridad, sesión, carrito, formularios básicos). No puedes desactivarlas desde el panel de cookies.</li>
+                        <li><strong>Preferencias:</strong> Permiten recordar tus ajustes de experiencia, como temas de color, posibles idiomas u otras configuraciones que personalizan la interfaz.</li>
+                        <li><strong>Analíticas:</strong> Nos ayudan a entender cómo se usa el sitio (páginas más visitadas, tiempo de permanencia, etc.) para mejorar el rendimiento y la usabilidad.</li>
+                        <li><strong>Marketing:</strong> Se utilizan para mostrar contenido o promociones personalizadas, así como para medir el rendimiento de campañas externas.</li>
+                    </ul>
+
+                    <h3 class="text-white mb-3 mt-4">
+                        <i class="fas fa-balance-scale me-2"></i>
+                        Base legal para el uso de cookies
+                    </h3>
+                    <p class="text-white mb-3">
+                        Para las cookies <strong>necesarias</strong>, la base legal es nuestro <strong>interés legítimo</strong> en asegurar el correcto funcionamiento y seguridad del sitio.
+                        Para las cookies de <strong>preferencias, analíticas y marketing</strong>, la base legal es tu <strong>consentimiento explícito</strong>, que puedes otorgar, rechazar o personalizar desde el banner y el panel de configuración de cookies.
+                    </p>
+
+                    <h3 class="text-white mb-3 mt-4">
+                        <i class="fas fa-toggle-on me-2"></i>
+                        Cómo otorgar, gestionar o retirar tu consentimiento
+                    </h3>
+                    <p class="text-white mb-3">
+                        Al visitar nuestro sitio por primera vez, mostramos un banner donde puedes <strong>Aceptar todo</strong>, <strong>Rechazar</strong> o <strong>Personalizar</strong> las categorías de cookies.
+                        Tu elección se guarda durante un periodo limitado (por ejemplo, 180 días) y puedes cambiarla en cualquier momento.
+                    </p>
+                    <p class="text-white mb-3">
+                        Para modificar tus preferencias, haz clic en
+                        <a href="#" class="knd-cookie-settings-link text-decoration-underline">Cookie Settings</a>
+                        en el pie de página o en esta página. Esto abrirá de nuevo el panel de control de cookies donde podrás actualizar tu consentimiento.
+                    </p>
+
+                    <h3 class="text-white mb-3 mt-4">
+                        <i class="fas fa-user-lock me-2"></i>
+                        Cómo desactivar cookies desde tu navegador
+                    </h3>
+                    <p class="text-white mb-3">
+                        Además del panel de control de cookies de nuestro sitio, puedes configurar tu navegador para bloquear o eliminar cookies en cualquier momento.
+                        Ten en cuenta que desactivar ciertas cookies puede afectar al funcionamiento correcto de algunas funciones de la web.
+                    </p>
+
+                    <h3 class="text-white mb-3 mt-4">
+                        <i class="fas fa-envelope-open-text me-2"></i>
+                        Contacto y ejercicio de derechos
+                    </h3>
+                    <p class="text-white mb-3">
+                        Si tienes dudas sobre nuestro uso de cookies, deseas ejercer tus derechos de acceso, rectificación, cancelación u oposición relacionados con tus datos personales,
+                        puedes contactarnos en <strong><?php echo defined('SITE_EMAIL') ? SITE_EMAIL : 'info@kndstore.com'; ?></strong>.
+                    </p>
+                </div>
+
+                <hr class="my-5" style="border-color: rgba(138, 43, 226, 0.3);">
+
                 <!-- Herramientas Externas -->
                 <div class="mb-5">
                     <h2 class="section-title mb-4">

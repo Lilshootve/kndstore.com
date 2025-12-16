@@ -33,13 +33,14 @@ function generateFooter() {
     $footer .= '                <div class="col-lg-6">' . "\n";
     $footer .= '                    <div class="row">' . "\n";
     $footer .= '                        <div class="col-md-6">' . "\n";
-    $footer .= '                            <h5 class="mb-4">NAVEGACIÓN</h5>' . "\n";
-    $footer .= '                            <ul class="list-unstyled">' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="/faq.php" class="text-decoration-none" style="opacity: 0.8;">FAQ</a></li>' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="/contact.php" class="text-decoration-none" style="opacity: 0.8;">Contacto</a></li>' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="/privacy.php" class="text-decoration-none" style="opacity: 0.8;">Política de Privacidad</a></li>' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="/terms.php" class="text-decoration-none" style="opacity: 0.8;">Términos y Condiciones</a></li>' . "\n";
-    $footer .= '                            </ul>' . "\n";
+            $footer .= '                            <h5 class="mb-4">NAVEGACIÓN</h5>' . "\n";
+            $footer .= '                            <ul class="list-unstyled">' . "\n";
+            $footer .= '                                <li class="mb-3"><a href="/faq.php" class="text-decoration-none" style="opacity: 0.8;">FAQ</a></li>' . "\n";
+            $footer .= '                                <li class="mb-3"><a href="/contact.php" class="text-decoration-none" style="opacity: 0.8;">Contacto</a></li>' . "\n";
+            $footer .= '                                <li class="mb-3"><a href="/privacy.php" class="text-decoration-none" style="opacity: 0.8;">Política de Privacidad</a></li>' . "\n";
+            $footer .= '                                <li class="mb-3"><a href="/privacy.php#cookies-policy" class="text-decoration-none" style="opacity: 0.8;">Cookies</a></li>' . "\n";
+            $footer .= '                                <li class="mb-3"><a href="#" class="text-decoration-none knd-cookie-settings-link" style="opacity: 0.8;">Cookie Settings</a></li>' . "\n";
+            $footer .= '                            </ul>' . "\n";
     $footer .= '                        </div>' . "\n";
     $footer .= '                        ' . "\n";
     $footer .= '                        <div class="col-md-6">' . "\n";
@@ -94,6 +95,83 @@ function generateFooter() {
     $footer .= '        <!-- Efecto de partículas para el footer -->' . "\n";
     $footer .= '        <div id="particles-footer" class="position-absolute top-0 left-0 w-100 h-100" style="z-index: 1;"></div>' . "\n";
     $footer .= '    </footer>' . "\n";
+    $footer .= '' . "\n";
+    $footer .= '    <!-- Cookie Consent Banner & Modal -->' . "\n";
+    $footer .= '    <div id="knd-cookie-banner" class="knd-cookie-banner">' . "\n";
+    $footer .= '        <div class="knd-cookie-banner-inner glass-card-neon">' . "\n";
+    $footer .= '            <div class="knd-cookie-banner-text">' . "\n";
+    $footer .= '                <h5 class="mb-2" data-knd-cookie-title>Control de Cookies</h5>' . "\n";
+    $footer .= '                <p class="mb-0 small" data-knd-cookie-message>Usamos cookies para funciones esenciales y para mejorar tu experiencia. Puedes aceptar, rechazar o personalizar.</p>' . "\n";
+    $footer .= '            </div>' . "\n";
+    $footer .= '            <div class="knd-cookie-banner-actions">' . "\n";
+    $footer .= '                <button type="button" id="knd-cookie-reject-all" class="btn btn-sm btn-outline-light me-2">Rechazar</button>' . "\n";
+    $footer .= '                <button type="button" id="knd-cookie-customize" class="btn btn-sm btn-outline-neon me-2">Personalizar</button>' . "\n";
+    $footer .= '                <button type="button" id="knd-cookie-accept-all" class="btn btn-sm btn-neon-primary">Aceptar todo</button>' . "\n";
+    $footer .= '            </div>' . "\n";
+    $footer .= '        </div>' . "\n";
+    $footer .= '    </div>' . "\n";
+    $footer .= '' . "\n";
+    $footer .= '    <div id="knd-cookie-modal" class="knd-cookie-modal">' . "\n";
+    $footer .= '        <div class="knd-cookie-modal-backdrop"></div>' . "\n";
+    $footer .= '        <div class="knd-cookie-modal-dialog glass-card-neon">' . "\n";
+    $footer .= '            <div class="knd-cookie-modal-header d-flex justify-content-between align-items-center mb-3">' . "\n";
+    $footer .= '                <h5 class="mb-0" data-knd-cookie-title>Control de Cookies</h5>' . "\n";
+    $footer .= '                <button type="button" class="btn btn-sm btn-outline-light" data-knd-cookie-close>&times;</button>' . "\n";
+    $footer .= '            </div>' . "\n";
+    $footer .= '            <div class="knd-cookie-modal-body">' . "\n";
+    $footer .= '                <p class="small mb-3" data-knd-cookie-message>Usamos cookies para funciones esenciales y para mejorar tu experiencia. Puedes aceptar, rechazar o personalizar.</p>' . "\n";
+    $footer .= '                <div class="knd-cookie-category mb-3">' . "\n";
+    $footer .= '                    <div class="d-flex justify-content-between align-items-center">' . "\n";
+    $footer .= '                        <div>' . "\n";
+    $footer .= '                            <strong>Necesarias (siempre activas)</strong>' . "\n";
+    $footer .= '                            <p class="small mb-0 text-white-50">Requeridas para el funcionamiento básico del sitio, seguridad y carrito/pedidos.</p>' . "\n";
+    $footer .= '                        </div>' . "\n";
+    $footer .= '                        <div class="form-check form-switch mb-0">' . "\n";
+    $footer .= '                            <input class="form-check-input" type="checkbox" checked disabled>' . "\n";
+    $footer .= '                        </div>' . "\n";
+    $footer .= '                    </div>' . "\n";
+    $footer .= '                </div>' . "\n";
+    $footer .= '                <div class="knd-cookie-category mb-3">' . "\n";
+    $footer .= '                    <div class="d-flex justify-content-between align-items-center">' . "\n";
+    $footer .= '                        <div>' . "\n";
+    $footer .= '                            <strong>Preferencias</strong>' . "\n";
+    $footer .= '                            <p class="small mb-0 text-white-50">Guardan tus ajustes de color, idioma u otras preferencias.</p>' . "\n";
+    $footer .= '                        </div>' . "\n";
+    $footer .= '                        <div class="form-check form-switch mb-0">' . "\n";
+    $footer .= '                            <input class="form-check-input" type="checkbox" id="knd-consent-preferences">' . "\n";
+    $footer .= '                        </div>' . "\n";
+    $footer .= '                    </div>' . "\n";
+    $footer .= '                </div>' . "\n";
+    $footer .= '                <div class="knd-cookie-category mb-3">' . "\n";
+    $footer .= '                    <div class="d-flex justify-content-between align-items-center">' . "\n";
+    $footer .= '                        <div>' . "\n";
+    $footer .= '                            <strong>Analíticas</strong>' . "\n";
+    $footer .= '                            <p class="small mb-0 text-white-50">Nos ayudan a entender cómo usas la web para mejorarla (ej. Google Analytics).</p>' . "\n";
+    $footer .= '                        </div>' . "\n";
+    $footer .= '                        <div class="form-check form-switch mb-0">' . "\n";
+    $footer .= '                            <input class="form-check-input" type="checkbox" id="knd-consent-analytics">' . "\n";
+    $footer .= '                        </div>' . "\n";
+    $footer .= '                    </div>' . "\n";
+    $footer .= '                </div>' . "\n";
+    $footer .= '                <div class="knd-cookie-category mb-3">' . "\n";
+    $footer .= '                    <div class="d-flex justify-content-between align-items-center">' . "\n";
+    $footer .= '                        <div>' . "\n";
+    $footer .= '                            <strong>Marketing</strong>' . "\n";
+    $footer .= '                            <p class="small mb-0 text-white-50">Se usan para mostrar contenido y ofertas personalizadas en otras plataformas.</p>' . "\n";
+    $footer .= '                        </div>' . "\n";
+    $footer .= '                        <div class="form-check form-switch mb-0">' . "\n";
+    $footer .= '                            <input class="form-check-input" type="checkbox" id="knd-consent-marketing">' . "\n";
+    $footer .= '                        </div>' . "\n";
+    $footer .= '                    </div>' . "\n";
+    $footer .= '                </div>' . "\n";
+    $footer .= '                <p class="small text-white-50 mt-3 mb-0">Puedes cambiar tu decisión en cualquier momento desde \"Cookie Settings\".</p>' . "\n";
+    $footer .= '            </div>' . "\n";
+    $footer .= '            <div class="knd-cookie-modal-footer mt-3 d-flex flex-column flex-md-row justify-content-between align-items-stretch">' . "\n";
+    $footer .= '                <button type="button" id="knd-cookie-modal-reject-all" class="btn btn-outline-light mb-2 mb-md-0 flex-fill me-md-2">Rechazar</button>' . "\n";
+    $footer .= '                <button type="button" id="knd-cookie-save-preferences" class="btn btn-neon-primary flex-fill">Guardar preferencias</button>' . "\n";
+    $footer .= '            </div>' . "\n";
+    $footer .= '        </div>' . "\n";
+    $footer .= '    </div>' . "\n";
     
     return $footer;
 }
@@ -113,6 +191,9 @@ function generateScripts() {
     
     // Custom JS optimizado
     $scripts .= '<script src="assets/js/main.js" defer></script>' . "\n";
+    
+    // Gestor de consentimiento de cookies
+    $scripts .= '<script src="assets/js/cookies-consent.js" defer></script>' . "\n";
     
     // Mobile Optimization JS
     $scripts .= '<script src="assets/js/mobile-optimization.js" defer></script>' . "\n";
