@@ -38,7 +38,6 @@ function generateNavigation() {
     $nav .= '    <div class="container">' . "\n";
     $nav .= '        <a class="navbar-brand d-flex align-items-center" href="/index.php">' . "\n";
     $nav .= '            <img src="/assets/images/logo.png" alt="KND Store" height="32" class="me-2">' . "\n";
-    $nav .= '            <span class="fw-bold">KND STORE</span>' . "\n";
     $nav .= '        </a>' . "\n";
     $nav .= '        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">' . "\n";
     $nav .= '            <span class="navbar-toggler-icon"></span>' . "\n";
