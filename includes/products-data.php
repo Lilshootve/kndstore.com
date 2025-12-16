@@ -325,7 +325,7 @@ $PRODUCTS = [
                 'sizes' => ['S', 'M', 'L', 'XL']
             ],
             'turquoise' => [
-                'imagen' => 'assets/images/Cloths/Hoodie Desing 001 TURQUESA.png',
+                'imagen' => 'assets/images/Cloths/Hoodie Desing 001 TURQUESA.webp',
                 'sizes' => ['S', 'M', 'L', 'XL']
             ]
         ]
