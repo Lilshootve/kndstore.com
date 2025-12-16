@@ -400,23 +400,23 @@ $PRODUCTS = [
         ]
     ],
 
-    'hoodie-donut-style' => [
+    'hoodie-dark-eyes-style' => [
         'id' => 20,
-        'nombre' => 'Hoodie Donut Style (Limited Drop)',
-        'descripcion' => 'Edición limitada con diseño donut único.<br><br>Características:<br>• Edición LIMITADA<br>• Diseño donut exclusivo<br>• Colorway Tri-Tone<br>• Tallas S/M/L/XL<br>• + Delivery coordinado',
+        'nombre' => 'Hoodie Dark Eyes Style (Limited Drop)',
+        'descripcion' => 'Edición limitada con diseño Dark Eyes de alto contraste.<br><br>Características:<br>• Edición LIMITADA<br>• Diseño original Dark Eyes<br>• Colorway oscuro con acentos neón<br>• Tallas S/M/L/XL<br>• + Delivery coordinado',
         'precio' => 74.99,
-        'imagen' => 'assets/images/Cloths/Hoodie Donut Front.png',
+        'imagen' => 'assets/images/Cloths/Hoodie Dark Eyes Front.png',
         'categoria' => 'apparel',
-        'slug' => 'hoodie-donut-style',
+        'slug' => 'hoodie-dark-eyes-style',
         'tipo' => 'apparel',
         'limited' => true,
         'gallery' => [
-            'front' => 'assets/images/Cloths/Hoodie Donut Front.png',
-            'back' => 'assets/images/Cloths/Hoodie Donut Back.png'
+            'front' => 'assets/images/Cloths/Hoodie Dark Eyes Front.png',
+            'back' => 'assets/images/Cloths/Hoodie Dark Eyes Back.png'
         ],
         'variants' => [
             'tri-tone' => [
-                'imagen' => 'assets/images/Cloths/Hoodie Donut Front.png',
+                'imagen' => 'assets/images/Cloths/Hoodie Dark Eyes Front.png',
                 'sizes' => ['S', 'M', 'L', 'XL']
             ]
         ]
