@@ -572,11 +572,11 @@ h1, h2, h3, h4, h5, h6 {
     right: 30px;
     width: 70px;
     height: 70px;
-    background: linear-gradient(135deg, rgba(37, 156, 174, 1) 0%, rgba(174, 37, 101, 1) 100%);
+    background: linear-gradient(135deg, #259cae 0%, #8a2be2 100%);
     border-radius: 50%;
     display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
+    align-items: center;
+    justify-content: center;
     color: white;
     font-size: 28px;
     text-decoration: none;
