@@ -164,7 +164,11 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 3rem;
     font-weight: 700;
     margin-bottom: 1rem;
-    text-shadow: 0 0 20px rgba(37, 156, 174, 0.5);
+    /* Borde blanco delgado para contraste con fondos oscuros */
+    -webkit-text-stroke: 0.8px rgba(255, 255, 255, 0.9);
+    text-shadow: 
+        0 0 1px rgba(255, 255, 255, 0.55),
+        0 0 20px rgba(37, 156, 174, 0.5);
     line-height: 1.2;
     text-align: center;
     position: relative;
@@ -1527,7 +1531,11 @@ body.about-page,
     font-size: 3.5rem;
     font-weight: 700;
     margin-bottom: 1rem;
-    text-shadow: 0 0 20px rgba(37, 156, 174, 0.5);
+    /* Borde blanco delgado para contraste con fondos oscuros */
+    -webkit-text-stroke: 0.8px rgba(255, 255, 255, 0.9);
+    text-shadow: 
+        0 0 1px rgba(255, 255, 255, 0.55),
+        0 0 20px rgba(37, 156, 174, 0.5);
     line-height: 1.2;
     text-align: left;
     position: relative;
@@ -1540,8 +1548,12 @@ body.about-page,
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    /* Delgado borde oscuro para no perderse con el fondo */
-    text-shadow:
+    /* Borde blanco delgado para contraste con fondos oscuros - usando text-shadow para compatibilidad con gradiente */
+    text-shadow: 
+        -0.8px -0.8px 0 rgba(255, 255, 255, 0.9),
+        0.8px -0.8px 0 rgba(255, 255, 255, 0.9),
+        -0.8px 0.8px 0 rgba(255, 255, 255, 0.9),
+        0.8px 0.8px 0 rgba(255, 255, 255, 0.9),
         -1px 0 1px rgba(0, 0, 0, 0.8),
         1px 0 1px rgba(0, 0, 0, 0.8),
         0 -1px 1px rgba(0, 0, 0, 0.8),
@@ -1552,7 +1564,17 @@ body.about-page,
 
 .hero-title .text-gradient:hover {
     transform: scale(1.05);
-    text-shadow: 0 0 40px rgba(37, 156, 174, 0.5);
+    /* Mantener el borde blanco en hover, solo aumentar el glow */
+    text-shadow: 
+        -0.8px -0.8px 0 rgba(255, 255, 255, 0.9),
+        0.8px -0.8px 0 rgba(255, 255, 255, 0.9),
+        -0.8px 0.8px 0 rgba(255, 255, 255, 0.9),
+        0.8px 0.8px 0 rgba(255, 255, 255, 0.9),
+        -1px 0 1px rgba(0, 0, 0, 0.8),
+        1px 0 1px rgba(0, 0, 0, 0.8),
+        0 -1px 1px rgba(0, 0, 0, 0.8),
+        0 1px 1px rgba(0, 0, 0, 0.8),
+        0 0 40px rgba(37, 156, 174, 0.5);
 }
 
 /* Animación para el título */
@@ -1562,10 +1584,14 @@ body.about-page,
 
 @keyframes titleGlow {
     0% {
-        text-shadow: 0 0 20px rgba(37, 156, 174, 0.5);
+        text-shadow: 
+            0 0 1px rgba(255, 255, 255, 0.55),
+            0 0 20px rgba(37, 156, 174, 0.5);
     }
     100% {
-        text-shadow: 0 0 30px rgba(37, 156, 174, 0.8);
+        text-shadow: 
+            0 0 1px rgba(255, 255, 255, 0.55),
+            0 0 30px rgba(37, 156, 174, 0.8);
     }
 }
 
