@@ -73,24 +73,29 @@ function applyColorTheme(themeName) {
             '--knd-gunmetal-gray': '#2c2c2c'
         },
         'cyber-green': {
-            '--knd-neon-blue': '#00ff00',
-            '--knd-electric-purple': '#32cd32',
-            '--knd-gunmetal-gray': '#006400'
+            '--knd-neon-blue': '#66bf5a',
+            '--knd-electric-purple': '#70c4e1',
+            '--knd-gunmetal-gray': '#69bab0'
         },
         'fire-red': {
-            '--knd-neon-blue': '#ff0000',
-            '--knd-electric-purple': '#ff4500',
-            '--knd-gunmetal-gray': '#8b0000'
+            '--knd-neon-blue': '#b43b6a',
+            '--knd-electric-purple': '#e67635',
+            '--knd-gunmetal-gray': '#bfce17'
         },
         'golden-sun': {
-            '--knd-neon-blue': '#ffd700',
-            '--knd-electric-purple': '#ffa500',
-            '--knd-gunmetal-gray': '#daa520'
+            '--knd-neon-blue': '#ffea00',
+            '--knd-electric-purple': '#bed322',
+            '--knd-gunmetal-gray': '#321f22'
         },
         'neon-pink': {
-            '--knd-neon-blue': '#ff69b4',
-            '--knd-electric-purple': '#ff1493',
-            '--knd-gunmetal-gray': '#c71585'
+            '--knd-neon-blue': '#dca1e3',
+            '--knd-electric-purple': '#ffc3a8',
+            '--knd-gunmetal-gray': '#e6ffc9'
+        },
+        'nature-green': {
+            '--knd-neon-blue': '#c1eeaf',
+            '--knd-electric-purple': '#6ba166',
+            '--knd-gunmetal-gray': '#145926'
         },
         'ice-blue': {
             '--knd-neon-blue': '#00ffff',
