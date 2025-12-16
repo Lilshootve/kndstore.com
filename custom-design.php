@@ -18,9 +18,9 @@ echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise√
 <?php echo generateNavigation(); ?>
 
 <!-- Hero Section -->
-<section class="hero-section py-5">
+<section class="hero-section hero-custom-design-bg">
     <div class="container">
-        <div class="row align-items-center">
+        <div class="row align-items-center min-vh-100">
             <div class="col-lg-7">
                 <h1 class="hero-title">
                     <span class="text-gradient">Custom Design Lab</span><br>
@@ -29,14 +29,6 @@ echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise√
                 <p class="hero-subtitle">
                     Transforma tus ideas en dise√±os √∫nicos. Servicios personalizables de dise√±o para T-Shirts, Hoodies y conceptos completos de outfit.
                 </p>
-            </div>
-            <div class="col-lg-5 mt-4 mt-lg-0 text-center">
-                <div class="hero-image">
-                    <img src="/assets/images/Pants Desing 001 Turquesa.webp" 
-                         alt="Custom Design Lab Hero" 
-                         class="img-fluid"
-                         style="max-height: 420px; object-fit: contain; filter: drop-shadow(0 0 40px rgba(37, 156, 174, 0.6));">
-                </div>
             </div>
         </div>
     </div>
