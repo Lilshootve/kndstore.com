@@ -145,7 +145,7 @@ function generateScripts() {
     $scripts .= '      }' . "\n";
     $scripts .= '    },' . "\n";
     $scripts .= '    color: {' . "\n";
-    $scripts .= '      value: ["#259cae", "#8a2be2", "#00d4ff"]' . "\n";
+    $scripts .= '      value: ["#259cae", "#ae2565", "#00d4ff"]' . "\n";
     $scripts .= '    },' . "\n";
     $scripts .= '    shape: {' . "\n";
     $scripts .= '      type: "circle",' . "\n";

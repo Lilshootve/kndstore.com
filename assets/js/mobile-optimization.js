@@ -30,7 +30,7 @@ function optimizeParticlesForMobile() {
                     }
                 },
                 color: {
-                    value: ["#259cae", "#8a2be2"]
+                    value: ["#259cae", "#ae2565"]
                 },
                 shape: {
                     type: "circle"

@@ -69,7 +69,7 @@ function applyColorTheme(themeName) {
     const themes = {
         'galactic-blue': {
             '--knd-neon-blue': '#259cae',
-            '--knd-electric-purple': '#8a2be2',
+            '--knd-electric-purple': '#ae2565',
             '--knd-gunmetal-gray': '#2c2c2c'
         },
         'cyber-green': {

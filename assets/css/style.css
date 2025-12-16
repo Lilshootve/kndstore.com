@@ -3,7 +3,7 @@
 /* Variables CSS */
 :root {
     --knd-neon-blue: #259cae;
-    --knd-electric-purple: #8a2be2;
+    --knd-electric-purple: #ae2565;
     --knd-gunmetal-gray: #2c2c2c;
     --knd-black: #000000;
     --knd-white: #ffffff;
@@ -572,7 +572,7 @@ h1, h2, h3, h4, h5, h6 {
     right: 30px;
     width: 70px;
     height: 70px;
-    background: linear-gradient(135deg, #259cae 0%, #8a2be2 100%);
+    background: linear-gradient(135deg, #259cae 0%, #ae2565 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -3140,7 +3140,7 @@ body.about-page,
 
 /* Clase de prueba - Efectos épicos sin conflictos */
 .bg-dark-epic {
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 20%, #16213e 40%, #0f3460 60%, #533483 80%, #8a2be2 100%) !important;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 20%, #16213e 40%, #0f3460 60%, #533483 80%, #ae2565 100%) !important;
     position: relative;
     overflow: hidden;
     border: 2px solid rgba(37, 156, 174, 0.6);
@@ -3208,7 +3208,7 @@ body.about-page,
 }
 
 .about-section.bg-dark-epic {
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 20%, #16213e 40%, #0f3460 60%, #533483 80%, #8a2be2 100%) !important;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 20%, #16213e 40%, #0f3460 60%, #533483 80%, #ae2565 100%) !important;
     box-shadow: 
         inset 0 0 150px rgba(138, 43, 226, 0.6),
         0 0 100px rgba(138, 43, 226, 1),
@@ -3216,7 +3216,7 @@ body.about-page,
 }
 
 .features-section.bg-dark-epic {
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 20%, #16213e 40%, #0f3460 60%, #533483 80%, #8a2be2 100%) !important;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 20%, #16213e 40%, #0f3460 60%, #533483 80%, #ae2565 100%) !important;
     box-shadow: 
         inset 0 0 150px rgba(37, 156, 174, 0.6),
         0 0 100px rgba(37, 156, 174, 1),
@@ -3232,7 +3232,7 @@ body.about-page,
 }
 
 .categories-section.bg-dark-epic {
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 20%, #16213e 40%, #0f3460 60%, #533483 80%, #8a2be2 100%) !important;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 20%, #16213e 40%, #0f3460 60%, #533483 80%, #ae2565 100%) !important;
     box-shadow: 
         inset 0 0 150px rgba(37, 156, 174, 0.6),
         0 0 100px rgba(37, 156, 174, 1),

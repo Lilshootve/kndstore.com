@@ -567,7 +567,7 @@ function generateColorPanel() {
     $panel .= '            <h4>Galáctico Azul</h4>' . "\n";
     $panel .= '            <div class="color-preview">' . "\n";
     $panel .= '                <div class="color-swatch" style="background: #259cae;"></div>' . "\n";
-    $panel .= '                <div class="color-swatch" style="background: #8a2be2;"></div>' . "\n";
+    $panel .= '                <div class="color-swatch" style="background: #ae2565;"></div>' . "\n";
     $panel .= '                <div class="color-swatch" style="background: #16213e;"></div>' . "\n";
     $panel .= '            </div>' . "\n";
     $panel .= '            <p>El clásico azul neón con morado eléctrico</p>' . "\n";
