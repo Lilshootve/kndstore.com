@@ -98,9 +98,9 @@ function applyColorTheme(themeName) {
             '--knd-gunmetal-gray': '#145926'
         },
         'ice-blue': {
-            '--knd-neon-blue': '#00ffff',
-            '--knd-electric-purple': '#87ceeb',
-            '--knd-gunmetal-gray': '#4682b4'
+            '--knd-neon-blue': '#07eef2',
+            '--knd-electric-purple': '#24d2db',
+            '--knd-gunmetal-gray': '#000000'
         }
     };
     
@@ -264,76 +264,12 @@ function showOrderNotification(message, type = 'success') {
     }, 3000);
 }
 
-// Listeners para botones "Añadir al pedido"
-document.addEventListener('click', function (e) {
-    const btn = e.target.closest('.add-to-order');
-    if (!btn) return;
-
-    const id = parseInt(btn.dataset.id, 10);
-    const name = btn.dataset.name;
-    const price = parseFloat(btn.dataset.price);
-    const type = btn.dataset.type || 'digital';
-
-    if (!id || !name || isNaN(price)) {
-        console.warn('Datos de producto inválidos para el pedido', btn.dataset);
-        return;
-    }
-
-    // Para productos apparel, capturar variants (talla/color)
-    let variants = null;
-    if (type === 'apparel') {
-        const color = btn.dataset.variantColor || document.getElementById('variant-color')?.value || '';
-        const size = btn.dataset.variantSize || document.getElementById('variant-size')?.value || '';
-        
-        if (!size) {
-            alert('Por favor selecciona una talla antes de agregar al pedido.');
-            return;
-        }
-        
-        variants = { color, size };
-    }
-
-    // Para productos service, capturar brief si existe
-    let brief = null;
-    if (type === 'service') {
-        const briefData = localStorage.getItem('knd_custom_design_brief');
-        if (briefData) {
-            try {
-                brief = JSON.parse(briefData);
-            } catch (e) {
-                console.error('Error parsing brief:', e);
-            }
-        }
-    }
-
-    const itemData = { id, name, price, type };
-    if (variants) itemData.variants = variants;
-    if (brief) itemData.brief = brief;
-
-    const items = addItemToOrder(itemData);
-    updateOrderBadge();
-
-    // Mostrar notificación en la parte inferior izquierda
-    const item = items.find(i => i.id === id);
-    let message = item.qty > 1 
-        ? `${name} añadido (${item.qty} en pedido)`
-        : `${name} añadido al pedido`;
-    
-    if (variants && variants.size) {
-        message += ` - Talla: ${variants.size}`;
-        if (variants.color) {
-            message += `, Color: ${variants.color}`;
-        }
-    }
-    
-    showOrderNotification(message, 'success');
-});
-
-// Inicializar badge al cargar
-document.addEventListener('DOMContentLoaded', function() {
-    updateOrderBadge();
-    // También actualizar badge en scroll nav si existe la función
-    if (typeof window.updateOrderBadgeInScrollNav === 'function') {
-        setTimeout(window.updateOrderBadgeInScrollNav, 100);
-    }
-}); 
+// Exportar helpers si hiciera falta en el futuro
+window.KND_ORDER = {
+    loadOrderItems,
+    saveOrderItems,
+    addItemToOrder,
+    getOrderTotal,
+    updateOrderBadge,
+    showOrderNotification
+};
