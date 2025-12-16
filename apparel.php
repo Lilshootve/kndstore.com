@@ -51,9 +51,7 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
                 </div>
             </div>
             <div class="col-lg-5 mt-4 mt-lg-0 text-center">
-                <div class="hero-image">
-                    <img src="/assets/images/hero-apparel-knd.png" alt="KND Apparel Hero" class="img-fluid" style="max-height: 420px; object-fit: contain; filter: drop-shadow(0 0 40px rgba(37, 156, 174, 0.6));">
-                </div>
+                <div class="hero-image"></div>
             </div>
         </div>
     </div>
