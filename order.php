@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const div = document.createElement('div');
             div.className = 'order-item-row d-flex justify-content-between align-items-center mb-3 p-3';
-            div.style.border = '1px solid rgba(0, 191, 255, 0.3)';
+            div.style.border = '1px solid rgba(37, 156, 174, 0.3)';
             div.style.borderRadius = '10px';
             div.style.background = 'rgba(26, 26, 46, 0.5)';
             div.innerHTML = `

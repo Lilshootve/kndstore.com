@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon: 'error',
                 title: 'Order ID requerido',
                 text: 'Por favor ingresa un Order ID válido.',
-                confirmButtonColor: '#00bfff'
+                confirmButtonColor: '#259cae'
             });
             return;
         }
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon: 'success',
                 title: '¡Death Roll completado!',
                 text: `Obtuviste: ${data.rarity} - ${data.reward.name}`,
-                confirmButtonColor: '#00bfff',
+                confirmButtonColor: '#259cae',
                 timer: 3000
             });
             
@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon: 'error',
                 title: 'Error',
                 text: error.message || 'Error al ejecutar el Death Roll. Intenta nuevamente.',
-                confirmButtonColor: '#00bfff'
+                confirmButtonColor: '#259cae'
             });
         }
     });
@@ -324,16 +324,16 @@ document.addEventListener('DOMContentLoaded', function() {
 .deathroll-panel {
     background: rgba(26, 26, 46, 0.9);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 191, 255, 0.3);
+    border: 1px solid rgba(37, 156, 174, 0.3);
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     overflow: hidden;
 }
 
 .panel-header {
-    background: linear-gradient(135deg, rgba(0, 191, 255, 0.2), rgba(138, 43, 226, 0.2));
+    background: linear-gradient(135deg, rgba(37, 156, 174, 0.2), rgba(138, 43, 226, 0.2));
     padding: 1rem;
-    border-bottom: 1px solid rgba(0, 191, 255, 0.3);
+    border-bottom: 1px solid rgba(37, 156, 174, 0.3);
 }
 
 .panel-header h4 {
@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: 10px;
     padding: 1rem;
     margin-top: 1rem;
-    border: 1px solid rgba(0, 191, 255, 0.2);
+    border: 1px solid rgba(37, 156, 174, 0.2);
 }
 
 .result-header {
@@ -384,9 +384,9 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .rarity-badge.tier-rare {
-    background: rgba(0, 191, 255, 0.2);
+    background: rgba(37, 156, 174, 0.2);
     color: var(--knd-neon-blue);
-    border: 1px solid rgba(0, 191, 255, 0.5);
+    border: 1px solid rgba(37, 156, 174, 0.5);
 }
 
 .rarity-badge.tier-epic {

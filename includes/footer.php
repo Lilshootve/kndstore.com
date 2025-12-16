@@ -145,7 +145,7 @@ function generateScripts() {
     $scripts .= '      }' . "\n";
     $scripts .= '    },' . "\n";
     $scripts .= '    color: {' . "\n";
-    $scripts .= '      value: ["#00bfff", "#8a2be2", "#00d4ff"]' . "\n";
+    $scripts .= '      value: ["#259cae", "#8a2be2", "#00d4ff"]' . "\n";
     $scripts .= '    },' . "\n";
     $scripts .= '    shape: {' . "\n";
     $scripts .= '      type: "circle",' . "\n";
@@ -180,7 +180,7 @@ function generateScripts() {
     $scripts .= '    line_linked: {' . "\n";
     $scripts .= '      enable: true,' . "\n";
     $scripts .= '      distance: 150,' . "\n";
-    $scripts .= '      color: "#00bfff",' . "\n";
+    $scripts .= '      color: "#259cae",' . "\n";
     $scripts .= '      opacity: 0.4,' . "\n";
     $scripts .= '      width: 1' . "\n";
     $scripts .= '    },' . "\n";

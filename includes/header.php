@@ -244,7 +244,7 @@ function generateCommonAssets() {
                             icon.style.fontSize = "1.2em";
                             // Solo aplicar color azul si NO es un icono de pago
                             if (!isPaymentIcon) {
-                                icon.style.color = "#00bfff";
+                                icon.style.color = "#259cae";
                             }
                             fallbackCount++;
                         }
@@ -485,8 +485,8 @@ function generateFavicon() {
     $favicon .= '<link rel="manifest" href="/assets/images/site.webmanifest">' . "\n";
     
     // Meta tags para PWA
-    $favicon .= '<meta name="theme-color" content="#00bfff">' . "\n";
-    $favicon .= '<meta name="msapplication-TileColor" content="#00bfff">' . "\n";
+    $favicon .= '<meta name="theme-color" content="#259cae">' . "\n";
+    $favicon .= '<meta name="msapplication-TileColor" content="#259cae">' . "\n";
     
     return $favicon;
 }
@@ -566,7 +566,7 @@ function generateColorPanel() {
     $panel .= '        <div class="color-theme active" data-theme="galactic-blue">' . "\n";
     $panel .= '            <h4>Galáctico Azul</h4>' . "\n";
     $panel .= '            <div class="color-preview">' . "\n";
-    $panel .= '                <div class="color-swatch" style="background: #00bfff;"></div>' . "\n";
+    $panel .= '                <div class="color-swatch" style="background: #259cae;"></div>' . "\n";
     $panel .= '                <div class="color-swatch" style="background: #8a2be2;"></div>' . "\n";
     $panel .= '                <div class="color-swatch" style="background: #16213e;"></div>' . "\n";
     $panel .= '            </div>' . "\n";

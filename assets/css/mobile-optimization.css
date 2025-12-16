@@ -81,7 +81,7 @@
     }
     
     .navbar-toggler:focus {
-        box-shadow: 0 0 0 0.2rem rgba(0, 191, 255, 0.25) !important;
+        box-shadow: 0 0 0 0.2rem rgba(37, 156, 174, 0.25) !important;
     }
     
     .navbar-collapse {
@@ -105,7 +105,7 @@
     }
     
     .nav-link:hover {
-        background: rgba(0, 191, 255, 0.1) !important;
+        background: rgba(37, 156, 174, 0.1) !important;
         transform: translateX(5px) !important;
     }
     
@@ -345,7 +345,7 @@
 .nav-link,
 .product-card,
 .category-card {
-    -webkit-tap-highlight-color: rgba(0, 191, 255, 0.3) !important;
+    -webkit-tap-highlight-color: rgba(37, 156, 174, 0.3) !important;
     touch-action: manipulation !important;
 }
 
@@ -387,7 +387,7 @@
     }
     
     .navbar-collapse::-webkit-scrollbar-track {
-        background: rgba(0, 191, 255, 0.1) !important;
+        background: rgba(37, 156, 174, 0.1) !important;
         border-radius: 2px !important;
     }
     

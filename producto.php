@@ -164,7 +164,7 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                             </div>
                             
                             <?php if (isset($producto['tipo']) && $producto['tipo'] === 'apparel'): ?>
-                                <div class="alert alert-info mt-3" style="background: rgba(0, 191, 255, 0.1); border-color: var(--knd-neon-blue);">
+                                <div class="alert alert-info mt-3" style="background: rgba(37, 156, 174, 0.1); border-color: var(--knd-neon-blue);">
                                     <i class="fas fa-info-circle me-2"></i>
                                     <strong>Delivery:</strong> Se coordina por WhatsApp/medios de contacto luego de la compra.
                                 </div>

@@ -30,7 +30,7 @@ function optimizeParticlesForMobile() {
                     }
                 },
                 color: {
-                    value: ["#00bfff", "#8a2be2"]
+                    value: ["#259cae", "#8a2be2"]
                 },
                 shape: {
                     type: "circle"
@@ -46,7 +46,7 @@ function optimizeParticlesForMobile() {
                 line_linked: {
                     enable: true,
                     distance: 120, // Reducido de 150
-                    color: "#00bfff",
+                    color: "#259cae",
                     opacity: 0.2, // Reducido de 0.4
                     width: 1
                 },

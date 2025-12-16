@@ -271,7 +271,7 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
                 </div>
             </div>
         </div>
-        <div class="alert alert-info mt-4 text-center" style="background: rgba(0, 191, 255, 0.1); border-color: var(--knd-neon-blue);">
+        <div class="alert alert-info mt-4 text-center" style="background: rgba(37, 156, 174, 0.1); border-color: var(--knd-neon-blue);">
             <i class="fas fa-info-circle me-2"></i>
             <strong>Nota importante:</strong> Delivery se coordina por WhatsApp/medios de contacto luego de la compra.
         </div>
@@ -362,7 +362,7 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
     max-height: 90vh;
     object-fit: contain;
     border-radius: 10px;
-    box-shadow: 0 10px 50px rgba(0, 191, 255, 0.3);
+    box-shadow: 0 10px 50px rgba(37, 156, 174, 0.3);
 }
 
 .lightbox-close {
@@ -396,7 +396,7 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
 }
 
 .lightbox-nav:hover {
-    background: rgba(0, 191, 255, 0.7);
+    background: rgba(37, 156, 174, 0.7);
     color: #fff;
 }
 

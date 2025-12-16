@@ -446,7 +446,7 @@ function copyDiscordServer() {
 /* Upgrade Info Card */
 .knd-upgrade-info {
     background: rgba(26, 26, 46, 0.7);
-    border: 1px solid rgba(0, 191, 255, 0.3);
+    border: 1px solid rgba(37, 156, 174, 0.3);
     border-radius: 15px;
     padding: 1.5rem;
     backdrop-filter: blur(5px);
@@ -519,7 +519,7 @@ function copyDiscordServer() {
 }
 
 .knd-crate-pro {
-    border: 1px solid rgba(0, 191, 255, 0.6);
+    border: 1px solid rgba(37, 156, 174, 0.6);
 }
 
 .knd-crate-pro::before {
@@ -528,7 +528,7 @@ function copyDiscordServer() {
 
 .knd-crate-pro:hover {
     border-color: var(--knd-neon-blue);
-    box-shadow: 0 8px 20px rgba(0, 191, 255, 0.3), 0 0 20px rgba(0, 191, 255, 0.2);
+    box-shadow: 0 8px 20px rgba(37, 156, 174, 0.3), 0 0 20px rgba(37, 156, 174, 0.2);
     transform: translateY(-5px);
 }
 
@@ -590,10 +590,10 @@ function copyDiscordServer() {
 }
 
 .tier-rare {
-    background: rgba(0, 191, 255, 0.2);
+    background: rgba(37, 156, 174, 0.2);
     color: var(--knd-neon-blue);
-    border: 1px solid rgba(0, 191, 255, 0.5);
-    box-shadow: 0 0 10px rgba(0, 191, 255, 0.3);
+    border: 1px solid rgba(37, 156, 174, 0.5);
+    box-shadow: 0 0 10px rgba(37, 156, 174, 0.3);
 }
 
 .tier-epic {
@@ -611,7 +611,7 @@ function copyDiscordServer() {
 }
 
 .crate-upgrade {
-    background: rgba(0, 191, 255, 0.1);
+    background: rgba(37, 156, 174, 0.1);
     border-left: 3px solid var(--knd-neon-blue);
     padding: 0.75rem;
     margin-bottom: 1rem;
@@ -685,7 +685,7 @@ function copyDiscordServer() {
 }
 
 .knd-loot-rare {
-    border: 1px solid rgba(0, 191, 255, 0.6);
+    border: 1px solid rgba(37, 156, 174, 0.6);
 }
 
 .knd-loot-rare::before {
@@ -694,7 +694,7 @@ function copyDiscordServer() {
 
 .knd-loot-rare:hover {
     border-color: var(--knd-neon-blue);
-    box-shadow: 0 8px 20px rgba(0, 191, 255, 0.3), 0 0 15px rgba(0, 191, 255, 0.2);
+    box-shadow: 0 8px 20px rgba(37, 156, 174, 0.3), 0 0 15px rgba(37, 156, 174, 0.2);
     transform: translateY(-5px);
 }
 
@@ -757,7 +757,7 @@ function copyDiscordServer() {
 /* Operational Cards */
 .knd-operational-card {
     background: rgba(26, 26, 46, 0.9);
-    border: 1px solid rgba(0, 191, 255, 0.3);
+    border: 1px solid rgba(37, 156, 174, 0.3);
     border-radius: 15px;
     padding: 2rem;
     height: 100%;
