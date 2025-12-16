@@ -50,9 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php echo generateNavigation(); ?>
 
 <!-- Hero Section -->
-<section class="hero-section py-5">
+<section class="hero-section hero-contact-bg">
     <div class="container">
-        <div class="row">
+        <div class="row align-items-center min-vh-100">
             <div class="col-12 text-center">
                 <h1 class="hero-title">
                     <span class="text-gradient">¿LISTO PARA</span><br>

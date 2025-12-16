@@ -52,9 +52,9 @@ foreach ($PRODUCTS as $slug => $producto) {
 <?php echo generateNavigation(); ?>
 
 <!-- Hero Section -->
-<section class="hero-section py-5">
+<section class="hero-section hero-catalog-bg">
     <div class="container">
-        <div class="row">
+        <div class="row align-items-center min-vh-100">
             <div class="col-12 text-center">
                 <h1 class="hero-title">
                     <span class="text-gradient">Nuestro</span><br>

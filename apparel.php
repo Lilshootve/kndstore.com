@@ -30,9 +30,9 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
 <?php echo generateNavigation(); ?>
 
 <!-- Hero Section -->
-<section class="hero-section py-5">
+<section class="hero-section hero-apparel-bg">
     <div class="container">
-        <div class="row align-items-center">
+        <div class="row align-items-center min-vh-100">
             <div class="col-lg-7">
                 <h1 class="hero-title">
                     <span class="text-gradient">KND Apparel</span><br>
@@ -52,7 +52,7 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
             </div>
             <div class="col-lg-5 mt-4 mt-lg-0 text-center">
                 <div class="hero-image">
-                    <i class="fas fa-tshirt" style="font-size: 8rem; color: var(--knd-neon-blue); opacity: 0.3;"></i>
+                    <img src="/assets/images/hero-apparel-knd.png" alt="KND Apparel Hero" class="img-fluid" style="max-height: 420px; object-fit: contain; filter: drop-shadow(0 0 40px rgba(37, 156, 174, 0.6));">
                 </div>
             </div>
         </div>

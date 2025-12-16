@@ -1310,6 +1310,117 @@ h1, h2, h3, h4, h5, h6 {
     z-index: 0;
 }
 
+/* Hero con imagen de fondo para Apparel */
+.hero-apparel-bg {
+    background-image: url('/assets/images/hero-apparel-knd.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    position: relative;
+}
+
+.hero-apparel-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.7) 0%,
+        rgba(0, 0, 0, 0.5) 50%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+    z-index: 0;
+}
+
+.hero-apparel-bg .container {
+    position: relative;
+    z-index: 2;
+}
+
+@media (max-width: 768px) {
+    .hero-apparel-bg {
+        background-attachment: scroll;
+    }
+}
+
+/* Hero con imagen de fondo para Catálogo */
+.hero-catalog-bg {
+    background-image: url('/assets/images/hero-catalog-knd.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    position: relative;
+}
+
+.hero-catalog-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.7) 0%,
+        rgba(0, 0, 0, 0.5) 50%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+    z-index: 0;
+}
+
+.hero-catalog-bg .container {
+    position: relative;
+    z-index: 2;
+}
+
+@media (max-width: 768px) {
+    .hero-catalog-bg {
+        background-attachment: scroll;
+    }
+}
+
+/* Hero con imagen de fondo para Contacto */
+.hero-contact-bg {
+    background-image: url('/assets/images/hero-contact-background.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    position: relative;
+}
+
+.hero-contact-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.7) 0%,
+        rgba(0, 0, 0, 0.5) 50%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+    z-index: 0;
+}
+
+.hero-contact-bg .container {
+    position: relative;
+    z-index: 2;
+}
+
+@media (max-width: 768px) {
+    .hero-contact-bg {
+        background-attachment: scroll;
+    }
+}
+
 .hero-home-bg .container {
     position: relative;
     z-index: 2;
