@@ -32,7 +32,7 @@ echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise√
             </div>
             <div class="col-lg-5 mt-4 mt-lg-0 text-center">
                 <div class="hero-image">
-                    <img src="/assets/images/Pants Desing 001 Turquesa.png" 
+                    <img src="/assets/images/Pants Desing 001 Turquesa.webp" 
                          alt="Custom Design Lab Hero" 
                          class="img-fluid"
                          style="max-height: 420px; object-fit: contain; filter: drop-shadow(0 0 40px rgba(37, 156, 174, 0.6));">

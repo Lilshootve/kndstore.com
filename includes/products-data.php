@@ -311,17 +311,17 @@ $PRODUCTS = [
         'nombre' => 'Hoodie KND Style',
         'descripcion' => 'Hoodie oficial KND con diseño galáctico único.<br><br>Características:<br>• Material premium<br>• Diseño exclusivo KND<br>• Disponible en 3 colores<br>• Tallas S/M/L/XL<br>• + Delivery coordinado',
         'precio' => 59.99,
-        'imagen' => 'assets/images/Cloths/Hoodie Desing 001 MAGENTA.png',
+        'imagen' => 'assets/images/Cloths/Hoodie Desing 001 MAGENTA.webp',
         'categoria' => 'apparel',
         'slug' => 'hoodie-knd-style',
         'tipo' => 'apparel',
         'variants' => [
             'magenta' => [
-                'imagen' => 'assets/images/Cloths/Hoodie Desing 001 MAGENTA.png',
+                'imagen' => 'assets/images/Cloths/Hoodie Desing 001 MAGENTA.webp',
                 'sizes' => ['S', 'M', 'L', 'XL']
             ],
             'black' => [
-                'imagen' => 'assets/images/Cloths/Hoodie Desing 001 NEGRA.png',
+                'imagen' => 'assets/images/Cloths/Hoodie Desing 001 NEGRA.webp',
                 'sizes' => ['S', 'M', 'L', 'XL']
             ],
             'turquoise' => [
