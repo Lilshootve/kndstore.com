@@ -118,18 +118,13 @@ function kndApplyConsentToUI(consent) {
 }
 
 function initCookieConsentUI() {
-    const locale = kndGetLocale();
-    const t = KND_COOKIE_TRANSLATIONS[locale] || KND_COOKIE_TRANSLATIONS.es;
-
     const banner = document.getElementById('knd-cookie-banner');
     const modal = document.getElementById('knd-cookie-modal');
     if (!banner || !modal) return;
 
-    // Inyectar textos desde traducciones por si en el futuro hay multi-idioma
-    const titleEls = document.querySelectorAll('[data-knd-cookie-title]');
-    titleEls.forEach(el => el.textContent = t.title);
-    const msgEls = document.querySelectorAll('[data-knd-cookie-message]');
-    msgEls.forEach(el => el.textContent = t.message);
+    // Los textos ya vienen traducidos desde PHP en el HTML (data-* attributes)
+    // Solo actualizamos si window.I18N está disponible y hay cambios dinámicos
+    // Los elementos con data-knd-cookie-title y data-knd-cookie-message ya tienen el texto correcto desde PHP
 
     const btnAcceptAll = document.getElementById('knd-cookie-accept-all');
     const btnRejectAll = document.getElementById('knd-cookie-reject-all');

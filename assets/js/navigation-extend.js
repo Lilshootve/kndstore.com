@@ -28,13 +28,18 @@
             return;
         }
         
+        // Helper para traducciones JS
+        function tJs(key, fallback) {
+            return (window.I18N && window.I18N[key]) || fallback || key;
+        }
+        
         // Crear item Apparel
         const apparelItem = document.createElement('li');
         apparelItem.className = 'nav-item';
         const apparelLink = document.createElement('a');
         apparelLink.className = 'nav-link' + (currentPage === 'apparel.php' ? ' active' : '');
         apparelLink.href = '/apparel.php';
-        apparelLink.textContent = 'Apparel';
+        apparelLink.textContent = tJs('nav.apparel', 'Apparel');
         apparelItem.appendChild(apparelLink);
         
         // Crear item Custom Design
@@ -43,7 +48,7 @@
         const customLink = document.createElement('a');
         customLink.className = 'nav-link' + (currentPage === 'custom-design.php' ? ' active' : '');
         customLink.href = '/custom-design.php';
-        customLink.textContent = 'Custom Design';
+        customLink.textContent = tJs('nav.custom_design', 'Custom Design');
         customItem.appendChild(customLink);
         
         // Insertar después de "Sobre Nosotros" y antes de "Contacto"

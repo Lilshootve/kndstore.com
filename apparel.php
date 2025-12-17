@@ -22,7 +22,7 @@ foreach ($apparelProducts as $slug => $product) {
     }
 }
 
-echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodies, T-Shirts y ediciones limitadas. Digital Goods • Apparel • Custom Design Services');
+echo generateHeader(t('apparel.meta.title'), t('apparel.meta.description'));
 ?>
 
 <div id="particles-bg"></div>
@@ -35,18 +35,18 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
         <div class="row align-items-center min-vh-100">
             <div class="col-lg-7">
                 <h1 class="hero-title">
-                    <span class="text-gradient">KND Apparel</span><br>
-                    <span class="hero-subtitle-mini">Ropa galáctica oficial</span>
+                    <span class="text-gradient"><?php echo t('apparel.hero.title'); ?></span><br>
+                    <span class="hero-subtitle-mini"><?php echo t('apparel.hero.subtitle_mini'); ?></span>
                 </h1>
                 <p class="hero-subtitle">
-                    Viste con estilo cósmico. Hoodies, T-Shirts y ediciones limitadas diseñadas para tu universo digital.
+                    <?php echo t('apparel.hero.subtitle'); ?>
                 </p>
                 <div class="mt-4 d-flex flex-wrap gap-3">
                     <a href="#knd-brand" class="btn btn-primary btn-lg">
-                        <i class="fas fa-tshirt me-2"></i> Ver Colección
+                        <i class="fas fa-tshirt me-2"></i> <?php echo t('apparel.cta.view_collection'); ?>
                     </a>
                     <a href="/custom-design.php" class="btn btn-outline-neon btn-lg">
-                        <i class="fas fa-palette me-2"></i> Custom Design
+                        <i class="fas fa-palette me-2"></i> <?php echo t('apparel.cta.custom_design'); ?>
                     </a>
                 </div>
             </div>
@@ -61,14 +61,14 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
 <section class="py-5 bg-dark-epic" id="knd-brand">
     <div class="container">
         <h2 class="section-title text-center mb-5">
-            <i class="fas fa-star me-2"></i> KND Brand (Official)
+            <i class="fas fa-star me-2"></i> <?php echo t('apparel.section.knd_brand.title'); ?>
         </h2>
         <div class="row">
             <?php foreach ($kndBrandProducts as $slug => $product): ?>
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="product-card">
                         <?php if (isset($product['limited']) && $product['limited']): ?>
-                            <div class="product-limited-badge">LIMITED</div>
+                            <div class="product-limited-badge"><?php echo t('apparel.badge.limited'); ?></div>
                         <?php endif; ?>
                         <?php 
                         // Recopilar todas las imágenes disponibles para el lightbox
@@ -116,11 +116,11 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
                             <div class="product-footer">
                                 <span class="product-price">
                                     $<?php echo number_format($product['precio'], 2); ?>
-                                    <small class="text-muted d-block">+ Delivery</small>
+                                    <small class="text-muted d-block"><?php echo t('product.label.plus_delivery'); ?></small>
                                 </span>
                                 <div class="d-flex gap-2 mt-2">
                                     <a href="/producto.php?slug=<?php echo $slug; ?>" class="btn btn-outline-neon btn-sm btn-details">
-                                        Ver detalles
+                                        <?php echo t('btn.view_details'); ?>
                                     </a>
                                     <button 
                                         type="button"
@@ -147,13 +147,13 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
 <section class="py-5" id="limited-drops">
     <div class="container">
         <h2 class="section-title text-center mb-5">
-            <i class="fas fa-gem me-2"></i> Limited Drops
+            <i class="fas fa-gem me-2"></i> <?php echo t('apparel.section.limited_drops.title'); ?>
         </h2>
         <div class="row">
             <?php foreach ($limitedDrops as $slug => $product): ?>
                 <div class="col-lg-6 col-md-6 mb-4">
                     <div class="product-card product-card-limited position-relative">
-                        <div class="product-limited-badge">LIMITED</div>
+                        <div class="product-limited-badge"><?php echo t('apparel.badge.limited'); ?></div>
                         <?php 
                         // Recopilar todas las imágenes disponibles para el lightbox
                         $allImages = [];
@@ -201,11 +201,11 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
                             <div class="product-footer">
                                 <span class="product-price">
                                     $<?php echo number_format($product['precio'], 2); ?>
-                                    <small class="text-muted d-block">+ Delivery</small>
+                                    <small class="text-muted d-block"><?php echo t('product.label.plus_delivery'); ?></small>
                                 </span>
                                 <div class="d-flex gap-2 mt-2">
                                     <a href="/producto.php?slug=<?php echo $slug; ?>" class="btn btn-outline-neon btn-sm btn-details">
-                                        Ver detalles
+                                        <?php echo t('btn.view_details'); ?>
                                     </a>
                                     <button 
                                         type="button"
@@ -232,7 +232,7 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
 <section class="py-5 bg-dark-epic" id="how-it-works">
     <div class="container">
         <h2 class="section-title text-center mb-5">
-            <i class="fas fa-question-circle me-2"></i> Cómo funciona
+            <i class="fas fa-question-circle me-2"></i> <?php echo t('apparel.section.how_it_works.title'); ?>
         </h2>
         <div class="row">
             <div class="col-lg-4 mb-4">
@@ -280,7 +280,7 @@ echo generateHeader('KND Apparel', 'KND Apparel - Ropa galáctica oficial. Hoodi
 <section class="py-5" id="faq">
     <div class="container">
         <h2 class="section-title text-center mb-5">
-            <i class="fas fa-question-circle me-2"></i> Preguntas Frecuentes
+            <i class="fas fa-question-circle me-2"></i> <?php echo t('apparel.section.faq.title'); ?>
         </h2>
         <div class="row">
             <div class="col-lg-8 mx-auto">

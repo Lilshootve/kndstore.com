@@ -129,11 +129,13 @@ function enhanceMobileNavigation() {
 
         // Mejorar accesibilidad del menú hamburguesa
         if (navbarToggler) {
-            navbarToggler.setAttribute('aria-label', 'Abrir menú de navegación');
+            // Los aria-labels pueden quedarse en español/inglés según el idioma actual
+            // Por ahora los dejamos genéricos ya que son accesibilidad, no texto visible
+            navbarToggler.setAttribute('aria-label', 'Toggle navigation menu');
             navbarToggler.addEventListener('click', function() {
                 const isExpanded = this.getAttribute('aria-expanded') === 'true';
                 this.setAttribute('aria-expanded', !isExpanded);
-                this.setAttribute('aria-label', isExpanded ? 'Abrir menú de navegación' : 'Cerrar menú de navegación');
+                this.setAttribute('aria-label', isExpanded ? 'Open navigation menu' : 'Close navigation menu');
             });
         }
     }
@@ -159,7 +161,8 @@ function enhanceMobileForms() {
                 const submitBtn = this.querySelector('button[type="submit"]');
                 if (submitBtn) {
                     submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+                    // Texto genérico de carga - podría venir de window.I18N si se necesita
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
                 }
             });
         });

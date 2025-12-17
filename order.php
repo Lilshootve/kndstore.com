@@ -4,7 +4,7 @@ require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 
-echo generateHeader('Tu Pedido', 'Tu Pedido - KND Store. Revisa y confirma tu pedido de Digital Goods, Apparel o Custom Design Services');
+echo generateHeader(t('order.meta.title'), t('order.meta.description'));
 ?>
 
 <div id="particles-bg"></div>
@@ -13,25 +13,25 @@ echo generateHeader('Tu Pedido', 'Tu Pedido - KND Store. Revisa y confirma tu pe
 
 <section class="order-section py-5">
     <div class="container">
-        <h1 class="mb-4 text-center">Tu pedido</h1>
-        <p class="text-center mb-5">Revisa los servicios seleccionados, completa tus datos y envía el pedido por WhatsApp.</p>
+        <h1 class="mb-4 text-center"><?php echo t('order.title'); ?></h1>
+        <p class="text-center mb-5"><?php echo t('order.subtitle'); ?></p>
 
         <div class="row">
             <div class="col-lg-7 mb-4">
                 <div class="card knd-card">
                     <div class="card-header">
-                        <h4 class="mb-0">Servicios seleccionados</h4>
+                        <h4 class="mb-0"><?php echo t('order.selected_services.title'); ?></h4>
                     </div>
                     <div class="card-body">
                         <div id="order-items-container">
                             <!-- Aquí se inyectan los items vía JS -->
                         </div>
                         <div id="order-empty-message" class="text-center text-muted">
-                            No tienes servicios en el pedido todavía.
+                            <?php echo t('order.empty_message'); ?>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between">
-                            <strong>Total:</strong>
+                            <strong><?php echo t('order.total.label'); ?></strong>
                             <span id="order-total" class="fw-bold">$0.00</span>
                         </div>
                     </div>
@@ -41,22 +41,22 @@ echo generateHeader('Tu Pedido', 'Tu Pedido - KND Store. Revisa y confirma tu pe
             <div class="col-lg-5">
                 <div class="card knd-card">
                     <div class="card-header">
-                        <h4 class="mb-0">Datos del pedido</h4>
+                        <h4 class="mb-0"><?php echo t('order.data.title'); ?></h4>
                     </div>
                     <div class="card-body">
                         <form id="order-form">
                             <div class="mb-3">
-                                <label class="form-label">Nombre</label>
+                                <label class="form-label"><?php echo t('order.form.name_label'); ?></label>
                                 <input type="text" name="name" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">WhatsApp</label>
+                                <label class="form-label"><?php echo t('order.form.whatsapp_label'); ?></label>
                                 <input type="text" name="whatsapp" class="form-control" placeholder="+58..." required>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Método de pago</label>
+                                <label class="form-label"><?php echo t('order.form.payment_method_label'); ?></label>
                                 <select name="payment_method" class="form-select" required>
-                                    <option value="">Selecciona un método</option>
+                                    <option value=""><?php echo t('order.form.payment_method_select'); ?></option>
                                     <option value="Zinli">Zinli</option>
                                     <option value="Binance Pay">Binance Pay</option>
                                     <option value="Pago Móvil">Pago Móvil</option>
@@ -65,21 +65,21 @@ echo generateHeader('Tu Pedido', 'Tu Pedido - KND Store. Revisa y confirma tu pe
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Tipo de entrega</label>
+                                <label class="form-label"><?php echo t('order.form.delivery_type_label'); ?></label>
                                 <select name="delivery_type" class="form-select" id="delivery-type-select">
-                                    <option value="Digital / remoto">Digital / remoto</option>
-                                    <option value="Delivery coordinado">Delivery coordinado (Apparel)</option>
+                                    <option value="Digital / remoto"><?php echo t('order.form.delivery_type.digital'); ?></option>
+                                    <option value="Delivery coordinado"><?php echo t('order.form.delivery_type.coordinated'); ?></option>
                                 </select>
-                                <small class="text-muted">Se actualizará automáticamente si hay productos apparel en el pedido.</small>
+                                <small class="text-muted"><?php echo t('order.form.delivery_type.note'); ?></small>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Notas adicionales</label>
-                                <textarea name="notes" class="form-control" rows="3" placeholder="Especifica detalles de tu servicio, horarios, usuario de juego, etc."></textarea>
+                                <label class="form-label"><?php echo t('order.form.notes_label'); ?></label>
+                                <textarea name="notes" class="form-control" rows="3" placeholder="<?php echo t('order.form.notes_placeholder'); ?>"></textarea>
                             </div>
 
                             <button type="button" id="send-whatsapp-order" class="btn btn-whatsapp w-100">
                                 <i class="fab fa-whatsapp me-2"></i>
-                                Enviar pedido por WhatsApp
+                                <?php echo t('order.form.submit'); ?>
                             </button>
                         </form>
                     </div>
@@ -226,7 +226,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 const itemId = parseInt(this.dataset.id, 10);
                 const item = items.find(i => i.id === itemId);
                 
-                if (confirm(`¿Eliminar "${item.name}" del pedido?`)) {
+                const confirmTemplate = (window.I18N && window.I18N['order.confirm_remove']) 
+                    ? window.I18N['order.confirm_remove']
+                    : '¿Eliminar "{name}" del pedido?';
+                const confirmMsg = confirmTemplate.replace('{name}', item.name);
+                if (confirm(confirmMsg)) {
                     removeItem(itemId);
                     renderOrderItems();
                     updateOrderBadge();
@@ -331,9 +335,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 msg += `*Tipo de entrega:* ${deliveryType}%0A`;
             }
             
-            if (notes) msg += `%0A*Notas adicionales:* ${notes}%0A`;
+            if (notes) {
+                const notesLabel = (window.I18N && window.I18N['order.whatsapp.notes_label']) || 'Notas adicionales:';
+                msg += `%0A*${notesLabel}* ${notes}%0A`;
+            }
 
             if (hasApparel || hasService) {
+                // Nota importante - podría venir de window.I18N si se necesita
                 msg += '%0A*Nota importante:* Te contactaremos por WhatsApp/medios para coordinar delivery y/o detalles del diseño.%0A';
             }
             

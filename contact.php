@@ -28,13 +28,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validación básica
     if (empty($name) || empty($email) || empty($subject) || empty($message)) {
-        $error_message = 'Todos los campos son requeridos para establecer contacto intergaláctico.';
+        $error_message = t('contact.form.error.required');
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error_message = 'Frecuencia de respuesta inválida. Verifica tu señal de email.';
+        $error_message = t('contact.form.error.email');
     } else {
         // Aquí normalmente enviarías el email
         // Por ahora simulamos el envío exitoso
-        $success_message = '🛰️ Transmisión recibida. El Consejo Técnico evaluará tu solicitud y te responderá en una frecuencia cercana.';
+        $success_message = t('contact.form.success');
         
         // Limpiar campos después del envío exitoso
         $name = $email = $subject = $message = '';
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<?php echo generateHeader('Contacto', 'Contacto - KND Store. Digital Goods • Apparel • Custom Design Services. Establece contacto intergaláctico con nosotros'); ?>
+<?php echo generateHeader(t('contact.meta.title'), t('contact.meta.description')); ?>
 
 <!-- Particles Background -->
 <div id="particles-bg"></div>
@@ -55,12 +55,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="row align-items-center min-vh-100">
             <div class="col-12 text-center">
                 <h1 class="hero-title">
-                    <span class="text-gradient">¿LISTO PARA</span><br>
-                    <span class="text-gradient">ESTABLECER CONTACTO</span><br>
-                    <span class="text-gradient">INTERGALÁCTICO?</span>
+                    <span class="text-gradient"><?php echo t('contact.hero.title_line1'); ?></span><br>
+                    <span class="text-gradient"><?php echo t('contact.hero.title_line2'); ?></span><br>
+                    <span class="text-gradient"><?php echo t('contact.hero.title_line3'); ?></span>
                 </h1>
                 <p class="hero-subtitle">
-                    Ya seas un guerrero del gaming, un explorador de tecnología o una civilización alienígena con problemas de hardware... estamos aquí para ti. 💬 Mándanos una señal.
+                    <?php echo t('contact.hero.subtitle'); ?>
                 </p>
             </div>
         </div>
@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="contact-form-container">
                     <h2 class="section-title text-center mb-5">
                         <i class="fas fa-satellite me-3"></i>
-                        Transmisión de Señal
+                        <?php echo t('contact.form.title'); ?>
                     </h2>
                     
                     <?php if ($success_message): ?>
@@ -98,14 +98,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="form-group">
                                     <label for="name" class="form-label">
                                         <i class="fas fa-user me-2"></i>
-                                        Nombre del Piloto
+                                        <?php echo t('contact.form.name_label_pilot'); ?>
                                     </label>
                                     <input type="text" 
                                            class="form-control galactic-input" 
                                            id="name" 
                                            name="name" 
                                            value="<?php echo htmlspecialchars($name ?? ''); ?>"
-                                           placeholder="Introduce tu nombre completo aquí"
+                                           placeholder="<?php echo t('contact.form.name_placeholder'); ?>"
                                            required>
                                 </div>
                             </div>
@@ -113,14 +113,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="form-group">
                                     <label for="email" class="form-label">
                                         <i class="fas fa-envelope me-2"></i>
-                                        Frecuencia de Respuesta
+                                        <?php echo t('contact.form.email_label_frequency'); ?>
                                     </label>
                                     <input type="email" 
                                            class="form-control galactic-input" 
                                            id="email" 
                                            name="email" 
                                            value="<?php echo htmlspecialchars($email ?? ''); ?>"
-                                           placeholder="tu@email.com (correo electrónico donde te responderemos)"
+                                           placeholder="<?php echo t('contact.form.email_placeholder'); ?>"
                                            required>
                                 </div>
                             </div>
@@ -130,14 +130,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="form-group">
                                 <label for="subject" class="form-label">
                                     <i class="fas fa-bullseye me-2"></i>
-                                    Asunto Galáctico
+                                    <?php echo t('contact.form.subject_label_galactic'); ?>
                                 </label>
                                 <input type="text" 
                                        class="form-control galactic-input" 
                                        id="subject" 
                                        name="subject" 
                                        value="<?php echo htmlspecialchars($subject ?? ''); ?>"
-                                       placeholder="Ej: Consulta sobre productos, Soporte técnico, Información de pedidos, etc."
+                                       placeholder="<?php echo t('contact.form.subject_placeholder'); ?>"
                                        required>
                             </div>
                         </div>
@@ -146,13 +146,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="form-group">
                                 <label for="message" class="form-label">
                                     <i class="fas fa-comments me-2"></i>
-                                    Transmisión / Mensaje
+                                    <?php echo t('contact.form.message_label_transmission'); ?>
                                 </label>
                                 <textarea class="form-control galactic-textarea" 
                                           id="message" 
                                           name="message" 
                                           rows="6" 
-                                          placeholder="Escribe tu mensaje aquí. Describe tu consulta, problema o solicitud con el mayor detalle posible para poder ayudarte mejor."
+                                          placeholder="<?php echo t('contact.form.message_placeholder'); ?>"
                                           required><?php echo htmlspecialchars($message ?? ''); ?></textarea>
                             </div>
                         </div>
@@ -160,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="text-center">
                             <button type="submit" class="btn btn-primary btn-lg galactic-btn">
                                 <i class="fas fa-paper-plane me-2"></i>
-                                Transmitir Señal
+                                <?php echo t('contact.form.submit'); ?>
                             </button>
                         </div>
                     </form>
@@ -177,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="col-12 text-center mb-5">
                 <h2 class="section-title">
                     <i class="fas fa-broadcast-tower me-3"></i>
-                    Canales de Comunicación
+                    <?php echo t('contact.info.channels.title'); ?>
                 </h2>
             </div>
         </div>
@@ -190,11 +190,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="contact-icon">
                                 <i class="fas fa-envelope"></i>
                             </div>
-                            <h4>Email Oficial</h4>
+                            <h4><?php echo t('contact.info.email_official'); ?></h4>
                             <p>support@kndstore.com</p>
                             <a href="mailto:support@kndstore.com" class="btn btn-primary btn-sm">
                                 <i class="fas fa-paper-plane me-2"></i>
-                                Enviar Mensaje
+                                <?php echo t('contact.info.send_message'); ?>
                             </a>
                         </div>
                     </div>
@@ -204,9 +204,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="contact-icon">
                                 <i class="fas fa-map-marker-alt"></i>
                             </div>
-                            <h4>Base Operativa</h4>
+                            <h4><?php echo t('contact.info.base_operative'); ?></h4>
                             <p>Maracaibo, Venezuela</p>
-                            <span class="location-badge">Nodo Tierra 01</span>
+                            <span class="location-badge"><?php echo t('contact.info.location_badge'); ?></span>
                         </div>
                     </div>
                     
@@ -215,11 +215,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="contact-icon">
                                 <i class="fab fa-discord"></i>
                             </div>
-                            <h4>Nave Nodriza</h4>
-                            <p>Únete a nuestra nave nodriza</p>
+                            <h4><?php echo t('contact.info.mothership'); ?></h4>
+                            <p><?php echo t('contact.info.mothership'); ?></p>
                             <a href="https://discord.gg/VXXYakrb7X" target="_blank" class="btn btn-primary btn-sm">
                                 <i class="fab fa-discord me-2"></i>
-                                Unirse al Discord
+                                <?php echo t('contact.info.join_discord'); ?>
                             </a>
                         </div>
                     </div>
@@ -237,23 +237,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="hours-container">
                     <h2 class="section-title text-center mb-5">
                         <i class="fas fa-clock me-3"></i>
-                        Horarios de Operación
+                        <?php echo t('contact.hours.title'); ?>
                     </h2>
                     
                     <div class="row">
                         <div class="col-md-6 mb-4">
                             <div class="hours-card">
-                                <h4><i class="fas fa-headset me-2"></i>Soporte Técnico</h4>
-                                <p>24/7 - Siempre activo</p>
-                                <span class="status-badge online">En Línea</span>
+                                <h4><i class="fas fa-headset me-2"></i><?php echo t('contact.info.technical_support'); ?></h4>
+                                <p><?php echo t('contact.hours.support_247'); ?></p>
+                                <span class="status-badge online"><?php echo t('contact.hours.online'); ?></span>
                             </div>
                         </div>
                         
                         <div class="col-md-6 mb-4">
                             <div class="hours-card">
-                                <h4><i class="fas fa-shopping-cart me-2"></i>Ventas</h4>
-                                <p>Lunes a Domingo</p>
-                                <span class="status-badge online">9:00 AM - 10:00 PM</span>
+                                <h4><i class="fas fa-shopping-cart me-2"></i><?php echo t('contact.info.sales'); ?></h4>
+                                <p><?php echo t('contact.hours.mon_sun'); ?></p>
+                                <span class="status-badge online"><?php echo t('contact.hours.hours_range'); ?></span>
                             </div>
                         </div>
                     </div>
@@ -261,7 +261,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="text-center mt-4">
                         <p class="hours-note">
                             <i class="fas fa-info-circle me-2"></i>
-                            El Consejo Técnico está disponible para emergencias galácticas en cualquier momento del día.
+                            <?php echo t('contact.hours.note'); ?>
                         </p>
                     </div>
                 </div>
@@ -277,17 +277,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="col-12 text-center">
                 <h2 class="section-title">
                     <i class="fas fa-rocket me-3"></i>
-                    ¿Necesitas Asistencia Inmediata?
+                    <?php echo t('contact.cta.immediate_assistance'); ?>
                 </h2>
                 <p class="cta-text">
-                    Para emergencias técnicas o consultas urgentes, nuestro equipo está listo para responder en tiempo real.
+                    <?php echo t('contact.cta.urgent_text'); ?>
                 </p>
                 <div class="cta-buttons">
-                                            <a href="https://discord.gg/VXXYakrb7X" target="_blank" class="btn btn-primary btn-lg me-3">
-                        <i class="fab fa-discord"></i> Discord Inmediato
+                    <a href="https://discord.gg/VXXYakrb7X" target="_blank" class="btn btn-primary btn-lg me-3">
+                        <i class="fab fa-discord"></i> <?php echo t('contact.cta.discord_immediate'); ?>
                     </a>
                     <a href="mailto:support@kndstore.com" class="btn btn-primary btn-lg">
-                        <i class="fas fa-envelope"></i> Email de Emergencia
+                        <i class="fas fa-envelope"></i> <?php echo t('contact.cta.emergency_email'); ?>
                     </a>
                 </div>
             </div>

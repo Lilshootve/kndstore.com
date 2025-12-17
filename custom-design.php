@@ -10,7 +10,7 @@ $serviceProducts = array_filter($PRODUCTS, function($product) {
     return isset($product['tipo']) && $product['tipo'] === 'service';
 });
 
-echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise√±o personalizado. KND Store: Digital Goods ‚Ä¢ Apparel ‚Ä¢ Custom Design Services');
+echo generateHeader(t('custom_design.meta.title'), t('custom_design.meta.description'));
 ?>
 
 <div id="particles-bg"></div>
@@ -38,7 +38,7 @@ echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise√
 <section class="py-5 bg-dark-epic" id="plans">
     <div class="container">
         <h2 class="section-title text-center mb-5">
-            <i class="fas fa-layer-group me-2"></i> Planes de Dise√±o
+            <i class="fas fa-layer-group me-2"></i> <?php echo t('custom_design.plans.title'); ?>
         </h2>
         
         <div class="row">
@@ -59,7 +59,7 @@ echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise√
                                 <?php echo strip_tags($product['descripcion']); ?>
                             </div>
                             <a href="/producto.php?slug=<?php echo $slug; ?>" class="btn btn-primary w-100">
-                                <i class="fas fa-shopping-cart me-2"></i> Solicitar / Comprar
+                                <i class="fas fa-shopping-cart me-2"></i> <?php echo t('custom_design.request_buy'); ?>
                             </a>
                         </div>
                     </div>
@@ -73,7 +73,7 @@ echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise√
 <section class="py-5" id="brief-form">
     <div class="container">
         <h2 class="section-title text-center mb-5">
-            <i class="fas fa-file-alt me-2"></i> Completa tu Brief
+            <i class="fas fa-file-alt me-2"></i> <?php echo t('custom_design.brief.title'); ?>
         </h2>
         <div class="row">
             <div class="col-lg-8 mx-auto">
@@ -129,7 +129,7 @@ echo generateHeader('Custom Design Lab', 'Custom Design Lab - Servicios de dise√
 <section class="py-5 bg-dark-epic" id="how-it-works">
     <div class="container">
         <h2 class="section-title text-center mb-5">
-            <i class="fas fa-cogs me-2"></i> C√≥mo funciona
+            <i class="fas fa-cogs me-2"></i> <?php echo t('custom_design.how_it_works.title'); ?>
         </h2>
         <div class="row">
             <div class="col-lg-3 col-md-6 mb-4">

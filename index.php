@@ -12,7 +12,7 @@ $startTime = startPerformanceTimer();
 setCacheHeaders('html');
 ?>
 
-<?php echo generateHeader('Inicio', 'KND Store - Digital Goods • Apparel • Custom Design Services. Tu tienda galáctica de productos únicos y tecnología de vanguardia'); ?>
+<?php echo generateHeader(t('nav.home'), t('meta.default_description')); ?>
 
 <!-- Particles Background -->
 <div id="particles-bg"></div>
@@ -25,23 +25,22 @@ setCacheHeaders('html');
         <div class="row align-items-center min-vh-100">
             <div class="col-lg-6">
                 <h1 class="hero-title">
-                    <span class="text-gradient">Bienvenido a</span><br>
-                    <span class="text-gradient">KND Store</span>
+                    <span class="text-gradient"><?php echo t('home.hero.welcome'); ?></span><br>
+                    <span class="text-gradient"><?php echo t('home.hero.store_name'); ?></span>
                 </h1>
                 <p class="hero-subtitle">
-                    Digital Goods • Apparel • Custom Design Services<br>
-                    Tu tienda galáctica de productos únicos y tecnología de vanguardia. 
-                    Descubre un universo de posibilidades con nuestro catálogo exclusivo.
+                    <?php echo t('home.hero.subtitle_line1'); ?><br>
+                    <?php echo t('home.hero.subtitle_line2'); ?>
                 </p>
                 <div class="hero-buttons">
                     <a href="/products.php" class="btn btn-primary btn-lg">
-                        <i class="fas fa-rocket"></i> Explorar Productos
+                        <i class="fas fa-rocket"></i> <?php echo t('home.cta.explore_products'); ?>
                     </a>
                     <a href="/apparel.php" class="btn btn-outline-neon btn-lg">
-                        <i class="fas fa-tshirt"></i> KND Apparel
+                        <i class="fas fa-tshirt"></i> <?php echo t('home.cta.knd_apparel'); ?>
                     </a>
                     <a href="/about.php" class="btn btn-outline-light btn-lg">
-                        <i class="fas fa-info-circle"></i> Conoce Más
+                        <i class="fas fa-info-circle"></i> <?php echo t('home.cta.learn_more'); ?>
                     </a>
                 </div>
             </div>
@@ -63,8 +62,8 @@ setCacheHeaders('html');
                     <div class="feature-icon">
                         <i class="fas fa-shipping-fast"></i>
                     </div>
-                    <h3>Envío Galáctico</h3>
-                    <p>Entregamos a cualquier parte del universo con nuestra tecnología de transporte espacial de última generación.</p>
+                    <h3><?php echo t('home.features.title.shipping'); ?></h3>
+                    <p><?php echo t('home.features.body.shipping'); ?></p>
                 </div>
             </div>
             <div class="col-lg-4 mb-4">
@@ -72,8 +71,8 @@ setCacheHeaders('html');
                     <div class="feature-icon">
                         <i class="fas fa-shield-alt"></i>
                     </div>
-                    <h3>Seguridad Cósmica</h3>
-                    <p>Protegemos tus datos con tecnología de encriptación cuántica y protocolos de seguridad intergalácticos.</p>
+                    <h3><?php echo t('home.features.title.security'); ?></h3>
+                    <p><?php echo t('home.features.body.security'); ?></p>
                 </div>
             </div>
             <div class="col-lg-4 mb-4">
@@ -81,8 +80,8 @@ setCacheHeaders('html');
                     <div class="feature-icon">
                         <i class="fas fa-headset"></i>
                     </div>
-                    <h3>Soporte 24/7</h3>
-                    <p>Nuestro equipo de soporte está disponible las 24 horas del día, los 7 días de la semana, en todos los husos horarios.</p>
+                    <h3><?php echo t('home.features.title.support'); ?></h3>
+                    <p><?php echo t('home.features.body.support'); ?></p>
                 </div>
             </div>
         </div>
@@ -92,7 +91,7 @@ setCacheHeaders('html');
 <!-- Featured Products -->
 <section class="featured-products py-5">
     <div class="container">
-        <h2 class="section-title">Productos Destacados</h2>
+        <h2 class="section-title"><?php echo t('home.featured_products.title'); ?></h2>
         <div class="row">
             <?php
             // Productos destacados - slugs de productos destacados
@@ -116,7 +115,7 @@ setCacheHeaders('html');
                 <div class="col-lg-6 col-md-6 mb-4">
                     <div class="product-card">
                         <?php if (in_array($product['nombre'], ['Avatar gamer personalizado', 'Wallpaper personalizado IA'])): ?>
-                            <div class="product-offer-badge">Oferta</div>
+                            <div class="product-offer-badge"><?php echo t('product.badge.offer'); ?></div>
                         <?php endif; ?>
                         <div class="product-image">
                             <img src="<?php echo $product['imagen']; ?>" alt="<?php echo htmlspecialchars($product['nombre']); ?>">
@@ -154,7 +153,7 @@ setCacheHeaders('html');
             <?php endforeach; ?>
         </div>
         <div class="text-center mt-4">
-            <a href="/products.php" class="btn btn-outline-light btn-lg">Ver Todos los Productos</a>
+            <a href="/products.php" class="btn btn-outline-light btn-lg"><?php echo t('home.featured_products.view_all'); ?></a>
         </div>
     </div>
 </section>
@@ -166,22 +165,21 @@ setCacheHeaders('html');
             <div class="col-lg-6 mb-4 mb-lg-0">
                 <div class="apparel-hero-content">
                     <span class="badge bg-danger mb-3" style="font-size: 0.9rem; padding: 8px 16px;">
-                        <i class="fas fa-gem me-2"></i> LIMITED DROPS
+                        <i class="fas fa-gem me-2"></i> <?php echo t('apparel.badge.limited_drops'); ?>
                     </span>
                     <h2 class="section-title mb-4" style="font-size: 2.5rem; line-height: 1.2;">
-                        <span class="text-gradient">KND Apparel</span><br>
-                        <span style="font-size: 1.8rem;">Ropa Galáctica Oficial</span>
+                        <span class="text-gradient"><?php echo t('apparel.section.title'); ?></span><br>
+                        <span style="font-size: 1.8rem;"><?php echo t('apparel.section.subtitle'); ?></span>
                     </h2>
                     <p class="text-white mb-4" style="font-size: 1.1rem; line-height: 1.8; opacity: 0.9;">
-                        Viste con estilo cósmico. Hoodies y T-Shirts de edición limitada diseñadas para tu universo digital. 
-                        Material premium, diseños exclusivos y entrega coordinada.
+                        <?php echo t('apparel.section.body'); ?>
                     </p>
                     <div class="d-flex flex-wrap gap-3 mb-4">
                         <a href="/apparel.php" class="btn btn-primary btn-lg">
-                            <i class="fas fa-tshirt me-2"></i> Ver Colección Completa
+                            <i class="fas fa-tshirt me-2"></i> <?php echo t('apparel.cta.view_full_collection'); ?>
                         </a>
                         <a href="/custom-design.php" class="btn btn-outline-neon btn-lg">
-                            <i class="fas fa-palette me-2"></i> Custom Design
+                            <i class="fas fa-palette me-2"></i> <?php echo t('apparel.cta.custom_design'); ?>
                         </a>
                     </div>
                     <div class="apparel-features">
@@ -189,25 +187,25 @@ setCacheHeaders('html');
                             <div class="col-6">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-check-circle text-primary me-2" style="font-size: 1.2rem;"></i>
-                                    <span class="text-white">Material Premium</span>
+                                    <span class="text-white"><?php echo t('apparel.feature.material'); ?></span>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-check-circle text-primary me-2" style="font-size: 1.2rem;"></i>
-                                    <span class="text-white">Diseños Exclusivos</span>
+                                    <span class="text-white"><?php echo t('apparel.feature.exclusive_designs'); ?></span>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-check-circle text-primary me-2" style="font-size: 1.2rem;"></i>
-                                    <span class="text-white">Ediciones Limitadas</span>
+                                    <span class="text-white"><?php echo t('apparel.feature.limited_editions'); ?></span>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-check-circle text-primary me-2" style="font-size: 1.2rem;"></i>
-                                    <span class="text-white">Delivery Coordinado</span>
+                                    <span class="text-white"><?php echo t('apparel.feature.coordinated_delivery'); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -249,7 +247,7 @@ setCacheHeaders('html');
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span class="text-primary fw-bold">$<?php echo number_format($product['precio'], 2); ?></span>
                                             <a href="/producto.php?slug=<?php echo $slug; ?>" class="btn btn-sm btn-outline-neon">
-                                                Ver <i class="fas fa-arrow-right ms-1"></i>
+                                                <?php echo t('btn.view'); ?> <i class="fas fa-arrow-right ms-1"></i>
                                             </a>
                                         </div>
                                     </div>

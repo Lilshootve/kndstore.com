@@ -44,7 +44,7 @@ foreach ($PRODUCTS as $slug => $producto) {
 }
 ?>
 
-<?php echo generateHeader('Catálogo', 'Catálogo completo - KND Store: Digital Goods • Apparel • Custom Design Services. Tecnología, Gaming, Software, Ropa y más'); ?>
+<?php echo generateHeader(t('products.meta.title'), t('products.meta.description')); ?>
 
 <!-- Particles Background -->
 <div id="particles-bg"></div>
@@ -71,14 +71,14 @@ foreach ($PRODUCTS as $slug => $producto) {
 <!-- Categorías Destacadas -->
 <section class="categories-section py-4 bg-dark-epic">
     <div class="container">
-        <h2 class="section-title text-center mb-4">Categorías Destacadas</h2>
+        <h2 class="section-title text-center mb-4"><?php echo t('products.categories.title'); ?></h2>
         <div class="row">
             <div class="col-lg-2 col-md-4 col-6 mb-3">
                 <a href="/products.php?categoria=tecnologia" class="category-card">
                     <div class="category-icon">
                         <i class="fas fa-chalkboard"></i>
                     </div>
-                    <h5>Tecnología</h5>
+                    <h5><?php echo t('products.categories.technology'); ?></h5>
                 </a>
             </div>
             <div class="col-lg-2 col-md-4 col-6 mb-3">
@@ -86,7 +86,7 @@ foreach ($PRODUCTS as $slug => $producto) {
                     <div class="category-icon">
                         <i class="fas fa-gamepad"></i>
                     </div>
-                    <h5>Gaming</h5>
+                    <h5><?php echo t('products.categories.gaming'); ?></h5>
                 </a>
             </div>
             <div class="col-lg-2 col-md-4 col-6 mb-3">
@@ -94,7 +94,7 @@ foreach ($PRODUCTS as $slug => $producto) {
                     <div class="category-icon">
                         <i class="fas fa-cogs"></i>
                     </div>
-                    <h5>Accesorios</h5>
+                    <h5><?php echo t('products.categories.accessories'); ?></h5>
                 </a>
             </div>
             <div class="col-lg-2 col-md-4 col-6 mb-3">
@@ -125,22 +125,22 @@ foreach ($PRODUCTS as $slug => $producto) {
                 <ul class="nav nav-pills justify-content-center" role="tablist">
                     <li class="nav-item">
                         <a class="nav-link <?php echo !$tipo_filtro ? 'active' : ''; ?>" href="/products.php">
-                            <i class="fas fa-th me-2"></i> All
+                            <i class="fas fa-th me-2"></i> <?php echo t('products.categories.all'); ?>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link <?php echo $tipo_filtro === 'digital' ? 'active' : ''; ?>" href="/products.php?type=digital">
-                            <i class="fas fa-download me-2"></i> Digital
+                            <i class="fas fa-download me-2"></i> <?php echo t('products.filters.type.digital'); ?>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link <?php echo $tipo_filtro === 'apparel' ? 'active' : ''; ?>" href="/products.php?type=apparel">
-                            <i class="fas fa-tshirt me-2"></i> Apparel
+                            <i class="fas fa-tshirt me-2"></i> <?php echo t('products.filters.type.apparel'); ?>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link <?php echo $tipo_filtro === 'service' ? 'active' : ''; ?>" href="/products.php?type=service">
-                            <i class="fas fa-palette me-2"></i> Services
+                            <i class="fas fa-palette me-2"></i> <?php echo t('products.filters.type.services'); ?>
                         </a>
                     </li>
                 </ul>
@@ -155,14 +155,14 @@ foreach ($PRODUCTS as $slug => $producto) {
                     <div class="row g-3">
                         <div class="col-md-6">
                             <input type="text" name="busqueda" value="<?php echo htmlspecialchars($busqueda); ?>" 
-                                   class="form-control search-input" placeholder="Buscar en el catálogo...">
+                                   class="form-control search-input" placeholder="<?php echo t('products.filters.search_placeholder'); ?>">
                         </div>
                         <div class="col-md-4">
                             <select name="categoria" class="form-select">
-                                <option value="">Todas las categorías</option>
-                                <option value="tecnologia" <?php echo $categoria_filtro === 'tecnologia' ? 'selected' : ''; ?>>Tecnología</option>
-                                <option value="gaming" <?php echo $categoria_filtro === 'gaming' ? 'selected' : ''; ?>>Gaming</option>
-                                <option value="accesorios" <?php echo $categoria_filtro === 'accesorios' ? 'selected' : ''; ?>>Accesorios</option>
+                                <option value=""><?php echo t('products.categories.all'); ?></option>
+                                <option value="tecnologia" <?php echo $categoria_filtro === 'tecnologia' ? 'selected' : ''; ?>><?php echo t('products.categories.technology'); ?></option>
+                                <option value="gaming" <?php echo $categoria_filtro === 'gaming' ? 'selected' : ''; ?>><?php echo t('products.categories.gaming'); ?></option>
+                                <option value="accesorios" <?php echo $categoria_filtro === 'accesorios' ? 'selected' : ''; ?>><?php echo t('products.categories.accessories'); ?></option>
                                 <option value="software" <?php echo $categoria_filtro === 'software' ? 'selected' : ''; ?>>Software</option>
                                 <option value="hardware" <?php echo $categoria_filtro === 'hardware' ? 'selected' : ''; ?>>Hardware</option>
                             </select>
@@ -188,9 +188,9 @@ foreach ($PRODUCTS as $slug => $producto) {
                     <?php if ($categoria_filtro): ?>
                         <?php echo ucfirst($categoria_filtro); ?>
                     <?php elseif ($busqueda): ?>
-                        Resultados para "<?php echo htmlspecialchars($busqueda); ?>"
+                        <?php echo t('products.results.title'); ?>: "<?php echo htmlspecialchars($busqueda); ?>"
                     <?php else: ?>
-                        Todo el Catálogo
+                        <?php echo t('products.results.title'); ?>
                     <?php endif; ?>
                 </h2>
             </div>
@@ -213,7 +213,7 @@ foreach ($PRODUCTS as $slug => $producto) {
                     <div class="col-lg-4 col-md-6 mb-4">
                         <div class="product-card">
                             <?php if (in_array($producto['nombre'], ['Avatar gamer personalizado', 'Wallpaper personalizado IA'])): ?>
-                                <div class="product-offer-badge">Oferta</div>
+                                <div class="product-offer-badge"><?php echo t('product.badge.offer'); ?></div>
                             <?php endif; ?>
                             <div class="product-image">
                                 <?php 
@@ -228,7 +228,7 @@ foreach ($PRODUCTS as $slug => $producto) {
                                     </div>
                                     <div class="product-overlay">
                                         <a href="/producto.php?slug=<?php echo $producto['slug']; ?>" class="btn btn-primary">
-                                            <i class="fas fa-eye me-2"></i>Ver detalles
+                                            <i class="fas fa-eye me-2"></i><?php echo t('btn.view_details'); ?>
                                         </a>
                                     </div>
                                 <?php else: 
@@ -243,7 +243,7 @@ foreach ($PRODUCTS as $slug => $producto) {
                                          onerror="this.onerror=null; this.src='/<?php echo htmlspecialchars($producto['imagen']); ?>';">
                                     <div class="product-overlay">
                                         <a href="/producto.php?slug=<?php echo $producto['slug']; ?>" class="btn btn-primary">
-                                            <i class="fas fa-eye me-2"></i>Ver detalles
+                                            <i class="fas fa-eye me-2"></i><?php echo t('btn.view_details'); ?>
                                         </a>
                                     </div>
                                 <?php endif; ?>
@@ -264,7 +264,7 @@ foreach ($PRODUCTS as $slug => $producto) {
                                     <?php endif; ?>
                                     <div class="d-flex gap-2">
                                     <a href="/producto.php?slug=<?php echo $producto['slug']; ?>" class="btn btn-outline-neon btn-sm btn-details">
-                                        Ver detalles
+                                        <?php echo t('btn.view_details'); ?>
                                     </a>
                                         <button 
                                             type="button"
@@ -274,7 +274,7 @@ foreach ($PRODUCTS as $slug => $producto) {
                                             data-price="<?php echo number_format($precio_real, 2, '.', ''); ?>"
                                             data-type="<?php echo isset($producto['tipo']) ? htmlspecialchars($producto['tipo']) : 'digital'; ?>"
                                         >
-                                            Añadir al pedido
+                                            <?php echo t('btn.add_to_order'); ?>
                                         </button>
                                     </div>
                                 </div>

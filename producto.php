@@ -37,8 +37,8 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
             <div class="col-12 text-center">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb justify-content-center">
-                        <li class="breadcrumb-item"><a href="/index.php">Inicio</a></li>
-                        <li class="breadcrumb-item"><a href="/products.php">Catálogo</a></li>
+                        <li class="breadcrumb-item"><a href="/index.php"><?php echo t('product.breadcrumb.home'); ?></a></li>
+                        <li class="breadcrumb-item"><a href="/products.php"><?php echo t('product.breadcrumb.catalog'); ?></a></li>
                         <li class="breadcrumb-item active" aria-current="page"><?php echo htmlspecialchars($producto['nombre']); ?></li>
                     </ol>
                 </nav>
@@ -179,7 +179,7 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                         </div>
                         <div class="mt-3">
                             <a href="/custom-design.php" class="btn btn-outline-neon">
-                                <i class="fas fa-palette me-2"></i> Completar Brief
+                                <i class="fas fa-palette me-2"></i> <?php echo t('product.brief.complete'); ?>
                             </a>
                         </div>
                     <?php endif; ?>
@@ -198,7 +198,7 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                                         id="add-apparel-btn"
                                     >
                                         <i class="fas fa-shopping-cart me-2"></i>
-                                        Añadir al pedido
+                                        <?php echo t('btn.add_to_order'); ?>
                                     </button>
                                 </div>
                             <?php else: ?>
@@ -212,7 +212,7 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                                         data-type="<?php echo isset($producto['tipo']) ? htmlspecialchars($producto['tipo']) : 'digital'; ?>"
                                     >
                                         <i class="fas fa-shopping-cart me-2"></i>
-                                        Añadir al pedido
+                                        <?php echo t('btn.add_to_order'); ?>
                                     </button>
                                 </div>
                             <?php endif; ?>
@@ -221,7 +221,7 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                                    class="btn btn-whatsapp btn-lg w-100" 
                                    target="_blank">
                                     <i class="fab fa-whatsapp me-2"></i>
-                                    Solicitar por WhatsApp
+                                    <?php echo t('product.request_whatsapp'); ?>
                                 </a>
                             </div>
                         </div>

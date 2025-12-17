@@ -5,7 +5,7 @@ require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 ?>
 
-<?php echo generateHeader('Términos y Condiciones', 'Términos y Condiciones de KND Store - Knowledge \'N Development'); ?>
+<?php echo generateHeader(t('terms.meta.title'), t('terms.meta.description')); ?>
 
 <!-- Particles Background -->
 <div id="particles-bg"></div>
@@ -18,16 +18,16 @@ require_once __DIR__ . '/includes/footer.php';
         <div class="row">
             <div class="col-12 text-center">
                 <h1 class="hero-title">
-                    <span class="text-gradient">Términos y</span><br>
-                    <span class="text-gradient">Condiciones</span>
+                    <span class="text-gradient"><?php echo t('terms.hero.title_line1'); ?></span><br>
+                    <span class="text-gradient"><?php echo t('terms.hero.title_line2'); ?></span>
                 </h1>
                 <p class="hero-subtitle">
-                    Servicios digitales y uso de la plataforma KND Store
+                    <?php echo t('terms.hero.subtitle'); ?>
                 </p>
                 <div class="mt-3">
                     <span class="badge bg-primary fs-6">
                         <i class="fas fa-file-contract me-2"></i>
-                        Última actualización: <?php echo date('F Y'); ?>
+                        <?php echo t('terms.last_update.badge', ['month_year' => date('F Y')]); ?>
                     </span>
                 </div>
             </div>

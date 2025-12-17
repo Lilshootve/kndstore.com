@@ -5,7 +5,7 @@ require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 ?>
 
-<?php echo generateHeader('Política de Privacidad', 'Política de Privacidad de KND Store - Protección de datos y privacidad'); ?>
+<?php echo generateHeader(t('privacy.meta.title'), t('privacy.meta.description')); ?>
 
 <!-- Particles Background -->
 <div id="particles-bg"></div>
@@ -18,16 +18,16 @@ require_once __DIR__ . '/includes/footer.php';
         <div class="row">
             <div class="col-12 text-center">
                 <h1 class="hero-title">
-                    <span class="text-gradient">Política de</span><br>
-                    <span class="text-gradient">Privacidad</span>
+                    <span class="text-gradient"><?php echo t('privacy.hero.title_line1'); ?></span><br>
+                    <span class="text-gradient"><?php echo t('privacy.hero.title_line2'); ?></span>
                 </h1>
                 <p class="hero-subtitle">
-                    Protección de datos y privacidad en KND Store
+                    <?php echo t('privacy.hero.subtitle'); ?>
                 </p>
                 <div class="mt-3">
                     <span class="badge bg-primary fs-6">
                         <i class="fas fa-shield-alt me-2"></i>
-                        Última actualización: <?php echo date('F Y'); ?>
+                        <?php echo t('privacy.last_update.badge', ['month_year' => date('F Y')]); ?>
                     </span>
                 </div>
             </div>

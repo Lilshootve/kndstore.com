@@ -3,12 +3,40 @@
 // La verificación de Font Awesome ahora se maneja en header.php
 // No necesitamos duplicar la funcionalidad aquí
 
+// Helper para traducciones JS
+function tJs(key, fallback) {
+    return (window.I18N && window.I18N[key]) || fallback || key;
+}
+
 // Función para inicializar la aplicación
 function initApp() {
     // Inicializar otros componentes
     initScrollEffects();
     initColorPanel();
     initMobileOptimizations();
+    initAddToOrderButtons();
+}
+
+// Inicializar botones "Añadir al pedido"
+function initAddToOrderButtons() {
+    document.querySelectorAll('.add-to-order').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const item = {
+                id: parseInt(this.dataset.id, 10),
+                name: this.dataset.name || '',
+                price: parseFloat(this.dataset.price || 0),
+                type: this.dataset.type || 'digital'
+            };
+            
+            if (item.id && item.name && item.price > 0) {
+                addItemToOrder(item);
+                updateOrderBadge();
+                // Usar clave de traducción para el mensaje
+                const messageKey = 'order.toast_added';
+                showOrderNotification(messageKey, 'success');
+            }
+        });
+    });
 }
 
 // Efectos de scroll
@@ -239,10 +267,12 @@ function showOrderNotification(message, type = 'success') {
     const notification = document.createElement('div');
     notification.id = 'order-notification';
     notification.className = `order-notification order-notification-${type}`;
+    // message puede venir ya traducido desde PHP o ser una clave de window.I18N
+    const displayMessage = (window.I18N && window.I18N[message]) ? window.I18N[message] : message;
     notification.innerHTML = `
         <div class="order-notification-content">
             <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'} me-2"></i>
-            <span>${message}</span>
+            <span>${displayMessage}</span>
         </div>
     `;
     
