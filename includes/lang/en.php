@@ -276,6 +276,8 @@ return [
     'products.filters.type.services' => 'Services',
     'products.results.title' => 'Results',
     'products.results.no_results' => 'No products found.',
+    'products.results.try_again' => 'Try different search terms or categories',
+    'products.results.view_all' => 'View all catalog',
     'products.results.count' => '{count} products found',
 
     // Order page

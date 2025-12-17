@@ -72,11 +72,11 @@ usort($productos_filtrados, function($a, $b) {
         <div class="row align-items-center min-vh-100">
             <div class="col-12 text-center">
                 <h1 class="hero-title">
-                    <span class="text-gradient">Nuestro</span><br>
-                    <span class="text-gradient">Catálogo</span>
+                    <span class="text-gradient"><?php echo t('products.hero.title_line1'); ?></span><br>
+                    <span class="text-gradient"><?php echo t('products.hero.title_line2'); ?></span>
                 </h1>
                 <p class="hero-subtitle">
-                    Digital Goods • Apparel • Custom Design Services
+                    <?php echo t('products.hero.subtitle'); ?>
                 </p>
             </div>
         </div>
@@ -216,9 +216,9 @@ usort($productos_filtrados, function($a, $b) {
                 <div class="col-12 text-center">
                     <div class="no-results">
                         <i class="fas fa-search fa-3x mb-3" style="color: var(--knd-neon-blue);"></i>
-                        <h3>No se encontraron servicios</h3>
-                        <p>Intenta con otros términos de búsqueda o categorías</p>
-                        <a href="/products.php" class="btn btn-primary">Ver todo el catálogo</a>
+                        <h3><?php echo t('products.results.no_results'); ?></h3>
+                        <p><?php echo t('products.results.try_again'); ?></p>
+                        <a href="/products.php" class="btn btn-primary"><?php echo t('products.results.view_all'); ?></a>
                     </div>
                 </div>
             </div>
