@@ -42,6 +42,21 @@ foreach ($PRODUCTS as $slug => $producto) {
             $productos_filtrados[] = $producto;
     }
 }
+
+// Ordenar productos: apparel primero, luego los demás
+usort($productos_filtrados, function($a, $b) {
+    $tipo_a = isset($a['tipo']) ? $a['tipo'] : 'digital';
+    $tipo_b = isset($b['tipo']) ? $b['tipo'] : 'digital';
+    
+    // Si ambos son apparel o ninguno es apparel, mantener orden original
+    if ($tipo_a === 'apparel' && $tipo_b !== 'apparel') {
+        return -1; // apparel va primero
+    }
+    if ($tipo_a !== 'apparel' && $tipo_b === 'apparel') {
+        return 1; // apparel va primero
+    }
+    return 0; // mantener orden original
+});
 ?>
 
 <?php echo generateHeader(t('products.meta.title'), t('products.meta.description')); ?>
