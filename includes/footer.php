@@ -87,7 +87,7 @@ function generateFooter() {
     $footer .= '                    ' . (defined('KND_MEANING_TEXT') ? KND_MEANING_TEXT : 'KND = <strong>Knowledge ‘N Development</strong> — conocimiento convertido en soluciones digitales rápidas, seguras e innovadoras.') . "\n";
     $footer .= '                </p>' . "\n";
     $footer .= '                <p class="mb-0" style="opacity: 0.7;">' . "\n";
-    $footer .= '                    ' . t('footer.copyright', ['year' => date('Y')]) . "\n";
+    $footer .= '                    ' . t('footer.copyright', null, ['year' => date('Y')]) . "\n";
     $footer .= '                </p>' . "\n";
     $footer .= '            </div>' . "\n";
     $footer .= '        </div>' . "\n";

@@ -1,60 +1,70 @@
 <?php
-// Funciones stub de i18n - definidas en archivo separado para asegurar que se carguen
+// KND Store - i18n fallback (rescate)
+// Esto evita fatal errors si faltan archivos de idioma.
+// Luego lo mejoramos bien.
 
-function t($key = '', $vars = array(), $fallback = '') {
-    $key = (string)$key;
-    if (!is_array($vars)) {
-        $vars = array();
-    }
-    $fallback = (string)$fallback;
-    
-    if ($fallback !== '') {
-        $value = $fallback;
-    } elseif ($key !== '') {
-        $parts = explode('.', $key);
-        $value = end($parts);
-        $value = ucfirst(str_replace('_', ' ', $value));
-    } else {
-        $value = '';
-    }
-    
-    if (!empty($vars)) {
-        foreach ($vars as $name => $rawVal) {
-            $safeVal = htmlspecialchars((string) $rawVal, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-            $value = str_replace('{' . $name . '}', $safeVal, $value);
+if (!function_exists('t')) {
+    function t(string $key, $fallback = null, array $vars = []): string {
+        // Detectar si $fallback es un array (compatibilidad con llamadas antiguas)
+        if (is_array($fallback)) {
+            // Si tiene claves 'es' o 'en', es un diccionario por idioma
+            if (isset($fallback['es']) || isset($fallback['en'])) {
+                $lang = current_lang();
+                $text = $fallback[$lang] ?? $fallback['es'] ?? $fallback['en'] ?? $key;
+            } else {
+                // Si no tiene 'es'/'en, entonces es $vars y el fallback es null
+                $vars = $fallback;
+                $text = $key; // Usar la clave como texto base
+            }
+        } else {
+            // $fallback es string/null normal
+            $text = $fallback ?? $key;
         }
+
+        // Reemplazo simple: {name} => valor
+        foreach ($vars as $k => $v) {
+            $text = str_replace('{' . $k . '}', (string)$v, $text);
+        }
+        
+        return htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
-    
-    return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
-function t_html($key = '', $vars = array(), $fallback = '') {
-    $key = (string)$key;
-    if (!is_array($vars)) {
-        $vars = array();
-    }
-    $fallback = (string)$fallback;
-    
-    if ($fallback !== '') {
-        $value = $fallback;
-    } elseif ($key !== '') {
-        $parts = explode('.', $key);
-        $value = end($parts);
-        $value = ucfirst(str_replace('_', ' ', $value));
-    } else {
-        $value = '';
-    }
-    
-    if (!empty($vars)) {
-        foreach ($vars as $name => $rawVal) {
-            $safeVal = htmlspecialchars((string) $rawVal, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-            $value = str_replace('{' . $name . '}', $safeVal, $value);
+if (!function_exists('t_html')) {
+    function t_html(string $key, $fallback = null, array $vars = []): string {
+        // Detectar si $fallback es un array (compatibilidad con llamadas antiguas)
+        if (is_array($fallback)) {
+            // Si tiene claves 'es' o 'en', es un diccionario por idioma
+            if (isset($fallback['es']) || isset($fallback['en'])) {
+                $lang = current_lang();
+                $text = $fallback[$lang] ?? $fallback['es'] ?? $fallback['en'] ?? $key;
+            } else {
+                // Si no tiene 'es'/'en, entonces es $vars y el fallback es null
+                $vars = $fallback;
+                $text = $key; // Usar la clave como texto base
+            }
+        } else {
+            // $fallback es string/null normal
+            $text = $fallback ?? $key;
         }
+
+        // Reemplazo simple: {name} => valor
+        foreach ($vars as $k => $v) {
+            $text = str_replace('{' . $k . '}', htmlspecialchars((string)$v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), $text);
+        }
+        
+        return $text; // Sin htmlspecialchars final para permitir HTML
     }
-    
-    return $value;
 }
 
-function current_lang() {
-    return 'es';
+if (!function_exists('current_lang')) {
+    function current_lang(): string {
+        return 'es';
+    }
+}
+
+if (!function_exists('__')) {
+    function __(string $key, $fallback = null, array $vars = []): string {
+        return t($key, $fallback, $vars);
+    }
 }

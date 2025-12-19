@@ -27,7 +27,7 @@ require_once __DIR__ . '/includes/footer.php';
                 <div class="mt-3">
                     <span class="badge bg-primary fs-6">
                         <i class="fas fa-shield-alt me-2"></i>
-                        <?php echo t('privacy.last_update.badge', ['month_year' => date('F Y')]); ?>
+                        <?php echo t('privacy.last_update.badge', null, ['month_year' => date('F Y')]); ?>
                     </span>
                 </div>
             </div>
