@@ -5,7 +5,29 @@
  */
 
 require_once __DIR__ . '/../../includes/session.php';
-require_once __DIR__ . '/../../includes/config.php';
+
+// Verificación robusta de config.php
+$configPath = __DIR__ . '/../../includes/config.php';
+if (!file_exists($configPath)) {
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    
+    // Detectar si estamos en desarrollo o producción
+    $serverName = $_SERVER['SERVER_NAME'] ?? '';
+    $isLocal = in_array($serverName, ['localhost', '127.0.0.1']);
+    
+    $message = $isLocal 
+        ? 'Missing includes/config.php on server.' 
+        : 'Configuration error. Please contact the administrator.';
+    
+    echo json_encode([
+        'success' => false,
+        'error' => $message
+    ]);
+    exit;
+}
+
+require_once $configPath;
 
 // Headers JSON
 header('Content-Type: application/json; charset=utf-8');
