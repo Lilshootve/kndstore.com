@@ -94,10 +94,15 @@ if (!defined('KND_I18N_LOADED')) {
     function knd_load_dictionary(string $lang): array
     {
         $file = __DIR__ . '/lang/' . $lang . '.php';
-        if (file_exists($file)) {
-            $data = include $file;
-            if (is_array($data)) {
-                return $data;
+        if (file_exists($file) && is_readable($file)) {
+            try {
+                $data = include $file;
+                if (is_array($data)) {
+                    return $data;
+                }
+            } catch (Throwable $e) {
+                // Si hay un error al cargar el archivo, loguear y continuar con array vacío
+                error_log('[i18n] Error loading dictionary file: ' . $file . ' - ' . $e->getMessage());
             }
         }
         return [];
@@ -105,19 +110,34 @@ if (!defined('KND_I18N_LOADED')) {
 
     // Resolver idioma actual y configurar cookie
     $CURRENT_LANG = knd_resolve_lang($KND_SUPPORTED_LANGS);
+    
+    // Asegurar que el idioma sea válido, si no, usar 'es' por defecto
+    if (!in_array($CURRENT_LANG, $KND_SUPPORTED_LANGS, true)) {
+        $CURRENT_LANG = 'es';
+    }
 
     // Guardar cookie de idioma (1 año) si es necesario
     if (!headers_sent()) {
-        $cookieLang = isset($_COOKIE['knd_lang']) ? strtolower((string) $_COOKIE['knd_lang']) : null;
-        if ($cookieLang !== $CURRENT_LANG) {
-            // Cookie accesible en todo el dominio
-            setcookie('knd_lang', $CURRENT_LANG, time() + 365 * 24 * 60 * 60, '/');
-            $_COOKIE['knd_lang'] = $CURRENT_LANG;
+        try {
+            $cookieLang = isset($_COOKIE['knd_lang']) ? strtolower((string) $_COOKIE['knd_lang']) : null;
+            if ($cookieLang !== $CURRENT_LANG) {
+                // Cookie accesible en todo el dominio
+                setcookie('knd_lang', $CURRENT_LANG, time() + 365 * 24 * 60 * 60, '/');
+                $_COOKIE['knd_lang'] = $CURRENT_LANG;
+            }
+        } catch (Throwable $e) {
+            // Si hay error al establecer cookie, continuar sin ella
+            error_log('[i18n] Error setting language cookie: ' . $e->getMessage());
         }
     }
 
     // Cargar diccionario global
     $I18N = knd_load_dictionary($CURRENT_LANG);
+    
+    // Si el diccionario está vacío, intentar cargar español como fallback
+    if (empty($I18N) && $CURRENT_LANG !== 'es') {
+        $I18N = knd_load_dictionary('es');
+    }
 
     /**
      * Idioma actual (es/en).
@@ -139,6 +159,11 @@ if (!defined('KND_I18N_LOADED')) {
     function t(string $key, array $vars = [], string $fallback = ''): string
     {
         global $I18N;
+        // Asegurar que $I18N sea un array
+        if (!is_array($I18N)) {
+            $I18N = [];
+        }
+        
         // $isLocal viene de config.php; puede no existir todavía si se usa t()
         // antes de cargar config, por eso lo leemos de $GLOBALS.
         $isLocal = $GLOBALS['isLocal'] ?? false;
@@ -172,6 +197,11 @@ if (!defined('KND_I18N_LOADED')) {
     function t_html(string $key, array $vars = [], string $fallback = ''): string
     {
         global $I18N;
+        // Asegurar que $I18N sea un array
+        if (!is_array($I18N)) {
+            $I18N = [];
+        }
+        
         $isLocal = $GLOBALS['isLocal'] ?? false;
 
         $value = isset($I18N[$key]) ? (string) $I18N[$key] : null;
