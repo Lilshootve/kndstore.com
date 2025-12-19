@@ -1,6 +1,17 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+
+// Capturar errores fatales
+register_shutdown_function(function() {
+    $error = error_get_last();
+    if ($error !== NULL && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        echo "<br><strong>ERROR FATAL:</strong> " . $error['message'] . "<br>";
+        echo "Archivo: " . $error['file'] . "<br>";
+        echo "Línea: " . $error['line'] . "<br>";
+    }
+});
 
 echo "Test 1: PHP funciona<br>";
 
@@ -21,11 +32,23 @@ try {
 }
 
 try {
-    echo "Test 4: Probando función t()<br>";
-    $test = t('test.key', [], 'Test funciona');
-    echo "Resultado: " . $test . "<br>";
+    echo "Test 4: Verificando si función t() existe<br>";
+    if (function_exists('t')) {
+        echo "Función t() existe<br>";
+        echo "Test 4.1: Probando función t() con array()<br>";
+        $test = t('test.key', array(), 'Test funciona');
+        echo "Resultado: " . $test . "<br>";
+    } else {
+        echo "ERROR: Función t() NO existe<br>";
+        die();
+    }
 } catch (Exception $e) {
     echo "Error en t(): " . $e->getMessage() . "<br>";
+    echo "Stack trace: " . $e->getTraceAsString() . "<br>";
+    die();
+} catch (Error $e) {
+    echo "Error fatal en t(): " . $e->getMessage() . "<br>";
+    echo "Stack trace: " . $e->getTraceAsString() . "<br>";
     die();
 }
 
