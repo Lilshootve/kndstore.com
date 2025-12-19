@@ -3,6 +3,31 @@
 // Esto evita fatal errors si faltan archivos de idioma.
 // Luego lo mejoramos bien.
 
+// Función auxiliar para cargar el diccionario de idioma
+if (!function_exists('_load_i18n_dict')) {
+    function _load_i18n_dict(): array {
+        static $dict = null;
+        
+        if ($dict !== null) {
+            return $dict;
+        }
+        
+        $lang = current_lang();
+        $langFile = __DIR__ . '/lang/' . $lang . '.php';
+        
+        if (file_exists($langFile) && is_readable($langFile)) {
+            $dict = require $langFile;
+            if (is_array($dict)) {
+                return $dict;
+            }
+        }
+        
+        // Fallback: diccionario vacío si no se puede cargar
+        $dict = [];
+        return $dict;
+    }
+}
+
 if (!function_exists('t')) {
     function t(string $key, $fallback = null, array $vars = []): string {
         // Detectar si $fallback es un array (compatibilidad con llamadas antiguas)
@@ -14,11 +39,19 @@ if (!function_exists('t')) {
             } else {
                 // Si no tiene 'es'/'en, entonces es $vars y el fallback es null
                 $vars = $fallback;
-                $text = $key; // Usar la clave como texto base
+                // Intentar buscar en el diccionario primero
+                $dict = _load_i18n_dict();
+                $text = $dict[$key] ?? $key;
             }
         } else {
             // $fallback es string/null normal
-            $text = $fallback ?? $key;
+            // Intentar buscar en el diccionario primero
+            $dict = _load_i18n_dict();
+            if (isset($dict[$key])) {
+                $text = $dict[$key];
+            } else {
+                $text = $fallback ?? $key;
+            }
         }
 
         // Reemplazo simple: {name} => valor
@@ -41,11 +74,19 @@ if (!function_exists('t_html')) {
             } else {
                 // Si no tiene 'es'/'en, entonces es $vars y el fallback es null
                 $vars = $fallback;
-                $text = $key; // Usar la clave como texto base
+                // Intentar buscar en el diccionario primero
+                $dict = _load_i18n_dict();
+                $text = $dict[$key] ?? $key;
             }
         } else {
             // $fallback es string/null normal
-            $text = $fallback ?? $key;
+            // Intentar buscar en el diccionario primero
+            $dict = _load_i18n_dict();
+            if (isset($dict[$key])) {
+                $text = $dict[$key];
+            } else {
+                $text = $fallback ?? $key;
+            }
         }
 
         // Reemplazo simple: {name} => valor
