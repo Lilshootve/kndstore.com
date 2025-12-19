@@ -337,24 +337,7 @@ function generateScripts() {
     // Panel de personalización de colores
     $scripts .= generateColorPanel();
     
-    // Inyectar window.I18N para JS (solo claves necesarias)
-    $scripts .= '<script>' . "\n";
-    $scripts .= 'window.I18N = {' . "\n";
-    $scripts .= '    "cookie.title": ' . json_encode(t('cookie.title')) . ',' . "\n";
-    $scripts .= '    "cookie.message": ' . json_encode(t('cookie.message')) . ',' . "\n";
-    $scripts .= '    "cookie.btn.accept_all": ' . json_encode(t('cookie.btn.accept_all')) . ',' . "\n";
-    $scripts .= '    "cookie.btn.reject_all": ' . json_encode(t('cookie.btn.reject_all')) . ',' . "\n";
-    $scripts .= '    "cookie.btn.customize": ' . json_encode(t('cookie.btn.customize')) . ',' . "\n";
-    $scripts .= '    "cookie.btn.save_preferences": ' . json_encode(t('cookie.btn.save_preferences')) . ',' . "\n";
-    $scripts .= '    "order.toast_added": ' . json_encode(t('order.toast_added')) . ',' . "\n";
-    $scripts .= '    "order.whatsapp.notes_label": ' . json_encode(t('order.whatsapp.notes_label')) . ',' . "\n";
-    $scripts .= '    "order.confirm_remove": ' . json_encode(t('order.confirm_remove')) . ',' . "\n";
-    $scripts .= '    "nav.apparel": ' . json_encode(t('nav.apparel')) . ',' . "\n";
-    $scripts .= '    "nav.custom_design": ' . json_encode(t('nav.custom_design')) . "\n";
-    $scripts .= '};' . "\n";
-    $scripts .= '</script>' . "\n";
-    
-    // Botón flotante de Discord (título puede quedarse genérico o añadirse a i18n si se necesita)
+    // Botón flotante de Discord
     $scripts .= '<a href="https://discord.gg/VXXYakrb7X" target="_blank" class="discord-float-btn" title="Discord">' . "\n";
     $scripts .= '    <i class="fab fa-discord"></i>' . "\n";
     $scripts .= '</a>' . "\n";

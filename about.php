@@ -5,7 +5,7 @@ require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 ?>
 
-<?php echo generateHeader(t('about.meta.title'), t('about.meta.description')); ?>
+<?php echo generateHeader('Sobre Nosotros', 'Sobre KND Store - Knowledge \'N Development. Digital Goods • Apparel • Custom Design Services'); ?>
 
 <!-- Particles Background -->
 <div id="particles-bg"></div>
@@ -21,11 +21,11 @@ require_once __DIR__ . '/includes/footer.php';
         <div class="row align-items-center min-vh-100">
             <div class="col-12 text-center">
                 <h1 class="hero-title">
-                    <span class="text-gradient"><?php echo t('about.hero.title_line1'); ?></span><br>
-                    <span class="text-gradient"><?php echo t('about.hero.title_line2'); ?></span>
+                    <span class="text-gradient">SOBRE</span><br>
+                    <span class="text-gradient">NOSOTROS</span>
                 </h1>
                 <p class="hero-subtitle">
-                    <?php echo t('about.hero.subtitle'); ?>
+                    Knowledge 'N Development — conocimiento y desarrollo al servicio de tu universo digital.
                 </p>
             </div>
         </div>
@@ -38,30 +38,30 @@ require_once __DIR__ . '/includes/footer.php';
         <div class="row align-items-center mb-5">
             <div class="col-lg-6">
                 <h2 class="section-title mb-4">
-                    <i class="fas fa-rocket me-2"></i> <?php echo t('about.history.title'); ?>
+                    <i class="fas fa-rocket me-2"></i> Nuestra Historia
                 </h2>
                 <div class="mb-3">
-                    <span class="badge bg-primary fs-5"><?php echo t('about.history.year'); ?></span>
+                    <span class="badge bg-primary fs-5">1995</span>
                 </div>
                 <p class="text-white mb-3">
-                    <?php echo t('about.history.paragraph1'); ?>
+                    KND Store no nació en una oficina. Nació en una mente. En 1995, mientras el mundo descubría Windows 95 y escuchaba discos compactos, una chispa se encendía en el núcleo de un futuro imposible de ignorar: fusionar tecnología y cultura gamer en una sola fuerza intergaláctica.
                 </p>
                 <p class="text-white mb-0">
-                    <?php echo t('about.history.paragraph2'); ?>
+                    Hoy, esa chispa es un núcleo en expansión. Somos más que una tienda. Somos una estación de comando para quienes no siguen el mapa, sino que lo hackean.
                 </p>
             </div>
             <div class="col-lg-6">
                 <h2 class="section-title mb-4">
-                    <?php echo t_html('about.knd_meaning.title'); ?>
+                    ¿Qué significa <span class="text-gradient">KND</span>?
                 </h2>
                 <p class="text-white mb-3">
-                    <?php echo t_html('about.knd_meaning.paragraph1'); ?>
+                    <strong>KND</strong> nace de <strong>Knowledge 'N Development</strong>. Es nuestra forma de decir que todo lo que hacemos parte de una idea muy simple: convertir conocimiento real en desarrollo constante, soluciones inteligentes y experiencias digitales de alto nivel.
                 </p>
                 <p class="text-white mb-3">
-                    <?php echo t_html('about.knd_meaning.paragraph2'); ?>
+                    En KND Store, el <em>knowledge</em> no es solo teoría. Es la base para diseñar builds, optimizar PCs, crear contenido digital y ofrecer servicios que realmente resuelven problemas del día a día de gamers y creadores. Cada servicio que ves en el catálogo es el resultado de años de prueba, error, aprendizaje y mejora continua.
                 </p>
                 <p class="text-white mb-0">
-                    <?php echo t_html('about.knd_meaning.paragraph3'); ?>
+                    El <em>development</em> es nuestra segunda mitad: nunca nos quedamos quietos. Ajustamos procesos, pulimos herramientas y actualizamos todo lo que haga falta para que tu experiencia siempre se sienta un paso por delante. <strong>Knowledge 'N Development</strong> es, en resumen, la filosofía que impulsa todo el universo KND.
                 </p>
             </div>
         </div>
@@ -93,7 +93,7 @@ require_once __DIR__ . '/includes/footer.php';
         <div class="row">
             <div class="col-12 text-center mb-5">
                 <h2 class="section-title">
-                    <?php echo t('about.values.title'); ?>
+                    Nuestros Valores
                 </h2>
             </div>
         </div>
@@ -104,8 +104,8 @@ require_once __DIR__ . '/includes/footer.php';
                         <div class="feature-icon mb-3">
                             <i class="fas fa-bullseye"></i>
                         </div>
-                        <h4 class="text-white"><?php echo t('about.values.precision.title'); ?></h4>
-                        <p class="text-white"><?php echo t('about.values.precision.text'); ?></p>
+                        <h4 class="text-white">Precisión Cuántica</h4>
+                        <p class="text-white">Nada de errores. Todo optimizado al byte.</p>
                     </div>
                 </div>
             </div>
@@ -115,8 +115,8 @@ require_once __DIR__ . '/includes/footer.php';
                         <div class="feature-icon mb-3">
                             <i class="fas fa-heart"></i>
                         </div>
-                        <h4 class="text-white"><?php echo t('about.values.loyalty.title'); ?></h4>
-                        <p class="text-white"><?php echo t('about.values.loyalty.text'); ?></p>
+                        <h4 class="text-white">Lealtad al Usuario</h4>
+                        <p class="text-white">No somos dioses del retail. Somos soldados del servicio.</p>
                     </div>
                 </div>
             </div>
@@ -126,8 +126,8 @@ require_once __DIR__ . '/includes/footer.php';
                         <div class="feature-icon mb-3">
                             <i class="fas fa-palette"></i>
                         </div>
-                        <h4 class="text-white"><?php echo t('about.values.aesthetic.title'); ?></h4>
-                        <p class="text-white"><?php echo t('about.values.aesthetic.text'); ?></p>
+                        <h4 class="text-white">Estética Interestelar</h4>
+                        <p class="text-white">Si no se ve brutal, no entra.</p>
                     </div>
                 </div>
             </div>
@@ -137,8 +137,8 @@ require_once __DIR__ . '/includes/footer.php';
                         <div class="feature-icon mb-3">
                             <i class="fas fa-globe"></i>
                         </div>
-                        <h4 class="text-white"><?php echo t('about.values.technology.title'); ?></h4>
-                        <p class="text-white"><?php echo t('about.values.technology.text'); ?></p>
+                        <h4 class="text-white">Tecnología sin Fronteras</h4>
+                        <p class="text-white">Desde chips hasta blockchain, si vibra en el futuro, lo domamos.</p>
                     </div>
                 </div>
             </div>
@@ -152,7 +152,7 @@ require_once __DIR__ . '/includes/footer.php';
         <div class="row">
             <div class="col-12 text-center mb-5">
                 <h2 class="section-title">
-                    <?php echo t('about.team.title'); ?>
+                    Nuestro Equipo
                 </h2>
             </div>
         </div>
@@ -203,7 +203,7 @@ require_once __DIR__ . '/includes/footer.php';
         <div class="row">
             <div class="col-12 text-center mb-5">
                 <h2 class="section-title">
-                    <?php echo t('about.technologies.title'); ?>
+                    Tecnologías que nos Propulsan
                 </h2>
             </div>
         </div>
@@ -215,8 +215,8 @@ require_once __DIR__ . '/includes/footer.php';
                             <i class="fas fa-brain"></i>
                         </div>
                         <div>
-                            <h4 class="text-white mb-1"><?php echo t('about.technologies.ai.title'); ?></h4>
-                            <p class="text-white mb-0"><?php echo t('about.technologies.ai.text'); ?></p>
+                            <h4 class="text-white mb-1">Inteligencia Artificial Autónoma (Kael)</h4>
+                            <p class="text-white mb-0">No es un asistente. Es un copiloto.</p>
                         </div>
                     </div>
                 </div>
@@ -228,8 +228,8 @@ require_once __DIR__ . '/includes/footer.php';
                             <i class="fas fa-dice"></i>
                         </div>
                         <div>
-                            <h4 class="text-white mb-1"><?php echo t('about.technologies.deathroll.title'); ?></h4>
-                            <p class="text-white mb-0"><?php echo t('about.technologies.deathroll.text'); ?></p>
+                            <h4 class="text-white mb-1">Death Roll Chain</h4>
+                            <p class="text-white mb-0">Un minijuego basado en riesgo controlado y recompensas digitales.</p>
                         </div>
                     </div>
                 </div>
@@ -241,8 +241,8 @@ require_once __DIR__ . '/includes/footer.php';
                             <i class="fas fa-star"></i>
                         </div>
                         <div>
-                            <h4 class="text-white mb-1"><?php echo t('about.technologies.points.title'); ?></h4>
-                            <p class="text-white mb-0"><?php echo t('about.technologies.points.text'); ?></p>
+                            <h4 class="text-white mb-1">Sistema de Puntos Acumulables</h4>
+                            <p class="text-white mb-0">Con lógica galáctica. Porque la lealtad merece recompensa.</p>
                         </div>
                     </div>
                 </div>
@@ -254,8 +254,8 @@ require_once __DIR__ . '/includes/footer.php';
                             <i class="fas fa-network-wired"></i>
                         </div>
                         <div>
-                            <h4 class="text-white mb-1"><?php echo t('about.technologies.fusion.title'); ?></h4>
-                            <p class="text-white mb-0"><?php echo t('about.technologies.fusion.text'); ?></p>
+                            <h4 class="text-white mb-1">Fusión Web 3.0 + Gaming + E-commerce</h4>
+                            <p class="text-white mb-0">Todo en un solo nodo, sin permisos, sin límites.</p>
                         </div>
                     </div>
                 </div>
@@ -270,35 +270,35 @@ require_once __DIR__ . '/includes/footer.php';
         <div class="row">
             <div class="col-lg-8 mx-auto text-center">
                 <h2 class="section-title mb-4">
-                    <?php echo t('about.future.title'); ?>
+                    Comunidad y Visión del Futuro
                 </h2>
                 <div class="card bg-dark border-info">
                     <div class="card-body">
                         <p class="lead text-white mb-4">
-                            <?php echo t('about.future.community_text'); ?>
+                            La comunidad es nuestro hipercombustible. Nos movemos en canales de energía como Discord, navegamos eventos galácticos, y repartimos loot como antiguos dioses de las misiones.
                         </p>
                         <h4 class="text-white mb-3">
-                            <?php echo t('about.future.future_title'); ?>
+                            ¿El futuro?
                         </h4>
                         <div class="row text-start">
                             <div class="col-md-6">
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-check-circle text-primary me-2"></i>
-                                    <span class="text-white"><?php echo t('about.future.crypto'); ?></span>
+                                    <span class="text-white">Una criptomoneda propia.</span>
                                 </div>
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-check-circle text-primary me-2"></i>
-                                    <span class="text-white"><?php echo t('about.future.bank'); ?></span>
+                                    <span class="text-white">Tal vez un banco.</span>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-check-circle text-primary me-2"></i>
-                                    <span class="text-white"><?php echo t('about.future.ship'); ?></span>
+                                    <span class="text-white">Seguro una nave.</span>
                                 </div>
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-check-circle text-primary me-2"></i>
-                                    <span class="text-white"><?php echo t('about.future.stores'); ?></span>
+                                    <span class="text-white">Definitivamente una tienda en cada planeta.</span>
                                 </div>
                             </div>
                         </div>
@@ -315,17 +315,17 @@ require_once __DIR__ . '/includes/footer.php';
         <div class="row">
             <div class="col-12 text-center">
                 <h2 class="section-title mb-4">
-                    <?php echo t('about.cta.join_mission'); ?>
+                    ¿Listo para unirte a la misión?
                 </h2>
                 <p class="text-white mb-4">
-                    <?php echo t('about.cta.explore_text'); ?>
+                    Explora nuestro catálogo galáctico y descubre tecnología que desafía los límites del universo conocido.
                 </p>
                 <div>
                     <a href="/products.php" class="btn btn-primary btn-lg me-3">
-                        <i class="fas fa-rocket me-2"></i> <?php echo t('about.cta.explore_products'); ?>
+                        <i class="fas fa-rocket me-2"></i> Explorar Productos
                     </a>
                     <a href="/contact.php" class="btn btn-outline-neon btn-lg">
-                        <i class="fas fa-envelope me-2"></i> <?php echo t('about.cta.contact'); ?>
+                        <i class="fas fa-envelope me-2"></i> Contactar
                     </a>
                 </div>
             </div>
