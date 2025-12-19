@@ -26,8 +26,20 @@ try {
 try {
     require_once __DIR__ . '/includes/config.php';
     echo "Test 3: config.php cargado<br>";
+    echo "Test 3.1: Verificando si function_exists está disponible<br>";
+    if (function_exists('function_exists')) {
+        echo "function_exists() está disponible<br>";
+    }
+    echo "Test 3.2: Verificando si podemos evaluar !function_exists('t')<br>";
+    $test_exists = !function_exists('t');
+    echo "Resultado de !function_exists('t'): " . ($test_exists ? 'true' : 'false') . "<br>";
 } catch (Exception $e) {
     echo "Error en config.php: " . $e->getMessage() . "<br>";
+    die();
+} catch (Error $e) {
+    echo "Error fatal en config.php: " . $e->getMessage() . "<br>";
+    echo "Archivo: " . $e->getFile() . "<br>";
+    echo "Línea: " . $e->getLine() . "<br>";
     die();
 }
 
