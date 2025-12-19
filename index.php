@@ -1,8 +1,21 @@
 <?php
-// Habilitar errores temporalmente para diagnóstico
+// Habilitar errores para diagnóstico
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
+
+// Capturar errores fatales
+register_shutdown_function(function() {
+    $error = error_get_last();
+    if ($error !== NULL && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        echo "<!DOCTYPE html><html><head><title>Error</title></head><body>";
+        echo "<h1 style='color:red'>ERROR FATAL</h1>";
+        echo "<p><strong>Mensaje:</strong> " . htmlspecialchars($error['message']) . "</p>";
+        echo "<p><strong>Archivo:</strong> " . htmlspecialchars($error['file']) . "</p>";
+        echo "<p><strong>Línea:</strong> " . $error['line'] . "</p>";
+        echo "</body></html>";
+    }
+});
 
 require_once __DIR__ . '/includes/session.php';
 require_once __DIR__ . '/includes/config.php';
