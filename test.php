@@ -24,22 +24,36 @@ try {
 }
 
 try {
+    echo "Test 3: Cargando config.php...<br>";
+    ob_start();
     require_once __DIR__ . '/includes/config.php';
-    echo "Test 3: config.php cargado<br>";
-    echo "Test 3.1: Verificando si function_exists está disponible<br>";
-    if (function_exists('function_exists')) {
-        echo "function_exists() está disponible<br>";
+    $output = ob_get_clean();
+    if ($output) {
+        echo "Output capturado: " . htmlspecialchars($output) . "<br>";
     }
-    echo "Test 3.2: Verificando si podemos evaluar !function_exists('t')<br>";
-    $test_exists = !function_exists('t');
-    echo "Resultado de !function_exists('t'): " . ($test_exists ? 'true' : 'false') . "<br>";
+    echo "Test 3.1: config.php cargado sin errores aparentes<br>";
+    
+    echo "Test 3.2: Verificando funciones definidas...<br>";
+    echo "function_exists('t'): " . (function_exists('t') ? 'SÍ' : 'NO') . "<br>";
+    echo "function_exists('t_html'): " . (function_exists('t_html') ? 'SÍ' : 'NO') . "<br>";
+    echo "function_exists('current_lang'): " . (function_exists('current_lang') ? 'SÍ' : 'NO') . "<br>";
+    
+    // Listar todas las funciones definidas que empiezan con 't'
+    $all_functions = get_defined_functions();
+    $user_functions = array_filter($all_functions['user'], function($func) {
+        return strpos($func, 't') === 0;
+    });
+    echo "Funciones que empiezan con 't': " . implode(', ', $user_functions) . "<br>";
+    
 } catch (Exception $e) {
     echo "Error en config.php: " . $e->getMessage() . "<br>";
+    echo "Stack: " . $e->getTraceAsString() . "<br>";
     die();
 } catch (Error $e) {
     echo "Error fatal en config.php: " . $e->getMessage() . "<br>";
     echo "Archivo: " . $e->getFile() . "<br>";
     echo "Línea: " . $e->getLine() . "<br>";
+    echo "Stack: " . $e->getTraceAsString() . "<br>";
     die();
 }
 
