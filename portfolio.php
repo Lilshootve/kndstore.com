@@ -7,7 +7,7 @@ require_once __DIR__ . '/includes/footer.php';
 $projects = [
     [
         'title' => 'Enviosand',
-        'url' => 'https://enviosand.com/shipping-services',
+        'url' => 'https://enviosand.com',
         'goal' => __('portfolio.project.enviosand.goal', 'Increase shipping service inquiries with a clear booking flow.'),
         'role' => __('portfolio.project.enviosand.role', 'Landing page strategy, visual design, and conversion copy.'),
     ],
@@ -25,7 +25,7 @@ $projects = [
     ],
     [
         'title' => 'JProd USA',
-        'url' => 'https://jprodusa.com/services.html',
+        'url' => 'https://jprodusa.com',
         'goal' => __('portfolio.project.jprod.goal', 'Position services with clarity and premium positioning.'),
         'role' => __('portfolio.project.jprod.role', 'Page redesign, messaging polish, and CTA strategy.'),
     ],
