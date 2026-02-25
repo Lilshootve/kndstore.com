@@ -205,7 +205,7 @@ $projects = [
                 <div class="col-lg-7 order-1 order-lg-1">
                     <div class="portfolio-hero-content">
                         <span class="portfolio-badge badge bg-primary">
-                            <i class="fas fa-gem me-2"></i> <?php echo __('portfolio.hero.badge', 'Premium landing pages'); ?>
+                            <?php echo __('portfolio.hero.badge', 'Premium landing pages'); ?>
                         </span>
                         <h1 class="hero-title mt-4">
                             <span class="text-gradient">
