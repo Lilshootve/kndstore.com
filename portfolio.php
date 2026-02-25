@@ -197,9 +197,12 @@ $projects = [
 <div class="portfolio-page">
     <!-- Hero Section -->
     <section class="hero-section portfolio-hero">
+        <div class="portfolio-hero-layer portfolio-hero-ambient" aria-hidden="true">
+            <img src="/assets/images/hero-coctact-background.png" alt="">
+        </div>
         <div class="container">
             <div class="row align-items-center min-vh-100">
-                <div class="col-lg-8">
+                <div class="col-lg-7 order-1 order-lg-1">
                     <div class="portfolio-hero-content">
                         <span class="portfolio-badge badge bg-primary">
                             <i class="fas fa-gem me-2"></i> <?php echo __('portfolio.hero.badge', 'Premium landing pages'); ?>
@@ -221,6 +224,26 @@ $projects = [
                             </a>
                         </div>
                     </div>
+                </div>
+                <div class="col-lg-5 order-2 order-lg-2 mt-5 mt-lg-0">
+                    <figure class="portfolio-mockup-wrap">
+                        <div class="portfolio-mockup-card">
+                            <div class="mockup-topbar">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <div class="mockup-screen">
+                                <div class="mockup-strip"></div>
+                                <div class="mockup-lines">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                                <div class="mockup-cta"></div>
+                            </div>
+                        </div>
+                    </figure>
                 </div>
             </div>
         </div>
