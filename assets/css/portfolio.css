@@ -1,0 +1,128 @@
+/* KND Store - Portfolio Page Styles */
+
+.portfolio-page {
+    position: relative;
+    z-index: 1;
+}
+
+.portfolio-hero {
+    background: radial-gradient(circle at 20% 20%, rgba(37, 156, 174, 0.18), transparent 45%),
+                radial-gradient(circle at 80% 30%, rgba(174, 37, 101, 0.18), transparent 55%),
+                linear-gradient(135deg, rgba(0, 0, 0, 0.92), rgba(10, 10, 26, 0.95));
+}
+
+.portfolio-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(0, 212, 255, 0.08), transparent 55%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.portfolio-hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+.portfolio-hero-content {
+    max-width: 720px;
+}
+
+.portfolio-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.55rem 1.25rem;
+    border: 1px solid rgba(37, 156, 174, 0.6);
+    background: rgba(37, 156, 174, 0.12);
+    color: var(--knd-neon-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    box-shadow: 0 0 18px rgba(37, 156, 174, 0.35);
+}
+
+.portfolio-section-subtitle {
+    color: rgba(255, 255, 255, 0.75);
+    max-width: 680px;
+    font-size: 1.05rem;
+    margin-top: 0.5rem;
+}
+
+.portfolio-card {
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.portfolio-card:hover {
+    transform: translateY(-6px);
+    box-shadow:
+        0 0 35px rgba(37, 156, 174, 0.45),
+        0 18px 45px rgba(0, 0, 0, 0.65);
+}
+
+.portfolio-card-title {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    color: var(--knd-white);
+}
+
+.portfolio-card-meta {
+    display: grid;
+    gap: 1rem;
+}
+
+.portfolio-meta-item {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.portfolio-meta-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--knd-neon-blue);
+}
+
+.portfolio-meta-text {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.portfolio-card-footer {
+    margin-top: auto;
+}
+
+.portfolio-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+@media (max-width: 991px) {
+    .portfolio-hero .row {
+        min-height: 70vh;
+    }
+
+    .portfolio-card {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .portfolio-hero .row {
+        min-height: 60vh;
+    }
+
+    .portfolio-section-subtitle {
+        font-size: 1rem;
+    }
+}
