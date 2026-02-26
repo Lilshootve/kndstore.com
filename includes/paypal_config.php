@@ -1,17 +1,35 @@
 <?php
 // PayPal configuration (LIVE).
-// IMPORTANT: Replace placeholders with real credentials on the server.
+// Credentials are loaded from paypal_secrets.local.php (non-versioned) or environment variables.
+// Do NOT store real credentials in the repository.
+
+$paypalSecrets = [];
+$secretsFile = __DIR__ . '/paypal_secrets.local.php';
+if (file_exists($secretsFile)) {
+    $paypalSecrets = include $secretsFile;
+    if (!is_array($paypalSecrets)) {
+        $paypalSecrets = [];
+    }
+}
+
+$clientId = $paypalSecrets['client_id'] ?? getenv('PAYPAL_CLIENT_ID');
+$clientSecret = $paypalSecrets['client_secret'] ?? getenv('PAYPAL_CLIENT_SECRET');
+$apiBase = $paypalSecrets['api_base'] ?? getenv('PAYPAL_API_BASE') ?: 'https://api-m.paypal.com';
+
+if (empty($clientId) || empty($clientSecret)) {
+    throw new \Exception(
+        'PayPal credentials are missing. Create includes/paypal_secrets.local.php returning an array with client_id and client_secret, or set PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET environment variables.'
+    );
+}
 
 if (!defined('PAYPAL_CLIENT_ID')) {
-    define('PAYPAL_CLIENT_ID', 'YOUR_PAYPAL_CLIENT_ID');
+    define('PAYPAL_CLIENT_ID', $clientId);
 }
-
 if (!defined('PAYPAL_CLIENT_SECRET')) {
-    define('PAYPAL_CLIENT_SECRET', 'YOUR_PAYPAL_CLIENT_SECRET');
+    define('PAYPAL_CLIENT_SECRET', $clientSecret);
 }
-
 if (!defined('PAYPAL_API_BASE')) {
-    define('PAYPAL_API_BASE', 'https://api-m.paypal.com');
+    define('PAYPAL_API_BASE', $apiBase ?: 'https://api-m.paypal.com');
 }
 
 if (!function_exists('getPayPalAccessToken')) {
