@@ -72,6 +72,7 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                                 <div class="order-payment-pills mb-4">
                                     <button type="button" class="order-pill order-pill-active" data-value="paypal">PayPal</button>
                                     <button type="button" class="order-pill" data-value="bank_transfer">Bank Transfer (ACH / Wire)</button>
+                                    <button type="button" class="order-pill" data-value="whatsapp">WhatsApp (Other)</button>
                                 </div>
                                 <?php
                                 $paypalId = defined('PAYPAL_CLIENT_ID') ? PAYPAL_CLIENT_ID : '';
@@ -85,6 +86,21 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                                 <div id="bank-transfer-info" class="checkout-info-box bank-transfer-only" style="display: none;">
                                     <div class="checkout-info-title"><?php echo t('order.bank_transfer.title'); ?></div>
                                     <p class="mb-0"><?php echo t('order.bank_transfer.info_secure'); ?></p>
+                                </div>
+                                <div id="whatsapp-other-info" class="checkout-info-box whatsapp-only" style="display: none;">
+                                    <?php echo t('order.whatsapp_other.info'); ?>
+                                </div>
+                                <div id="whatsapp-alt-dropdown-wrap" class="whatsapp-only mt-3" style="display: none;">
+                                    <label class="order-field-label"><?php echo t('order.form.alternative_method_label'); ?></label>
+                                    <select name="alt_method" class="order-input order-select-dark" id="alternative-method-select">
+                                        <option value=""><?php echo t('order.form.alternative_method_select'); ?></option>
+                                        <option value="usdt trc20">USDT (TRC20)</option>
+                                        <option value="usdt bep20">USDT (BEP20)</option>
+                                        <option value="binance pay">Binance Pay</option>
+                                        <option value="zinli">Zinli</option>
+                                        <option value="pipol pay">Pipol Pay</option>
+                                        <option value="wally">Wally</option>
+                                    </select>
                                 </div>
                             </div>
 
@@ -110,6 +126,9 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                                 </div>
                                 <button type="button" id="confirm-bank-transfer" class="order-btn-primary bank-transfer-only mt-4" style="display: none;">
                                     <?php echo t('order.bank_transfer.confirm_btn'); ?>
+                                </button>
+                                <button type="button" id="send-whatsapp-order" class="order-btn-whatsapp whatsapp-only mt-4" style="display: none;">
+                                    <?php echo t('order.form.submit'); ?>
                                 </button>
                             </div>
                         </form>
@@ -403,10 +422,63 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Payment flow toggle: paypal | bank_transfer
+    // WhatsApp (Other): create server-side record, then open WhatsApp
+    const sendWhatsAppBtn = document.getElementById('send-whatsapp-order');
+    if (sendWhatsAppBtn) {
+        sendWhatsAppBtn.addEventListener('click', async function () {
+            const items = loadOrderItems();
+            if (!items.length) {
+                alert('Your order is empty. Add items from the shop first.');
+                return;
+            }
+            const form = document.getElementById('order-form');
+            const name = form.querySelector('[name="name"]').value.trim();
+            const whatsapp = form.querySelector('[name="whatsapp"]').value.trim();
+            if (!name || !whatsapp) {
+                alert('Please enter your name and WhatsApp number.');
+                return;
+            }
+            const deliveryType = document.getElementById('delivery-type-select')?.value || '';
+            const notes = form.querySelector('[name="notes"]').value.trim();
+            const email = form.querySelector('[name="email"]')?.value?.trim() || '';
+            const altMethod = document.getElementById('alternative-method-select')?.value || '';
+            const payloadItems = items.map(item => ({
+                id: item.id,
+                qty: item.qty,
+                variants: item.variants || null
+            }));
+            try {
+                const res = await fetch('/api/other/create_request.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        items: payloadItems,
+                        deliveryType,
+                        customer: { name, whatsapp, email, notes },
+                        alt_method: altMethod
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.order_id && data.whatsapp_url) {
+                    localStorage.removeItem(ORDER_KEY);
+                    if (window.KND_ORDER && typeof window.KND_ORDER.updateOrderBadge === 'function') {
+                        window.KND_ORDER.updateOrderBadge();
+                    }
+                    window.location.href = data.whatsapp_url;
+                } else {
+                    alert(data.error || 'Something went wrong. Please try again.');
+                }
+            } catch (e) {
+                alert('Something went wrong. Please try again.');
+            }
+        });
+    }
+
+    // Payment flow toggle: paypal | bank_transfer | whatsapp
     const paymentMethodSelect = document.getElementById('payment-method-select');
     const paypalOnly = document.querySelectorAll('.paypal-only');
     const bankTransferOnly = document.querySelectorAll('.bank-transfer-only');
+    const whatsappOnly = document.querySelectorAll('.whatsapp-only');
     const paypalSection = document.getElementById('paypal-section');
     const paypalContainer = document.getElementById('paypal-button-container');
     window.__paypalRendered = false;
@@ -440,10 +512,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const val = paymentMethodSelect ? paymentMethodSelect.value : '';
         const isPayPal = val === 'paypal';
         const isBankTransfer = val === 'bank_transfer';
-        const isManual = isBankTransfer;
+        const isWhatsApp = val === 'whatsapp';
+        const isManual = isBankTransfer || isWhatsApp;
 
         paypalOnly.forEach(el => { el.style.display = isPayPal ? 'block' : 'none'; });
         bankTransferOnly.forEach(el => { el.style.display = isBankTransfer ? 'block' : 'none'; });
+        whatsappOnly.forEach(el => { el.style.display = isWhatsApp ? 'block' : 'none'; });
         if (paypalSection) paypalSection.style.display = isPayPal ? 'block' : 'none';
 
         const nameInput = document.getElementById('order-name');
