@@ -48,7 +48,7 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
             </div>
 
             <div class="col-lg-5">
-                <div class="card order-details-card h-100">
+                <div class="card order-details-card checkout-lux h-100">
                     <div class="card-body order-details-body">
                         <form id="order-form">
                             <input type="hidden" name="payment_flow" id="payment-method-select" value="paypal">
@@ -71,8 +71,8 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                                 <div class="order-section-label"><?php echo t('order.section.payment'); ?></div>
                                 <div class="order-payment-pills mb-4">
                                     <button type="button" class="order-pill order-pill-active" data-value="paypal">PayPal</button>
-                                    <button type="button" class="order-pill" data-value="bank_transfer">Bank Transfer</button>
-                                    <button type="button" class="order-pill" data-value="whatsapp">WhatsApp</button>
+                                    <button type="button" class="order-pill" data-value="bank_transfer">Bank Transfer (ACH/Wire)</button>
+                                    <button type="button" class="order-pill" data-value="whatsapp">WhatsApp (Other)</button>
                                 </div>
                                 <?php
                                 $paypalId = defined('PAYPAL_CLIENT_ID') ? PAYPAL_CLIENT_ID : '';
@@ -80,42 +80,53 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                                     echo '<div class="order-paypal-warning">PayPal not configured.</div>';
                                 }
                                 ?>
-                                <div id="whatsapp-other-helper" class="order-helper manual-only" style="display: none;"><?php echo t('order.form.whatsapp_other_helper'); ?></div>
-                                <div class="manual-only order-payment-select-wrap">
-                                    <select name="payment_method" class="order-input" required>
-                                        <option value=""><?php echo t('order.form.payment_method_select'); ?></option>
-                                        <option value="Bank Transfer">Bank Transfer</option>
-                                        <option value="Zinli">Zinli</option>
+                                <div id="paypal-info" class="checkout-info-box paypal-only" style="display: none;">
+                                    <?php echo t('order.paypal.secure_note'); ?>
+                                </div>
+                                <div id="bank-transfer-info" class="checkout-info-box bank-transfer-only" style="display: none;">
+                                    <p class="mb-2"><?php echo t('order.bank_transfer.info'); ?></p>
+                                    <p class="mb-0 checkout-info-hint"><?php echo t('order.bank_transfer.hint'); ?></p>
+                                </div>
+                                <div id="whatsapp-other-info" class="checkout-info-box whatsapp-only" style="display: none;">
+                                    <?php echo t('order.whatsapp_other.info'); ?>
+                                </div>
+                                <div id="whatsapp-alt-dropdown-wrap" class="whatsapp-only mt-3" style="display: none;">
+                                    <label class="order-field-label"><?php echo t('order.form.alternative_method_label'); ?></label>
+                                    <select name="payment_method" class="order-input order-select-dark" id="alternative-method-select">
+                                        <option value=""><?php echo t('order.form.alternative_method_select'); ?></option>
+                                        <option value="USDT (TRC20)">USDT (TRC20)</option>
+                                        <option value="USDT (BEP20)">USDT (BEP20)</option>
                                         <option value="Binance Pay">Binance Pay</option>
+                                        <option value="Zinli">Zinli</option>
                                         <option value="Pipol Pay">Pipol Pay</option>
-                                        <option value="Mobile Payment">Mobile Payment</option>
-                                        <option value="Cryptocurrency">Cryptocurrency</option>
+                                        <option value="Wally">Wally</option>
                                     </select>
                                 </div>
-                                <div id="paypal-section" style="display: none;">
-                                    <div class="paypal-wrap">
-                                        <div id="paypal-button-container"></div>
-                                        <div id="paypal-loading" class="paypal-loading" style="display:none;"><span class="spinner-border spinner-border-sm me-2" role="status" style="vertical-align: middle;"></span><span><?php echo t('order.paypal.loading'); ?></span></div>
-                                        <div id="paypal-error" class="paypal-error" style="display:none;" role="alert"></div>
-                                    </div>
-                                </div>
-                                <button type="button" id="send-whatsapp-order" class="order-btn-whatsapp manual-only">
-                                    <?php echo t('order.form.submit'); ?>
-                                </button>
                             </div>
 
                             <div class="order-section-block">
                                 <div class="order-section-label"><?php echo t('order.section.delivery'); ?></div>
                                 <div class="mb-4">
-                                    <select name="delivery_type" class="order-input" id="delivery-type-select">
+                                    <select name="delivery_type" class="order-input order-select-dark" id="delivery-type-select">
                                         <option value="Digital / remote"><?php echo t('order.form.delivery_type.digital'); ?></option>
                                         <option value="Coordinated delivery"><?php echo t('order.form.delivery_type.coordinated'); ?></option>
                                     </select>
                                 </div>
-                                <div>
+                                <div class="mb-4">
                                     <label class="order-field-label"><?php echo t('order.form.notes_label'); ?></label>
-                                    <textarea name="notes" class="order-input" rows="2" placeholder="<?php echo t('order.form.notes_placeholder'); ?>"></textarea>
+                                    <textarea name="notes" class="order-input order-textarea" rows="3" placeholder="<?php echo t('order.form.notes_placeholder'); ?>"></textarea>
                                 </div>
+
+                                <div id="paypal-section" class="mt-4 paypal-only" style="display: none;">
+                                    <div class="paypal-wrap paypal-embed">
+                                        <div id="paypal-button-container"></div>
+                                        <div id="paypal-loading" class="paypal-loading" style="display:none;"><span class="spinner-border spinner-border-sm me-2" role="status" style="vertical-align: middle;"></span><span><?php echo t('order.paypal.loading'); ?></span></div>
+                                        <div id="paypal-error" class="paypal-error" style="display:none;" role="alert"></div>
+                                    </div>
+                                </div>
+                                <button type="button" id="send-whatsapp-order" class="order-btn-whatsapp whatsapp-only mt-4" style="display: none;">
+                                    <?php echo t('order.form.submit'); ?>
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -373,7 +384,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const formData = new FormData(form);
             const name = formData.get('name') || '';
             const whatsapp = formData.get('whatsapp') || '';
-            const payment = formData.get('payment_method') || '';
+            const paymentFlow = formData.get('payment_flow') || 'whatsapp';
+            const altMethod = formData.get('payment_method') || '';
             const deliveryType = formData.get('delivery_type') || '';
             const notes = formData.get('notes') || '';
 
@@ -418,7 +430,8 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             msg += `%0A*Total:* $${total.toFixed(2)}%0A`;
-            if (payment) msg += `*Payment method:* ${payment}%0A`;
+            msg += `*Payment method:* WhatsApp (Other)%0A`;
+            if (altMethod) msg += `*Alternative method:* ${altMethod}%0A`;
             
             // Actualizar delivery type si hay apparel
             if (hasApparel) {
@@ -449,11 +462,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Payment flow toggle: paypal | bank_transfer | whatsapp
     const paymentMethodSelect = document.getElementById('payment-method-select');
-    const manualOnly = document.querySelectorAll('.manual-only');
-    const whatsappHelper = document.getElementById('whatsapp-other-helper');
+    const paypalOnly = document.querySelectorAll('.paypal-only');
+    const bankTransferOnly = document.querySelectorAll('.bank-transfer-only');
+    const whatsappOnly = document.querySelectorAll('.whatsapp-only');
     const paypalSection = document.getElementById('paypal-section');
     const paypalContainer = document.getElementById('paypal-button-container');
-    const paymentMethodField = document.querySelector('select[name="payment_method"]');
+    const altMethodSelect = document.getElementById('alternative-method-select');
     window.__paypalRendered = false;
     window.__paypalScriptInjected = false;
 
@@ -484,15 +498,16 @@ document.addEventListener('DOMContentLoaded', function () {
     function updatePaymentFlow() {
         const val = paymentMethodSelect ? paymentMethodSelect.value : '';
         const isPayPal = val === 'paypal';
+        const isBankTransfer = val === 'bank_transfer';
         const isWhatsApp = val === 'whatsapp';
-        const isManual = val === 'bank_transfer' || isWhatsApp;
+        const isManual = isBankTransfer || isWhatsApp;
 
-        manualOnly.forEach(el => {
-            el.style.display = isManual ? '' : 'none';
-        });
-        if (whatsappHelper) whatsappHelper.style.display = isWhatsApp ? 'block' : 'none';
+        paypalOnly.forEach(el => { el.style.display = isPayPal ? 'block' : 'none'; });
+        bankTransferOnly.forEach(el => { el.style.display = isBankTransfer ? 'block' : 'none'; });
+        whatsappOnly.forEach(el => { el.style.display = isWhatsApp ? 'block' : 'none'; });
         if (paypalSection) paypalSection.style.display = isPayPal ? 'block' : 'none';
-        if (paymentMethodField) paymentMethodField.required = isManual;
+
+        if (altMethodSelect) altMethodSelect.required = false;
 
         const nameInput = document.getElementById('order-name');
         const whatsappInput = document.getElementById('order-whatsapp');

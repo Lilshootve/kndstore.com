@@ -5272,6 +5272,138 @@ body {
     padding: 0.5rem 0;
 }
 
+/* ===== Checkout Luxury (checkout-lux) ===== */
+.checkout-lux .order-section-block {
+    margin-bottom: 2.25rem;
+}
+
+.checkout-lux .order-section-block:last-child {
+    margin-bottom: 0;
+}
+
+/* Segmented control - luxury pill buttons */
+.checkout-lux .order-payment-pills {
+    display: flex;
+    gap: 0.35rem;
+    padding: 0.25rem;
+    background: rgba(12, 15, 22, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 100px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.checkout-lux .order-pill {
+    flex: 1;
+    padding: 0.65rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    border: 1px solid transparent;
+    border-radius: 100px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
+}
+
+.checkout-lux .order-pill:hover {
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.checkout-lux .order-pill.order-pill-active {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(255, 0, 255, 0.08) 100%);
+    border-color: rgba(0, 212, 255, 0.35);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Info boxes */
+.checkout-info-box {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.85);
+    padding: 1rem 1.25rem;
+    margin-top: 0.75rem;
+    background: rgba(12, 15, 22, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+}
+
+.checkout-info-hint {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Dropdown - high contrast dark theme */
+.checkout-lux .order-select-dark,
+.order-select-dark {
+    background: #0c0f16 !important;
+    color: #f0f4f8 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+}
+
+.checkout-lux .order-select-dark:focus,
+.order-select-dark:focus {
+    outline: none;
+    border-color: rgba(0, 212, 255, 0.5);
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+}
+
+.checkout-lux .order-select-dark option,
+.order-select-dark option {
+    background: #0c0f16 !important;
+    color: #f0f4f8 !important;
+}
+
+/* Notes textarea */
+.checkout-lux .order-textarea,
+.order-textarea {
+    min-height: 80px;
+    resize: vertical;
+    background: rgba(12, 15, 22, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.checkout-lux .order-textarea:focus,
+.order-textarea:focus {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(12, 15, 22, 0.7) !important;
+}
+
+/* PayPal embed area */
+.checkout-lux .paypal-embed,
+.paypal-embed {
+    padding: 1.25rem;
+    background: rgba(12, 15, 22, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+}
+
+/* WhatsApp button spacing */
+.checkout-lux .order-btn-whatsapp {
+    margin-top: 1rem;
+}
+
+@media (max-width: 576px) {
+    .checkout-lux .order-payment-pills {
+        flex-direction: column;
+        padding: 0.5rem;
+    }
+    .checkout-lux .order-pill {
+        width: 100%;
+        text-align: center;
+    }
+}
+
 /* Order item rows - matte premium */
 .order-items-card .order-item-row {
     border: 1px solid rgba(255, 255, 255, 0.06);
