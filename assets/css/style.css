@@ -5043,8 +5043,42 @@ body {
 
 /* Order Section Styles */
 .order-section {
-    padding-top: 120px;
+    padding-top: 100px;
     min-height: 100vh;
+}
+
+.order-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.order-checkout-row .knd-card {
+    min-height: 100%;
+}
+
+.order-totals small {
+    font-size: 0.75rem;
+}
+
+.paypal-card {
+    background: rgba(26, 26, 46, 0.6);
+    border: 1px solid rgba(37, 156, 174, 0.4);
+    border-radius: 12px;
+}
+
+.paypal-loading {
+    color: var(--knd-neon-blue);
+}
+
+.paypal-loading .spinner-border {
+    border-color: currentColor;
+    border-right-color: transparent;
+}
+
+.paypal-error.alert-danger {
+    background: rgba(220, 53, 69, 0.15);
+    border-color: rgba(220, 53, 69, 0.5);
+    color: #f8a5b4;
 }
 
 .knd-card {

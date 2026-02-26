@@ -12,35 +12,45 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
 
 <?php echo generateNavigation(); ?>
 
-<section class="order-section py-5">
+<section class="order-section py-4">
     <div class="container">
-        <h1 class="mb-4 text-center"><?php echo t('order.title'); ?></h1>
-        <p class="text-center mb-5"><?php echo t('order.subtitle'); ?></p>
+        <h1 class="mb-2 text-center"><?php echo t('order.title'); ?></h1>
+        <p class="text-center mb-4 order-subtitle"><?php echo t('order.subtitle'); ?></p>
 
-        <div class="row">
+        <div class="row align-items-stretch order-checkout-row">
             <div class="col-lg-7 mb-4">
-                <div class="card knd-card">
+                <div class="card knd-card h-100">
                     <div class="card-header">
                         <h4 class="mb-0"><?php echo t('order.selected_services.title'); ?></h4>
                     </div>
                     <div class="card-body">
                         <div id="order-items-container">
-                            <!-- Aquí se inyectan los items vía JS -->
+                            <!-- Items injected via JS -->
                         </div>
                         <div id="order-empty-message" class="text-center text-muted">
                             <?php echo t('order.empty_message'); ?>
                         </div>
                         <hr>
-                        <div class="d-flex justify-content-between">
-                            <strong><?php echo t('order.total.label'); ?></strong>
-                            <span id="order-total" class="fw-bold">$0.00</span>
+                        <div id="order-totals" class="order-totals">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted"><?php echo t('order.totals.subtotal'); ?></span>
+                                <span id="order-subtotal">$0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted"><?php echo t('order.totals.shipping'); ?> <small>(<?php echo t('order.totals.shipping_quoted'); ?>)</small></span>
+                                <span id="order-shipping">$0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between pt-2 border-top border-secondary">
+                                <strong><?php echo t('order.total.label'); ?></strong>
+                                <span id="order-total" class="fw-bold" style="color: var(--knd-neon-blue);">$0.00</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-5">
-                <div class="card knd-card">
+                <div class="card knd-card h-100">
                     <div class="card-header">
                         <h4 class="mb-0"><?php echo t('order.data.title'); ?></h4>
                     </div>
@@ -60,12 +70,14 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                                 ?>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label"><?php echo t('order.form.name_label'); ?></label>
-                                <input type="text" name="name" class="form-control" required>
+                                <label class="form-label" for="order-name"><?php echo t('order.form.name_label'); ?></label>
+                                <input type="text" name="name" id="order-name" class="form-control" required>
+                                <small class="form-text paypal-optional-hint text-muted" style="display:none;"><?php echo t('order.form.delivery_updates_hint'); ?></small>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label"><?php echo t('order.form.whatsapp_label'); ?></label>
-                                <input type="text" name="whatsapp" class="form-control" placeholder="+58..." required>
+                                <label class="form-label" for="order-whatsapp"><?php echo t('order.form.whatsapp_label'); ?></label>
+                                <input type="text" name="whatsapp" id="order-whatsapp" class="form-control" placeholder="+58..." required>
+                                <small class="form-text paypal-optional-hint text-muted" style="display:none;"><?php echo t('order.form.delivery_updates_hint'); ?></small>
                             </div>
                             <div class="mb-3 manual-only">
                                 <label class="form-label"><?php echo t('order.form.payment_method_label'); ?></label>
@@ -97,7 +109,16 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                             </button>
 
                             <div id="paypal-section" class="mt-3" style="display: none;">
-                                <div id="paypal-button-container"></div>
+                                <div class="paypal-card p-3 rounded">
+                                    <h5 class="mb-2" style="color: var(--knd-neon-blue); font-size: 1rem;"><?php echo t('order.paypal.title'); ?></h5>
+                                    <p class="small text-muted mb-3"><?php echo t('order.paypal.trust'); ?></p>
+                                    <div id="paypal-button-container"></div>
+                                    <div id="paypal-loading" class="paypal-loading text-center py-3" style="display:none;">
+                                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                        <span><?php echo t('order.paypal.loading'); ?></span>
+                                    </div>
+                                    <div id="paypal-error" class="paypal-error alert alert-danger py-2 small mt-2" style="display:none;" role="alert"></div>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -182,6 +203,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!items.length) {
             emptyMsg.style.display = 'block';
+            const subtotalEl = document.getElementById('order-subtotal');
+            const shippingEl = document.getElementById('order-shipping');
+            if (subtotalEl) subtotalEl.textContent = '$0.00';
+            if (shippingEl) shippingEl.textContent = '$0.00';
             totalEl.textContent = '$0.00';
             return;
         }
@@ -198,6 +223,10 @@ document.addEventListener('DOMContentLoaded', function () {
             quote = await fetchQuote(payloadItems, deliveryType);
             latestQuote = quote;
         } catch (e) {
+            const subtotalEl = document.getElementById('order-subtotal');
+            const shippingEl = document.getElementById('order-shipping');
+            if (subtotalEl) subtotalEl.textContent = '$0.00';
+            if (shippingEl) shippingEl.textContent = '$0.00';
             totalEl.textContent = '$0.00';
             emptyMsg.textContent = 'Unable to calculate totals. Please try again.';
             emptyMsg.style.display = 'block';
@@ -261,6 +290,10 @@ document.addEventListener('DOMContentLoaded', function () {
             container.appendChild(div);
         });
 
+        const subtotalEl = document.getElementById('order-subtotal');
+        const shippingEl = document.getElementById('order-shipping');
+        if (subtotalEl) subtotalEl.textContent = formatPrice(quote.subtotal || 0);
+        if (shippingEl) shippingEl.textContent = (quote.shipping != null && quote.shipping > 0) ? formatPrice(quote.shipping) : '—';
         totalEl.textContent = formatPrice(quote.total || 0);
         
         // Agregar listeners para los botones
@@ -464,6 +497,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (paymentMethodField) {
             paymentMethodField.required = !isPayPal;
         }
+        const nameInput = document.getElementById('order-name');
+        const whatsappInput = document.getElementById('order-whatsapp');
+        const hints = document.querySelectorAll('.paypal-optional-hint');
+        if (nameInput) nameInput.required = !isPayPal;
+        if (whatsappInput) whatsappInput.required = !isPayPal;
+        hints.forEach(function(h) { h.style.display = isPayPal ? 'block' : 'none'; });
         if (isPayPal && !window.__paypalRendered && paypalContainer) {
             loadPayPalSDK(function() {
                 if (paymentMethodSelect.value === 'paypal') renderPayPalButtons();
@@ -471,67 +510,100 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function showPayPalLoading() {
+        const loading = document.getElementById('paypal-loading');
+        const err = document.getElementById('paypal-error');
+        if (loading) loading.style.display = 'block';
+        if (err) { err.style.display = 'none'; err.textContent = ''; }
+    }
+    function hidePayPalLoading() {
+        const loading = document.getElementById('paypal-loading');
+        if (loading) loading.style.display = 'none';
+    }
+    function showPayPalError(msg) {
+        const err = document.getElementById('paypal-error');
+        if (err) { err.textContent = msg; err.style.display = 'block'; }
+    }
+
     function renderPayPalButtons() {
         if (window.__paypalRendered || !window.paypal || !paypalContainer) return;
         window.__paypalRendered = true;
         paypal.Buttons({
             createOrder: async function () {
-                const items = loadOrderItems();
-                const deliveryType = document.getElementById('delivery-type-select')?.value || '';
-                const payloadItems = items.map(item => ({
-                    id: item.id,
-                    qty: item.qty,
-                    variants: item.variants || null
-                }));
-                const response = await fetch('/api/paypal/create_order.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        items: payloadItems,
-                        deliveryType
-                    })
-                });
-                const data = await response.json();
-                if (!response.ok || !data.id) {
-                    throw new Error('PayPal order creation failed');
+                showPayPalLoading();
+                try {
+                    const items = loadOrderItems();
+                    const deliveryType = document.getElementById('delivery-type-select')?.value || '';
+                    const payloadItems = items.map(item => ({
+                        id: item.id,
+                        qty: item.qty,
+                        variants: item.variants || null
+                    }));
+                    const response = await fetch('/api/paypal/create_order.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            items: payloadItems,
+                            deliveryType
+                        })
+                    });
+                    const data = await response.json();
+                    hidePayPalLoading();
+                    if (!response.ok || !data.id) {
+                        showPayPalError('<?php echo addslashes(t('order.paypal.error')); ?>');
+                        throw new Error('PayPal order creation failed');
+                    }
+                    return data.id;
+                } catch (e) {
+                    hidePayPalLoading();
+                    if (!document.getElementById('paypal-error').textContent) {
+                        showPayPalError('<?php echo addslashes(t('order.paypal.error')); ?>');
+                    }
+                    throw e;
                 }
-                return data.id;
             },
             onApprove: async function (data) {
-                const items = loadOrderItems();
-                const deliveryType = document.getElementById('delivery-type-select')?.value || '';
-                const form = document.getElementById('order-form');
-                const formData = new FormData(form);
-                const customer = {
-                    name: formData.get('name') || '',
-                    whatsapp: formData.get('whatsapp') || '',
-                    notes: formData.get('notes') || ''
-                };
-                const payloadItems = items.map(item => ({
-                    id: item.id,
-                    qty: item.qty,
-                    variants: item.variants || null
-                }));
-                const response = await fetch('/api/paypal/capture_order.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        orderID: data.orderID,
-                        items: payloadItems,
-                        deliveryType,
-                        customer
-                    })
-                });
-                const result = await response.json();
-                if (response.ok && result.redirect) {
-                    localStorage.removeItem(ORDER_KEY);
-                    if (window.KND_ORDER && typeof window.KND_ORDER.updateOrderBadge === 'function') {
-                        window.KND_ORDER.updateOrderBadge();
+                showPayPalLoading();
+                try {
+                    const items = loadOrderItems();
+                    const deliveryType = document.getElementById('delivery-type-select')?.value || '';
+                    const form = document.getElementById('order-form');
+                    const formData = new FormData(form);
+                    const customer = {
+                        name: formData.get('name') || '',
+                        whatsapp: formData.get('whatsapp') || '',
+                        notes: formData.get('notes') || ''
+                    };
+                    const payloadItems = items.map(item => ({
+                        id: item.id,
+                        qty: item.qty,
+                        variants: item.variants || null
+                    }));
+                    const response = await fetch('/api/paypal/capture_order.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            orderID: data.orderID,
+                            items: payloadItems,
+                            deliveryType,
+                            customer
+                        })
+                    });
+                    const result = await response.json();
+                    hidePayPalLoading();
+                    if (response.ok && result.redirect) {
+                        localStorage.removeItem(ORDER_KEY);
+                        if (window.KND_ORDER && typeof window.KND_ORDER.updateOrderBadge === 'function') {
+                            window.KND_ORDER.updateOrderBadge();
+                        }
+                        window.location.href = result.redirect;
+                        return;
                     }
-                    window.location.href = result.redirect;
-                    return;
+                    showPayPalError('<?php echo addslashes(t('order.paypal.error')); ?>');
+                } catch (e) {
+                    hidePayPalLoading();
+                    showPayPalError('<?php echo addslashes(t('order.paypal.error')); ?>');
                 }
-                alert('PayPal capture failed. Please contact support.');
             }
         }).render('#paypal-button-container');
     }
