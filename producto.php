@@ -20,7 +20,7 @@ if (!$producto) {
 // Generar mensaje de WhatsApp
 $product_price = getProductPriceValue((int) $producto['id'], $producto);
 $mensaje_whatsapp = urlencode("Hello, I'm interested in: " . $producto['nombre'] . " - $" . number_format($product_price, 2));
-$link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
+$link_whatsapp = "https://wa.me/584141592319?text=" . $mensaje_whatsapp;
 
 $categoryLabels = [
     'tecnologia' => 'Technology',

@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
     msg += '*Payment Method:* Bank Transfer%0A%0A';
     msg += 'Please share the banking details to complete this transfer.';
 
-    const phone = '584246661334';
+    const phone = '584141592319';
     const url = 'https://wa.me/' + phone + '?text=' + msg;
 
     btn.href = url;

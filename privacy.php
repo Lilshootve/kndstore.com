@@ -247,7 +247,7 @@ require_once __DIR__ . '/includes/footer.php';
                             <div class="card bg-dark border-primary h-100">
                                 <div class="card-body">
                                     <h5 class="text-white mb-2"><i class="fab fa-whatsapp me-2"></i>WhatsApp</h5>
-                                    <p class="text-white-50 mb-0">+58 424-666-1334</p>
+                                    <p class="text-white-50 mb-0">+58 414-159-2319</p>
                                 </div>
                             </div>
                         </div>
