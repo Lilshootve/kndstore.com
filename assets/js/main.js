@@ -227,6 +227,15 @@ function getOrderTotal(items) {
     }, 0);
 }
 
+// Build a safe payload for server-side quoting (no local price usage).
+function getOrderItemsForQuote(items) {
+    return items.map(item => ({
+        id: item.id,
+        qty: item.qty,
+        variants: item.variants || null
+    }));
+}
+
 // Actualizar un pequeño indicador (opcional) del número de items en el pedido
 function updateOrderBadge() {
     const items = loadOrderItems();
@@ -300,6 +309,7 @@ window.KND_ORDER = {
     saveOrderItems,
     addItemToOrder,
     getOrderTotal,
+    getOrderItemsForQuote,
     updateOrderBadge,
     showOrderNotification
 };

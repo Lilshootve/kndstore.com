@@ -14,7 +14,7 @@ function renderCreativeCard(string $slug, array $product): string {
         $firstGallery = reset($product['gallery']);
         $displayImage = $firstGallery;
     }
-    $price = getProductPriceValue($slug, $product);
+    $price = getProductPriceValue((int) $product['id'], $product);
 
     $html = '<div class="col-lg-4 col-md-6 mb-4">';
     $html .= '  <div class="product-card creative-card">';

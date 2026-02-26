@@ -61,7 +61,7 @@ function renderApparelCard(string $slug, array $product, string $badgeLabel, str
     $imageUrl = rawurlencode($mainImage);
     $imageUrl = str_replace('%2F', '/', $imageUrl);
     $swatches = getSwatchesForSlug($slug);
-    $price = getProductPriceValue($slug, $product);
+    $price = getProductPriceValue((int) $product['id'], $product);
 
     ob_start();
     ?>

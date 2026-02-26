@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/session.php';
 require_once __DIR__ . '/includes/config.php';
+require_once __DIR__ . '/includes/paypal_config.php';
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 
@@ -46,6 +47,19 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                     <div class="card-body">
                         <form id="order-form">
                             <div class="mb-3">
+                                <label class="form-label">Payment Method</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="payment_flow" id="payment-flow-manual" value="manual" checked>
+                                        <label class="form-check-label" for="payment-flow-manual">WhatsApp (manual)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="payment_flow" id="payment-flow-paypal" value="paypal">
+                                        <label class="form-check-label" for="payment-flow-paypal">PayPal (instant)</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
                                 <label class="form-label"><?php echo t('order.form.name_label'); ?></label>
                                 <input type="text" name="name" class="form-control" required>
                             </div>
@@ -53,7 +67,7 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                                 <label class="form-label"><?php echo t('order.form.whatsapp_label'); ?></label>
                                 <input type="text" name="whatsapp" class="form-control" placeholder="+58..." required>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3 manual-only">
                                 <label class="form-label"><?php echo t('order.form.payment_method_label'); ?></label>
                                 <select name="payment_method" class="form-select" required>
                                     <option value=""><?php echo t('order.form.payment_method_select'); ?></option>
@@ -77,10 +91,12 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                                 <textarea name="notes" class="form-control" rows="3" placeholder="<?php echo t('order.form.notes_placeholder'); ?>"></textarea>
                             </div>
 
-                            <button type="button" id="send-whatsapp-order" class="btn btn-whatsapp w-100">
+                            <button type="button" id="send-whatsapp-order" class="btn btn-whatsapp w-100 manual-only">
                                 <i class="fab fa-whatsapp me-2"></i>
                                 <?php echo t('order.form.submit'); ?>
                             </button>
+
+                            <div id="paypal-button-container" class="mt-3" style="display: none;"></div>
                         </form>
                     </div>
                 </div>
@@ -89,11 +105,14 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
     </div>
 </section>
 
+<script src="https://www.paypal.com/sdk/js?client-id=<?php echo urlencode(PAYPAL_CLIENT_ID); ?>&currency=USD"></script>
+
 <script>
 // Lógica para leer el pedido desde localStorage y rellenar la vista en order.php
 
 document.addEventListener('DOMContentLoaded', function () {
     const ORDER_KEY = 'knd_order_items';
+    let latestQuote = null;
 
     function loadOrderItems() {
         try {
@@ -137,11 +156,27 @@ document.addEventListener('DOMContentLoaded', function () {
         return filtered;
     }
 
-    function renderOrderItems() {
+    async function fetchQuote(items, deliveryType) {
+        const response = await fetch('/api/checkout/quote.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                items,
+                deliveryType
+            })
+        });
+        if (!response.ok) {
+            throw new Error('Unable to calculate totals.');
+        }
+        return response.json();
+    }
+
+    async function renderOrderItems() {
         const items = loadOrderItems();
         const container = document.getElementById('order-items-container');
         const emptyMsg = document.getElementById('order-empty-message');
         const totalEl = document.getElementById('order-total');
+        const deliveryType = document.getElementById('delivery-type-select')?.value || '';
 
         container.innerHTML = '';
 
@@ -153,11 +188,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
         emptyMsg.style.display = 'none';
 
-        let total = 0;
+        let quote = null;
+        try {
+            const payloadItems = items.map(item => ({
+                id: item.id,
+                qty: item.qty,
+                variants: item.variants || null
+            }));
+            quote = await fetchQuote(payloadItems, deliveryType);
+            latestQuote = quote;
+        } catch (e) {
+            totalEl.textContent = '$0.00';
+            emptyMsg.textContent = 'Unable to calculate totals. Please try again.';
+            emptyMsg.style.display = 'block';
+            return;
+        }
+
+        const quoteById = new Map();
+        quote.itemsDetailed.forEach(item => {
+            quoteById.set(item.id, item);
+        });
 
         items.forEach(item => {
-            const lineTotal = item.price * item.qty;
-            total += lineTotal;
+            const quoteItem = quoteById.get(item.id);
+            const unitPrice = quoteItem ? quoteItem.unit_price : 0;
+            const lineTotal = quoteItem ? quoteItem.line_total : 0;
 
             // Construir información adicional (variants, brief)
             let additionalInfo = '';
@@ -182,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function () {
             div.innerHTML = `
                 <div class="flex-grow-1">
                     <strong class="d-block mb-1">${item.name}</strong>
-                    <div class="text-muted small mb-2">Unit price: ${formatPrice(item.price)}</div>
+                    <div class="text-muted small mb-2">Unit price: ${formatPrice(unitPrice)}</div>
                     ${additionalInfo}
                     <div class="d-flex align-items-center gap-2 mt-2">
                         <button class="btn btn-sm btn-outline-neon qty-btn" data-action="decrease" data-id="${item.id}" ${item.qty <= 1 ? 'disabled' : ''}>
@@ -206,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function () {
             container.appendChild(div);
         });
 
-        totalEl.textContent = formatPrice(total);
+        totalEl.textContent = formatPrice(quote.total || 0);
         
         // Agregar listeners para los botones
         container.querySelectorAll('.qty-btn').forEach(btn => {
@@ -270,6 +325,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
     checkDeliveryType();
+    const deliverySelect = document.getElementById('delivery-type-select');
+    if (deliverySelect) {
+        deliverySelect.addEventListener('change', function () {
+            renderOrderItems();
+        });
+    }
 
     // Envío a WhatsApp
     const sendBtn = document.getElementById('send-whatsapp-order');
@@ -297,9 +358,13 @@ document.addEventListener('DOMContentLoaded', function () {
             let total = 0;
             let hasApparel = false;
             let hasService = false;
+            const quoteById = latestQuote && latestQuote.itemsDetailed
+                ? new Map(latestQuote.itemsDetailed.map(item => [item.id, item]))
+                : new Map();
             
             items.forEach(item => {
-                const lineTotal = item.price * item.qty;
+                const quoteItem = quoteById.get(item.id);
+                const lineTotal = quoteItem ? quoteItem.line_total : 0;
                 total += lineTotal;
                 msg += `- ${item.name} (x${item.qty}) - $${lineTotal.toFixed(2)}%0A`;
                 
@@ -353,6 +418,88 @@ document.addEventListener('DOMContentLoaded', function () {
 
             window.open(url, '_blank');
         });
+    }
+
+    // Payment flow toggle
+    const manualRadio = document.getElementById('payment-flow-manual');
+    const paypalRadio = document.getElementById('payment-flow-paypal');
+    const manualOnly = document.querySelectorAll('.manual-only');
+    const paypalContainer = document.getElementById('paypal-button-container');
+
+    function updatePaymentFlow() {
+        const isPayPal = paypalRadio && paypalRadio.checked;
+        manualOnly.forEach(el => {
+            el.style.display = isPayPal ? 'none' : '';
+        });
+        if (paypalContainer) {
+            paypalContainer.style.display = isPayPal ? 'block' : 'none';
+        }
+    }
+
+    if (manualRadio && paypalRadio) {
+        manualRadio.addEventListener('change', updatePaymentFlow);
+        paypalRadio.addEventListener('change', updatePaymentFlow);
+        updatePaymentFlow();
+    }
+
+    // PayPal Buttons
+    if (window.paypal && paypalContainer) {
+        paypal.Buttons({
+            createOrder: async function () {
+                const items = loadOrderItems();
+                const deliveryType = document.getElementById('delivery-type-select')?.value || '';
+                const payloadItems = items.map(item => ({
+                    id: item.id,
+                    qty: item.qty,
+                    variants: item.variants || null
+                }));
+                const response = await fetch('/api/paypal/create_order.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        items: payloadItems,
+                        deliveryType
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok || !data.id) {
+                    throw new Error('PayPal order creation failed');
+                }
+                return data.id;
+            },
+            onApprove: async function (data) {
+                const items = loadOrderItems();
+                const deliveryType = document.getElementById('delivery-type-select')?.value || '';
+                const form = document.getElementById('order-form');
+                const formData = new FormData(form);
+                const customer = {
+                    name: formData.get('name') || '',
+                    whatsapp: formData.get('whatsapp') || '',
+                    notes: formData.get('notes') || ''
+                };
+                const payloadItems = items.map(item => ({
+                    id: item.id,
+                    qty: item.qty,
+                    variants: item.variants || null
+                }));
+                const response = await fetch('/api/paypal/capture_order.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderID: data.orderID,
+                        items: payloadItems,
+                        deliveryType,
+                        customer
+                    })
+                });
+                const result = await response.json();
+                if (response.ok && result.redirect) {
+                    window.location.href = result.redirect;
+                    return;
+                }
+                alert('PayPal capture failed. Please contact support.');
+            }
+        }).render('#paypal-button-container');
     }
 });
 </script>
