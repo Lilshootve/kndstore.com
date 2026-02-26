@@ -216,4 +216,5 @@ return [
     'order.form.notes_label' => 'Notes',
     'order.form.notes_placeholder' => 'Anything we should know?',
     'order.form.submit' => 'Send via WhatsApp',
+    'order.form.whatsapp_other_helper' => 'Alternative payment options available via WhatsApp. Cryptocurrency payments supported: USDT, USDC, BTC, ETH, BNB (selected networks confirmed before payment). Binance Pay, Pipol Pay, Zinli and other regional and international methods. Availability and applicable fees confirmed via WhatsApp.',
 ];

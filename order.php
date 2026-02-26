@@ -59,8 +59,9 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                             <div class="mb-3">
                                 <label class="form-label">Payment Method</label>
                                 <select name="payment_flow" id="payment-method-select" class="form-select">
-                                    <option value="paypal">PayPal</option>
-                                    <option value="whatsapp" selected>WhatsApp (Other)</option>
+                                    <option value="paypal" selected>PayPal</option>
+                                    <option value="bank_transfer">Bank Transfer (ACH/Wire)</option>
+                                    <option value="whatsapp">WhatsApp (Other)</option>
                                 </select>
                                 <?php
                                 $paypalId = defined('PAYPAL_CLIENT_ID') ? PAYPAL_CLIENT_ID : '';
@@ -79,14 +80,20 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                                 <input type="text" name="whatsapp" id="order-whatsapp" class="form-control" placeholder="+58..." required>
                                 <small class="form-text paypal-optional-hint text-muted" style="display:none;"><?php echo t('order.form.delivery_updates_hint'); ?></small>
                             </div>
+                            <div id="whatsapp-other-helper" class="mb-3 manual-only" style="display: none;">
+                                <div class="small text-muted p-2 rounded" style="background: rgba(37, 156, 174, 0.1); border: 1px solid rgba(37, 156, 174, 0.2);">
+                                    <?php echo t('order.form.whatsapp_other_helper'); ?>
+                                </div>
+                            </div>
                             <div class="mb-3 manual-only">
                                 <label class="form-label"><?php echo t('order.form.payment_method_label'); ?></label>
                                 <select name="payment_method" class="form-select" required>
                                     <option value=""><?php echo t('order.form.payment_method_select'); ?></option>
+                                    <option value="Bank Transfer">Bank Transfer (ACH/Wire)</option>
                                     <option value="Zinli">Zinli</option>
                                     <option value="Binance Pay">Binance Pay</option>
+                                    <option value="Pipol Pay">Pipol Pay</option>
                                     <option value="Mobile Payment">Mobile Payment</option>
-                                    <option value="Bank Transfer">Bank Transfer</option>
                                     <option value="Cryptocurrency">Cryptocurrency</option>
                                 </select>
                             </div>
@@ -453,9 +460,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Payment flow toggle (select: paypal | whatsapp)
+    // Payment flow toggle: paypal | bank_transfer | whatsapp
     const paymentMethodSelect = document.getElementById('payment-method-select');
     const manualOnly = document.querySelectorAll('.manual-only');
+    const whatsappHelper = document.getElementById('whatsapp-other-helper');
     const paypalSection = document.getElementById('paypal-section');
     const paypalContainer = document.getElementById('paypal-button-container');
     const paymentMethodField = document.querySelector('select[name="payment_method"]');
@@ -487,22 +495,25 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function updatePaymentFlow() {
-        const isPayPal = paymentMethodSelect && paymentMethodSelect.value === 'paypal';
+        const val = paymentMethodSelect ? paymentMethodSelect.value : '';
+        const isPayPal = val === 'paypal';
+        const isWhatsApp = val === 'whatsapp';
+        const isManual = val === 'bank_transfer' || isWhatsApp;
+
         manualOnly.forEach(el => {
-            el.style.display = isPayPal ? 'none' : '';
+            el.style.display = isManual ? '' : 'none';
         });
-        if (paypalSection) {
-            paypalSection.style.display = isPayPal ? 'block' : 'none';
-        }
-        if (paymentMethodField) {
-            paymentMethodField.required = !isPayPal;
-        }
+        if (whatsappHelper) whatsappHelper.style.display = isWhatsApp ? 'block' : 'none';
+        if (paypalSection) paypalSection.style.display = isPayPal ? 'block' : 'none';
+        if (paymentMethodField) paymentMethodField.required = isManual;
+
         const nameInput = document.getElementById('order-name');
         const whatsappInput = document.getElementById('order-whatsapp');
         const hints = document.querySelectorAll('.paypal-optional-hint');
-        if (nameInput) nameInput.required = !isPayPal;
-        if (whatsappInput) whatsappInput.required = !isPayPal;
+        if (nameInput) nameInput.required = isManual;
+        if (whatsappInput) whatsappInput.required = isManual;
         hints.forEach(function(h) { h.style.display = isPayPal ? 'block' : 'none'; });
+
         if (isPayPal && !window.__paypalRendered && paypalContainer) {
             loadPayPalSDK(function() {
                 if (paymentMethodSelect.value === 'paypal') renderPayPalButtons();
