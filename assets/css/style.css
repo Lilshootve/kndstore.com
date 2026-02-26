@@ -5323,6 +5323,14 @@ body {
     box-shadow: 0 0 12px rgba(0, 212, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
+/* Info box title */
+.checkout-info-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 0.5rem;
+}
+
 /* Info boxes */
 .checkout-info-box {
     font-size: 0.875rem;
@@ -5391,6 +5399,26 @@ body {
 /* WhatsApp button spacing */
 .checkout-lux .order-btn-whatsapp {
     margin-top: 1rem;
+}
+
+/* Primary confirm button - Bank Transfer */
+.order-btn-primary {
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(255, 0, 255, 0.1) 100%);
+    border: 1px solid rgba(0, 212, 255, 0.4);
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.order-btn-primary:hover {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.3) 0%, rgba(255, 0, 255, 0.15) 100%);
+    border-color: rgba(0, 212, 255, 0.6);
 }
 
 @media (max-width: 576px) {

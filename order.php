@@ -71,8 +71,7 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                                 <div class="order-section-label"><?php echo t('order.section.payment'); ?></div>
                                 <div class="order-payment-pills mb-4">
                                     <button type="button" class="order-pill order-pill-active" data-value="paypal">PayPal</button>
-                                    <button type="button" class="order-pill" data-value="bank_transfer">Bank Transfer (ACH/Wire)</button>
-                                    <button type="button" class="order-pill" data-value="whatsapp">WhatsApp (Other)</button>
+                                    <button type="button" class="order-pill" data-value="bank_transfer">Bank Transfer (ACH / Wire)</button>
                                 </div>
                                 <?php
                                 $paypalId = defined('PAYPAL_CLIENT_ID') ? PAYPAL_CLIENT_ID : '';
@@ -84,23 +83,8 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                                     <?php echo t('order.paypal.secure_note'); ?>
                                 </div>
                                 <div id="bank-transfer-info" class="checkout-info-box bank-transfer-only" style="display: none;">
-                                    <p class="mb-2"><?php echo t('order.bank_transfer.info'); ?></p>
-                                    <p class="mb-0 checkout-info-hint"><?php echo t('order.bank_transfer.hint'); ?></p>
-                                </div>
-                                <div id="whatsapp-other-info" class="checkout-info-box whatsapp-only" style="display: none;">
-                                    <?php echo t('order.whatsapp_other.info'); ?>
-                                </div>
-                                <div id="whatsapp-alt-dropdown-wrap" class="whatsapp-only mt-3" style="display: none;">
-                                    <label class="order-field-label"><?php echo t('order.form.alternative_method_label'); ?></label>
-                                    <select name="payment_method" class="order-input order-select-dark" id="alternative-method-select">
-                                        <option value=""><?php echo t('order.form.alternative_method_select'); ?></option>
-                                        <option value="USDT (TRC20)">USDT (TRC20)</option>
-                                        <option value="USDT (BEP20)">USDT (BEP20)</option>
-                                        <option value="Binance Pay">Binance Pay</option>
-                                        <option value="Zinli">Zinli</option>
-                                        <option value="Pipol Pay">Pipol Pay</option>
-                                        <option value="Wally">Wally</option>
-                                    </select>
+                                    <div class="checkout-info-title"><?php echo t('order.bank_transfer.title'); ?></div>
+                                    <p class="mb-0"><?php echo t('order.bank_transfer.info_secure'); ?></p>
                                 </div>
                             </div>
 
@@ -124,8 +108,8 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                                         <div id="paypal-error" class="paypal-error" style="display:none;" role="alert"></div>
                                     </div>
                                 </div>
-                                <button type="button" id="send-whatsapp-order" class="order-btn-whatsapp whatsapp-only mt-4" style="display: none;">
-                                    <?php echo t('order.form.submit'); ?>
+                                <button type="button" id="confirm-bank-transfer" class="order-btn-primary bank-transfer-only mt-4" style="display: none;">
+                                    <?php echo t('order.bank_transfer.confirm_btn'); ?>
                                 </button>
                             </div>
                         </form>
@@ -370,104 +354,61 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Envío a WhatsApp
-    const sendBtn = document.getElementById('send-whatsapp-order');
-    if (sendBtn) {
-        sendBtn.addEventListener('click', function () {
+    // Bank Transfer: confirm order and redirect to request page
+    const confirmBankBtn = document.getElementById('confirm-bank-transfer');
+    if (confirmBankBtn) {
+        confirmBankBtn.addEventListener('click', async function () {
             const items = loadOrderItems();
             if (!items.length) {
                 alert('Your order is empty. Add items from the shop first.');
                 return;
             }
-
             const form = document.getElementById('order-form');
-            const formData = new FormData(form);
-            const name = formData.get('name') || '';
-            const whatsapp = formData.get('whatsapp') || '';
-            const paymentFlow = formData.get('payment_flow') || 'whatsapp';
-            const altMethod = formData.get('payment_method') || '';
-            const deliveryType = formData.get('delivery_type') || '';
-            const notes = formData.get('notes') || '';
-
-            let msg = '🛰 *New order from KND Store*%0A%0A';
-            if (name) msg += '*Name:* ' + name + '%0A';
-            if (whatsapp) msg += '*Customer WhatsApp:* ' + whatsapp + '%0A';
-            msg += '%0A*Requested items:*%0A';
-
-            let total = 0;
-            let hasApparel = false;
-            let hasService = false;
-            const quoteById = latestQuote && latestQuote.itemsDetailed
-                ? new Map(latestQuote.itemsDetailed.map(item => [item.id, item]))
-                : new Map();
-            
-            items.forEach(item => {
-                const quoteItem = quoteById.get(item.id);
-                const lineTotal = quoteItem ? quoteItem.line_total : 0;
-                total += lineTotal;
-                msg += `- ${item.name} (x${item.qty}) - $${lineTotal.toFixed(2)}%0A`;
-                
-                // Agregar variants si es apparel
-                if (item.variants) {
-                    if (item.variants.size) msg += `  Size: ${item.variants.size}%0A`;
-                    if (item.variants.color) msg += `  Color: ${item.variants.color}%0A`;
-                    hasApparel = true;
+            const name = form.querySelector('[name="name"]').value.trim();
+            const whatsapp = form.querySelector('[name="whatsapp"]').value.trim();
+            if (!name || !whatsapp) {
+                alert('Please enter your name and WhatsApp number.');
+                return;
+            }
+            const deliveryType = document.getElementById('delivery-type-select')?.value || '';
+            const notes = form.querySelector('[name="notes"]').value.trim();
+            const payloadItems = items.map(item => ({
+                id: item.id,
+                qty: item.qty,
+                variants: item.variants || null
+            }));
+            try {
+                const res = await fetch('/api/bank_transfer/create_request.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        items: payloadItems,
+                        deliveryType,
+                        customer: { name, whatsapp, notes }
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.order_id) {
+                    localStorage.removeItem(ORDER_KEY);
+                    if (window.KND_ORDER && typeof window.KND_ORDER.updateOrderBadge === 'function') {
+                        window.KND_ORDER.updateOrderBadge();
+                    }
+                    window.location.href = '/bank-transfer-request.php?order=' + encodeURIComponent(data.order_id);
+                } else {
+                    alert(data.error || 'Something went wrong. Please try again.');
                 }
-                
-                // Agregar brief si es service
-                if (item.brief) {
-                    msg += `  Brief:%0A`;
-                    if (item.brief.estilo) msg += `    Style: ${item.brief.estilo}%0A`;
-                    if (item.brief.colores) msg += `    Colors: ${item.brief.colores}%0A`;
-                    if (item.brief.texto) msg += `    Text: ${item.brief.texto}%0A`;
-                    if (item.brief.referencias) msg += `    References: ${item.brief.referencias}%0A`;
-                    if (item.brief.detalles) msg += `    Details: ${item.brief.detalles}%0A`;
-                    hasService = true;
-                }
-                
-                if (item.type === 'apparel') hasApparel = true;
-                if (item.type === 'service') hasService = true;
-            });
-
-            msg += `%0A*Total:* $${total.toFixed(2)}%0A`;
-            msg += `*Payment method:* WhatsApp (Other)%0A`;
-            if (altMethod) msg += `*Alternative method:* ${altMethod}%0A`;
-            
-            // Actualizar delivery type si hay apparel
-            if (hasApparel) {
-                msg += `*Delivery type:* Coordinated delivery (Apparel)%0A`;
-            } else if (deliveryType) {
-                msg += `*Delivery type:* ${deliveryType}%0A`;
+            } catch (e) {
+                alert('Something went wrong. Please try again.');
             }
-            
-            if (notes) {
-                const notesLabel = (window.I18N && window.I18N['order.whatsapp.notes_label']) || 'Additional notes:';
-                msg += `%0A*${notesLabel}* ${notes}%0A`;
-            }
-
-            if (hasApparel || hasService) {
-                // Nota importante - podría venir de window.I18N si se necesita
-                msg += '%0A*Important note:* We will contact you via WhatsApp/contact channels to coordinate delivery and/or design details.%0A';
-            }
-            
-            msg += '%0ASend the payment receipt here when you have it ready.';
-
-            // Reemplaza este número con tu número de WhatsApp real
-            const phone = '584246661334';
-            const url = `https://wa.me/${phone}?text=${msg}`;
-
-            window.open(url, '_blank');
         });
     }
 
-    // Payment flow toggle: paypal | bank_transfer | whatsapp
+    // Payment flow toggle: paypal | bank_transfer
     const paymentMethodSelect = document.getElementById('payment-method-select');
     const paypalOnly = document.querySelectorAll('.paypal-only');
     const bankTransferOnly = document.querySelectorAll('.bank-transfer-only');
-    const whatsappOnly = document.querySelectorAll('.whatsapp-only');
     const paypalSection = document.getElementById('paypal-section');
     const paypalContainer = document.getElementById('paypal-button-container');
-    const altMethodSelect = document.getElementById('alternative-method-select');
     window.__paypalRendered = false;
     window.__paypalScriptInjected = false;
 
@@ -487,7 +428,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         window.__paypalScriptInjected = true;
         const script = document.createElement('script');
-        script.src = 'https://www.paypal.com/sdk/js?client-id=<?php echo urlencode(PAYPAL_CLIENT_ID); ?>&currency=USD&components=buttons';
+        script.src = 'https://www.paypal.com/sdk/js?client-id=<?php echo urlencode(PAYPAL_CLIENT_ID); ?>&currency=USD&components=buttons&disable-funding=paylater';
         script.onload = script.onreadystatechange = function() {
             if (script.readyState && script.readyState !== 'loaded' && script.readyState !== 'complete') return;
             if (cb) cb();
@@ -499,15 +440,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const val = paymentMethodSelect ? paymentMethodSelect.value : '';
         const isPayPal = val === 'paypal';
         const isBankTransfer = val === 'bank_transfer';
-        const isWhatsApp = val === 'whatsapp';
-        const isManual = isBankTransfer || isWhatsApp;
+        const isManual = isBankTransfer;
 
         paypalOnly.forEach(el => { el.style.display = isPayPal ? 'block' : 'none'; });
         bankTransferOnly.forEach(el => { el.style.display = isBankTransfer ? 'block' : 'none'; });
-        whatsappOnly.forEach(el => { el.style.display = isWhatsApp ? 'block' : 'none'; });
         if (paypalSection) paypalSection.style.display = isPayPal ? 'block' : 'none';
-
-        if (altMethodSelect) altMethodSelect.required = false;
 
         const nameInput = document.getElementById('order-name');
         const whatsappInput = document.getElementById('order-whatsapp');
@@ -542,6 +479,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.__paypalRendered || !window.paypal || !paypalContainer) return;
         window.__paypalRendered = true;
         paypal.Buttons({
+            fundingSource: paypal.FUNDING.PAYPAL,
+            style: { layout: 'vertical', shape: 'rect', label: 'paypal' },
             createOrder: async function () {
                 showPayPalLoading();
                 try {
