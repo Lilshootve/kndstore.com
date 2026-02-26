@@ -48,16 +48,16 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                         <form id="order-form">
                             <div class="mb-3">
                                 <label class="form-label">Payment Method</label>
-                                <div class="d-flex gap-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="payment_flow" id="payment-flow-manual" value="manual" checked>
-                                        <label class="form-check-label" for="payment-flow-manual">WhatsApp (manual)</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="payment_flow" id="payment-flow-paypal" value="paypal">
-                                        <label class="form-check-label" for="payment-flow-paypal">PayPal (instant)</label>
-                                    </div>
-                                </div>
+                                <select name="payment_flow" id="payment-method-select" class="form-select">
+                                    <option value="paypal">PayPal</option>
+                                    <option value="whatsapp" selected>WhatsApp (Other)</option>
+                                </select>
+                                <?php
+                                $paypalId = defined('PAYPAL_CLIENT_ID') ? PAYPAL_CLIENT_ID : '';
+                                if (empty($paypalId) || strpos($paypalId, 'YOUR_') === 0 || stripos($paypalId, 'placeholder') !== false) {
+                                    echo '<div class="alert alert-warning mt-2 py-2 small" role="alert"><i class="fas fa-exclamation-triangle me-1"></i>PayPal credentials not configured. Create includes/paypal_secrets.local.php or set PAYPAL_CLIENT_ID.</div>';
+                                }
+                                ?>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label"><?php echo t('order.form.name_label'); ?></label>
@@ -96,7 +96,9 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                                 <?php echo t('order.form.submit'); ?>
                             </button>
 
-                            <div id="paypal-button-container" class="mt-3" style="display: none;"></div>
+                            <div id="paypal-section" class="mt-3" style="display: none;">
+                                <div id="paypal-button-container"></div>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -105,7 +107,12 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
     </div>
 </section>
 
-<script src="https://www.paypal.com/sdk/js?client-id=<?php echo urlencode(PAYPAL_CLIENT_ID); ?>&currency=USD"></script>
+<script>
+window.__paypalSDKReady = function() {
+    document.dispatchEvent(new CustomEvent('paypal-sdk-ready'));
+};
+</script>
+<script src="https://www.paypal.com/sdk/js?client-id=<?php echo urlencode(PAYPAL_CLIENT_ID); ?>&currency=USD&components=buttons&callback=__paypalSDKReady"></script>
 
 <script>
 // Lógica para leer el pedido desde localStorage y rellenar la vista en order.php
@@ -420,30 +427,33 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Payment flow toggle
-    const manualRadio = document.getElementById('payment-flow-manual');
-    const paypalRadio = document.getElementById('payment-flow-paypal');
+    // Payment flow toggle (select: paypal | whatsapp)
+    const paymentMethodSelect = document.getElementById('payment-method-select');
     const manualOnly = document.querySelectorAll('.manual-only');
+    const paypalSection = document.getElementById('paypal-section');
     const paypalContainer = document.getElementById('paypal-button-container');
+    const paymentMethodField = document.querySelector('select[name="payment_method"]');
+    window.__paypalRendered = false;
 
     function updatePaymentFlow() {
-        const isPayPal = paypalRadio && paypalRadio.checked;
+        const isPayPal = paymentMethodSelect && paymentMethodSelect.value === 'paypal';
         manualOnly.forEach(el => {
             el.style.display = isPayPal ? 'none' : '';
         });
-        if (paypalContainer) {
-            paypalContainer.style.display = isPayPal ? 'block' : 'none';
+        if (paypalSection) {
+            paypalSection.style.display = isPayPal ? 'block' : 'none';
+        }
+        if (paymentMethodField) {
+            paymentMethodField.required = !isPayPal;
+        }
+        if (isPayPal && !window.__paypalRendered && window.paypal && paypalContainer) {
+            renderPayPalButtons();
         }
     }
 
-    if (manualRadio && paypalRadio) {
-        manualRadio.addEventListener('change', updatePaymentFlow);
-        paypalRadio.addEventListener('change', updatePaymentFlow);
-        updatePaymentFlow();
-    }
-
-    // PayPal Buttons
-    if (window.paypal && paypalContainer) {
+    function renderPayPalButtons() {
+        if (window.__paypalRendered || !window.paypal || !paypalContainer) return;
+        window.__paypalRendered = true;
         paypal.Buttons({
             createOrder: async function () {
                 const items = loadOrderItems();
@@ -494,12 +504,30 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
                 const result = await response.json();
                 if (response.ok && result.redirect) {
+                    localStorage.removeItem(ORDER_KEY);
+                    if (window.KND_ORDER && typeof window.KND_ORDER.updateOrderBadge === 'function') {
+                        window.KND_ORDER.updateOrderBadge();
+                    }
                     window.location.href = result.redirect;
                     return;
                 }
                 alert('PayPal capture failed. Please contact support.');
             }
         }).render('#paypal-button-container');
+    }
+
+    if (paymentMethodSelect) {
+        paymentMethodSelect.addEventListener('change', updatePaymentFlow);
+        updatePaymentFlow();
+    }
+
+    document.addEventListener('paypal-sdk-ready', function() {
+        if (paymentMethodSelect && paymentMethodSelect.value === 'paypal') {
+            renderPayPalButtons();
+        }
+    });
+    if (window.paypal && paymentMethodSelect && paymentMethodSelect.value === 'paypal') {
+        renderPayPalButtons();
     }
 });
 </script>
