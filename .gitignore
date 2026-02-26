@@ -2,4 +2,5 @@ includes/config.php
 includes/config-local.php
 includes/secrets.local.php
 includes/paypal_secrets.local.php
+config/*.local.php
 
