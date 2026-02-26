@@ -100,7 +100,7 @@ if (!function_exists('t_html')) {
 
 if (!function_exists('current_lang')) {
     function current_lang(): string {
-        return 'es';
+        return 'en';
     }
 }
 

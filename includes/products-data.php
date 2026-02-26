@@ -8,9 +8,9 @@ $PRODUCTS = [
 
         'id' => 1,
 
-        'nombre' => 'Formateo y limpieza de PC (Remoto)',
+        'nombre' => 'PC Format & Cleanup (Remote)',
 
-        'descripcion' => 'Recupera el rendimiento de tu PC desde la comodidad de tu nave.<br><br>Incluye:<br>• Formateo completo del sistema<br>• Instalación de Windows limpio<br>• Instalación de drivers actualizados<br>• Optimización de rendimiento<br>• Limpieza de archivos temporales<br>• Configuración de seguridad básica',
+        'descripcion' => 'Restore your PC performance from the comfort of your ship.<br><br>Includes:<br>• Full system format<br>• Clean Windows installation<br>• Updated driver installation<br>• Performance optimization<br>• Temporary file cleanup<br>• Basic security setup',
 
         'precio' => 10.00,
 
@@ -28,9 +28,9 @@ $PRODUCTS = [
 
         'id' => 2,
 
-        'nombre' => 'Instalación de Windows + Drivers',
+        'nombre' => 'Windows + Drivers Installation',
 
-        'descripcion' => 'Sistema operativo listo para despegar. Configuración limpia y segura.<br><br>Incluye:<br>• Instalación de Windows 10/11<br>• Instalación de todos los drivers<br>• Activación del sistema<br>• Configuración inicial<br>• Instalación de actualizaciones críticas',
+        'descripcion' => 'Operating system ready for launch. Clean and secure setup.<br><br>Includes:<br>• Windows 10/11 installation<br>• All drivers installed<br>• System activation<br>• Initial setup<br>• Critical updates installed',
 
         'precio' => 8.00,
 
@@ -48,9 +48,9 @@ $PRODUCTS = [
 
         'id' => 3,
 
-        'nombre' => 'Optimización Gamer (FPS, temperaturas, disco)',
+        'nombre' => 'Gamer Optimization (FPS, temperatures, storage)',
 
-        'descripcion' => 'Tu PC, afinada para dominar la galaxia del gaming.<br><br>Incluye:<br>• Optimización de FPS en juegos<br>• Control de temperaturas<br>• Optimización del disco duro/SSD<br>• Configuración de gráficos<br>• Optimización de memoria RAM<br>• Configuración de overclock seguro',
+        'descripcion' => 'Your PC tuned to dominate the gaming galaxy.<br><br>Includes:<br>• FPS optimization in games<br>• Temperature control<br>• HDD/SSD optimization<br>• Graphics settings<br>• RAM optimization<br>• Safe overclock configuration',
 
         'precio' => 5.00,
 
@@ -68,9 +68,9 @@ $PRODUCTS = [
 
         'id' => 4,
 
-        'nombre' => 'Activación de Juegos y Gift Cards',
+        'nombre' => 'Game & Gift Card Activation',
 
-        'descripcion' => 'Claves para Steam, PSN, Xbox, Riot y más. Entrega directa.<br><br>Plataformas disponibles:<br>• Steam<br>• PlayStation Network<br>• Xbox Live<br>• Riot Games<br>• Epic Games<br>• Nintendo eShop<br>• Origin/EA Play',
+        'descripcion' => 'Keys for Steam, PSN, Xbox, Riot, and more. Direct delivery.<br><br>Available platforms:<br>• Steam<br>• PlayStation Network<br>• Xbox Live<br>• Riot Games<br>• Epic Games<br>• Nintendo eShop<br>• Origin/EA Play',
 
         'precio' => 3.00,
 
@@ -88,9 +88,9 @@ $PRODUCTS = [
 
         'id' => 5,
 
-        'nombre' => 'Asesoría para PC Gamer (Presupuesto personalizado)',
+        'nombre' => 'PC Gamer Consulting (Custom Budget)',
 
-        'descripcion' => '¿Tienes $300 o $3000? Te armamos la build perfecta.<br><br>Incluye:<br>• Análisis de necesidades<br>• Selección de componentes<br>• Verificación de compatibilidad<br>• Lista de compra optimizada<br>• Guía de ensamblaje<br>• Soporte post-compra',
+        'descripcion' => 'Got $300 or $3000? We build the perfect rig.<br><br>Includes:<br>• Needs analysis<br>• Component selection<br>• Compatibility check<br>• Optimized shopping list<br>• Assembly guide<br>• Post-purchase support',
 
         'precio' => 5.00,
 
@@ -108,9 +108,9 @@ $PRODUCTS = [
 
         'id' => 6,
 
-        'nombre' => 'Death Roll Crate (Caja misteriosa)',
+        'nombre' => 'Death Roll Crate (Mystery Box)',
 
-        'descripcion' => 'Llave, wallpaper, avatar… ¿o meme cósmico? Nunca lo sabrás.<br><br>Contenido aleatorio:<br>• Claves de juegos<br>• Wallpapers personalizados<br>• Avatares gamer<br>• Memes galácticos<br>• Descuentos especiales<br>• Contenido exclusivo KND',
+        'descripcion' => 'Key, wallpaper, avatar… or a cosmic meme? You never know.<br><br>Random contents:<br>• Game keys<br>• Custom wallpapers<br>• Gamer avatars<br>• Galactic memes<br>• Special discounts<br>• Exclusive KND content',
 
         'precio' => 2.00,
 
@@ -128,9 +128,9 @@ $PRODUCTS = [
 
         'id' => 7,
 
-        'nombre' => 'Wallpaper personalizado IA',
+        'nombre' => 'AI Custom Wallpaper',
 
-        'descripcion' => 'Tu fondo, tu nave. Generado a medida.<br><br>Incluye:<br>• Diseño personalizado<br>• Múltiples resoluciones<br>• Estilo galáctico KND<br>• Versión móvil incluida<br>• Archivos en alta calidad<br>• Modificaciones gratuitas',
+        'descripcion' => 'Your background, your ship. Generated to spec.<br><br>Includes:<br>• Custom design<br>• Multiple resolutions<br>• KND galactic style<br>• Mobile version included<br>• High-quality files<br>• Free revisions',
 
         'precio' => 4.00,
 
@@ -148,9 +148,9 @@ $PRODUCTS = [
 
         'id' => 8,
 
-        'nombre' => 'Avatar gamer personalizado',
+        'nombre' => 'Custom Gamer Avatar',
 
-        'descripcion' => 'Crea tu imagen digital con estilo galáctico.<br><br>Incluye:<br>• Diseño único<br>• Múltiples formatos<br>• Estilo KND galáctico<br>• Versiones para redes sociales<br>• Archivos editables<br>• Modificaciones incluidas',
+        'descripcion' => 'Build your digital identity with a galactic style.<br><br>Includes:<br>• Unique design<br>• Multiple formats<br>• KND galactic style<br>• Social media versions<br>• Editable files<br>• Included revisions',
 
         'precio' => 6.00,
 
@@ -168,9 +168,9 @@ $PRODUCTS = [
 
         'id' => 9,
 
-        'nombre' => 'Icon Pack edición especial',
+        'nombre' => 'Icon Pack (Special Edition)',
 
-        'descripcion' => 'Reinventa tu escritorio con estética cósmica.<br><br>Incluye:<br>• Pack completo de iconos<br>• Estilo galáctico KND<br>• Múltiples tamaños<br>• Instrucciones de instalación<br>• Iconos personalizables<br>• Soporte técnico',
+        'descripcion' => 'Reinvent your desktop with a cosmic aesthetic.<br><br>Includes:<br>• Full icon pack<br>• KND galactic style<br>• Multiple sizes<br>• Installation instructions<br>• Customizable icons<br>• Technical support',
 
         'precio' => 3.00,
 
@@ -188,9 +188,9 @@ $PRODUCTS = [
 
         'id' => 10,
 
-        'nombre' => 'Instalación de Office, Adobe, OBS, etc.',
+        'nombre' => 'Office, Adobe, OBS Installation',
 
-        'descripcion' => 'Programas listos para usar. Te lo dejo full operativo.<br><br>Software disponible:<br>• Microsoft Office<br>• Adobe Creative Suite<br>• OBS Studio<br>• Antivirus<br>• Navegadores<br>• Herramientas de desarrollo',
+        'descripcion' => 'Apps ready to use. Fully operational.<br><br>Available software:<br>• Microsoft Office<br>• Adobe Creative Suite<br>• OBS Studio<br>• Antivirus<br>• Browsers<br>• Developer tools',
 
         'precio' => 5.00,
 
@@ -208,9 +208,9 @@ $PRODUCTS = [
 
         'id' => 11,
 
-        'nombre' => 'PC Ready Pack (software + configuración)',
+        'nombre' => 'PC Ready Pack (Software + Setup)',
 
-        'descripcion' => 'Todo instalado, optimizado y listo para jugar o trabajar.<br><br>Incluye:<br>• Instalación de Windows<br>• Todos los drivers<br>• Software esencial<br>• Optimización completa<br>• Configuración de seguridad<br>• Backup del sistema',
+        'descripcion' => 'Everything installed, optimized, and ready to game or work.<br><br>Includes:<br>• Windows installation<br>• All drivers<br>• Essential software<br>• Full optimization<br>• Security setup<br>• System backup',
 
         'precio' => 10.00,
 
@@ -228,9 +228,9 @@ $PRODUCTS = [
 
         'id' => 12,
 
-        'nombre' => 'Mini tutorial PDF o video express',
+        'nombre' => 'Mini Tutorial (PDF or Express Video)',
 
-        'descripcion' => '¿No sabes algo? Te lo explico claro y con estilo.<br><br>Formatos disponibles:<br>• PDF detallado<br>• Video tutorial<br>• Guía paso a paso<br>• Screenshots explicativos<br>• Ejemplos prácticos<br>• Soporte adicional',
+        'descripcion' => 'Don’t know something? We explain it clearly and with style.<br><br>Available formats:<br>• Detailed PDF<br>• Video tutorial<br>• Step-by-step guide<br>• Screenshots with notes<br>• Practical examples<br>• Extra support',
 
         'precio' => 2.00,
 
@@ -248,9 +248,9 @@ $PRODUCTS = [
 
         'id' => 13,
 
-        'nombre' => 'Compatibilidad de piezas (¿funcionan juntas?)',
+        'nombre' => 'Parts Compatibility Check (Do they work together?)',
 
-        'descripcion' => 'Evita errores antes de comprar. Te lo confirmo todo.<br><br>Verificación incluye:<br>• Compatibilidad de CPU y motherboard<br>• Compatibilidad de RAM<br>• Compatibilidad de GPU<br>• Compatibilidad de fuente<br>• Compatibilidad de gabinete<br>• Recomendaciones de mejora',
+        'descripcion' => 'Avoid mistakes before you buy. We confirm everything.<br><br>Verification includes:<br>• CPU and motherboard compatibility<br>• RAM compatibility<br>• GPU compatibility<br>• Power supply compatibility<br>• Case compatibility<br>• Upgrade recommendations',
 
         'precio' => 3.00,
 
@@ -268,9 +268,9 @@ $PRODUCTS = [
 
         'id' => 14,
 
-        'nombre' => 'Simulación de Build con PDF personalizado',
+        'nombre' => 'Build Simulation with Custom PDF',
 
-        'descripcion' => 'Lista completa + imagen de referencia para tu futura nave.<br><br>Incluye:<br>• Lista completa de componentes<br>• Imagen de referencia<br>• Análisis de precios<br>• Alternativas sugeridas<br>• Guía de ensamblaje<br>• Estimación de rendimiento',
+        'descripcion' => 'Full list + reference image for your future rig.<br><br>Includes:<br>• Full component list<br>• Reference image<br>• Price analysis<br>• Suggested alternatives<br>• Assembly guide<br>• Performance estimate',
 
         'precio' => 7.00,
 
@@ -288,9 +288,9 @@ $PRODUCTS = [
 
         'id' => 15,
 
-        'nombre' => 'Análisis de rendimiento de tu PC actual',
+        'nombre' => 'PC Performance Analysis',
 
-        'descripcion' => '¿Funciona bien o le falta potencia? Lo analizamos contigo.<br><br>Análisis incluye:<br>• Rendimiento de CPU<br>• Rendimiento de GPU<br>• Análisis de memoria RAM<br>• Velocidad de almacenamiento<br>• Temperaturas del sistema<br>• Recomendaciones de mejora',
+        'descripcion' => 'Running fine or lacking power? We analyze it with you.<br><br>Analysis includes:<br>• CPU performance<br>• GPU performance<br>• RAM analysis<br>• Storage speed<br>• System temperatures<br>• Upgrade recommendations',
 
         'precio' => 5.00,
 
@@ -309,7 +309,7 @@ $PRODUCTS = [
     'hoodie-knd-style' => [
         'id' => 16,
         'nombre' => 'Hoodie KND Style',
-        'descripcion' => 'Hoodie oficial KND con diseño galáctico único.<br><br>Características:<br>• Material premium<br>• Diseño exclusivo KND<br>• Disponible en 3 colores<br>• Tallas S/M/L/XL<br>• + Delivery coordinado',
+        'descripcion' => 'Official KND hoodie with a unique galactic design.<br><br>Features:<br>• Premium fabric<br>• Exclusive KND design<br>• Available in 3 colors<br>• Sizes S/M/L/XL<br>• + Coordinated delivery',
         'precio' => 59.99,
         'imagen' => 'assets/images/Cloths/Hoodie Desing 001 MAGENTA.webp',
         'categoria' => 'apparel',
@@ -334,7 +334,7 @@ $PRODUCTS = [
     'tshirt-knd-oversize' => [
         'id' => 17,
         'nombre' => 'T-Shirt KND Oversize',
-        'descripcion' => 'T-Shirt oversize con estilo KND galáctico.<br><br>Características:<br>• Corte oversize cómodo<br>• Diseño exclusivo KND<br>• Disponible en 3 colores<br>• Tallas S/M/L/XL<br>• + Delivery coordinado',
+        'descripcion' => 'Oversize T-shirt with KND galactic style.<br><br>Features:<br>• Comfortable oversize fit<br>• Exclusive KND design<br>• Available in 3 colors<br>• Sizes S/M/L/XL<br>• + Coordinated delivery',
         'precio' => 34.99,
         'imagen' => 'assets/images/Cloths/T-shirt Desing 001 MAGENTA.png',
         'categoria' => 'apparel',
@@ -359,7 +359,7 @@ $PRODUCTS = [
     'hoodie-knd-black-edition' => [
         'id' => 18,
         'nombre' => 'Hoodie KND Black Edition',
-        'descripcion' => 'Edición especial negra con diseño premium.<br><br>Características:<br>• Material premium<br>• Diseño exclusivo Black Edition<br>• Tallas S/M/L/XL<br>• + Delivery coordinado',
+        'descripcion' => 'Special black edition with premium design.<br><br>Features:<br>• Premium fabric<br>• Exclusive Black Edition design<br>• Sizes S/M/L/XL<br>• + Coordinated delivery',
         'precio' => 64.99,
         'imagen' => 'assets/images/Cloths/Hoodie BLACK FRONT.png',
         'categoria' => 'apparel',
@@ -381,7 +381,7 @@ $PRODUCTS = [
     'hoodie-anime-style' => [
         'id' => 19,
         'nombre' => 'Hoodie Anime Style (Limited Drop)',
-        'descripcion' => 'Edición limitada con diseño anime único.<br><br>Características:<br>• Edición LIMITADA<br>• Diseño anime exclusivo<br>• Colorway Tri-Tone<br>• Tallas S/M/L/XL<br>• + Delivery coordinado',
+        'descripcion' => 'Limited edition with a unique anime design.<br><br>Features:<br>• LIMITED edition<br>• Exclusive anime design<br>• Tri-Tone colorway<br>• Sizes S/M/L/XL<br>• + Coordinated delivery',
         'precio' => 74.99,
         'imagen' => 'assets/images/Cloths/Hoodie Anime PINK FRONT.png',
         'categoria' => 'apparel',
@@ -403,7 +403,7 @@ $PRODUCTS = [
     'hoodie-dark-eyes-style' => [
         'id' => 20,
         'nombre' => 'Hoodie Dark Eyes Style (Limited Drop)',
-        'descripcion' => 'Edición limitada con diseño Dark Eyes de alto contraste.<br><br>Características:<br>• Edición LIMITADA<br>• Diseño original Dark Eyes<br>• Colorway oscuro con acentos neón<br>• Tallas S/M/L/XL<br>• + Delivery coordinado',
+        'descripcion' => 'Limited edition with a high-contrast Dark Eyes design.<br><br>Features:<br>• LIMITED edition<br>• Original Dark Eyes design<br>• Dark colorway with neon accents<br>• Sizes S/M/L/XL<br>• + Coordinated delivery',
         'precio' => 74.99,
         'imagen' => 'assets/images/Cloths/Hoodie Dark Eyes Front.png',
         'categoria' => 'apparel',
@@ -427,7 +427,7 @@ $PRODUCTS = [
     'custom-tshirt-design' => [
         'id' => 21,
         'nombre' => 'Custom T-Shirt Design (Service)',
-        'descripcion' => 'Servicio de diseño personalizado con impresión bajo pedido. Todos los diseños producidos son originales y cumplen con las políticas de propiedad intelectual.<br><br>Incluye:<br>• Diseño personalizado único<br>• Mockup profesional<br>• Archivos editables<br>• Revisión básica incluida<br>• Entrega digital del diseño<br>• Coordinación por WhatsApp',
+        'descripcion' => 'Custom design service with made-to-order print production. All designs are original and follow intellectual property policies.<br><br>Includes:<br>• Unique custom design<br>• Professional mockup<br>• Editable files<br>• Basic revision included<br>• Digital delivery of the design<br>• WhatsApp coordination',
         'precio' => 24.99,
         'imagen' => 'assets/images/Cloths/T-shirt Desing Custom Francisco A #1.png',
         'categoria' => 'accesorios',
@@ -438,7 +438,7 @@ $PRODUCTS = [
     'custom-hoodie-design' => [
         'id' => 22,
         'nombre' => 'Custom Hoodie Design (Service)',
-        'descripcion' => 'Servicio de diseño personalizado con impresión bajo pedido. Todos los diseños producidos son originales y cumplen con las políticas de propiedad intelectual.<br><br>Incluye:<br>• Diseño personalizado único<br>• Mockup profesional<br>• Archivos editables<br>• Revisión básica incluida<br>• Entrega digital del diseño<br>• Coordinación por WhatsApp',
+        'descripcion' => 'Custom design service with made-to-order print production. All designs are original and follow intellectual property policies.<br><br>Includes:<br>• Unique custom design<br>• Professional mockup<br>• Editable files<br>• Basic revision included<br>• Digital delivery of the design<br>• WhatsApp coordination',
         'precio' => 34.99,
         'imagen' => 'assets/images/Cloths/Hoodie Desing CUSTOM Francsico A.png',
         'categoria' => 'accesorios',
@@ -453,7 +453,7 @@ $PRODUCTS = [
     'custom-full-outfit-concept' => [
         'id' => 23,
         'nombre' => 'Custom Full Outfit Concept (Service)',
-        'descripcion' => 'Servicio de diseño personalizado con impresión bajo pedido. Todos los diseños producidos son originales y cumplen con las políticas de propiedad intelectual.<br><br>Incluye:<br>• Concepto completo de outfit<br>• Diseño de hoodie + t-shirt<br>• Variaciones de color<br>• Mockups profesionales<br>• Archivos editables<br>• Revisión básica incluida<br>• Entrega digital<br>• Coordinación por WhatsApp',
+        'descripcion' => 'Custom design service with made-to-order print production. All designs are original and follow intellectual property policies.<br><br>Includes:<br>• Full outfit concept<br>• Hoodie + T-shirt design<br>• Color variations<br>• Professional mockups<br>• Editable files<br>• Basic revision included<br>• Digital delivery<br>• WhatsApp coordination',
         'precio' => 69.99,
         'imagen' => 'assets/images/Cloths/T-shirt Desing Custom Francisco A #1.png',
         'categoria' => 'accesorios',

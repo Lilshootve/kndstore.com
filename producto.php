@@ -18,8 +18,22 @@ if (!$producto) {
 }
 
 // Generar mensaje de WhatsApp
-$mensaje_whatsapp = urlencode("Hola, me interesa el servicio: " . $producto['nombre'] . " - $" . number_format($producto['precio'], 2));
+$mensaje_whatsapp = urlencode("Hello, I'm interested in: " . $producto['nombre'] . " - $" . number_format($producto['precio'], 2));
 $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
+
+$categoryLabels = [
+    'tecnologia' => 'Technology',
+    'gaming' => 'Gaming',
+    'accesorios' => 'Accessories',
+    'software' => 'Software',
+    'hardware' => 'Hardware',
+    'apparel' => 'Apparel',
+];
+$typeLabels = [
+    'digital' => 'Digital',
+    'apparel' => 'Apparel',
+    'service' => 'Service',
+];
 
 ?>
 
@@ -71,8 +85,8 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                                 <?php foreach ($producto['gallery'] as $view => $image): ?>
                                     <?php 
                                     $viewLabel = ucfirst($view);
-                                    if ($view === 'espanol') $viewLabel = 'Español';
-                                    if ($view === 'japones') $viewLabel = 'Japonés';
+                                    if ($view === 'espanol') $viewLabel = 'Spanish';
+                                    if ($view === 'japones') $viewLabel = 'Japanese';
                                     if ($view === 'tshirt') $viewLabel = 'T-Shirt';
                                     if ($view === 'hoodie') $viewLabel = 'Hoodie';
                                     ?>
@@ -109,7 +123,7 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                     <div class="product-price-container">
                         <span class="product-price">$<?php echo number_format($producto['precio'], 2); ?></span>
                         <?php if (isset($producto['tipo']) && $producto['tipo'] === 'apparel'): ?>
-                            <small class="text-muted d-block">+ Delivery</small>
+                            <small class="text-muted d-block">+ Coordinated delivery</small>
                         <?php endif; ?>
                     </div>
                     
@@ -120,14 +134,14 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                     <?php if (isset($producto['tipo']) && $producto['tipo'] === 'apparel' && isset($producto['variants'])): ?>
                         <!-- Variants para Apparel -->
                         <div class="product-variants mt-4">
-                            <h5 class="mb-3">Selecciona tu variante:</h5>
+                            <h5 class="mb-3">Choose your variant:</h5>
                             
                             <!-- Selector de Color -->
                             <?php if (count($producto['variants']) > 1): ?>
                                 <div class="mb-3">
                                     <label class="form-label">Color</label>
                                     <select id="variant-color" class="form-select">
-                                        <option value="">Selecciona un color</option>
+                                        <option value="">Select a color</option>
                                         <?php foreach ($producto['variants'] as $colorKey => $variant): ?>
                                             <option value="<?php echo htmlspecialchars($colorKey); ?>" 
                                                     data-image="<?php echo htmlspecialchars($variant['imagen']); ?>">
@@ -146,9 +160,9 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                             
                             <!-- Selector de Talla -->
                             <div class="mb-3">
-                                <label class="form-label">Talla</label>
+                                <label class="form-label">Size</label>
                                 <select id="variant-size" class="form-select" required>
-                                    <option value="">Selecciona una talla</option>
+                                    <option value="">Select a size</option>
                                     <?php 
                                     $sizes = ['S', 'M', 'L', 'XL'];
                                     if (isset($producto['variants'])) {
@@ -166,7 +180,7 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                             <?php if (isset($producto['tipo']) && $producto['tipo'] === 'apparel'): ?>
                                 <div class="alert alert-info mt-3" style="background: rgba(37, 156, 174, 0.1); border-color: var(--knd-neon-blue);">
                                     <i class="fas fa-info-circle me-2"></i>
-                                    <strong>Delivery:</strong> Se coordina por WhatsApp/medios de contacto luego de la compra.
+                                    <strong>Delivery:</strong> Coordinated via WhatsApp/contact channels after purchase.
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -175,7 +189,7 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                     <?php if (isset($producto['tipo']) && $producto['tipo'] === 'service'): ?>
                         <div class="alert alert-warning mt-3" style="background: rgba(255, 193, 7, 0.1); border-color: #ffc107;">
                             <i class="fas fa-exclamation-triangle me-2"></i>
-                            <strong>Disclaimer:</strong> No aceptamos contenido protegido por derechos de autor o marcas registradas sin autorización del titular.
+                            <strong>Disclaimer:</strong> We do not accept copyrighted content or registered trademarks without authorization from the rights holder.
                         </div>
                         <div class="mt-3">
                             <a href="/custom-design.php" class="btn btn-outline-neon">
@@ -230,12 +244,12 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
                     <div class="product-meta mt-4">
                         <div class="category-badge">
                             <i class="fas fa-tag me-2"></i>
-                            <?php echo ucfirst($producto['categoria']); ?>
+                            <?php echo $categoryLabels[$producto['categoria']] ?? ucfirst($producto['categoria']); ?>
                         </div>
                         <?php if (isset($producto['tipo'])): ?>
                             <div class="category-badge mt-2">
                                 <i class="fas fa-layer-group me-2"></i>
-                                <?php echo ucfirst($producto['tipo']); ?>
+                                <?php echo $typeLabels[$producto['tipo']] ?? ucfirst($producto['tipo']); ?>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -243,12 +257,12 @@ $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
             </div>
         </div>
         
-        <!-- Botón Volver -->
+        <!-- Back button -->
         <div class="row mt-5">
             <div class="col-12 text-center">
                 <a href="/products.php" class="btn btn-outline-neon btn-lg">
                     <i class="fas fa-arrow-left me-2"></i>
-                    Volver a la tienda
+                    Back to the shop
                 </a>
             </div>
         </div>
@@ -261,15 +275,15 @@ function copyDiscordServer() {
         // Mostrar notificación
         const notification = document.createElement('div');
         notification.className = 'discord-notification';
-        notification.innerHTML = '<i class="fab fa-discord me-2"></i>Servidor copiado: knd_store';
+        notification.innerHTML = '<i class="fab fa-discord me-2"></i>Server copied: knd_store';
         document.body.appendChild(notification);
         
         setTimeout(() => {
             notification.remove();
         }, 3000);
     }).catch(function(err) {
-        console.error('Error al copiar: ', err);
-        alert('Servidor Discord: knd_store');
+        console.error('Copy error: ', err);
+        alert('Discord server: knd_store');
     });
 }
 

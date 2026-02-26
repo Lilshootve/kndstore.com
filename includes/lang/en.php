@@ -23,10 +23,12 @@ return [
     
     // Navigation
     'nav.home' => 'Home',
-    'nav.products' => 'Products',
+    'nav.products' => 'Shop',
     'nav.apparel' => 'Apparel',
+    'nav.custom_design' => 'Custom Design',
     'nav.about' => 'About',
     'nav.contact' => 'Contact',
+    'nav.orders' => 'Orders',
     
     // Meta
     'meta.default_description' => 'Digital store of technology services and products with gaming and cosmic theme',
@@ -57,6 +59,10 @@ return [
     // Product
     'product.badge.offer' => 'Offer',
     'product.label.plus_delivery' => '+ Shipping',
+    'product.breadcrumb.home' => 'Home',
+    'product.breadcrumb.catalog' => 'Shop',
+    'product.request_whatsapp' => 'Request on WhatsApp',
+    'product.brief.complete' => 'Complete design brief',
     
     // Apparel
     'apparel.meta.title' => 'Apparel - KND Store',
@@ -85,6 +91,14 @@ return [
     'btn.view' => 'View',
     'btn.view_details' => 'View Details',
     'btn.add_to_order' => 'Add to Order',
+
+    // Custom Design
+    'custom_design.meta.title' => 'Custom Design - KND Store',
+    'custom_design.meta.description' => 'Custom design services for apparel and digital concepts.',
+    'custom_design.plans.title' => 'Design Plans',
+    'custom_design.request_buy' => 'Request & Buy',
+    'custom_design.brief.title' => 'Design Brief',
+    'custom_design.how_it_works.title' => 'How It Works',
     
     // Footer
     'footer.about_text' => 'KND Store is your destination for digital experiences, exclusive apparel and personalized services. We transform knowledge into innovative solutions.',
@@ -171,4 +185,25 @@ return [
     'contact.form.success' => 'Message sent successfully',
     'contact.cta.discord_immediate' => 'Instant Discord',
     'contact.cta.emergency_email' => 'Urgent email',
+
+    // Order
+    'order.meta.title' => 'Orders - KND Store',
+    'order.meta.description' => 'Review your items and send your order request.',
+    'order.title' => 'Your Order',
+    'order.subtitle' => 'Review your items and send your order via WhatsApp.',
+    'order.selected_services.title' => 'Selected Items',
+    'order.empty_message' => 'Your order is empty.',
+    'order.total.label' => 'Total',
+    'order.data.title' => 'Order Details',
+    'order.form.name_label' => 'Name',
+    'order.form.whatsapp_label' => 'WhatsApp',
+    'order.form.payment_method_label' => 'Payment Method',
+    'order.form.payment_method_select' => 'Select a payment method',
+    'order.form.delivery_type_label' => 'Delivery Type',
+    'order.form.delivery_type.digital' => 'Digital / remote',
+    'order.form.delivery_type.coordinated' => 'Coordinated delivery',
+    'order.form.delivery_type.note' => 'Apparel orders require coordinated delivery.',
+    'order.form.notes_label' => 'Notes',
+    'order.form.notes_placeholder' => 'Anything we should know?',
+    'order.form.submit' => 'Send via WhatsApp',
 ];

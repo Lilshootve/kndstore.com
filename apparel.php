@@ -93,7 +93,7 @@ function renderApparelCard(string $slug, array $product, string $badgeLabel, str
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
-                <p class="apparel-size-note">¿No estás seguro de tu talla? Consulta la guía antes de comprar.</p>
+                <p class="apparel-size-note">Not sure about your size? Check the guide before you buy.</p>
                 <div class="d-flex gap-2 mt-2">
                     <a href="/producto.php?slug=<?php echo $slug; ?>" class="btn btn-outline-neon btn-sm btn-details">
                         <?php echo t('btn.view_details'); ?>
@@ -106,7 +106,7 @@ function renderApparelCard(string $slug, array $product, string $badgeLabel, str
                         data-price="<?php echo number_format($product['precio'], 2, '.', ''); ?>"
                         data-type="apparel"
                     >
-                        Añadir al pedido
+                        <?php echo t('btn.add_to_order'); ?>
                     </button>
                 </div>
             </div>
@@ -178,17 +178,17 @@ echo generateHeader(
                     <span class="text-gradient">KND Apparel — Knowledge and Development</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Diseñado para quienes crean, evolucionan y construyen.
+                    Designed for creators, builders, and those who evolve.
                 </p>
                 <p class="hero-subtitle hero-subtitle-secondary">
-                    Colecciones curadas: CORE (esencial) + DROPS (limitados).
+                    Curated collections: CORE (essential) + DROPS (limited).
                 </p>
                 <div class="mt-4 d-flex flex-wrap gap-3">
                     <a href="#core" class="btn btn-primary btn-lg" data-scroll>
-                        <i class="fas fa-tshirt me-2"></i> VER COLECCIÓN
+                        <i class="fas fa-tshirt me-2"></i> View Collection
                     </a>
                     <a href="#custom-design" class="btn btn-outline-neon btn-lg" data-scroll>
-                        <i class="fas fa-palette me-2"></i> DISEÑO PERSONALIZADO
+                        <i class="fas fa-palette me-2"></i> Custom Design
                     </a>
                 </div>
             </div>
@@ -204,7 +204,7 @@ echo generateHeader(
         <div class="apparel-anchor-pills">
             <a href="#core" class="apparel-pill" data-scroll>CORE</a>
             <a href="#drops" class="apparel-pill" data-scroll>DROPS</a>
-            <a href="#how" class="apparel-pill" data-scroll>CÓMO FUNCIONA</a>
+            <a href="#how" class="apparel-pill" data-scroll>How It Works</a>
             <a href="#faq" class="apparel-pill" data-scroll>FAQ</a>
         </div>
     </div>
@@ -217,7 +217,7 @@ echo generateHeader(
             CORE COLLECTION
         </h2>
         <p class="apparel-section-subtitle text-center">
-            Línea esencial. Minimalismo, identidad y mentalidad.
+            Essential line. Clean identity. Everyday mindset.
         </p>
         <div class="row">
             <?php foreach ($coreProducts as $slug => $product): ?>
@@ -241,7 +241,7 @@ echo generateHeader(
             LIMITED DROPS
         </h2>
         <p class="apparel-section-subtitle text-center">
-            Piezas experimentales y ediciones limitadas. Cuando se van, se fueron.
+            Experimental pieces. Limited editions. Once gone, gone.
         </p>
         <div class="row">
             <?php foreach ($dropProducts as $slug => $product): ?>
@@ -259,15 +259,15 @@ echo generateHeader(
 <?php if (!empty($otherProducts)): ?>
 <section class="py-5 bg-dark-epic apparel-section" id="otros">
     <div class="container">
-        <h2 class="section-title text-center mb-5">OTROS</h2>
+        <h2 class="section-title text-center mb-5">OTHER PIECES</h2>
         <p class="apparel-section-subtitle text-center">
-            Piezas extra disponibles por tiempo limitado o temporadas especiales.
+            Extra pieces available for limited windows or seasonal drops.
         </p>
         <div class="row">
             <?php foreach ($otherProducts as $slug => $product): ?>
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="reveal-on-scroll">
-                        <?php echo renderApparelCard($slug, $product, 'OTRO', 'apparel-badge-core'); ?>
+                        <?php echo renderApparelCard($slug, $product, 'OTHER', 'apparel-badge-core'); ?>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -283,7 +283,7 @@ echo generateHeader(
             <div class="col-lg-7">
                 <h2 class="section-title mb-4">Custom Design</h2>
                 <p class="apparel-section-subtitle">
-                    Diseños personalizados con identidad propia. Creamos piezas únicas alineadas a tu visión y tu comunidad.
+                    Custom pieces with a signature identity. We build designs aligned with your vision and community.
                 </p>
             </div>
             <div class="col-lg-5 text-lg-end">
@@ -308,8 +308,8 @@ echo generateHeader(
                         <div class="mb-3">
                             <i class="fas fa-shopping-cart fa-3x text-primary"></i>
                         </div>
-                        <h4 class="text-white mb-3">1. Elige tu línea</h4>
-                        <p class="text-white-50">CORE (esencial) o DROPS (limitado).</p>
+                        <h4 class="text-white mb-3">1. Choose your line</h4>
+                        <p class="text-white-50">CORE (essential) or DROPS (limited).</p>
                     </div>
                 </div>
             </div>
@@ -319,8 +319,8 @@ echo generateHeader(
                         <div class="mb-3">
                             <i class="fas fa-box fa-3x text-primary"></i>
                         </div>
-                        <h4 class="text-white mb-3">2. Talla y estilo</h4>
-                        <p class="text-white-50">Fit claro, sin sorpresas.</p>
+                        <h4 class="text-white mb-3">2. Size and style</h4>
+                        <p class="text-white-50">Clear fit, no surprises.</p>
                     </div>
                 </div>
             </div>
@@ -330,8 +330,8 @@ echo generateHeader(
                         <div class="mb-3">
                             <i class="fas fa-truck fa-3x text-primary"></i>
                         </div>
-                        <h4 class="text-white mb-3">3. Checkout y listo</h4>
-                        <p class="text-white-50">Confirmación inmediata.</p>
+                        <h4 class="text-white mb-3">3. Checkout and done</h4>
+                        <p class="text-white-50">Instant confirmation.</p>
                     </div>
                 </div>
             </div>
@@ -341,15 +341,15 @@ echo generateHeader(
                         <div class="mb-3">
                             <i class="fas fa-clock fa-3x text-primary"></i>
                         </div>
-                        <h4 class="text-white mb-3">4. Producción y despacho</h4>
-                        <p class="text-white-50">Tiempos transparentes según disponibilidad.</p>
+                        <h4 class="text-white mb-3">4. Production and dispatch</h4>
+                        <p class="text-white-50">Transparent timelines based on availability.</p>
                     </div>
                 </div>
             </div>
         </div>
         <div class="alert alert-info mt-4 text-center" style="background: rgba(37, 156, 174, 0.1); border-color: var(--knd-neon-blue);">
             <i class="fas fa-info-circle me-2"></i>
-            <strong>Nota importante:</strong> Te confirmamos tiempos y tracking por tus canales activos.
+            <strong>Heads up:</strong> We confirm timelines and tracking via your active contact channels.
         </div>
     </div>
 </section>
@@ -366,72 +366,72 @@ echo generateHeader(
                     <div class="accordion-item bg-dark border-primary mb-3">
                         <h2 class="accordion-header">
                             <button class="accordion-button bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                                ¿CORE se agota?
+                                Does CORE sell out?
                             </button>
                         </h2>
                         <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
                             <div class="accordion-body text-white-50">
-                                Puede, pero se repone. Es la línea estable.
+                                It can, but it restocks. It is the stable line.
                             </div>
                         </div>
                     </div>
                     <div class="accordion-item bg-dark border-primary mb-3">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
-                                ¿DROPS vuelven?
+                                Do DROPS return?
                             </button>
                         </h2>
                         <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="accordion-body text-white-50">
-                                Normalmente no. Son cápsulas limitadas.
+                                Usually not. They are limited capsules.
                             </div>
                         </div>
                     </div>
                     <div class="accordion-item bg-dark border-primary mb-3">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
-                                ¿Cómo elijo mi talla?
+                                How do I choose my size?
                             </button>
                         </h2>
                         <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="accordion-body text-white-50">
-                                Usa la guía; si estás entre dos, sube una.
+                                Use the size guide. If you are between sizes, size up.
                             </div>
                         </div>
                     </div>
                     <div class="accordion-item bg-dark border-primary mb-3">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
-                                ¿Puedo pedir un diseño personalizado?
+                                Can I request a custom design?
                             </button>
                         </h2>
                         <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="accordion-body text-white-50">
-                                Sí, en “Custom Design”.
+                                Yes, through Custom Design.
                             </div>
                         </div>
                     </div>
                     <div class="accordion-item bg-dark border-primary mb-3">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
-                                ¿Hacen envíos internacionales?
+                                Do you ship internationally?
                             </button>
                         </h2>
                         <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="accordion-body text-white-50">
-                                Sí. Realizamos envíos internacionales previa coordinación con el comprador. El costo y el tiempo de entrega dependen del país y del courier disponible. Tras tu pedido, te contactamos para cotizar y confirmar antes del despacho.
+                                Yes. We offer international shipping upon request. Shipping costs and delivery times depend on destination and courier availability. We will contact you after your order to confirm the final shipping details.
                             </div>
                         </div>
                     </div>
                     <div class="accordion-item bg-dark border-primary mb-3">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#faq6">
-                                ¿Qué pasa si no me queda?
+                                What if the size does not fit?
                             </button>
                         </h2>
                         <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="accordion-body text-white-50">
-                                Publicamos medidas exactas por talla en cada producto (pecho, largo y manga). Te recomendamos compararlas con una prenda similar que ya tengas antes de comprar. Si tienes dudas, puedes escribirnos y te orientamos antes de confirmar tu pedido. Por motivos de higiene y personalización, no realizamos cambios por talla una vez entregada la prenda.
+                                We provide exact measurements (chest, length, and sleeves) for each size. Please compare them with a garment you already own before purchasing. If you have questions, message us and we will guide you before confirming your order. For hygiene and customization reasons, we do not offer size exchanges once delivered.
                             </div>
                         </div>
                     </div>

@@ -24,10 +24,10 @@ echo generateHeader(t('custom_design.meta.title'), t('custom_design.meta.descrip
             <div class="col-lg-7">
                 <h1 class="hero-title">
                     <span class="text-gradient">Custom Design Lab</span><br>
-                    <span class="hero-subtitle-mini">Diseño personalizado a tu medida</span>
+                    <span class="hero-subtitle-mini">Custom design built for you</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Transforma tus ideas en diseños únicos. Servicios personalizables de diseño para T-Shirts, Hoodies y conceptos completos de outfit.
+                    Turn your ideas into unique designs. Customizable design services for T-Shirts, Hoodies, and full outfit concepts.
                 </p>
             </div>
         </div>
@@ -79,43 +79,43 @@ echo generateHeader(t('custom_design.meta.title'), t('custom_design.meta.descrip
             <div class="col-lg-8 mx-auto">
                 <div class="card knd-card">
                     <div class="card-header">
-                        <h4 class="mb-0">Formulario de Brief</h4>
+                        <h4 class="mb-0">Design Brief</h4>
                     </div>
                     <div class="card-body">
                         <form id="custom-design-brief-form">
                             <div class="mb-3">
-                                <label class="form-label">Estilo deseado</label>
-                                <input type="text" name="estilo" class="form-control" placeholder="Ej: Minimalista, Futurista, Anime, etc.">
+                                <label class="form-label">Desired style</label>
+                                <input type="text" name="estilo" class="form-control" placeholder="e.g., Minimalist, Futuristic, Anime, etc.">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Colores preferidos</label>
-                                <input type="text" name="colores" class="form-control" placeholder="Ej: Magenta, Turquesa, Negro">
+                                <label class="form-label">Preferred colors</label>
+                                <input type="text" name="colores" class="form-control" placeholder="e.g., Magenta, Turquoise, Black">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Texto/Nombre a incluir</label>
-                                <input type="text" name="texto" class="form-control" placeholder="Texto o nombre que quieres en el diseño">
+                                <label class="form-label">Text/name to include</label>
+                                <input type="text" name="texto" class="form-control" placeholder="Text or name you want in the design">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Referencias de estilo (no personajes ni marcas)</label>
-                                <textarea name="referencias" class="form-control" rows="4" placeholder="Describe referencias visuales de estilo, estilos que te gustan, o enlaces a imágenes de inspiración (sin personajes ni marcas protegidas)"></textarea>
+                                <label class="form-label">Style references (no characters or brands)</label>
+                                <textarea name="referencias" class="form-control" rows="4" placeholder="Describe visual references, styles you like, or links to inspiration images (no protected characters or brands)"></textarea>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Detalles extra</label>
-                                <textarea name="detalles" class="form-control" rows="3" placeholder="Cualquier detalle adicional que quieras especificar"></textarea>
+                                <label class="form-label">Extra details</label>
+                                <textarea name="detalles" class="form-control" rows="3" placeholder="Any extra details you want to specify"></textarea>
                             </div>
                     <div class="alert alert-warning" style="background: rgba(255, 193, 7, 0.1); border-color: #ffc107;">
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Propiedad Intelectual & Producción:</strong>
-                        Este servicio incluye <strong>diseño gráfico original</strong> y <strong>producción impresa bajo pedido</strong>.
-                        No realizamos ni imprimimos diseños que reproduzcan personajes, marcas, logotipos o material protegido por derechos de autor sin autorización verificable del titular.
+                        <strong>Intellectual Property & Production:</strong>
+                        This service includes <strong>original graphic design</strong> and <strong>made-to-order print production</strong>.
+                        We do not create or print designs that reproduce characters, brands, logos, or copyrighted material without verifiable authorization from the rights holder.
                     </div>
                     
                     <p class="text-white-50 small mb-0">
-                        Si el brief contiene referencias no autorizadas, <strong>KND Store</strong> podrá ajustar la propuesta creativa o rechazar el pedido antes de producción,
-                        sin obligación de replicar la referencia original.
+                        If the brief contains unauthorized references, <strong>KND Store</strong> may adjust the creative proposal or reject the order before production,
+                        without obligation to replicate the original reference.
                     </p>
                             <button type="button" id="save-brief-btn" class="btn btn-primary w-100">
-                                <i class="fas fa-save me-2"></i> Guardar Brief (se agregará a tu pedido)
+                                <i class="fas fa-save me-2"></i> Save Brief (will be added to your order)
                             </button>
                         </form>
                     </div>
@@ -138,8 +138,8 @@ echo generateHeader(t('custom_design.meta.title'), t('custom_design.meta.descrip
                         <div class="mb-3">
                             <i class="fas fa-shopping-cart fa-3x text-primary"></i>
                         </div>
-                        <h5 class="text-white mb-3">1. Selecciona el servicio</h5>
-                        <p class="text-white-50 small">Elige el plan de diseño que necesitas.</p>
+                        <h5 class="text-white mb-3">1. Choose the service</h5>
+                        <p class="text-white-50 small">Pick the design plan you need.</p>
                     </div>
                 </div>
             </div>
@@ -149,8 +149,8 @@ echo generateHeader(t('custom_design.meta.title'), t('custom_design.meta.descrip
                         <div class="mb-3">
                             <i class="fas fa-file-alt fa-3x text-primary"></i>
                         </div>
-                        <h5 class="text-white mb-3">2. Completa el brief</h5>
-                        <p class="text-white-50 small">Describe tu idea, estilo y referencias.</p>
+                        <h5 class="text-white mb-3">2. Complete the brief</h5>
+                        <p class="text-white-50 small">Describe your idea, style, and references.</p>
                     </div>
                 </div>
             </div>
@@ -160,8 +160,8 @@ echo generateHeader(t('custom_design.meta.title'), t('custom_design.meta.descrip
                         <div class="mb-3">
                             <i class="fas fa-palette fa-3x text-primary"></i>
                         </div>
-                        <h5 class="text-white mb-3">3. Diseñamos</h5>
-                        <p class="text-white-50 small">Creamos tu diseño personalizado.</p>
+                        <h5 class="text-white mb-3">3. We design</h5>
+                        <p class="text-white-50 small">We craft your custom design.</p>
                     </div>
                 </div>
             </div>
@@ -171,8 +171,8 @@ echo generateHeader(t('custom_design.meta.title'), t('custom_design.meta.descrip
                         <div class="mb-3">
                             <i class="fas fa-download fa-3x text-primary"></i>
                         </div>
-                        <h5 class="text-white mb-3">4. Entrega digital</h5>
-                        <p class="text-white-50 small">Recibes tus archivos editables y mockups.</p>
+                        <h5 class="text-white mb-3">4. Digital delivery</h5>
+                        <p class="text-white-50 small">Receive your editable files and mockups.</p>
                     </div>
                 </div>
             </div>
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.setItem('knd_custom_design_brief', JSON.stringify(brief));
             
             // Mostrar notificación
-            alert('Brief guardado. Cuando agregues un servicio de diseño a tu pedido, este brief se incluirá automáticamente.');
+            alert('Brief saved. When you add a design service to your order, this brief will be included automatically.');
             
             // Limpiar formulario
             briefForm.reset();

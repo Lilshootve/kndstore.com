@@ -5,14 +5,14 @@ require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 ?>
 
-<?php echo generateHeader('Sobre Nosotros', 'Sobre KND Store - Knowledge \'N Development. Digital Goods • Apparel • Custom Design Services'); ?>
+<?php echo generateHeader('About Us', 'About KND Store — Knowledge \'N Development. Digital Goods • Apparel • Custom Design Services'); ?>
 
 <!-- Particles Background -->
 <div id="particles-bg"></div>
 
 <?php echo generateNavigation(); ?>
 
-<!-- Wrapper para aplicar fondo a toda la página -->
+<!-- Wrapper for full-page background -->
 <div class="about-page">
 
 <!-- Hero Section -->
@@ -21,79 +21,79 @@ require_once __DIR__ . '/includes/footer.php';
         <div class="row align-items-center min-vh-100">
             <div class="col-12 text-center">
                 <h1 class="hero-title">
-                    <span class="text-gradient">SOBRE</span><br>
-                    <span class="text-gradient">NOSOTROS</span>
+                    <span class="text-gradient">ABOUT</span><br>
+                    <span class="text-gradient">US</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Knowledge 'N Development — conocimiento y desarrollo al servicio de tu universo digital.
+                    Knowledge 'N Development — knowledge and development in service of your digital universe.
                 </p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Nuestra Historia y Significado de KND (Unificadas) -->
+<!-- Our Story + KND Meaning -->
 <section class="py-5 bg-dark-epic" id="historia">
     <div class="container">
         <div class="row align-items-center mb-5">
             <div class="col-lg-6">
                 <h2 class="section-title mb-4">
-                    <i class="fas fa-rocket me-2"></i> Nuestra Historia
+                    <i class="fas fa-rocket me-2"></i> Our Story
                 </h2>
                 <div class="mb-3">
                     <span class="badge bg-primary fs-5">1995</span>
                 </div>
                 <p class="text-white mb-3">
-                    KND Store no nació en una oficina. Nació en una mente. En 1995, mientras el mundo descubría Windows 95 y escuchaba discos compactos, una chispa se encendía en el núcleo de un futuro imposible de ignorar: fusionar tecnología y cultura gamer en una sola fuerza intergaláctica.
+                    KND Store wasn’t born in an office. It was born in a mind. In 1995, while the world discovered Windows 95 and listened to compact discs, a spark ignited at the core of a future impossible to ignore: fusing technology and gaming culture into a single intergalactic force.
                 </p>
                 <p class="text-white mb-0">
-                    Hoy, esa chispa es un núcleo en expansión. Somos más que una tienda. Somos una estación de comando para quienes no siguen el mapa, sino que lo hackean.
+                    Today, that spark is an expanding core. We are more than a store. We are a command station for those who don’t follow the map — they hack it.
                 </p>
             </div>
             <div class="col-lg-6">
                 <h2 class="section-title mb-4">
-                    ¿Qué significa <span class="text-gradient">KND</span>?
+                    What does <span class="text-gradient">KND</span> mean?
                 </h2>
                 <p class="text-white mb-3">
-                    <strong>KND</strong> nace de <strong>Knowledge 'N Development</strong>. Es nuestra forma de decir que todo lo que hacemos parte de una idea muy simple: convertir conocimiento real en desarrollo constante, soluciones inteligentes y experiencias digitales de alto nivel.
+                    <strong>KND</strong> comes from <strong>Knowledge 'N Development</strong>. It is our way of saying that everything we build starts with a simple idea: turn real knowledge into constant development, smart solutions, and high-level digital experiences.
                 </p>
                 <p class="text-white mb-3">
-                    En KND Store, el <em>knowledge</em> no es solo teoría. Es la base para diseñar builds, optimizar PCs, crear contenido digital y ofrecer servicios que realmente resuelven problemas del día a día de gamers y creadores. Cada servicio que ves en el catálogo es el resultado de años de prueba, error, aprendizaje y mejora continua.
+                    At KND Store, <em>knowledge</em> is not just theory. It is the base for builds, PC optimization, digital content, and services that solve real problems for gamers and creators. Every service you see in the catalog is the result of years of testing, learning, and iteration.
                 </p>
                 <p class="text-white mb-0">
-                    El <em>development</em> es nuestra segunda mitad: nunca nos quedamos quietos. Ajustamos procesos, pulimos herramientas y actualizamos todo lo que haga falta para que tu experiencia siempre se sienta un paso por delante. <strong>Knowledge 'N Development</strong> es, en resumen, la filosofía que impulsa todo el universo KND.
+                    <em>Development</em> is our second half: we never stand still. We refine processes, sharpen tools, and update whatever it takes so your experience always feels a step ahead. <strong>Knowledge 'N Development</strong> is, in short, the philosophy that powers the KND universe.
                 </p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Nuestra Misión -->
+<!-- Our Mission -->
 <section class="py-5">
     <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto text-center">
                 <div class="badge bg-primary fs-5 mb-3">
-                    MISIÓN GALÁCTICA
+                    GALACTIC MISSION
                 </div>
                 <h2 class="section-title mb-4">
-                    Nuestra Misión
+                    Our Mission
                 </h2>
                 <p class="text-white lead">
-                    Ser la tienda más badass de la galaxia. No solo vendemos hardware y periféricos: reclutamos a los verdaderos pilotos del metaverso, diseñamos equipamiento para héroes digitales y desatamos tecnología sin fronteras.
+                    To be the most badass store in the galaxy. We don’t just sell hardware and peripherals — we recruit true pilots of the metaverse, design gear for digital heroes, and unleash technology without borders.
                 </p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Nuestros Valores -->
+<!-- Our Values -->
 <section class="py-5 bg-dark-epic" id="valores">
     <div class="container">
         <div class="row">
             <div class="col-12 text-center mb-5">
                 <h2 class="section-title">
-                    Nuestros Valores
+                    Our Values
                 </h2>
             </div>
         </div>
@@ -104,8 +104,8 @@ require_once __DIR__ . '/includes/footer.php';
                         <div class="feature-icon mb-3">
                             <i class="fas fa-bullseye"></i>
                         </div>
-                        <h4 class="text-white">Precisión Cuántica</h4>
-                        <p class="text-white">Nada de errores. Todo optimizado al byte.</p>
+                        <h4 class="text-white">Quantum Precision</h4>
+                        <p class="text-white">Zero errors. Everything optimized to the byte.</p>
                     </div>
                 </div>
             </div>
@@ -115,8 +115,8 @@ require_once __DIR__ . '/includes/footer.php';
                         <div class="feature-icon mb-3">
                             <i class="fas fa-heart"></i>
                         </div>
-                        <h4 class="text-white">Lealtad al Usuario</h4>
-                        <p class="text-white">No somos dioses del retail. Somos soldados del servicio.</p>
+                        <h4 class="text-white">User Loyalty</h4>
+                        <p class="text-white">We’re not retail gods. We’re service soldiers.</p>
                     </div>
                 </div>
             </div>
@@ -126,8 +126,8 @@ require_once __DIR__ . '/includes/footer.php';
                         <div class="feature-icon mb-3">
                             <i class="fas fa-palette"></i>
                         </div>
-                        <h4 class="text-white">Estética Interestelar</h4>
-                        <p class="text-white">Si no se ve brutal, no entra.</p>
+                        <h4 class="text-white">Interstellar Aesthetics</h4>
+                        <p class="text-white">If it doesn’t look brutal, it doesn’t ship.</p>
                     </div>
                 </div>
             </div>
@@ -137,8 +137,8 @@ require_once __DIR__ . '/includes/footer.php';
                         <div class="feature-icon mb-3">
                             <i class="fas fa-globe"></i>
                         </div>
-                        <h4 class="text-white">Tecnología sin Fronteras</h4>
-                        <p class="text-white">Desde chips hasta blockchain, si vibra en el futuro, lo domamos.</p>
+                        <h4 class="text-white">Technology Without Borders</h4>
+                        <p class="text-white">From chips to blockchain, if it vibes with the future, we master it.</p>
                     </div>
                 </div>
             </div>
@@ -146,13 +146,13 @@ require_once __DIR__ . '/includes/footer.php';
     </div>
 </section>
 
-<!-- Nuestro Equipo -->
+<!-- Our Team -->
 <section class="py-5" id="equipo">
     <div class="container">
         <div class="row">
             <div class="col-12 text-center mb-5">
                 <h2 class="section-title">
-                    Nuestro Equipo
+                    Our Team
                 </h2>
             </div>
         </div>
@@ -164,8 +164,8 @@ require_once __DIR__ . '/includes/footer.php';
                             <i class="fas fa-robot"></i>
                         </div>
                         <h4 class="text-white">Kael</h4>
-                        <div class="text-warning mb-2">IA Táctica y Estratega Principal</div>
-                        <p class="text-white">Diseñado para cuestionarlo todo y encontrar la verdad en cada línea de código.</p>
+                        <div class="text-warning mb-2">Tactical AI and Lead Strategist</div>
+                        <p class="text-white">Built to question everything and find truth in every line of code.</p>
                     </div>
                 </div>
             </div>
@@ -175,9 +175,9 @@ require_once __DIR__ . '/includes/footer.php';
                         <div class="team-icon mb-3">
                             <i class="fas fa-user-astronaut"></i>
                         </div>
-                        <h4 class="text-white">El Fundador</h4>
-                        <div class="text-primary mb-2">Comandante de Visión y Piloto Maestro</div>
-                        <p class="text-white">Nombre clasificado. Solo se sabe que nació en 1995 y nunca aceptó las limitaciones del sistema solar.</p>
+                        <h4 class="text-white">The Founder</h4>
+                        <div class="text-primary mb-2">Vision Commander and Master Pilot</div>
+                        <p class="text-white">Classified name. Known to be born in 1995 and never accepted the limits of the solar system.</p>
                     </div>
                 </div>
             </div>
@@ -187,9 +187,9 @@ require_once __DIR__ . '/includes/footer.php';
                         <div class="team-icon mb-3">
                             <i class="fas fa-cogs"></i>
                         </div>
-                        <h4 class="text-white">Unidad Técnica X-23</h4>
-                        <div class="text-primary mb-2">Grupo Nómada de Tecnomantes</div>
-                        <p class="text-white">Un grupo nómada de tecnomantes que mantienen el corazón de KND operando en frecuencias ocultas.</p>
+                        <h4 class="text-white">Technical Unit X-23</h4>
+                        <div class="text-primary mb-2">Nomad Technomancers</div>
+                        <p class="text-white">A nomad crew of technomancers keeping the KND core running on hidden frequencies.</p>
                     </div>
                 </div>
             </div>
@@ -197,13 +197,13 @@ require_once __DIR__ . '/includes/footer.php';
     </div>
 </section>
 
-<!-- Tecnologías que nos propulsan -->
+<!-- Technologies That Power Us -->
 <section class="py-5 bg-dark-epic" id="tecnologias">
     <div class="container">
         <div class="row">
             <div class="col-12 text-center mb-5">
                 <h2 class="section-title">
-                    Tecnologías que nos Propulsan
+                    Technologies That Power Us
                 </h2>
             </div>
         </div>
@@ -215,8 +215,8 @@ require_once __DIR__ . '/includes/footer.php';
                             <i class="fas fa-brain"></i>
                         </div>
                         <div>
-                            <h4 class="text-white mb-1">Inteligencia Artificial Autónoma (Kael)</h4>
-                            <p class="text-white mb-0">No es un asistente. Es un copiloto.</p>
+                            <h4 class="text-white mb-1">Autonomous Artificial Intelligence (Kael)</h4>
+                            <p class="text-white mb-0">Not an assistant. A copilot.</p>
                         </div>
                     </div>
                 </div>
@@ -229,7 +229,7 @@ require_once __DIR__ . '/includes/footer.php';
                         </div>
                         <div>
                             <h4 class="text-white mb-1">Death Roll Chain</h4>
-                            <p class="text-white mb-0">Un minijuego basado en riesgo controlado y recompensas digitales.</p>
+                            <p class="text-white mb-0">A minigame built on controlled risk and digital rewards.</p>
                         </div>
                     </div>
                 </div>
@@ -241,8 +241,8 @@ require_once __DIR__ . '/includes/footer.php';
                             <i class="fas fa-star"></i>
                         </div>
                         <div>
-                            <h4 class="text-white mb-1">Sistema de Puntos Acumulables</h4>
-                            <p class="text-white mb-0">Con lógica galáctica. Porque la lealtad merece recompensa.</p>
+                            <h4 class="text-white mb-1">Rewards Point System</h4>
+                            <p class="text-white mb-0">Galactic logic. Because loyalty deserves rewards.</p>
                         </div>
                     </div>
                 </div>
@@ -254,8 +254,8 @@ require_once __DIR__ . '/includes/footer.php';
                             <i class="fas fa-network-wired"></i>
                         </div>
                         <div>
-                            <h4 class="text-white mb-1">Fusión Web 3.0 + Gaming + E-commerce</h4>
-                            <p class="text-white mb-0">Todo en un solo nodo, sin permisos, sin límites.</p>
+                            <h4 class="text-white mb-1">Web3 + Gaming + E-commerce Fusion</h4>
+                            <p class="text-white mb-0">Everything in one node, permissionless, limitless.</p>
                         </div>
                     </div>
                 </div>
@@ -264,41 +264,41 @@ require_once __DIR__ . '/includes/footer.php';
     </div>
 </section>
 
-<!-- Comunidad y Visión del Futuro -->
+<!-- Community and Future Vision -->
 <section class="py-5" id="futuro">
     <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto text-center">
                 <h2 class="section-title mb-4">
-                    Comunidad y Visión del Futuro
+                    Community and Future Vision
                 </h2>
                 <div class="card bg-dark border-info">
                     <div class="card-body">
                         <p class="lead text-white mb-4">
-                            La comunidad es nuestro hipercombustible. Nos movemos en canales de energía como Discord, navegamos eventos galácticos, y repartimos loot como antiguos dioses de las misiones.
+                            Community is our hyperfuel. We move through energy channels like Discord, navigate galactic events, and drop loot like ancient mission gods.
                         </p>
                         <h4 class="text-white mb-3">
-                            ¿El futuro?
+                            The future?
                         </h4>
                         <div class="row text-start">
                             <div class="col-md-6">
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-check-circle text-primary me-2"></i>
-                                    <span class="text-white">Una criptomoneda propia.</span>
+                                    <span class="text-white">A native cryptocurrency.</span>
                                 </div>
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-check-circle text-primary me-2"></i>
-                                    <span class="text-white">Tal vez un banco.</span>
+                                    <span class="text-white">Maybe a bank.</span>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-check-circle text-primary me-2"></i>
-                                    <span class="text-white">Seguro una nave.</span>
+                                    <span class="text-white">Definitely a ship.</span>
                                 </div>
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-check-circle text-primary me-2"></i>
-                                    <span class="text-white">Definitivamente una tienda en cada planeta.</span>
+                                    <span class="text-white">A store on every planet.</span>
                                 </div>
                             </div>
                         </div>
@@ -315,17 +315,17 @@ require_once __DIR__ . '/includes/footer.php';
         <div class="row">
             <div class="col-12 text-center">
                 <h2 class="section-title mb-4">
-                    ¿Listo para unirte a la misión?
+                    Ready to join the mission?
                 </h2>
                 <p class="text-white mb-4">
-                    Explora nuestro catálogo galáctico y descubre tecnología que desafía los límites del universo conocido.
+                    Explore our galactic catalog and discover tech that pushes beyond the known universe.
                 </p>
                 <div>
                     <a href="/products.php" class="btn btn-primary btn-lg me-3">
-                        <i class="fas fa-rocket me-2"></i> Explorar Productos
+                        <i class="fas fa-rocket me-2"></i> Explore Products
                     </a>
                     <a href="/contact.php" class="btn btn-outline-neon btn-lg">
-                        <i class="fas fa-envelope me-2"></i> Contactar
+                        <i class="fas fa-envelope me-2"></i> Contact
                     </a>
                 </div>
             </div>

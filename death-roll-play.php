@@ -14,7 +14,7 @@ if (!$userId) {
     exit;
 }
 
-echo generateHeader('Death Roll - Jugar', 'Juega Death Roll y obtén tu recompensa digital');
+echo generateHeader('Death Roll - Play', 'Play Death Roll and claim your digital reward');
 ?>
 
 <!-- Particles Background -->
@@ -29,7 +29,7 @@ echo generateHeader('Death Roll - Jugar', 'Juega Death Roll y obtén tu recompen
             <div class="col-12 text-center">
                 <h1 class="hero-title">
                     <span class="text-gradient">Death Roll</span><br>
-                    <span class="hero-subtitle-mini">Minijuego de riesgo controlado</span>
+                    <span class="hero-subtitle-mini">Controlled-risk mini-game</span>
                 </h1>
             </div>
         </div>
@@ -46,9 +46,9 @@ echo generateHeader('Death Roll - Jugar', 'Juega Death Roll y obtén tu recompen
                     <div id="unity-container" class="unity-wrapper">
                         <div id="unity-loading" class="unity-loading">
                             <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Cargando...</span>
+                                <span class="visually-hidden">Loading...</span>
                             </div>
-                            <p class="mt-3 text-white">Cargando Death Roll...</p>
+                            <p class="mt-3 text-white">Loading Death Roll...</p>
                         </div>
                         <canvas id="unity-canvas" class="unity-canvas" style="display: none;"></canvas>
                     </div>
@@ -59,7 +59,7 @@ echo generateHeader('Death Roll - Jugar', 'Juega Death Roll y obtén tu recompen
             <div class="col-lg-3 col-md-4">
                 <div class="deathroll-panel">
                     <div class="panel-header">
-                        <h4><i class="fas fa-dice-d20 me-2"></i> Panel de Control</h4>
+                        <h4><i class="fas fa-dice-d20 me-2"></i> Control Panel</h4>
                     </div>
                     <div class="panel-body">
                         <!-- Order ID Status -->
@@ -69,9 +69,9 @@ echo generateHeader('Death Roll - Jugar', 'Juega Death Roll y obtén tu recompen
                                    id="order-id-input" 
                                    class="form-control form-control-sm" 
                                    value="<?php echo htmlspecialchars($orderId, ENT_QUOTES, 'UTF-8'); ?>" 
-                                   placeholder="Ingresa Order ID"
+                                   placeholder="Enter Order ID"
                                    <?php echo $orderId ? 'readonly' : ''; ?>>
-                            <small class="text-white-50">ID del pedido para el Death Roll</small>
+                            <small class="text-white-50">Order ID for Death Roll</small>
                         </div>
                         
                         <!-- Roll Button -->
@@ -84,23 +84,23 @@ echo generateHeader('Death Roll - Jugar', 'Juega Death Roll y obtén tu recompen
                         <!-- Result Display -->
                         <div id="result-container" class="result-container" style="display: none;">
                             <div class="result-header">
-                                <h5><i class="fas fa-trophy me-2"></i> Resultado</h5>
+                                <h5><i class="fas fa-trophy me-2"></i> Result</h5>
                             </div>
                             <div class="result-body">
                                 <div class="mb-2">
-                                    <span class="text-white-50 small">Número:</span>
+                                    <span class="text-white-50 small">Number:</span>
                                     <span id="result-number" class="fw-bold text-white"></span>
                                 </div>
                                 <div class="mb-2">
-                                    <span class="text-white-50 small">Rareza:</span>
+                                    <span class="text-white-50 small">Rarity:</span>
                                     <span id="result-rarity" class="rarity-badge"></span>
                                 </div>
                                 <div class="mb-2">
-                                    <span class="text-white-50 small">Recompensa:</span>
+                                    <span class="text-white-50 small">Reward:</span>
                                     <div id="result-reward" class="text-white fw-bold"></div>
                                 </div>
                                 <div class="mt-3">
-                                    <h6 class="text-white-50 small mb-2">Instrucciones:</h6>
+                                    <h6 class="text-white-50 small mb-2">Instructions:</h6>
                                     <p id="result-instructions" class="text-white small"></p>
                                 </div>
                             </div>
@@ -109,9 +109,9 @@ echo generateHeader('Death Roll - Jugar', 'Juega Death Roll y obtén tu recompen
                         <!-- Loading State -->
                         <div id="roll-loading" class="text-center" style="display: none;">
                             <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                <span class="visually-hidden">Procesando...</span>
+                                <span class="visually-hidden">Processing...</span>
                             </div>
-                            <p class="mt-2 text-white small">Ejecutando Death Roll...</p>
+                            <p class="mt-2 text-white small">Executing Death Roll...</p>
                         </div>
                     </div>
                 </div>
@@ -156,7 +156,7 @@ echo generateHeader('Death Roll - Jugar', 'Juega Death Roll y obtén tu recompen
                 canvas.style.display = "block";
             }).catch((message) => {
                 console.error("Error loading Unity:", message);
-                loadingBar.innerHTML = '<p class="text-white">Error al cargar el juego. El resultado se mostrará en el panel.</p>';
+                loadingBar.innerHTML = '<p class="text-white">Error loading the game. The result will show in the panel.</p>';
             });
         } else {
             // Cargar loader script
@@ -166,8 +166,8 @@ echo generateHeader('Death Roll - Jugar', 'Juega Death Roll y obtén tu recompen
                 loadUnity();
             };
             script.onerror = () => {
-                console.warn("Unity loader no disponible. Continuando sin Unity.");
-                loadingBar.innerHTML = '<p class="text-white">Unity no disponible. Puedes usar el panel de control.</p>';
+                console.warn("Unity loader not available. Continuing without Unity.");
+                loadingBar.innerHTML = '<p class="text-white">Unity unavailable. You can use the control panel.</p>';
             };
             document.body.appendChild(script);
         }
@@ -190,7 +190,7 @@ echo generateHeader('Death Roll - Jugar', 'Juega Death Roll y obtén tu recompen
                     reward: rewardName
                 }));
             } catch (e) {
-                console.warn("Error enviando a Unity:", e);
+                console.warn("Error sending to Unity:", e);
             }
         }
     };
@@ -209,8 +209,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!orderId) {
             Swal.fire({
                 icon: 'error',
-                title: 'Order ID requerido',
-                text: 'Por favor ingresa un Order ID válido.',
+                title: 'Order ID required',
+                text: 'Please enter a valid Order ID.',
                 confirmButtonColor: '#259cae'
             });
             return;
@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
             rollLoading.style.display = 'none';
             
             if (!response.ok || !data.success) {
-                throw new Error(data.error || 'Error al ejecutar el Death Roll');
+                throw new Error(data.error || 'Error running the Death Roll');
             }
             
             // Mostrar resultado
@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Mostrar éxito
             Swal.fire({
                 icon: 'success',
-                title: '¡Death Roll completado!',
+                title: 'Death Roll completed!',
                 text: `Obtuviste: ${data.rarity} - ${data.reward.name}`,
                 confirmButtonColor: '#259cae',
                 timer: 3000
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: error.message || 'Error al ejecutar el Death Roll. Intenta nuevamente.',
+                text: error.message || 'Error running Death Roll. Please try again.',
                 confirmButtonColor: '#259cae'
             });
         }
@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
         rarityEl.className = 'rarity-badge tier-' + data.rarity.toLowerCase();
         
         document.getElementById('result-reward').textContent = data.reward.name;
-        document.getElementById('result-instructions').textContent = data.claim_instructions || 'Contacta por Discord o WhatsApp para reclamar tu recompensa.';
+        document.getElementById('result-instructions').textContent = data.claim_instructions || 'Contact Discord or WhatsApp to claim your reward.';
         
         resultContainer.style.display = 'block';
     }

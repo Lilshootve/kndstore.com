@@ -227,7 +227,7 @@ usort($productos_filtrados, function($a, $b) {
                 <?php foreach ($productos_filtrados as $producto): ?>
                     <div class="col-lg-4 col-md-6 mb-4">
                         <div class="product-card">
-                            <?php if (in_array($producto['nombre'], ['Avatar gamer personalizado', 'Wallpaper personalizado IA'])): ?>
+                            <?php if (in_array($producto['nombre'], ['Custom Gamer Avatar', 'AI Custom Wallpaper'])): ?>
                                 <div class="product-offer-badge"><?php echo t('product.badge.offer'); ?></div>
                             <?php endif; ?>
                             <div class="product-image">
@@ -267,7 +267,7 @@ usort($productos_filtrados, function($a, $b) {
                                 <h5 class="product-title"><?php echo htmlspecialchars($producto['nombre']); ?></h5>
                                 <p class="product-description"><?php echo $producto['descripcion']; ?></p>
                                 <div class="product-footer">
-                                    <?php if (in_array($producto['nombre'], ['Avatar gamer personalizado', 'Wallpaper personalizado IA'])): ?>
+                                    <?php if (in_array($producto['nombre'], ['Custom Gamer Avatar', 'AI Custom Wallpaper'])): ?>
                                         <span class="product-price">
                                             <span class="product-price-original">$<?php echo number_format($producto['precio'], 2); ?></span>
                                             <span class="product-price-offer">$2.50</span>

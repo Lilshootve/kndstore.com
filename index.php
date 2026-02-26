@@ -124,7 +124,7 @@ setCacheHeaders('html');
                 if (!isset($PRODUCTS[$slug])) continue;
                 $product = $PRODUCTS[$slug];
                 // Determinar precio real (oferta para Avatar y Wallpaper)
-                if (in_array($product['nombre'], ['Avatar gamer personalizado', 'Wallpaper personalizado IA'])) {
+                if (in_array($product['nombre'], ['Custom Gamer Avatar', 'AI Custom Wallpaper'])) {
                     $precio_real = 2.50;
                 } else {
                     $precio_real = $product['precio'];
@@ -132,7 +132,7 @@ setCacheHeaders('html');
             ?>
                 <div class="col-lg-6 col-md-6 mb-4">
                     <div class="product-card">
-                        <?php if (in_array($product['nombre'], ['Avatar gamer personalizado', 'Wallpaper personalizado IA'])): ?>
+                        <?php if (in_array($product['nombre'], ['Custom Gamer Avatar', 'AI Custom Wallpaper'])): ?>
                             <div class="product-offer-badge"><?php echo t('product.badge.offer'); ?></div>
                         <?php endif; ?>
                         <div class="product-image">
@@ -142,7 +142,7 @@ setCacheHeaders('html');
                             <h3><?php echo htmlspecialchars($product['nombre']); ?></h3>
                             <p><?php echo strip_tags($product['descripcion']); ?></p>
                             <div class="product-footer">
-                                <?php if (in_array($product['nombre'], ['Avatar gamer personalizado', 'Wallpaper personalizado IA'])): ?>
+                                <?php if (in_array($product['nombre'], ['Custom Gamer Avatar', 'AI Custom Wallpaper'])): ?>
                                     <span class="product-price">
                                         <span class="product-price-original">$<?php echo number_format($product['precio'], 2); ?></span>
                                         <span class="product-price-offer">$2.50</span>
@@ -152,7 +152,7 @@ setCacheHeaders('html');
                                 <?php endif; ?>
                                 <div class="d-flex gap-2">
                                     <a href="/producto.php?slug=<?php echo $product['slug']; ?>" class="btn btn-outline-neon btn-sm btn-details">
-                                        Ver detalles
+                                        <?php echo t('btn.view_details'); ?>
                                     </a>
                                     <button 
                                         type="button"
@@ -161,7 +161,7 @@ setCacheHeaders('html');
                                         data-name="<?php echo htmlspecialchars($product['nombre'], ENT_QUOTES, 'UTF-8'); ?>"
                                         data-price="<?php echo number_format($precio_real, 2, '.', ''); ?>"
                                     >
-                                        Añadir al pedido
+                                        <?php echo t('btn.add_to_order'); ?>
                                     </button>
                                 </div>
                             </div>

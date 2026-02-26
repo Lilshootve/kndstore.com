@@ -59,16 +59,16 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                                     <option value=""><?php echo t('order.form.payment_method_select'); ?></option>
                                     <option value="Zinli">Zinli</option>
                                     <option value="Binance Pay">Binance Pay</option>
-                                    <option value="Pago Móvil">Pago Móvil</option>
-                                    <option value="Transferencia bancaria">Transferencia bancaria</option>
-                                    <option value="Criptomonedas">Criptomonedas</option>
+                                    <option value="Mobile Payment">Mobile Payment</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                    <option value="Cryptocurrency">Cryptocurrency</option>
                                 </select>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label"><?php echo t('order.form.delivery_type_label'); ?></label>
                                 <select name="delivery_type" class="form-select" id="delivery-type-select">
-                                    <option value="Digital / remoto"><?php echo t('order.form.delivery_type.digital'); ?></option>
-                                    <option value="Delivery coordinado"><?php echo t('order.form.delivery_type.coordinated'); ?></option>
+                                    <option value="Digital / remote"><?php echo t('order.form.delivery_type.digital'); ?></option>
+                                    <option value="Coordinated delivery"><?php echo t('order.form.delivery_type.coordinated'); ?></option>
                                 </select>
                                 <small class="text-muted"><?php echo t('order.form.delivery_type.note'); ?></small>
                             </div>
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!raw) return [];
             return JSON.parse(raw);
         } catch (e) {
-            console.error('Error leyendo pedido en order.php', e);
+            console.error('Error reading order in order.php', e);
             return [];
         }
     }
@@ -163,15 +163,15 @@ document.addEventListener('DOMContentLoaded', function () {
             let additionalInfo = '';
             if (item.variants) {
                 additionalInfo = `<div class="text-info small mb-1">`;
-                if (item.variants.size) additionalInfo += `Talla: ${item.variants.size}`;
+                if (item.variants.size) additionalInfo += `Size: ${item.variants.size}`;
                 if (item.variants.color) additionalInfo += ` | Color: ${item.variants.color}`;
                 additionalInfo += `</div>`;
             }
             if (item.type === 'apparel') {
-                additionalInfo += `<div class="text-warning small"><i class="fas fa-truck me-1"></i> + Delivery coordinado</div>`;
+                additionalInfo += `<div class="text-warning small"><i class="fas fa-truck me-1"></i> + Coordinated delivery</div>`;
             }
             if (item.brief) {
-                additionalInfo += `<div class="text-muted small mt-1"><i class="fas fa-file-alt me-1"></i> Brief incluido</div>`;
+                additionalInfo += `<div class="text-muted small mt-1"><i class="fas fa-file-alt me-1"></i> Brief included</div>`;
             }
 
             const div = document.createElement('div');
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function () {
             div.innerHTML = `
                 <div class="flex-grow-1">
                     <strong class="d-block mb-1">${item.name}</strong>
-                    <div class="text-muted small mb-2">Precio unitario: ${formatPrice(item.price)}</div>
+                    <div class="text-muted small mb-2">Unit price: ${formatPrice(item.price)}</div>
                     ${additionalInfo}
                     <div class="d-flex align-items-center gap-2 mt-2">
                         <button class="btn btn-sm btn-outline-neon qty-btn" data-action="decrease" data-id="${item.id}" ${item.qty <= 1 ? 'disabled' : ''}>
@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="fw-bold" style="font-size: 1.1rem; color: var(--knd-neon-blue);">
                         ${formatPrice(lineTotal)}
                     </div>
-                    <button class="btn btn-sm btn-danger remove-item-btn" data-id="${item.id}" title="Eliminar">
+                    <button class="btn btn-sm btn-danger remove-item-btn" data-id="${item.id}" title="Remove">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 const confirmTemplate = (window.I18N && window.I18N['order.confirm_remove']) 
                     ? window.I18N['order.confirm_remove']
-                    : '¿Eliminar "{name}" del pedido?';
+                    : 'Remove "{name}" from your order?';
                 const confirmMsg = confirmTemplate.replace('{name}', item.name);
                 if (confirm(confirmMsg)) {
                     removeItem(itemId);
@@ -266,7 +266,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const hasApparel = items.some(item => item.type === 'apparel');
         const deliverySelect = document.getElementById('delivery-type-select');
         if (deliverySelect && hasApparel) {
-            deliverySelect.value = 'Delivery coordinado';
+            deliverySelect.value = 'Coordinated delivery';
         }
     }
     checkDeliveryType();
@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function () {
         sendBtn.addEventListener('click', function () {
             const items = loadOrderItems();
             if (!items.length) {
-                alert('Tu pedido está vacío. Añade servicios desde el catálogo primero.');
+                alert('Your order is empty. Add items from the shop first.');
                 return;
             }
 
@@ -289,10 +289,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const deliveryType = formData.get('delivery_type') || '';
             const notes = formData.get('notes') || '';
 
-            let msg = '🛰 *Nuevo pedido desde KND Store*%0A%0A';
-            if (name) msg += '*Nombre:* ' + name + '%0A';
-            if (whatsapp) msg += '*WhatsApp cliente:* ' + whatsapp + '%0A';
-            msg += '%0A*Servicios solicitados:*%0A';
+            let msg = '🛰 *New order from KND Store*%0A%0A';
+            if (name) msg += '*Name:* ' + name + '%0A';
+            if (whatsapp) msg += '*Customer WhatsApp:* ' + whatsapp + '%0A';
+            msg += '%0A*Requested items:*%0A';
 
             let total = 0;
             let hasApparel = false;
@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 // Agregar variants si es apparel
                 if (item.variants) {
-                    if (item.variants.size) msg += `  Talla: ${item.variants.size}%0A`;
+                    if (item.variants.size) msg += `  Size: ${item.variants.size}%0A`;
                     if (item.variants.color) msg += `  Color: ${item.variants.color}%0A`;
                     hasApparel = true;
                 }
@@ -313,11 +313,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Agregar brief si es service
                 if (item.brief) {
                     msg += `  Brief:%0A`;
-                    if (item.brief.estilo) msg += `    Estilo: ${item.brief.estilo}%0A`;
-                    if (item.brief.colores) msg += `    Colores: ${item.brief.colores}%0A`;
-                    if (item.brief.texto) msg += `    Texto: ${item.brief.texto}%0A`;
-                    if (item.brief.referencias) msg += `    Referencias: ${item.brief.referencias}%0A`;
-                    if (item.brief.detalles) msg += `    Detalles: ${item.brief.detalles}%0A`;
+                    if (item.brief.estilo) msg += `    Style: ${item.brief.estilo}%0A`;
+                    if (item.brief.colores) msg += `    Colors: ${item.brief.colores}%0A`;
+                    if (item.brief.texto) msg += `    Text: ${item.brief.texto}%0A`;
+                    if (item.brief.referencias) msg += `    References: ${item.brief.referencias}%0A`;
+                    if (item.brief.detalles) msg += `    Details: ${item.brief.detalles}%0A`;
                     hasService = true;
                 }
                 
@@ -326,26 +326,26 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             msg += `%0A*Total:* $${total.toFixed(2)}%0A`;
-            if (payment) msg += `*Método de pago:* ${payment}%0A`;
+            if (payment) msg += `*Payment method:* ${payment}%0A`;
             
             // Actualizar delivery type si hay apparel
             if (hasApparel) {
-                msg += `*Tipo de entrega:* Delivery coordinado (Apparel)%0A`;
+                msg += `*Delivery type:* Coordinated delivery (Apparel)%0A`;
             } else if (deliveryType) {
-                msg += `*Tipo de entrega:* ${deliveryType}%0A`;
+                msg += `*Delivery type:* ${deliveryType}%0A`;
             }
             
             if (notes) {
-                const notesLabel = (window.I18N && window.I18N['order.whatsapp.notes_label']) || 'Notas adicionales:';
+                const notesLabel = (window.I18N && window.I18N['order.whatsapp.notes_label']) || 'Additional notes:';
                 msg += `%0A*${notesLabel}* ${notes}%0A`;
             }
 
             if (hasApparel || hasService) {
                 // Nota importante - podría venir de window.I18N si se necesita
-                msg += '%0A*Nota importante:* Te contactaremos por WhatsApp/medios para coordinar delivery y/o detalles del diseño.%0A';
+                msg += '%0A*Important note:* We will contact you via WhatsApp/contact channels to coordinate delivery and/or design details.%0A';
             }
             
-            msg += '%0AEnvíame el comprobante de pago por aquí cuando lo tengas listo.';
+            msg += '%0ASend the payment receipt here when you have it ready.';
 
             // Reemplaza este número con tu número de WhatsApp real
             const phone = '584246661334';
