@@ -53,7 +53,7 @@ echo generateHeader(t('custom_design.meta.title'), t('custom_design.meta.descrip
                         <div class="card-body text-center">
                             <h4 class="text-white mb-3"><?php echo htmlspecialchars($product['nombre']); ?></h4>
                             <div class="product-price mb-3">
-                                $<?php echo number_format($product['precio'], 2); ?>
+                                $<?php echo number_format(getProductPriceValue($slug, $product), 2); ?>
                             </div>
                             <div class="text-white-50 mb-4" style="min-height: 80px;">
                                 <?php echo strip_tags($product['descripcion']); ?>

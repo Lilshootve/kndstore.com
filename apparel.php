@@ -61,6 +61,7 @@ function renderApparelCard(string $slug, array $product, string $badgeLabel, str
     $imageUrl = rawurlencode($mainImage);
     $imageUrl = str_replace('%2F', '/', $imageUrl);
     $swatches = getSwatchesForSlug($slug);
+    $price = getProductPriceValue($slug, $product);
 
     ob_start();
     ?>
@@ -81,7 +82,7 @@ function renderApparelCard(string $slug, array $product, string $badgeLabel, str
             <p><?php echo strip_tags($product['descripcion']); ?></p>
             <div class="product-footer">
                 <span class="product-price">
-                    $<?php echo number_format($product['precio'], 2); ?>
+                    $<?php echo number_format($price, 2); ?>
                     <small class="text-muted d-block"><?php echo t('product.label.plus_delivery'); ?></small>
                 </span>
                 <?php if (!empty($swatches)): ?>
@@ -103,7 +104,7 @@ function renderApparelCard(string $slug, array $product, string $badgeLabel, str
                         class="btn btn-primary btn-sm add-to-order"
                         data-id="<?php echo (int)$product['id']; ?>"
                         data-name="<?php echo htmlspecialchars($product['nombre'], ENT_QUOTES, 'UTF-8'); ?>"
-                        data-price="<?php echo number_format($product['precio'], 2, '.', ''); ?>"
+                        data-price="<?php echo number_format($price, 2, '.', ''); ?>"
                         data-type="apparel"
                     >
                         <?php echo t('btn.add_to_order'); ?>

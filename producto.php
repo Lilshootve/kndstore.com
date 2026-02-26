@@ -18,7 +18,8 @@ if (!$producto) {
 }
 
 // Generar mensaje de WhatsApp
-$mensaje_whatsapp = urlencode("Hello, I'm interested in: " . $producto['nombre'] . " - $" . number_format($producto['precio'], 2));
+$product_price = getProductPriceValue($slug, $producto);
+$mensaje_whatsapp = urlencode("Hello, I'm interested in: " . $producto['nombre'] . " - $" . number_format($product_price, 2));
 $link_whatsapp = "https://wa.me/584246661334?text=" . $mensaje_whatsapp;
 
 $categoryLabels = [
@@ -121,7 +122,7 @@ $typeLabels = [
                     </h1>
                     
                     <div class="product-price-container">
-                        <span class="product-price">$<?php echo number_format($producto['precio'], 2); ?></span>
+                        <span class="product-price">$<?php echo number_format($product_price, 2); ?></span>
                         <?php if (isset($producto['tipo']) && $producto['tipo'] === 'apparel'): ?>
                             <small class="text-muted d-block">+ Coordinated delivery</small>
                         <?php endif; ?>
@@ -207,7 +208,7 @@ $typeLabels = [
                                         class="btn btn-primary btn-lg w-100 add-to-order"
                                         data-id="<?php echo (int)$producto['id']; ?>"
                                         data-name="<?php echo htmlspecialchars($producto['nombre'], ENT_QUOTES, 'UTF-8'); ?>"
-                                        data-price="<?php echo number_format($producto['precio'], 2, '.', ''); ?>"
+                                        data-price="<?php echo number_format($product_price, 2, '.', ''); ?>"
                                         data-type="apparel"
                                         id="add-apparel-btn"
                                     >
@@ -222,7 +223,7 @@ $typeLabels = [
                                         class="btn btn-primary btn-lg w-100 add-to-order"
                                         data-id="<?php echo (int)$producto['id']; ?>"
                                         data-name="<?php echo htmlspecialchars($producto['nombre'], ENT_QUOTES, 'UTF-8'); ?>"
-                                        data-price="<?php echo number_format($producto['precio'], 2, '.', ''); ?>"
+                                        data-price="<?php echo number_format($product_price, 2, '.', ''); ?>"
                                         data-type="<?php echo isset($producto['tipo']) ? htmlspecialchars($producto['tipo']) : 'digital'; ?>"
                                     >
                                         <i class="fas fa-shopping-cart me-2"></i>

@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/pricing.php';
+
 // KND Store - Fuente única de datos de productos (key = slug)
 
 $PRODUCTS = [
@@ -32,7 +34,7 @@ $PRODUCTS = [
 
         'descripcion' => 'Operating system ready for launch. Clean and secure setup.<br><br>Includes:<br>• Windows 10/11 installation<br>• All drivers installed<br>• System activation<br>• Initial setup<br>• Critical updates installed',
 
-        'precio' => 8.00,
+        'precio' => 49.00,
 
         'imagen' => 'assets/images/productos/instalacion-windows-drivers.png',
 
@@ -52,7 +54,7 @@ $PRODUCTS = [
 
         'descripcion' => 'Your PC tuned to dominate the gaming galaxy.<br><br>Includes:<br>• FPS optimization in games<br>• Temperature control<br>• HDD/SSD optimization<br>• Graphics settings<br>• RAM optimization<br>• Safe overclock configuration',
 
-        'precio' => 5.00,
+        'precio' => 49.00,
 
         'imagen' => 'assets/images/productos/optimizacion-gamer-fps-temperaturas-disco.png',
 
@@ -92,7 +94,7 @@ $PRODUCTS = [
 
         'descripcion' => 'Got $300 or $3000? We build the perfect rig.<br><br>Includes:<br>• Needs analysis<br>• Component selection<br>• Compatibility check<br>• Optimized shopping list<br>• Assembly guide<br>• Post-purchase support',
 
-        'precio' => 5.00,
+        'precio' => 19.00,
 
         'imagen' => 'assets/images/productos/asesoria-pc-gamer-presupuesto.png',
 
@@ -112,7 +114,7 @@ $PRODUCTS = [
 
         'descripcion' => 'Key, wallpaper, avatar… or a cosmic meme? You never know.<br><br>Random contents:<br>• Game keys<br>• Custom wallpapers<br>• Gamer avatars<br>• Galactic memes<br>• Special discounts<br>• Exclusive KND content',
 
-        'precio' => 2.00,
+        'precio' => 5.00,
 
         'imagen' => 'assets/images/productos/death-roll-crate-caja-misteriosa.png',
 
@@ -132,7 +134,7 @@ $PRODUCTS = [
 
         'descripcion' => 'Your background, your ship. Generated to spec.<br><br>Includes:<br>• Custom design<br>• Multiple resolutions<br>• KND galactic style<br>• Mobile version included<br>• High-quality files<br>• Free revisions',
 
-        'precio' => 4.00,
+        'precio' => 15.00,
 
         'imagen' => 'assets/images/productos/wallpaper-personalizado-knd.png',
 
@@ -152,7 +154,7 @@ $PRODUCTS = [
 
         'descripcion' => 'Build your digital identity with a galactic style.<br><br>Includes:<br>• Unique design<br>• Multiple formats<br>• KND galactic style<br>• Social media versions<br>• Editable files<br>• Included revisions',
 
-        'precio' => 6.00,
+        'precio' => 19.00,
 
         'imagen' => 'assets/images/productos/avatar-gamer-personalizado.png',
 
@@ -172,7 +174,7 @@ $PRODUCTS = [
 
         'descripcion' => 'Reinvent your desktop with a cosmic aesthetic.<br><br>Includes:<br>• Full icon pack<br>• KND galactic style<br>• Multiple sizes<br>• Installation instructions<br>• Customizable icons<br>• Technical support',
 
-        'precio' => 3.00,
+        'precio' => 15.00,
 
         'imagen' => 'assets/images/productos/icon-pack-edicion-especial.png',
 
@@ -192,7 +194,7 @@ $PRODUCTS = [
 
         'descripcion' => 'Apps ready to use. Fully operational.<br><br>Available software:<br>• Microsoft Office<br>• Adobe Creative Suite<br>• OBS Studio<br>• Antivirus<br>• Browsers<br>• Developer tools',
 
-        'precio' => 5.00,
+        'precio' => 39.00,
 
         'imagen' => 'assets/images/productos/instalacion-programas-office-adobe-obs.png',
 
@@ -212,7 +214,7 @@ $PRODUCTS = [
 
         'descripcion' => 'Everything installed, optimized, and ready to game or work.<br><br>Includes:<br>• Windows installation<br>• All drivers<br>• Essential software<br>• Full optimization<br>• Security setup<br>• System backup',
 
-        'precio' => 10.00,
+        'precio' => 79.00,
 
         'imagen' => 'assets/images/productos/pc-ready-pack-software-configuracion.png',
 
@@ -232,7 +234,7 @@ $PRODUCTS = [
 
         'descripcion' => 'Don’t know something? We explain it clearly and with style.<br><br>Available formats:<br>• Detailed PDF<br>• Video tutorial<br>• Step-by-step guide<br>• Screenshots with notes<br>• Practical examples<br>• Extra support',
 
-        'precio' => 2.00,
+        'precio' => 12.00,
 
         'imagen' => 'assets/images/productos/mini-tutorial-pdf-video-express.png',
 
@@ -252,7 +254,7 @@ $PRODUCTS = [
 
         'descripcion' => 'Avoid mistakes before you buy. We confirm everything.<br><br>Verification includes:<br>• CPU and motherboard compatibility<br>• RAM compatibility<br>• GPU compatibility<br>• Power supply compatibility<br>• Case compatibility<br>• Upgrade recommendations',
 
-        'precio' => 3.00,
+        'precio' => 9.00,
 
         'imagen' => 'assets/images/productos/compatibilidad-piezas-pc.png',
 
@@ -272,7 +274,7 @@ $PRODUCTS = [
 
         'descripcion' => 'Full list + reference image for your future rig.<br><br>Includes:<br>• Full component list<br>• Reference image<br>• Price analysis<br>• Suggested alternatives<br>• Assembly guide<br>• Performance estimate',
 
-        'precio' => 7.00,
+        'precio' => 29.00,
 
         'imagen' => 'assets/images/productos/simulacion-build-pdf-personalizado.png',
 
@@ -292,7 +294,7 @@ $PRODUCTS = [
 
         'descripcion' => 'Running fine or lacking power? We analyze it with you.<br><br>Analysis includes:<br>• CPU performance<br>• GPU performance<br>• RAM analysis<br>• Storage speed<br>• System temperatures<br>• Upgrade recommendations',
 
-        'precio' => 5.00,
+        'precio' => 19.00,
 
         'imagen' => 'assets/images/productos/analisis-rendimiento-pc.png',
 
@@ -310,7 +312,7 @@ $PRODUCTS = [
         'id' => 16,
         'nombre' => 'Hoodie KND Style',
         'descripcion' => 'Official KND hoodie with a unique galactic design.<br><br>Features:<br>• Premium fabric<br>• Exclusive KND design<br>• Available in 3 colors<br>• Sizes S/M/L/XL<br>• + Coordinated delivery',
-        'precio' => 59.99,
+        'precio' => 44.99,
         'imagen' => 'assets/images/Cloths/Hoodie Desing 001 MAGENTA.webp',
         'categoria' => 'apparel',
         'slug' => 'hoodie-knd-style',
@@ -335,7 +337,7 @@ $PRODUCTS = [
         'id' => 17,
         'nombre' => 'T-Shirt KND Oversize',
         'descripcion' => 'Oversize T-shirt with KND galactic style.<br><br>Features:<br>• Comfortable oversize fit<br>• Exclusive KND design<br>• Available in 3 colors<br>• Sizes S/M/L/XL<br>• + Coordinated delivery',
-        'precio' => 34.99,
+        'precio' => 24.99,
         'imagen' => 'assets/images/Cloths/T-shirt Desing 001 MAGENTA.png',
         'categoria' => 'apparel',
         'slug' => 'tshirt-knd-oversize',
@@ -360,7 +362,7 @@ $PRODUCTS = [
         'id' => 18,
         'nombre' => 'Hoodie KND Black Edition',
         'descripcion' => 'Special black edition with premium design.<br><br>Features:<br>• Premium fabric<br>• Exclusive Black Edition design<br>• Sizes S/M/L/XL<br>• + Coordinated delivery',
-        'precio' => 64.99,
+        'precio' => 49.99,
         'imagen' => 'assets/images/Cloths/Hoodie BLACK FRONT.png',
         'categoria' => 'apparel',
         'slug' => 'hoodie-knd-black-edition',
@@ -382,7 +384,7 @@ $PRODUCTS = [
         'id' => 19,
         'nombre' => 'Hoodie Anime Style (Limited Drop)',
         'descripcion' => 'Limited edition with a unique anime design.<br><br>Features:<br>• LIMITED edition<br>• Exclusive anime design<br>• Tri-Tone colorway<br>• Sizes S/M/L/XL<br>• + Coordinated delivery',
-        'precio' => 74.99,
+        'precio' => 59.99,
         'imagen' => 'assets/images/Cloths/Hoodie Anime PINK FRONT.png',
         'categoria' => 'apparel',
         'slug' => 'hoodie-anime-style',
@@ -404,7 +406,7 @@ $PRODUCTS = [
         'id' => 20,
         'nombre' => 'Hoodie Dark Eyes Style (Limited Drop)',
         'descripcion' => 'Limited edition with a high-contrast Dark Eyes design.<br><br>Features:<br>• LIMITED edition<br>• Original Dark Eyes design<br>• Dark colorway with neon accents<br>• Sizes S/M/L/XL<br>• + Coordinated delivery',
-        'precio' => 74.99,
+        'precio' => 59.99,
         'imagen' => 'assets/images/Cloths/Hoodie Dark Eyes Front.png',
         'categoria' => 'apparel',
         'slug' => 'hoodie-dark-eyes-style',

@@ -17,7 +17,7 @@ function renderServiceCard(string $slug, array $product): string {
         $firstGallery = reset($product['gallery']);
         $displayImage = $firstGallery;
     }
-    $precio_real = $product['precio'];
+    $price = getProductPriceValue($slug, $product);
 
     $html = '<div class="col-lg-4 col-md-6 mb-4">';
     $html .= '  <div class="product-card">';
@@ -41,10 +41,10 @@ function renderServiceCard(string $slug, array $product): string {
     $html .= '      <h5 class="product-title">' . htmlspecialchars($product['nombre']) . '</h5>';
     $html .= '      <p class="product-description">' . $product['descripcion'] . '</p>';
     $html .= '      <div class="product-footer">';
-    $html .= '        <span class="product-price">$' . number_format($product['precio'], 2) . '</span>';
+    $html .= '        <span class="product-price">$' . number_format($price, 2) . '</span>';
     $html .= '        <div class="d-flex gap-2">';
     $html .= '          <a href="/producto.php?slug=' . htmlspecialchars($slug) . '" class="btn btn-outline-neon btn-sm btn-details">' . t('btn.view_details') . '</a>';
-    $html .= '          <button type="button" class="btn btn-primary btn-sm add-to-order" data-id="' . (int)$product['id'] . '" data-name="' . htmlspecialchars($product['nombre'], ENT_QUOTES, 'UTF-8') . '" data-price="' . number_format($precio_real, 2, '.', '') . '" data-type="' . (isset($product['tipo']) ? htmlspecialchars($product['tipo']) : 'digital') . '">';
+    $html .= '          <button type="button" class="btn btn-primary btn-sm add-to-order" data-id="' . (int)$product['id'] . '" data-name="' . htmlspecialchars($product['nombre'], ENT_QUOTES, 'UTF-8') . '" data-price="' . number_format($price, 2, '.', '') . '" data-type="' . (isset($product['tipo']) ? htmlspecialchars($product['tipo']) : 'digital') . '">';
     $html .= '            ' . t('btn.add_to_order');
     $html .= '          </button>';
     $html .= '        </div>';
