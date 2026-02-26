@@ -72,7 +72,7 @@ $PRODUCTS = [
 
         'nombre' => 'Game & Gift Card Activation',
 
-        'descripcion' => 'Keys for Steam, PSN, Xbox, Riot, and more. Direct delivery.<br><br>Available platforms:<br>• Steam<br>• PlayStation Network<br>• Xbox Live<br>• Riot Games<br>• Epic Games<br>• Nintendo eShop<br>• Origin/EA Play',
+        'descripcion' => 'Digital activation service for official game and platform gift cards.<br><br>Available platforms:<br>• Steam<br>• PlayStation Network<br>• Xbox Live<br>• Riot Games<br>• Epic Games<br>• Nintendo eShop<br>• Origin/EA Play',
 
         'precio' => 3.00,
 
@@ -106,25 +106,6 @@ $PRODUCTS = [
 
     ],
 
-    'death-roll-crate' => [
-
-        'id' => 6,
-
-        'nombre' => 'Death Roll Crate (Mystery Box)',
-
-        'descripcion' => 'Key, wallpaper, avatar… or a cosmic meme? You never know.<br><br>Random contents:<br>• Game keys<br>• Custom wallpapers<br>• Gamer avatars<br>• Galactic memes<br>• Special discounts<br>• Exclusive KND content',
-
-        'precio' => 5.00,
-
-        'imagen' => 'assets/images/productos/death-roll-crate-caja-misteriosa.png',
-
-        'categoria' => 'gaming',
-
-        'slug' => 'death-roll-crate',
-
-        'tipo' => 'digital',
-
-    ],
 
     'wallpaper-personalizado' => [
 
@@ -134,7 +115,7 @@ $PRODUCTS = [
 
         'descripcion' => 'Your background, your ship. Generated to spec.<br><br>Includes:<br>• Custom design<br>• Multiple resolutions<br>• KND galactic style<br>• Mobile version included<br>• High-quality files<br>• Free revisions',
 
-        'precio' => 15.00,
+        'precio' => 6.00,
 
         'imagen' => 'assets/images/productos/wallpaper-personalizado-knd.png',
 
@@ -154,7 +135,7 @@ $PRODUCTS = [
 
         'descripcion' => 'Build your digital identity with a galactic style.<br><br>Includes:<br>• Unique design<br>• Multiple formats<br>• KND galactic style<br>• Social media versions<br>• Editable files<br>• Included revisions',
 
-        'precio' => 19.00,
+        'precio' => 6.00,
 
         'imagen' => 'assets/images/productos/avatar-gamer-personalizado.png',
 
@@ -422,6 +403,19 @@ $PRODUCTS = [
                 'sizes' => ['S', 'M', 'L', 'XL']
             ]
         ]
+    ],
+
+    // ====== CREATIVE CONSULTATION ======
+
+    'creative-design-consultation' => [
+        'id' => 24,
+        'nombre' => 'Creative Design Consultation',
+        'descripcion' => 'Structured creative guidance for branding, visual identity and digital aesthetics. Perfect for creators and digital entrepreneurs.<br><br>Includes:<br>• 30-minute consultation<br>• Strategic visual direction<br>• Practical improvement plan<br>• Follow-up summary',
+        'precio' => 3.00,
+        'imagen' => 'assets/images/productos/creative-design-consultation.png',
+        'categoria' => 'accesorios',
+        'slug' => 'creative-design-consultation',
+        'tipo' => 'digital',
     ],
 
     // ====== CUSTOM SERVICES ======

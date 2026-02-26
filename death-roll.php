@@ -163,10 +163,10 @@ require_once __DIR__ . '/includes/footer.php';
             <div class="col-md-6 col-lg-4">
                 <div class="card bg-dark border-primary h-100 text-center">
                     <div class="card-body">
-                        <h4 class="text-white mb-3">Death Roll Crate</h4>
-                        <p class="text-white-50">Guaranteed digital loot with random rarity.</p>
-                        <a href="/producto.php?slug=death-roll-crate" class="btn btn-primary w-100">
-                            <i class="fas fa-shopping-cart me-2"></i> Get crate
+                        <h4 class="text-white mb-3">KND Digital Store</h4>
+                        <p class="text-white-50">Browse our full catalog of digital services.</p>
+                        <a href="/products.php" class="btn btn-primary w-100">
+                            <i class="fas fa-shopping-cart me-2"></i> View Products
                         </a>
                     </div>
                 </div>

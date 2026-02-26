@@ -20,8 +20,8 @@ $PRODUCT_GROUPS = [
         'avatar-personalizado',
         'icon-pack-knd',
         'tutorial-knd',
-        'death-roll-crate',
         'activacion-juegos-giftcards',
+        'creative-design-consultation',
     ],
     'apparel' => [
         'hoodie-knd-style',
