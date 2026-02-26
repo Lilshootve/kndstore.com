@@ -5604,3 +5604,37 @@ body {
         font-size: 1.1rem;
     }
 }
+
+/* Services-first layout */
+.knd-pillar-section .knd-pillar-card,
+.services-section .knd-pillar-card {
+    background: rgba(20, 20, 40, 0.7);
+    border: 1px solid rgba(37, 156, 174, 0.25);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.knd-pillar-item + .knd-pillar-item {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.knd-pillar-item h4 {
+    color: var(--knd-neon-blue);
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.services-section .services-header .section-title {
+    margin-bottom: 12px;
+}
+
+.services-section .services-disclaimer .alert {
+    border-radius: 14px;
+}
+
+.creative-card .product-image img {
+    filter: saturate(1.1);
+}

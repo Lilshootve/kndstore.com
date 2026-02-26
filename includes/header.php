@@ -48,13 +48,13 @@ function generateNavigation() {
     $nav .= '                    <a class="nav-link' . ($current_page == 'index.php' ? ' active' : '') . '" href="/index.php">' . t('nav.home') . '</a>' . "\n";
     $nav .= '                </li>' . "\n";
     $nav .= '                <li class="nav-item">' . "\n";
-    $nav .= '                    <a class="nav-link' . ($current_page == 'products.php' ? ' active' : '') . '" href="/products.php">' . t('nav.products') . '</a>' . "\n";
+    $nav .= '                    <a class="nav-link' . ($current_page == 'products.php' ? ' active' : '') . '" href="/products.php">' . t('nav.services') . '</a>' . "\n";
+    $nav .= '                </li>' . "\n";
+    $nav .= '                <li class="nav-item">' . "\n";
+    $nav .= '                    <a class="nav-link' . ($current_page == 'creative.php' ? ' active' : '') . '" href="/creative.php">' . t('nav.creative') . '</a>' . "\n";
     $nav .= '                </li>' . "\n";
     $nav .= '                <li class="nav-item">' . "\n";
     $nav .= '                    <a class="nav-link' . ($current_page == 'apparel.php' ? ' active' : '') . '" href="/apparel.php">' . t('nav.apparel') . '</a>' . "\n";
-    $nav .= '                </li>' . "\n";
-    $nav .= '                <li class="nav-item">' . "\n";
-    $nav .= '                    <a class="nav-link' . ($current_page == 'custom-design.php' ? ' active' : '') . '" href="/custom-design.php">' . t('nav.custom_design') . '</a>' . "\n";
     $nav .= '                </li>' . "\n";
     $nav .= '                <li class="nav-item">' . "\n";
     $nav .= '                    <a class="nav-link' . ($current_page == 'about.php' ? ' active' : '') . '" href="/about.php">' . t('nav.about') . '</a>' . "\n";

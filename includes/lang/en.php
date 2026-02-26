@@ -24,6 +24,8 @@ return [
     // Navigation
     'nav.home' => 'Home',
     'nav.products' => 'Shop',
+    'nav.services' => 'Services',
+    'nav.creative' => 'Creative',
     'nav.apparel' => 'Apparel',
     'nav.custom_design' => 'Custom Design',
     'nav.about' => 'About',
