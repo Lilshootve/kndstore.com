@@ -108,13 +108,6 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
 </section>
 
 <script>
-window.__paypalSDKReady = function() {
-    document.dispatchEvent(new CustomEvent('paypal-sdk-ready'));
-};
-</script>
-<script src="https://www.paypal.com/sdk/js?client-id=<?php echo urlencode(PAYPAL_CLIENT_ID); ?>&currency=USD&components=buttons&callback=__paypalSDKReady"></script>
-
-<script>
 // Lógica para leer el pedido desde localStorage y rellenar la vista en order.php
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -434,6 +427,31 @@ document.addEventListener('DOMContentLoaded', function () {
     const paypalContainer = document.getElementById('paypal-button-container');
     const paymentMethodField = document.querySelector('select[name="payment_method"]');
     window.__paypalRendered = false;
+    window.__paypalScriptInjected = false;
+
+    function loadPayPalSDK(cb) {
+        if (window.paypal) {
+            if (cb) cb();
+            return;
+        }
+        if (window.__paypalScriptInjected) {
+            const check = setInterval(function() {
+                if (window.paypal) {
+                    clearInterval(check);
+                    if (cb) cb();
+                }
+            }, 50);
+            return;
+        }
+        window.__paypalScriptInjected = true;
+        const script = document.createElement('script');
+        script.src = 'https://www.paypal.com/sdk/js?client-id=<?php echo urlencode(PAYPAL_CLIENT_ID); ?>&currency=USD&components=buttons';
+        script.onload = script.onreadystatechange = function() {
+            if (script.readyState && script.readyState !== 'loaded' && script.readyState !== 'complete') return;
+            if (cb) cb();
+        };
+        document.head.appendChild(script);
+    }
 
     function updatePaymentFlow() {
         const isPayPal = paymentMethodSelect && paymentMethodSelect.value === 'paypal';
@@ -446,8 +464,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (paymentMethodField) {
             paymentMethodField.required = !isPayPal;
         }
-        if (isPayPal && !window.__paypalRendered && window.paypal && paypalContainer) {
-            renderPayPalButtons();
+        if (isPayPal && !window.__paypalRendered && paypalContainer) {
+            loadPayPalSDK(function() {
+                if (paymentMethodSelect.value === 'paypal') renderPayPalButtons();
+            });
         }
     }
 
@@ -519,15 +539,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (paymentMethodSelect) {
         paymentMethodSelect.addEventListener('change', updatePaymentFlow);
         updatePaymentFlow();
-    }
-
-    document.addEventListener('paypal-sdk-ready', function() {
-        if (paymentMethodSelect && paymentMethodSelect.value === 'paypal') {
-            renderPayPalButtons();
-        }
-    });
-    if (window.paypal && paymentMethodSelect && paymentMethodSelect.value === 'paypal') {
-        renderPayPalButtons();
     }
 });
 </script>
