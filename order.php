@@ -19,30 +19,28 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
 
         <div class="row align-items-stretch order-checkout-row">
             <div class="col-lg-7 mb-4">
-                <div class="card knd-card h-100">
-                    <div class="card-header">
-                        <h4 class="mb-0"><?php echo t('order.selected_services.title'); ?></h4>
-                    </div>
+                <div class="card order-items-card h-100">
                     <div class="card-body">
+                        <div class="order-section-label mb-3"><?php echo t('order.selected_services.title'); ?></div>
                         <div id="order-items-container">
                             <!-- Items injected via JS -->
                         </div>
                         <div id="order-empty-message" class="text-center text-muted">
                             <?php echo t('order.empty_message'); ?>
                         </div>
-                        <hr>
+                        <hr class="order-divider">
                         <div id="order-totals" class="order-totals">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="text-muted"><?php echo t('order.totals.subtotal'); ?></span>
+                            <div class="order-total-row">
+                                <span class="order-total-muted"><?php echo t('order.totals.subtotal'); ?></span>
                                 <span id="order-subtotal">$0.00</span>
                             </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="text-muted"><?php echo t('order.totals.shipping'); ?> <small>(<?php echo t('order.totals.shipping_quoted'); ?>)</small></span>
+                            <div class="order-total-row">
+                                <span class="order-total-muted"><?php echo t('order.totals.shipping'); ?></span>
                                 <span id="order-shipping">$0.00</span>
                             </div>
-                            <div class="d-flex justify-content-between pt-2 border-top border-secondary">
-                                <strong><?php echo t('order.total.label'); ?></strong>
-                                <span id="order-total" class="fw-bold" style="color: var(--knd-neon-blue);">$0.00</span>
+                            <div class="order-total-final">
+                                <span><?php echo t('order.total.label'); ?></span>
+                                <span id="order-total" class="order-total-amount">$0.00</span>
                             </div>
                         </div>
                     </div>
@@ -50,81 +48,73 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
             </div>
 
             <div class="col-lg-5">
-                <div class="card knd-card h-100">
-                    <div class="card-header">
-                        <h4 class="mb-0"><?php echo t('order.data.title'); ?></h4>
-                    </div>
-                    <div class="card-body">
+                <div class="card order-details-card h-100">
+                    <div class="card-body order-details-body">
                         <form id="order-form">
-                            <div class="mb-3">
-                                <label class="form-label">Payment Method</label>
-                                <select name="payment_flow" id="payment-method-select" class="form-select">
-                                    <option value="paypal" selected>PayPal</option>
-                                    <option value="bank_transfer">Bank Transfer (ACH/Wire)</option>
-                                    <option value="whatsapp">WhatsApp (Other)</option>
-                                </select>
+                            <input type="hidden" name="payment_flow" id="payment-method-select" value="paypal">
+
+                            <div class="order-section-block">
+                                <div class="order-section-label"><?php echo t('order.section.client'); ?></div>
+                                <div class="mb-4">
+                                    <label class="order-field-label" for="order-name"><?php echo t('order.form.name_label'); ?></label>
+                                    <input type="text" name="name" id="order-name" class="order-input" required>
+                                    <small class="form-text paypal-optional-hint order-field-hint" style="display:none;"><?php echo t('order.form.delivery_updates_hint'); ?></small>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="order-field-label" for="order-whatsapp"><?php echo t('order.form.whatsapp_label'); ?></label>
+                                    <input type="text" name="whatsapp" id="order-whatsapp" class="order-input" placeholder="+1 234 567 8900" required>
+                                    <small class="form-text paypal-optional-hint order-field-hint" style="display:none;"><?php echo t('order.form.delivery_updates_hint'); ?></small>
+                                </div>
+                            </div>
+
+                            <div class="order-section-block">
+                                <div class="order-section-label"><?php echo t('order.section.payment'); ?></div>
+                                <div class="order-payment-pills mb-4">
+                                    <button type="button" class="order-pill order-pill-active" data-value="paypal">PayPal</button>
+                                    <button type="button" class="order-pill" data-value="bank_transfer">Bank Transfer</button>
+                                    <button type="button" class="order-pill" data-value="whatsapp">WhatsApp</button>
+                                </div>
                                 <?php
                                 $paypalId = defined('PAYPAL_CLIENT_ID') ? PAYPAL_CLIENT_ID : '';
                                 if (empty($paypalId) || strpos($paypalId, 'YOUR_') === 0 || stripos($paypalId, 'placeholder') !== false) {
-                                    echo '<div class="alert alert-warning mt-2 py-2 small" role="alert"><i class="fas fa-exclamation-triangle me-1"></i>PayPal credentials not configured. Create includes/paypal_secrets.local.php or set PAYPAL_CLIENT_ID.</div>';
+                                    echo '<div class="order-paypal-warning">PayPal not configured.</div>';
                                 }
                                 ?>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label" for="order-name"><?php echo t('order.form.name_label'); ?></label>
-                                <input type="text" name="name" id="order-name" class="form-control" required>
-                                <small class="form-text paypal-optional-hint text-muted" style="display:none;"><?php echo t('order.form.delivery_updates_hint'); ?></small>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label" for="order-whatsapp"><?php echo t('order.form.whatsapp_label'); ?></label>
-                                <input type="text" name="whatsapp" id="order-whatsapp" class="form-control" placeholder="+58..." required>
-                                <small class="form-text paypal-optional-hint text-muted" style="display:none;"><?php echo t('order.form.delivery_updates_hint'); ?></small>
-                            </div>
-                            <div id="whatsapp-other-helper" class="mb-3 manual-only" style="display: none;">
-                                <div class="small text-muted p-2 rounded" style="background: rgba(37, 156, 174, 0.1); border: 1px solid rgba(37, 156, 174, 0.2);">
-                                    <?php echo t('order.form.whatsapp_other_helper'); ?>
+                                <div id="whatsapp-other-helper" class="order-helper manual-only" style="display: none;"><?php echo t('order.form.whatsapp_other_helper'); ?></div>
+                                <div class="manual-only order-payment-select-wrap">
+                                    <select name="payment_method" class="order-input" required>
+                                        <option value=""><?php echo t('order.form.payment_method_select'); ?></option>
+                                        <option value="Bank Transfer">Bank Transfer</option>
+                                        <option value="Zinli">Zinli</option>
+                                        <option value="Binance Pay">Binance Pay</option>
+                                        <option value="Pipol Pay">Pipol Pay</option>
+                                        <option value="Mobile Payment">Mobile Payment</option>
+                                        <option value="Cryptocurrency">Cryptocurrency</option>
+                                    </select>
                                 </div>
-                            </div>
-                            <div class="mb-3 manual-only">
-                                <label class="form-label"><?php echo t('order.form.payment_method_label'); ?></label>
-                                <select name="payment_method" class="form-select" required>
-                                    <option value=""><?php echo t('order.form.payment_method_select'); ?></option>
-                                    <option value="Bank Transfer">Bank Transfer (ACH/Wire)</option>
-                                    <option value="Zinli">Zinli</option>
-                                    <option value="Binance Pay">Binance Pay</option>
-                                    <option value="Pipol Pay">Pipol Pay</option>
-                                    <option value="Mobile Payment">Mobile Payment</option>
-                                    <option value="Cryptocurrency">Cryptocurrency</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label"><?php echo t('order.form.delivery_type_label'); ?></label>
-                                <select name="delivery_type" class="form-select" id="delivery-type-select">
-                                    <option value="Digital / remote"><?php echo t('order.form.delivery_type.digital'); ?></option>
-                                    <option value="Coordinated delivery"><?php echo t('order.form.delivery_type.coordinated'); ?></option>
-                                </select>
-                                <small class="text-muted"><?php echo t('order.form.delivery_type.note'); ?></small>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label"><?php echo t('order.form.notes_label'); ?></label>
-                                <textarea name="notes" class="form-control" rows="3" placeholder="<?php echo t('order.form.notes_placeholder'); ?>"></textarea>
-                            </div>
-
-                            <button type="button" id="send-whatsapp-order" class="btn btn-whatsapp w-100 manual-only">
-                                <i class="fab fa-whatsapp me-2"></i>
-                                <?php echo t('order.form.submit'); ?>
-                            </button>
-
-                            <div id="paypal-section" class="mt-3" style="display: none;">
-                                <div class="paypal-card p-3 rounded">
-                                    <h5 class="mb-2" style="color: var(--knd-neon-blue); font-size: 1rem;"><?php echo t('order.paypal.title'); ?></h5>
-                                    <p class="small text-muted mb-3"><?php echo t('order.paypal.trust'); ?></p>
-                                    <div id="paypal-button-container"></div>
-                                    <div id="paypal-loading" class="paypal-loading text-center py-3" style="display:none;">
-                                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                                        <span><?php echo t('order.paypal.loading'); ?></span>
+                                <div id="paypal-section" style="display: none;">
+                                    <div class="paypal-wrap">
+                                        <div id="paypal-button-container"></div>
+                                        <div id="paypal-loading" class="paypal-loading" style="display:none;"><span class="spinner-border spinner-border-sm me-2" role="status" style="vertical-align: middle;"></span><span><?php echo t('order.paypal.loading'); ?></span></div>
+                                        <div id="paypal-error" class="paypal-error" style="display:none;" role="alert"></div>
                                     </div>
-                                    <div id="paypal-error" class="paypal-error alert alert-danger py-2 small mt-2" style="display:none;" role="alert"></div>
+                                </div>
+                                <button type="button" id="send-whatsapp-order" class="order-btn-whatsapp manual-only">
+                                    <?php echo t('order.form.submit'); ?>
+                                </button>
+                            </div>
+
+                            <div class="order-section-block">
+                                <div class="order-section-label"><?php echo t('order.section.delivery'); ?></div>
+                                <div class="mb-4">
+                                    <select name="delivery_type" class="order-input" id="delivery-type-select">
+                                        <option value="Digital / remote"><?php echo t('order.form.delivery_type.digital'); ?></option>
+                                        <option value="Coordinated delivery"><?php echo t('order.form.delivery_type.coordinated'); ?></option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="order-field-label"><?php echo t('order.form.notes_label'); ?></label>
+                                    <textarea name="notes" class="order-input" rows="2" placeholder="<?php echo t('order.form.notes_placeholder'); ?>"></textarea>
                                 </div>
                             </div>
                         </form>
@@ -267,13 +257,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const div = document.createElement('div');
             div.className = 'order-item-row d-flex justify-content-between align-items-center mb-3 p-3';
-            div.style.border = '1px solid rgba(37, 156, 174, 0.3)';
-            div.style.borderRadius = '10px';
-            div.style.background = 'rgba(26, 26, 46, 0.5)';
             div.innerHTML = `
                 <div class="flex-grow-1">
                     <strong class="d-block mb-1">${item.name}</strong>
-                    <div class="text-muted small mb-2">Unit price: ${formatPrice(unitPrice)}</div>
+                    <div class="order-item-unit-price mb-2">${formatPrice(unitPrice)}</div>
                     ${additionalInfo}
                     <div class="d-flex align-items-center gap-2 mt-2">
                         <button class="btn btn-sm btn-outline-neon qty-btn" data-action="decrease" data-id="${item.id}" ${item.qty <= 1 ? 'disabled' : ''}>
@@ -286,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                 </div>
                 <div class="d-flex flex-column align-items-end gap-2">
-                    <div class="fw-bold" style="font-size: 1.1rem; color: var(--knd-neon-blue);">
+                    <div class="order-item-line-total">
                         ${formatPrice(lineTotal)}
                     </div>
                     <button class="btn btn-sm btn-danger remove-item-btn" data-id="${item.id}" title="Remove">
@@ -621,7 +608,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (paymentMethodSelect) {
         paymentMethodSelect.addEventListener('change', updatePaymentFlow);
+        document.querySelectorAll('.order-payment-pills .order-pill').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const val = this.dataset.value;
+                paymentMethodSelect.value = val;
+                paymentMethodSelect.dispatchEvent(new Event('change'));
+                document.querySelectorAll('.order-payment-pills .order-pill').forEach(function(b) {
+                    b.classList.toggle('order-pill-active', b.dataset.value === val);
+                });
+            });
+        });
         updatePaymentFlow();
+        document.querySelectorAll('.order-payment-pills .order-pill').forEach(function(b) {
+            b.classList.toggle('order-pill-active', b.dataset.value === paymentMethodSelect.value);
+        });
     }
 });
 </script>

@@ -2334,11 +2334,11 @@ body.about-page,
 }
 
 /* Iconos de métodos de pago */
-.footer .fab {
+.footer .footer-payment-icon i {
     transition: all 0.3s ease;
 }
 
-.footer .fab:hover {
+.footer .footer-payment-icon:hover i {
     transform: scale(1.2);
     filter: drop-shadow(0 0 10px currentColor);
 }
@@ -5041,44 +5041,277 @@ body {
 
 /* Categorías */
 
-/* Order Section Styles */
+/* Order Section - Luxury Digital Brand */
 .order-section {
     padding-top: 100px;
     min-height: 100vh;
 }
 
-.order-subtitle {
-    font-size: 1rem;
-    opacity: 0.9;
+.order-section h1 {
+    font-size: 1.75rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
 }
 
-.order-checkout-row .knd-card {
+.order-subtitle {
+    font-size: 0.95rem;
+    opacity: 0.7;
+    letter-spacing: 0.02em;
+}
+
+.order-items-card #order-empty-message {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.9rem;
+}
+
+.order-checkout-row .card {
     min-height: 100%;
 }
 
-.order-totals small {
-    font-size: 0.75rem;
-}
-
-.paypal-card {
-    background: rgba(26, 26, 46, 0.6);
-    border: 1px solid rgba(37, 156, 174, 0.4);
+/* Order Items Card - matte dark */
+.order-items-card {
+    background: rgba(18, 18, 24, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 12px;
 }
 
+.order-items-card .card-body {
+    padding: 2rem;
+}
+
+/* Order Details Card - premium minimal */
+.order-details-card {
+    background: rgba(18, 18, 24, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+}
+
+.order-details-body {
+    padding: 2.25rem;
+}
+
+/* Section labels - small uppercase */
+.order-section-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 0.75rem;
+}
+
+.order-section-block {
+    margin-bottom: 2rem;
+}
+
+.order-section-block:last-child {
+    margin-bottom: 0;
+}
+
+/* Field labels */
+.order-field-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 0.5rem;
+}
+
+.order-field-hint {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 0.35rem;
+}
+
+/* Inputs - refined */
+.order-input {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: #fff;
+    font-size: 0.95rem;
+    width: 100%;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.order-input:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.order-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* Payment pills */
+.order-payment-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.order-pill {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 100px;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.order-pill:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.order-pill.order-pill-active {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Order totals */
+.order-divider {
+    border-color: rgba(255, 255, 255, 0.06);
+    margin: 1.5rem 0 1.25rem;
+}
+
+.order-total-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.order-total-muted {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.order-total-final {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 1rem;
+}
+
+.order-total-amount {
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+/* WhatsApp helper - subtle */
+.order-helper {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.45);
+    line-height: 1.5;
+    padding: 0.75rem 0;
+}
+
+.order-payment-select-wrap {
+    margin-top: 1rem;
+}
+
+.order-paypal-warning {
+    font-size: 0.8rem;
+    color: rgba(255, 193, 7, 0.9);
+    margin-top: 0.5rem;
+}
+
+/* WhatsApp submit button */
+.order-btn-whatsapp {
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    background: rgba(37, 211, 102, 0.15);
+    border: 1px solid rgba(37, 211, 102, 0.35);
+    border-radius: 8px;
+    color: #25d366;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.order-btn-whatsapp:hover {
+    background: rgba(37, 211, 102, 0.25);
+    border-color: rgba(37, 211, 102, 0.5);
+}
+
+/* PayPal wrap - minimal */
+.paypal-wrap {
+    margin-top: 0.5rem;
+}
+
 .paypal-loading {
-    color: var(--knd-neon-blue);
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 0.75rem 0;
 }
 
 .paypal-loading .spinner-border {
     border-color: currentColor;
     border-right-color: transparent;
+    margin-right: 0.5rem;
+    vertical-align: middle;
 }
 
-.paypal-error.alert-danger {
-    background: rgba(220, 53, 69, 0.15);
-    border-color: rgba(220, 53, 69, 0.5);
-    color: #f8a5b4;
+.paypal-error {
+    font-size: 0.85rem;
+    color: rgba(248, 165, 180, 0.95);
+    padding: 0.5rem 0;
+}
+
+/* Order item rows - matte premium */
+.order-items-card .order-item-row {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    transition: all 0.2s ease;
+}
+
+.order-items-card .order-item-row:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.order-item-unit-price {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.order-item-line-total {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.order-items-card .qty-btn {
+    border-color: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.order-items-card .qty-btn:hover:not(:disabled) {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.order-items-card .remove-item-btn {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.order-items-card .remove-item-btn:hover {
+    color: rgba(248, 113, 113, 0.9);
 }
 
 .knd-card {
