@@ -221,6 +221,8 @@ return [
     'order.paypal.loading' => 'Preparing...',
     'order.paypal.error' => 'Something went wrong. Please try again or use WhatsApp.',
     'order.form.whatsapp_label' => 'WhatsApp',
+    'order.form.email_label' => 'Email (optional)',
+    'order.form.email_hint' => 'For order confirmation and updates',
     'order.form.payment_method_label' => 'Payment Method',
     'order.form.alternative_method_label' => 'Alternative method',
     'order.form.alternative_method_select' => 'Select alternative method',

@@ -65,6 +65,11 @@ echo generateHeader(t('order.meta.title'), t('order.meta.description'));
                                     <input type="text" name="whatsapp" id="order-whatsapp" class="order-input" placeholder="+1 234 567 8900" required>
                                     <small class="form-text paypal-optional-hint order-field-hint" style="display:none;"><?php echo t('order.form.delivery_updates_hint'); ?></small>
                                 </div>
+                                <div class="mb-4">
+                                    <label class="order-field-label" for="order-email"><?php echo t('order.form.email_label'); ?></label>
+                                    <input type="email" name="email" id="order-email" class="order-input" placeholder="you@example.com">
+                                    <small class="form-text order-field-hint"><?php echo t('order.form.email_hint'); ?></small>
+                                </div>
                             </div>
 
                             <div class="order-section-block">
@@ -598,6 +603,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const customer = {
                         name: formData.get('name') || '',
                         whatsapp: formData.get('whatsapp') || '',
+                        email: formData.get('email') || '',
                         notes: formData.get('notes') || ''
                     };
                     const payloadItems = items.map(item => ({

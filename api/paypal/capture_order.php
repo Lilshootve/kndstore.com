@@ -128,6 +128,7 @@ if (round($amountValue, 2) !== round($total, 2) || $currencyCode !== 'USD') {
 }
 
 $orderRef = 'KND-' . strtoupper(bin2hex(random_bytes(2)));
+$customerEmail = trim($customer['email'] ?? '');
 $record = [
     'created_at' => date('c'),
     'order_ref' => $orderRef,
@@ -144,12 +145,41 @@ $record = [
     'customer' => [
         'name' => $customer['name'] ?? '',
         'whatsapp' => $customer['whatsapp'] ?? '',
+        'email' => $customerEmail ?: null,
         'notes' => $customer['notes'] ?? '',
     ],
 ];
 
 $existing[] = $record;
 @file_put_contents($ordersFile, json_encode($existing, JSON_PRETTY_PRINT), LOCK_EX);
+
+require_once __DIR__ . '/../../includes/mailer.php';
+
+$itemsList = '';
+foreach ($itemsDetailed as $it) {
+    $itemsList .= '  - ' . ($it['name'] ?? 'Item') . ' x' . ($it['qty'] ?? 1) . ' — $' . number_format($it['line_total'] ?? 0, 2) . "\n";
+}
+$emailBody = "Order Confirmation - KND Store\n\n";
+$emailBody .= "Order ID: " . $orderRef . "\n";
+$emailBody .= "Total: $" . number_format($total, 2) . " USD\n";
+$emailBody .= "Delivery: " . ($deliveryType ?: 'Digital / remote') . "\n\n";
+$emailBody .= "Items:\n" . $itemsList . "\n";
+$emailBody .= "Next steps: We will contact you via WhatsApp or email for delivery details.\n\n";
+$emailBody .= "Support: support@kndstore.com | WhatsApp +58 414-159-2319";
+
+if ($customerEmail && filter_var($customerEmail, FILTER_VALIDATE_EMAIL)) {
+    knd_mail($customerEmail, 'Order ' . $orderRef . ' confirmed - KND Store', $emailBody);
+}
+
+$opsSecretsFile = __DIR__ . '/../../config/ops_secrets.local.php';
+if (file_exists($opsSecretsFile)) {
+    $opsSecrets = include $opsSecretsFile;
+    $opsEmail = is_array($opsSecrets) ? trim($opsSecrets['ops_email'] ?? '') : '';
+    if ($opsEmail && filter_var($opsEmail, FILTER_VALIDATE_EMAIL)) {
+        $opsBody = "[PayPal] New order\n\n" . $emailBody . "\n\nCustomer: " . ($customer['name'] ?? '-') . "\nWhatsApp: " . ($customer['whatsapp'] ?? '-');
+        knd_mail($opsEmail, 'KND Order ' . $orderRef . ' - PayPal', $opsBody);
+    }
+}
 
 echo json_encode([
     'ok' => true,
