@@ -60,6 +60,7 @@ function renderApparelCard(string $slug, array $product, string $badgeLabel, str
 
     $imageUrl = rawurlencode($mainImage);
     $imageUrl = str_replace('%2F', '/', $imageUrl);
+    $swatches = getSwatchesForSlug($slug);
 
     ob_start();
     ?>
@@ -83,6 +84,16 @@ function renderApparelCard(string $slug, array $product, string $badgeLabel, str
                     $<?php echo number_format($product['precio'], 2); ?>
                     <small class="text-muted d-block"><?php echo t('product.label.plus_delivery'); ?></small>
                 </span>
+                <?php if (!empty($swatches)): ?>
+                    <div class="apparel-swatches">
+                        <?php foreach ($swatches as $swatch): ?>
+                            <span class="apparel-swatch"
+                                  style="background-color: <?php echo htmlspecialchars($swatch['hex']); ?>;"
+                                  title="<?php echo htmlspecialchars($swatch['label']); ?>"></span>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+                <p class="apparel-size-note">¿No estás seguro de tu talla? Consulta la guía antes de comprar.</p>
                 <div class="d-flex gap-2 mt-2">
                     <a href="/producto.php?slug=<?php echo $slug; ?>" class="btn btn-outline-neon btn-sm btn-details">
                         <?php echo t('btn.view_details'); ?>
@@ -103,6 +114,37 @@ function renderApparelCard(string $slug, array $product, string $badgeLabel, str
     </div>
     <?php
     return ob_get_clean();
+}
+
+$apparelSwatchMap = [
+    'turquesa' => '#14b8a6',
+    'morado' => '#9333ea',
+    'negro' => '#111111',
+];
+
+function getSwatchesForSlug(string $slug): array {
+    $slugMap = [
+        'hoodie-knd-style' => ['turquesa', 'morado', 'negro'],
+        'tshirt-knd-oversize' => ['turquesa', 'morado', 'negro'],
+        'hoodie-knd-black-edition' => ['negro'],
+    ];
+
+    if (!isset($slugMap[$slug])) {
+        return [];
+    }
+
+    $labels = $slugMap[$slug];
+    $swatches = [];
+    foreach ($labels as $label) {
+        $hex = $GLOBALS['apparelSwatchMap'][$label] ?? null;
+        if ($hex) {
+            $swatches[] = [
+                'label' => ucfirst($label),
+                'hex' => $hex,
+            ];
+        }
+    }
+    return $swatches;
 }
 
 $missingCore = [];
@@ -377,7 +419,7 @@ echo generateHeader(
                         </h2>
                         <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="accordion-body text-white-50">
-                                Política pendiente de confirmar. Ajusta aquí tu política real.
+                                Sí. Realizamos envíos internacionales previa coordinación con el comprador. El costo y el tiempo de entrega dependen del país y del courier disponible. Tras tu pedido, te contactamos para cotizar y confirmar antes del despacho.
                             </div>
                         </div>
                     </div>
@@ -389,7 +431,7 @@ echo generateHeader(
                         </h2>
                         <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="accordion-body text-white-50">
-                                Política pendiente de confirmar. Ajusta aquí tu política real.
+                                Publicamos medidas exactas por talla en cada producto (pecho, largo y manga). Te recomendamos compararlas con una prenda similar que ya tengas antes de comprar. Si tienes dudas, puedes escribirnos y te orientamos antes de confirmar tu pedido. Por motivos de higiene y personalización, no realizamos cambios por talla una vez entregada la prenda.
                             </div>
                         </div>
                     </div>
@@ -502,6 +544,37 @@ echo generateHeader(
     color: #ff9ad0;
     border: 1px solid rgba(174, 37, 101, 0.6);
     box-shadow: 0 0 12px rgba(174, 37, 101, 0.35);
+}
+
+.apparel-swatches {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.apparel-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.apparel-swatch:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.apparel-swatch.is-active {
+    box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.6);
+}
+
+.apparel-size-note {
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.65);
 }
 
 .reveal-on-scroll {
