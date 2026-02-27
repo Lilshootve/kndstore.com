@@ -172,17 +172,23 @@ storage_log('paypal_capture: persist_result', [
 
 require_once __DIR__ . '/../../includes/mailer.php';
 
+$trackUrl = 'https://kndstore.com/track-order.php?id=' . urlencode($orderRef);
+
 $itemsList = '';
 foreach ($itemsDetailed as $it) {
     $itemsList .= '  - ' . ($it['name'] ?? 'Item') . ' x' . ($it['qty'] ?? 1) . ' — $' . number_format($it['line_total'] ?? 0, 2) . "\n";
 }
-$emailBody = "Order Confirmation - KND Store\n\n";
+$emailBody  = "Order Confirmation - KND Store\n";
+$emailBody .= "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
 $emailBody .= "Order ID: " . $orderRef . "\n";
 $emailBody .= "Total: $" . number_format($total, 2) . " USD\n";
 $emailBody .= "Delivery: " . ($deliveryType ?: 'Digital / remote') . "\n\n";
 $emailBody .= "Items:\n" . $itemsList . "\n";
+$emailBody .= "Track your order:\n" . $trackUrl . "\n\n";
 $emailBody .= "Next steps: We will contact you via WhatsApp or email for delivery details.\n\n";
-$emailBody .= "Support: support@kndstore.com | WhatsApp +58 414-159-2319";
+$emailBody .= "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+$emailBody .= "Support: support@kndstore.com | WhatsApp +58 414-159-2319\n";
+$emailBody .= "KND Store — kndstore.com";
 
 if ($customerEmail && filter_var($customerEmail, FILTER_VALIDATE_EMAIL)) {
     knd_mail($customerEmail, 'Order ' . $orderRef . ' confirmed - KND Store', $emailBody);

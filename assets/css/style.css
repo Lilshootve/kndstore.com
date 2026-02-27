@@ -3645,6 +3645,50 @@ body.about-page,
     transition: all 0.3s ease;
 }
 
+/* ── KND Orders Dropdown ── */
+.knd-dropdown { position: relative; }
+.knd-dropdown-arrow { font-size: 0.55em; transition: transform .25s; vertical-align: middle; }
+.knd-dropdown.open .knd-dropdown-arrow { transform: rotate(180deg); }
+.knd-dropdown-menu {
+    position: absolute; top: calc(100% + 6px); right: 0; z-index: 1050;
+    min-width: 210px; padding: 10px 0 8px;
+    background: rgba(10,12,18,.92); backdrop-filter: blur(18px) saturate(1.4);
+    border: 1px solid rgba(0,212,255,.12); border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.55), 0 0 0 1px rgba(0,212,255,.06);
+    opacity: 0; visibility: hidden; transform: translateY(6px);
+    transition: opacity .2s, visibility .2s, transform .2s;
+}
+.knd-dropdown.open .knd-dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+.knd-dropdown-hint {
+    display: block; padding: 2px 16px 8px; font-size: 10.5px; font-weight: 500;
+    letter-spacing: .6px; text-transform: uppercase;
+    color: rgba(0,212,255,.55); user-select: none;
+}
+.knd-dropdown-item {
+    display: flex; align-items: center; gap: 4px; padding: 8px 16px;
+    font-size: 13.5px; font-weight: 500; color: rgba(255,255,255,.82);
+    text-decoration: none; transition: background .15s, color .15s;
+    border-radius: 0;
+}
+.knd-dropdown-item:hover {
+    background: rgba(0,212,255,.08); color: #00d4ff; text-decoration: none;
+}
+.knd-dropdown-item.active {
+    color: #00d4ff;
+    background: rgba(0,212,255,.06);
+}
+.knd-dropdown-item i { width: 18px; text-align: center; font-size: 12px; opacity: .7; }
+@media (max-width: 991.98px) {
+    .knd-dropdown-menu {
+        position: static; border: none; box-shadow: none;
+        background: rgba(10,12,18,.6); backdrop-filter: none;
+        margin: 0 0 0 1rem; padding: 4px 0; border-radius: 8px;
+        opacity: 1; visibility: visible; transform: none;
+        display: none;
+    }
+    .knd-dropdown.open .knd-dropdown-menu { display: block; }
+}
+
 /* Botones con especificidad para evitar conflictos con Bootstrap */
 .navbar .btn,
 .hero-section .btn,
