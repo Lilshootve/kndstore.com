@@ -46,7 +46,7 @@ if (isset($_GET['logout'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_user'], $_POST['admin_pass'])) {
     if (hash_equals($adminUser, $_POST['admin_user']) && hash_equals($adminPass, $_POST['admin_pass'])) {
         $_SESSION['admin_logged_in'] = true;
-        header('Location: /admin/orders.php');
+        header('Location: /admin/');
         exit;
     }
     $loginError = 'Invalid credentials.';
