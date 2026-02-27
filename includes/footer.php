@@ -354,10 +354,6 @@ function generateScripts() {
     $scripts .= '</div>' . "\n";
     $scripts .= '<script src="/assets/js/support-chat.js" defer></script>' . "\n";
 
-    // Botón flotante de Discord
-    $scripts .= '<a href="https://discord.gg/zjP3u5Yztx" target="_blank" rel="noopener" class="discord-float-btn" title="Discord">' . "\n";
-    $scripts .= '    <i class="fab fa-discord"></i>' . "\n";
-    $scripts .= '</a>' . "\n";
     
     $scripts .= '</body>' . "\n";
     $scripts .= '</html>' . "\n";
