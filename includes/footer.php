@@ -330,6 +330,30 @@ function generateScripts() {
     // Panel de personalización de colores
     $scripts .= generateColorPanel();
     
+    // Support AI Chat Widget
+    $scripts .= '<link rel="stylesheet" href="/assets/css/support-chat.css">' . "\n";
+    $scripts .= '<button id="knd-chat-btn" class="knd-chat-btn" title="Support" aria-label="Open support chat"><i class="fas fa-headset"></i></button>' . "\n";
+    $scripts .= '<div id="knd-chat-panel" class="knd-chat-panel">' . "\n";
+    $scripts .= '  <div class="knd-chat-header">' . "\n";
+    $scripts .= '    <div class="knd-chat-header-info"><h4>KND Support</h4><span>AI assistant &bull; 24/7</span></div>' . "\n";
+    $scripts .= '    <button class="knd-chat-close" aria-label="Close">&times;</button>' . "\n";
+    $scripts .= '  </div>' . "\n";
+    $scripts .= '  <div class="knd-chat-messages"></div>' . "\n";
+    $scripts .= '  <div class="knd-chat-typing"><span></span><span></span><span></span></div>' . "\n";
+    $scripts .= '  <div class="knd-chat-quick">' . "\n";
+    $scripts .= '    <button class="knd-chat-quick-btn" data-msg="What payment methods do you accept?">Payment</button>' . "\n";
+    $scripts .= '    <button class="knd-chat-quick-btn" data-msg="How long does delivery take?">Delivery</button>' . "\n";
+    $scripts .= '    <button class="knd-chat-quick-btn" data-msg="How do I choose the right size?">Sizing</button>' . "\n";
+    $scripts .= '    <button class="knd-chat-quick-btn" data-msg="What is your refund policy?">Refunds</button>' . "\n";
+    $scripts .= '    <button class="knd-chat-quick-btn" data-msg="How can I reach human support?">Contact</button>' . "\n";
+    $scripts .= '  </div>' . "\n";
+    $scripts .= '  <div class="knd-chat-input-bar">' . "\n";
+    $scripts .= '    <textarea class="knd-chat-input" placeholder="Type a message..." rows="1"></textarea>' . "\n";
+    $scripts .= '    <button class="knd-chat-send" aria-label="Send"><i class="fas fa-paper-plane"></i></button>' . "\n";
+    $scripts .= '  </div>' . "\n";
+    $scripts .= '</div>' . "\n";
+    $scripts .= '<script src="/assets/js/support-chat.js" defer></script>' . "\n";
+
     // Botón flotante de Discord
     $scripts .= '<a href="https://discord.gg/zjP3u5Yztx" target="_blank" rel="noopener" class="discord-float-btn" title="Discord">' . "\n";
     $scripts .= '    <i class="fab fa-discord"></i>' . "\n";
