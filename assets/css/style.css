@@ -2324,6 +2324,15 @@ body.about-page,
     animation: none;
 }
 
+.btn-outline-neon.btn-icon:hover {
+    background: transparent;
+    color: #fff;
+    border-color: #00d4ff;
+    box-shadow: 0 0 18px rgba(0,212,255,.55), 0 0 6px rgba(0,212,255,.3) inset;
+    transform: translateY(-2px);
+    animation: none;
+}
+
 /* Efecto glow para el título del footer */
 .glow-text {
     background: linear-gradient(45deg, var(--knd-neon-blue), var(--knd-electric-purple));
