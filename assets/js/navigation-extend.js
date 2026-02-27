@@ -55,10 +55,7 @@
         if (!toggle) return;
 
         toggle.addEventListener('click', function(e) {
-            var isMobile = window.innerWidth < 992;
-            if (isMobile) {
-                e.preventDefault();
-            }
+            e.preventDefault();
             dd.classList.toggle('open');
         });
 

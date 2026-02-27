@@ -64,7 +64,7 @@ function generateNavigation() {
     $nav .= '                </li>' . "\n";
     $ordersActive = in_array($current_page, ['order.php', 'track-order.php']);
     $nav .= '                <li class="nav-item knd-dropdown">' . "\n";
-    $nav .= '                    <a class="nav-link knd-dropdown-toggle' . ($ordersActive ? ' active' : '') . '" href="/order.php" role="button" aria-expanded="false">' . "\n";
+    $nav .= '                    <a class="nav-link knd-dropdown-toggle' . ($ordersActive ? ' active' : '') . '" href="#" role="button" aria-expanded="false">' . "\n";
     $nav .= '                        <i class="fas fa-shopping-cart me-1"></i>' . "\n";
     $nav .= '                        ' . t('nav.orders') . "\n";
     $nav .= '                        <span id="order-count" class="badge rounded-pill bg-primary ms-1" style="display:none; min-width: 20px; justify-content: center; align-items: center;"></span>' . "\n";
