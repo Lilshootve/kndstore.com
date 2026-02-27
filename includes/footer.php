@@ -39,6 +39,7 @@ function generateFooter() {
     $footer .= '                                <li class="mb-3"><a href="/contact.php" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.contact') . '</a></li>' . "\n";
     $footer .= '                                <li class="mb-3"><a href="/privacy.php" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.privacy') . '</a></li>' . "\n";
     $footer .= '                                <li class="mb-3"><a href="/privacy.php#cookies-policy" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.cookies') . '</a></li>' . "\n";
+    $footer .= '                                <li class="mb-3"><a href="/track-order.php" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.track_order') . '</a></li>' . "\n";
     $footer .= '                                <li class="mb-3"><a href="#" class="text-decoration-none knd-cookie-settings-link" style="opacity: 0.8;">' . t('footer.navigation.cookie_settings') . '</a></li>' . "\n";
     $footer .= '                            </ul>' . "\n";
     $footer .= '                        </div>' . "\n";

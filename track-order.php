@@ -1,0 +1,123 @@
+<?php
+require_once __DIR__ . '/includes/session.php';
+require_once __DIR__ . '/includes/config.php';
+require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/includes/footer.php';
+
+$searchId = isset($_GET['id']) ? trim((string) $_GET['id']) : '';
+$order = null;
+$source = '';
+
+if ($searchId !== '') {
+    $storageDir = __DIR__ . '/storage';
+    $files = [
+        'paypal'  => $storageDir . '/orders.json',
+        'bank'    => $storageDir . '/bank_transfer_requests.json',
+        'other'   => $storageDir . '/other_payment_requests.json',
+    ];
+    foreach ($files as $src => $path) {
+        if (!file_exists($path)) continue;
+        $data = json_decode(file_get_contents($path), true);
+        if (!is_array($data)) continue;
+        $idKey = ($src === 'paypal') ? 'order_ref' : 'order_id';
+        foreach ($data as $r) {
+            if (isset($r[$idKey]) && strcasecmp($r[$idKey], $searchId) === 0) {
+                $order = $r;
+                $source = $src;
+                break 2;
+            }
+        }
+    }
+}
+
+$paymentLabels = ['paypal' => 'PayPal', 'bank' => 'Bank Transfer (ACH / Wire)', 'other' => 'WhatsApp (Other)'];
+$statusMessages = [
+    'pending'            => 'Awaiting confirmation',
+    'awaiting_transfer'  => 'Awaiting payment transfer',
+    'paid'               => 'Payment confirmed. Processing.',
+    'delivered'          => 'Completed',
+    'cancelled'          => 'Cancelled',
+];
+
+echo generateHeader(t('track.meta.title'), t('track.meta.description'));
+?>
+<div id="particles-bg"></div>
+<?php echo generateNavigation(); ?>
+
+<section class="order-section py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5">
+                <div class="card order-details-card checkout-lux">
+                    <div class="card-body order-details-body">
+                        <h2 class="mb-4 checkout-info-title"><?php echo t('track.title'); ?></h2>
+
+                        <form method="get" class="mb-4">
+                            <label class="order-field-label" for="track-id"><?php echo t('track.label'); ?></label>
+                            <div class="d-flex gap-2">
+                                <input type="text" name="id" id="track-id" class="order-input flex-grow-1" placeholder="KND-2026-XXXX" value="<?php echo htmlspecialchars($searchId); ?>" required>
+                                <button type="submit" class="order-btn-primary" style="width:auto;padding:0.7rem 1.5rem;"><?php echo t('track.search_btn'); ?></button>
+                            </div>
+                        </form>
+
+                        <?php if ($searchId !== '' && $order): ?>
+                        <?php
+                            $oid = ($source === 'paypal') ? ($order['order_ref'] ?? '') : ($order['order_id'] ?? '');
+                            $date = isset($order['created_at']) ? date('M j, Y — H:i', strtotime($order['created_at'])) : '-';
+                            $total = $order['totals']['total'] ?? 0;
+                            $currency = $order['totals']['currency'] ?? 'USD';
+                            $items = $order['items'] ?? [];
+                            $status = $order['status'] ?? ($source === 'paypal' ? 'paid' : 'pending');
+                            $statusMsg = $statusMessages[$status] ?? ucfirst($status);
+                            $paymentLabel = $paymentLabels[$source] ?? ucfirst($source);
+                        ?>
+                        <div class="checkout-info-box mb-3">
+                            <div class="order-total-row mb-2">
+                                <span class="order-total-muted"><?php echo t('track.order_id'); ?></span>
+                                <span class="fw-bold"><?php echo htmlspecialchars($oid); ?></span>
+                            </div>
+                            <div class="order-total-row mb-2">
+                                <span class="order-total-muted"><?php echo t('track.date'); ?></span>
+                                <span><?php echo htmlspecialchars($date); ?></span>
+                            </div>
+                            <div class="order-total-row mb-2">
+                                <span class="order-total-muted"><?php echo t('track.payment'); ?></span>
+                                <span><?php echo htmlspecialchars($paymentLabel); ?></span>
+                            </div>
+                            <div class="order-total-row mb-2">
+                                <span class="order-total-muted"><?php echo t('track.total'); ?></span>
+                                <span class="order-total-amount">$<?php echo number_format($total, 2); ?> <?php echo htmlspecialchars($currency); ?></span>
+                            </div>
+                        </div>
+
+                        <div class="checkout-info-box mb-3">
+                            <div class="checkout-info-title mb-2"><?php echo t('track.items'); ?></div>
+                            <?php foreach ($items as $it): ?>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span><?php echo htmlspecialchars($it['name'] ?? 'Item'); ?> <small class="text-muted">x<?php echo (int)($it['qty'] ?? 1); ?></small></span>
+                                <span>$<?php echo number_format($it['line_total'] ?? 0, 2); ?></span>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <div class="checkout-info-box">
+                            <div class="checkout-info-title mb-1"><?php echo t('track.status'); ?></div>
+                            <span class="badge bg-secondary"><?php echo htmlspecialchars($status); ?></span>
+                            <p class="mb-0 mt-2 checkout-info-hint"><?php echo htmlspecialchars($statusMsg); ?></p>
+                        </div>
+
+                        <?php elseif ($searchId !== ''): ?>
+                        <div class="checkout-info-box text-center">
+                            <p class="mb-0"><?php echo t('track.not_found'); ?></p>
+                        </div>
+                        <?php endif; ?>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="/assets/js/navigation-extend.js"></script>
+<?php echo generateFooter(); echo generateScripts(); ?>

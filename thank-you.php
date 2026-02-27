@@ -19,7 +19,8 @@ $ref = isset($_GET['ref']) ? htmlspecialchars($_GET['ref']) : '';
                 <h2 class="mb-3">Payment approved</h2>
                 <p class="text-muted mb-4">Your order has been received and payment was successful.</p>
                 <?php if ($ref): ?>
-                <p class="small text-muted">Order reference: <strong><?php echo $ref; ?></strong></p>
+                <p class="mb-2"><span class="text-muted">Order ID:</span> <strong class="fs-5"><?php echo $ref; ?></strong></p>
+                <p class="small text-muted mb-4">You can track your order anytime at <a href="/track-order.php?id=<?php echo urlencode($ref); ?>" class="text-decoration-underline" style="color: var(--knd-accent-cyan);">/track-order</a></p>
                 <?php endif; ?>
                 <a href="/" class="btn btn-outline-neon mt-3">Back to Home</a>
             </div>
