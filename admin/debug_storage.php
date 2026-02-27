@@ -10,9 +10,16 @@ if (!file_exists($secretsPath)) {
     exit;
 }
 $adminSecrets = require $secretsPath;
-if (!is_array($adminSecrets) || empty(trim($adminSecrets['admin_user'] ?? '')) || empty(trim($adminSecrets['admin_pass'] ?? ''))) {
+if (!is_array($adminSecrets)) {
     http_response_code(500);
-    echo 'admin_user/admin_pass empty in: ' . htmlspecialchars($secretsPath);
+    echo 'Secrets file did not return an array: ' . htmlspecialchars($secretsPath);
+    exit;
+}
+$adminUser = trim($adminSecrets['admin_user'] ?? $adminSecrets['username'] ?? '');
+$adminPass = trim($adminSecrets['admin_pass'] ?? $adminSecrets['password'] ?? '');
+if ($adminUser === '' || $adminPass === '') {
+    http_response_code(500);
+    echo 'Username or password empty in: ' . htmlspecialchars($secretsPath) . ' (accepts admin_user/admin_pass or username/password)';
     exit;
 }
 if (empty($_SESSION['admin_logged_in'])) {

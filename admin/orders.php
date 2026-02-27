@@ -13,11 +13,21 @@ if (!file_exists($secretsPath)) {
     exit;
 }
 $adminSecrets = require $secretsPath;
-if (!is_array($adminSecrets) || empty(trim($adminSecrets['admin_user'] ?? '')) || empty(trim($adminSecrets['admin_pass'] ?? ''))) {
+if (!is_array($adminSecrets)) {
     header('Content-Type: text/html; charset=utf-8');
     http_response_code(500);
     echo '<!DOCTYPE html><html><head><title>Admin - Configuration Error</title></head><body style="font-family:sans-serif;padding:2rem;background:#0a0a0a;color:#fff;">';
-    echo '<h1>Configuration Error</h1><p>admin_user and/or admin_pass are empty in:<br><code>' . htmlspecialchars($secretsPath) . '</code></p></body></html>';
+    echo '<h1>Configuration Error</h1><p>Secrets file did not return an array.<br><code>' . htmlspecialchars($secretsPath) . '</code></p></body></html>';
+    exit;
+}
+$adminUser = trim($adminSecrets['admin_user'] ?? $adminSecrets['username'] ?? '');
+$adminPass = trim($adminSecrets['admin_pass'] ?? $adminSecrets['password'] ?? '');
+if ($adminUser === '' || $adminPass === '') {
+    header('Content-Type: text/html; charset=utf-8');
+    http_response_code(500);
+    echo '<!DOCTYPE html><html><head><title>Admin - Configuration Error</title></head><body style="font-family:sans-serif;padding:2rem;background:#0a0a0a;color:#fff;">';
+    echo '<h1>Configuration Error</h1><p>Username or password is empty in:<br><code>' . htmlspecialchars($secretsPath) . '</code></p>';
+    echo '<p>Accepted keys: <code>admin_user/admin_pass</code> or <code>username/password</code>.</p></body></html>';
     exit;
 }
 
@@ -29,7 +39,7 @@ if (isset($_GET['logout'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_user'], $_POST['admin_pass'])) {
-    if (hash_equals($adminSecrets['admin_user'], $_POST['admin_user']) && hash_equals($adminSecrets['admin_pass'], $_POST['admin_pass'])) {
+    if (hash_equals($adminUser, $_POST['admin_user']) && hash_equals($adminPass, $_POST['admin_pass'])) {
         $_SESSION['admin_logged_in'] = true;
         header('Location: /admin/orders.php');
         exit;

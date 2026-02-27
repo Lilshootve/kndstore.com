@@ -7,12 +7,16 @@ $secretsReadable = $secretsExists && is_readable($secretsPath);
 
 $adminSecrets = null;
 $credsValid = false;
+$adminUser = '';
+$adminPass = '';
 
 if ($secretsExists) {
     $adminSecrets = require $secretsPath;
-    $credsValid = is_array($adminSecrets)
-        && !empty(trim($adminSecrets['admin_user'] ?? ''))
-        && !empty(trim($adminSecrets['admin_pass'] ?? ''));
+    if (is_array($adminSecrets)) {
+        $adminUser = trim($adminSecrets['admin_user'] ?? $adminSecrets['username'] ?? '');
+        $adminPass = trim($adminSecrets['admin_pass'] ?? $adminSecrets['password'] ?? '');
+        $credsValid = ($adminUser !== '' && $adminPass !== '');
+    }
 }
 
 if (!$secretsExists) {
@@ -22,7 +26,7 @@ if (!$secretsExists) {
 }
 if (!$credsValid) {
     http_response_code(500);
-    echo 'admin_user/admin_pass empty in: ' . htmlspecialchars($secretsPath);
+    echo 'Username or password empty in: ' . htmlspecialchars($secretsPath) . ' (accepts admin_user/admin_pass or username/password)';
     exit;
 }
 if (empty($_SESSION['admin_logged_in'])) {
