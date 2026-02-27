@@ -2,12 +2,21 @@
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 
+$DEBUG = isset($_GET['debug']) && $_GET['debug'] === '1';
+
 // ── Helpers ──
 
-function json_error(int $code, string $msg): void {
+function json_out(int $code, array $data): void {
     http_response_code($code);
-    echo json_encode(['error' => $msg]);
+    echo json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     exit;
+}
+
+function json_error(int $code, string $msg, array $debug = []): void {
+    global $DEBUG;
+    $payload = ['error' => $msg];
+    if ($DEBUG && $debug) $payload['debug'] = $debug;
+    json_out($code, $payload);
 }
 
 function support_log(string $event, array $data = []): void {
@@ -25,19 +34,18 @@ function check_rate_limit(string $ip): bool {
     $dir = dirname(__DIR__, 2) . '/storage/logs';
     if (!is_dir($dir)) @mkdir($dir, 0750, true);
     $file = $dir . '/support_ratelimit.json';
-    $window = 600; // 10 minutes
+    $window = 600;
     $maxReq = 30;
     $now = time();
 
     $fh = @fopen($file, 'c+');
-    if (!$fh) return true; // fail open
+    if (!$fh) return true;
     flock($fh, LOCK_EX);
 
     $raw = stream_get_contents($fh);
     $data = $raw ? json_decode($raw, true) : [];
     if (!is_array($data)) $data = [];
 
-    // Clean expired entries
     foreach ($data as $k => $entries) {
         $data[$k] = array_values(array_filter($entries, fn($t) => $t > $now - $window));
         if (empty($data[$k])) unset($data[$k]);
@@ -100,21 +108,49 @@ if (empty($messages)) {
     json_error(400, 'No valid messages.');
 }
 
-// ── Load config + KB ──
+// ── Load secrets ──
 
-$secretsPath = dirname(__DIR__, 2) . '/config/openai_secrets.local.php';
+$secretsPath = __DIR__ . '/../../config/openai_secrets.local.php';
+$resolvedPath = realpath($secretsPath) ?: $secretsPath;
+
 if (!file_exists($secretsPath)) {
-    support_log('error', ['msg' => 'openai_secrets.local.php missing']);
-    json_error(503, 'Support AI is temporarily unavailable. Please contact support@kndstore.com.');
-}
-$secrets = require $secretsPath;
-$apiKey = $secrets['api_key'] ?? '';
-if (empty($apiKey)) {
-    support_log('error', ['msg' => 'api_key empty']);
-    json_error(503, 'Support AI is temporarily unavailable. Please contact support@kndstore.com.');
+    support_log('config_error', [
+        'type' => 'missing_secrets',
+        'expected' => $secretsPath,
+        'resolved' => $resolvedPath,
+        '__DIR__' => __DIR__,
+    ]);
+    json_error(500, 'Support AI configuration error.', [
+        'error_type' => 'missing_secrets',
+        'expected_path' => $secretsPath,
+        'resolved_path' => $resolvedPath,
+        '__DIR__' => __DIR__,
+        'file_exists' => false,
+    ]);
 }
 
-$kbFile = dirname(__DIR__, 2) . '/includes/support_kb_en.php';
+$secrets = require $secretsPath;
+if (!is_array($secrets)) {
+    support_log('config_error', ['type' => 'secrets_not_array', 'path' => $resolvedPath]);
+    json_error(500, 'Support AI configuration error.', [
+        'error_type' => 'secrets_not_array',
+        'path' => $resolvedPath,
+    ]);
+}
+
+$apiKey = trim($secrets['api_key'] ?? '');
+if ($apiKey === '') {
+    support_log('config_error', ['type' => 'missing_api_key', 'path' => $resolvedPath]);
+    json_error(500, 'Support AI configuration error.', [
+        'error_type' => 'missing_api_key',
+        'path' => $resolvedPath,
+        'keys_found' => array_keys($secrets),
+    ]);
+}
+
+// ── Load knowledge base ──
+
+$kbFile = __DIR__ . '/../../includes/support_kb_en.php';
 $kb = file_exists($kbFile) ? require $kbFile : '';
 
 $systemPrompt = "You are KND Support, the official AI assistant for KND Store (kndstore.com). "
@@ -154,40 +190,55 @@ curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT        => 25,
     CURLOPT_CONNECTTIMEOUT => 5,
+    CURLOPT_SSL_VERIFYPEER => true,
+    CURLOPT_SSL_VERIFYHOST => 2,
 ]);
 
 $response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-$curlErr  = curl_error($ch);
+$httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$curlErrno = curl_errno($ch);
+$curlErr   = curl_error($ch);
 curl_close($ch);
 
-if ($curlErr || $httpCode !== 200) {
-    support_log('openai_error', [
-        'http' => $httpCode,
-        'curl' => $curlErr,
-        'body_len' => strlen($response ?: ''),
-    ]);
-    json_error(502, 'Support AI is temporarily unavailable. Please email support@kndstore.com or WhatsApp +58 414-159-2319.');
+if ($curlErrno || $curlErr || $httpCode !== 200) {
+    $snippet = mb_substr($response ?: '', 0, 200);
+    $logData = [
+        'http_code'  => $httpCode,
+        'curl_errno' => $curlErrno,
+        'curl_error' => $curlErr,
+        'body_snippet' => $snippet,
+    ];
+    support_log('openai_error', $logData);
+
+    $debugData = $DEBUG ? $logData : [];
+    $userMsg = 'Support AI is temporarily unavailable. Please email support@kndstore.com or WhatsApp +58 414-159-2319.';
+
+    if ($curlErrno === 60 || $curlErrno === 77) {
+        support_log('ssl_error', ['errno' => $curlErrno, 'error' => $curlErr]);
+        $userMsg = 'Secure connection failed. Please contact support@kndstore.com.';
+    }
+
+    json_error(502, $userMsg, $debugData);
 }
 
 $result = json_decode($response, true);
 $reply = $result['choices'][0]['message']['content'] ?? '';
 
 if (empty($reply)) {
-    support_log('empty_reply', ['raw_len' => strlen($response)]);
-    json_error(502, 'Could not generate a response. Please contact support@kndstore.com.');
+    $snippet = mb_substr($response, 0, 200);
+    support_log('empty_reply', ['raw_snippet' => $snippet, 'http_code' => $httpCode]);
+    json_error(502, 'Could not generate a response. Please contact support@kndstore.com.', $DEBUG ? ['raw_snippet' => $snippet] : []);
 }
 
 $tokensUsed = $result['usage']['total_tokens'] ?? 0;
 
-// Detect topic from last user message
 $lastUser = '';
 foreach (array_reverse($messages) as $m) {
     if ($m['role'] === 'user') { $lastUser = $m['content']; break; }
 }
 $topics = [];
 $topicMap = [
-    'payment' => '/pay|paypal|transfer|bank|binance|usdt|zinli|wally|pipol/i',
+    'payment'  => '/pay|paypal|transfer|bank|binance|usdt|zinli|wally|pipol/i',
     'delivery' => '/deliver|ship|shipping|envio|envío|tracking|track/i',
     'sizing'   => '/size|sizing|talla|medida|fit/i',
     'refund'   => '/refund|refun|devol|disput|reembolso/i',
@@ -198,12 +249,12 @@ foreach ($topicMap as $tag => $pattern) {
 }
 
 support_log('chat', [
-    'ip_hash'  => md5(trim($ip)),
-    'locale'   => $locale,
-    'tokens'   => $tokensUsed,
-    'topics'   => $topics ?: ['general'],
-    'msg_count'=> count($messages),
-    'reply_len'=> mb_strlen($reply),
+    'ip_hash'   => md5(trim($ip)),
+    'locale'    => $locale,
+    'tokens'    => $tokensUsed,
+    'topics'    => $topics ?: ['general'],
+    'msg_count' => count($messages),
+    'reply_len' => mb_strlen($reply),
 ]);
 
 echo json_encode(['reply' => $reply], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
