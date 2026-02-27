@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $source    = $_POST['source'] ?? '';
     $newStatus = $_POST['new_status'] ?? '';
     $postTab   = in_array($_POST['tab'] ?? '', $validTabs) ? $_POST['tab'] : 'paypal';
-    $allowed   = ['pending', 'awaiting_transfer', 'paid', 'delivered', 'cancelled'];
+    $allowed   = ['pending', 'awaiting_transfer', 'processing', 'paid', 'completed', 'delivered', 'cancelled'];
 
     $redirectParams = ['tab' => $postTab];
     foreach (['search_paypal','status_paypal','search_bank','status_bank','search_whatsapp','status_whatsapp','search_test','status_test'] as $k) {
@@ -207,6 +207,158 @@ $diagData['orders.json']['count_total']  = $countTotal;
 $diagData['bank_transfer_requests.json']['count'] = $countBank;
 $diagData['other_payment_requests.json']['count'] = $countOther;
 
+$allStatuses = ['pending', 'awaiting_transfer', 'processing', 'paid', 'completed', 'delivered', 'cancelled'];
+
+function getStatusClass(string $status): string {
+    $map = [
+        'pending' => 'status-pending',
+        'awaiting_transfer' => 'status-awaiting_transfer',
+        'paid' => 'status-paid',
+        'completed' => 'status-completed',
+        'delivered' => 'status-delivered',
+        'processing' => 'status-processing',
+        'cancelled' => 'status-cancelled',
+        'failed' => 'status-failed',
+    ];
+    return $map[$status] ?? 'status-unknown';
+}
+
+function getStatusLabel(string $status): string {
+    $map = [
+        'pending' => 'Pending',
+        'awaiting_transfer' => 'Awaiting Transfer',
+        'paid' => 'Paid',
+        'completed' => 'Completed',
+        'delivered' => 'Delivered',
+        'processing' => 'Processing',
+        'cancelled' => 'Cancelled',
+        'failed' => 'Failed',
+    ];
+    return $map[$status] ?? ucfirst($status);
+}
+
+function renderOrderTable($rows, $source, $tab) {
+    global $allStatuses;
+    $orderIdKey = ($source === 'paypal' || $source === 'test') ? 'order_ref' : 'order_id';
+    $search = trim($_GET['search_' . $tab] ?? '');
+    $filterStatus = trim($_GET['status_' . $tab] ?? '');
+    if ($search) {
+        $rows = array_filter($rows, fn($r) => stripos($r[$orderIdKey] ?? '', $search) !== false);
+    }
+    if ($filterStatus) {
+        $rows = array_filter($rows, fn($r) => ($r['status'] ?? '') === $filterStatus);
+    }
+    $rows = array_values($rows);
+
+    $paymentLabels = ['paypal' => 'PayPal', 'bank' => 'Bank Transfer', 'whatsapp' => 'WhatsApp Other', 'test' => 'Test'];
+    $paymentLabel = $paymentLabels[$source] ?? ucfirst($source);
+
+    $filterHidden = '';
+    if ($search) $filterHidden .= '<input type="hidden" name="search_' . $tab . '" value="' . htmlspecialchars($search) . '">';
+    if ($filterStatus) $filterHidden .= '<input type="hidden" name="status_' . $tab . '" value="' . htmlspecialchars($filterStatus) . '">';
+
+    ob_start();
+    ?>
+    <div class="admin-card p-3 mb-3">
+        <form method="get" class="row g-2 mb-3">
+            <input type="hidden" name="tab" value="<?php echo htmlspecialchars($tab); ?>">
+            <div class="col-md-4">
+                <input type="text" name="search_<?php echo $tab; ?>" class="form-control bg-dark text-light border-secondary" placeholder="Search by Order ID" value="<?php echo htmlspecialchars($search); ?>">
+            </div>
+            <div class="col-md-3">
+                <select name="status_<?php echo $tab; ?>" class="form-select form-select-sm">
+                    <option value="">All statuses</option>
+                    <?php foreach ($allStatuses as $sv): ?>
+                    <option value="<?php echo $sv; ?>" <?php echo $filterStatus === $sv ? 'selected' : ''; ?>><?php echo getStatusLabel($sv); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-sm btn-cyber">Apply</button>
+            </div>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-borderless">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Order ID</th>
+                        <th>Payment</th>
+                        <th>Customer</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Items</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach (array_reverse($rows) as $idx => $r):
+                    $oid = $r[$orderIdKey] ?? '-';
+                    $rowUid = $source . '-' . $idx;
+                    $date = isset($r['created_at']) ? date('M j, Y H:i', strtotime($r['created_at'])) : '-';
+                    $total = $r['totals']['total'] ?? 0;
+                    $currency = $r['totals']['currency'] ?? 'USD';
+                    $items = $r['items'] ?? [];
+                    $cust = $r['customer'] ?? [];
+                    if ($source === 'whatsapp') {
+                        $custName = $r['customer_name'] ?? $cust['name'] ?? '-';
+                        $custWhatsapp = $r['whatsapp'] ?? $cust['whatsapp'] ?? '';
+                    } else {
+                        $custName = $cust['name'] ?? '-';
+                        $custWhatsapp = $cust['whatsapp'] ?? '';
+                    }
+                    $status = $r['status'] ?? (($source === 'paypal' || $source === 'test') ? 'paid' : 'pending');
+                    $statusCls = getStatusClass($status);
+                    $statusLbl = getStatusLabel($status);
+                ?>
+                    <tr class="order-row" data-row-uid="<?php echo htmlspecialchars($rowUid); ?>">
+                        <td><?php echo htmlspecialchars($date); ?></td>
+                        <td><code><?php echo htmlspecialchars($oid); ?></code></td>
+                        <td><?php echo htmlspecialchars($paymentLabel); ?></td>
+                        <td><?php echo htmlspecialchars($custName); ?><br><small class="text-muted"><?php echo htmlspecialchars($custWhatsapp); ?></small></td>
+                        <td>$<?php echo number_format($total, 2); ?> <?php echo htmlspecialchars($currency); ?></td>
+                        <td><span class="status-badge <?php echo $statusCls; ?>" data-badge-for="<?php echo htmlspecialchars($rowUid); ?>"><?php echo htmlspecialchars($statusLbl); ?></span></td>
+                        <td><?php echo count($items); ?></td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-cyber expand-btn" data-target="<?php echo htmlspecialchars($rowUid); ?>">Expand</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary copy-wa-btn" data-order-id="<?php echo htmlspecialchars($oid); ?>" data-status="<?php echo htmlspecialchars($status); ?>" data-customer="<?php echo htmlspecialchars($custName); ?>">Copy WA</button>
+                        </td>
+                    </tr>
+                    <tr class="order-details-row d-none" data-row-uid="<?php echo htmlspecialchars($rowUid); ?>-detail">
+                        <td colspan="8" class="order-row-expand p-4">
+                            <strong>Items:</strong>
+                            <ul class="mb-2">
+                            <?php foreach ($items as $it): ?>
+                                <li><?php echo htmlspecialchars($it['name'] ?? 'Item'); ?> x<?php echo (int)($it['qty'] ?? 1); ?> — $<?php echo number_format($it['line_total'] ?? 0, 2); ?></li>
+                            <?php endforeach; ?>
+                            </ul>
+                            <form method="post" class="d-flex align-items-center gap-2 flex-wrap">
+                                <input type="hidden" name="action" value="update_status">
+                                <input type="hidden" name="tab" value="<?php echo htmlspecialchars($tab); ?>">
+                                <input type="hidden" name="order_id" value="<?php echo htmlspecialchars($oid); ?>">
+                                <input type="hidden" name="source" value="<?php echo htmlspecialchars($source); ?>">
+                                <?php echo $filterHidden; ?>
+                                <select name="new_status" class="status-select" data-row-uid="<?php echo htmlspecialchars($rowUid); ?>">
+                                    <?php foreach ($allStatuses as $sv): ?>
+                                    <option value="<?php echo $sv; ?>" <?php echo $status === $sv ? 'selected' : ''; ?>><?php echo getStatusLabel($sv); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-cyber">Save</button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php if (empty($rows)): ?>
+        <p class="text-muted mb-0">No orders found.</p>
+        <?php endif; ?>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
 require_once __DIR__ . '/../includes/header.php';
 require_once __DIR__ . '/../includes/footer.php';
 
@@ -225,8 +377,19 @@ echo generateHeader('Admin - Orders', 'KND Store order management');
 .admin-lux .order-row-expand { background: rgba(0,212,255,0.05); }
 .admin-lux .btn-cyber { background: rgba(0,212,255,0.15); border: 1px solid rgba(0,212,255,0.4); color: #00d4ff; }
 .admin-lux .btn-cyber:hover { background: rgba(0,212,255,0.25); color: #fff; }
-.admin-lux .badge-status { font-size: 0.75rem; }
 .admin-lux select.form-select { background: #0c0f16; color: #f0f4f8; border-color: rgba(255,255,255,0.12); }
+.status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: .4px; display: inline-block; text-transform: capitalize; }
+.status-pending { background: #2a2f36; color: #9aa4af; }
+.status-awaiting_transfer { background: rgba(243,156,18,.15); color: #f39c12; }
+.status-paid { background: rgba(46,204,113,.15); color: #2ecc71; }
+.status-completed { background: rgba(39,174,96,.18); color: #27ae60; }
+.status-delivered { background: rgba(39,174,96,.22); color: #27ae60; }
+.status-processing { background: rgba(52,152,219,.15); color: #3498db; }
+.status-cancelled { background: rgba(231,76,60,.18); color: #e74c3c; }
+.status-failed { background: rgba(192,57,43,.20); color: #c0392b; }
+.status-unknown { background: #1f242b; color: #7f8c8d; }
+.status-select { appearance: none; -webkit-appearance: none; background: #0c0f16; color: #f0f4f8; border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 4px 28px 4px 12px; font-size: 12px; font-weight: 600; letter-spacing: .4px; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2300d4ff'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; transition: border-color .2s, box-shadow .2s; }
+.status-select:focus { outline: none; border-color: rgba(0,212,255,.5); box-shadow: 0 0 0 2px rgba(0,212,255,.15); }
 .diag-panel { background: rgba(0,212,255,0.04); border: 1px solid rgba(0,212,255,0.12); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; font-size: 0.8rem; }
 .diag-panel summary { cursor: pointer; color: #00d4ff; font-weight: 600; }
 .diag-panel table { width: 100%; }
@@ -301,134 +464,48 @@ echo generateHeader('Admin - Orders', 'KND Store order management');
 </section>
 </div>
 
-<?php
-function renderOrderTable($rows, $source, $tab) {
-    $orderIdKey = ($source === 'paypal' || $source === 'test') ? 'order_ref' : 'order_id';
-    $search = trim($_GET['search_' . $tab] ?? '');
-    $filterStatus = trim($_GET['status_' . $tab] ?? '');
-    if ($search) {
-        $rows = array_filter($rows, fn($r) => stripos($r[$orderIdKey] ?? '', $search) !== false);
-    }
-    if ($filterStatus) {
-        $rows = array_filter($rows, fn($r) => ($r['status'] ?? '') === $filterStatus);
-    }
-    $rows = array_values($rows);
-
-    $paymentLabels = ['paypal' => 'PayPal', 'bank' => 'Bank Transfer', 'whatsapp' => 'WhatsApp Other', 'test' => 'Test'];
-    $paymentLabel = $paymentLabels[$source] ?? ucfirst($source);
-
-    $filterHidden = '';
-    if ($search) $filterHidden .= '<input type="hidden" name="search_' . $tab . '" value="' . htmlspecialchars($search) . '">';
-    if ($filterStatus) $filterHidden .= '<input type="hidden" name="status_' . $tab . '" value="' . htmlspecialchars($filterStatus) . '">';
-
-    ob_start();
-    ?>
-    <div class="admin-card p-3 mb-3">
-        <form method="get" class="row g-2 mb-3">
-            <input type="hidden" name="tab" value="<?php echo htmlspecialchars($tab); ?>">
-            <div class="col-md-4">
-                <input type="text" name="search_<?php echo $tab; ?>" class="form-control bg-dark text-light border-secondary" placeholder="Search by Order ID" value="<?php echo htmlspecialchars($search); ?>">
-            </div>
-            <div class="col-md-3">
-                <select name="status_<?php echo $tab; ?>" class="form-select form-select-sm">
-                    <option value="">All statuses</option>
-                    <option value="pending" <?php echo $filterStatus === 'pending' ? 'selected' : ''; ?>>pending</option>
-                    <option value="awaiting_transfer" <?php echo $filterStatus === 'awaiting_transfer' ? 'selected' : ''; ?>>awaiting_transfer</option>
-                    <option value="paid" <?php echo $filterStatus === 'paid' ? 'selected' : ''; ?>>paid</option>
-                    <option value="delivered" <?php echo $filterStatus === 'delivered' ? 'selected' : ''; ?>>delivered</option>
-                    <option value="cancelled" <?php echo $filterStatus === 'cancelled' ? 'selected' : ''; ?>>cancelled</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-sm btn-cyber">Apply</button>
-            </div>
-        </form>
-        <div class="table-responsive">
-            <table class="table table-borderless">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Order ID</th>
-                        <th>Payment</th>
-                        <th>Customer</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Items</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php foreach (array_reverse($rows) as $idx => $r):
-                    $oid = $r[$orderIdKey] ?? '-';
-                    $rowUid = $source . '-' . $idx;
-                    $date = isset($r['created_at']) ? date('M j, Y H:i', strtotime($r['created_at'])) : '-';
-                    $total = $r['totals']['total'] ?? 0;
-                    $currency = $r['totals']['currency'] ?? 'USD';
-                    $items = $r['items'] ?? [];
-                    $cust = $r['customer'] ?? [];
-                    if ($source === 'whatsapp') {
-                        $custName = $r['customer_name'] ?? $cust['name'] ?? '-';
-                        $custWhatsapp = $r['whatsapp'] ?? $cust['whatsapp'] ?? '';
-                    } else {
-                        $custName = $cust['name'] ?? '-';
-                        $custWhatsapp = $cust['whatsapp'] ?? '';
-                    }
-                    $status = $r['status'] ?? (($source === 'paypal' || $source === 'test') ? 'paid' : 'pending');
-                ?>
-                    <tr class="order-row" data-row-uid="<?php echo htmlspecialchars($rowUid); ?>">
-                        <td><?php echo htmlspecialchars($date); ?></td>
-                        <td><code><?php echo htmlspecialchars($oid); ?></code></td>
-                        <td><?php echo htmlspecialchars($paymentLabel); ?></td>
-                        <td><?php echo htmlspecialchars($custName); ?><br><small class="text-muted"><?php echo htmlspecialchars($custWhatsapp); ?></small></td>
-                        <td>$<?php echo number_format($total, 2); ?> <?php echo htmlspecialchars($currency); ?></td>
-                        <td><span class="badge badge-status bg-secondary"><?php echo htmlspecialchars($status); ?></span></td>
-                        <td><?php echo count($items); ?></td>
-                        <td>
-                            <button type="button" class="btn btn-sm btn-cyber expand-btn" data-target="<?php echo htmlspecialchars($rowUid); ?>">Expand</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary copy-wa-btn" data-order-id="<?php echo htmlspecialchars($oid); ?>" data-status="<?php echo htmlspecialchars($status); ?>" data-customer="<?php echo htmlspecialchars($custName); ?>">Copy WA</button>
-                        </td>
-                    </tr>
-                    <tr class="order-details-row d-none" data-row-uid="<?php echo htmlspecialchars($rowUid); ?>-detail">
-                        <td colspan="8" class="order-row-expand p-4">
-                            <strong>Items:</strong>
-                            <ul class="mb-2">
-                            <?php foreach ($items as $it): ?>
-                                <li><?php echo htmlspecialchars($it['name'] ?? 'Item'); ?> x<?php echo (int)($it['qty'] ?? 1); ?> — $<?php echo number_format($it['line_total'] ?? 0, 2); ?></li>
-                            <?php endforeach; ?>
-                            </ul>
-                            <form method="post" class="d-inline">
-                                <input type="hidden" name="action" value="update_status">
-                                <input type="hidden" name="tab" value="<?php echo htmlspecialchars($tab); ?>">
-                                <input type="hidden" name="order_id" value="<?php echo htmlspecialchars($oid); ?>">
-                                <input type="hidden" name="source" value="<?php echo htmlspecialchars($source); ?>">
-                                <?php echo $filterHidden; ?>
-                                <label class="me-2 text-muted">Current: <strong><?php echo htmlspecialchars($status); ?></strong></label>
-                                <select name="new_status" class="form-select form-select-sm d-inline-block w-auto">
-                                    <option value="pending" <?php echo $status === 'pending' ? 'selected' : ''; ?>>pending</option>
-                                    <option value="awaiting_transfer" <?php echo $status === 'awaiting_transfer' ? 'selected' : ''; ?>>awaiting_transfer</option>
-                                    <option value="paid" <?php echo $status === 'paid' ? 'selected' : ''; ?>>paid</option>
-                                    <option value="delivered" <?php echo $status === 'delivered' ? 'selected' : ''; ?>>delivered</option>
-                                    <option value="cancelled" <?php echo $status === 'cancelled' ? 'selected' : ''; ?>>cancelled</option>
-                                </select>
-                                <button type="submit" class="btn btn-sm btn-cyber ms-2">Update</button>
-                            </form>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-        <?php if (empty($rows)): ?>
-        <p class="text-muted mb-0">No orders found.</p>
-        <?php endif; ?>
-    </div>
-    <?php
-    return ob_get_clean();
-}
-?>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    var statusClassMap = {
+        'pending': 'status-pending',
+        'awaiting_transfer': 'status-awaiting_transfer',
+        'paid': 'status-paid',
+        'completed': 'status-completed',
+        'delivered': 'status-delivered',
+        'processing': 'status-processing',
+        'cancelled': 'status-cancelled',
+        'failed': 'status-failed'
+    };
+    var statusLabelMap = {
+        'pending': 'Pending',
+        'awaiting_transfer': 'Awaiting Transfer',
+        'paid': 'Paid',
+        'completed': 'Completed',
+        'delivered': 'Delivered',
+        'processing': 'Processing',
+        'cancelled': 'Cancelled',
+        'failed': 'Failed'
+    };
+
+    function applySelectColor(sel) {
+        var val = sel.value;
+        sel.className = 'status-select ' + (statusClassMap[val] || 'status-unknown');
+    }
+
+    document.querySelectorAll('.status-select').forEach(function(sel) {
+        applySelectColor(sel);
+        sel.addEventListener('change', function() {
+            applySelectColor(this);
+            var uid = this.dataset.rowUid;
+            var badge = document.querySelector('.status-badge[data-badge-for="' + uid + '"]');
+            if (badge) {
+                var val = this.value;
+                badge.className = 'status-badge ' + (statusClassMap[val] || 'status-unknown');
+                badge.textContent = statusLabelMap[val] || val;
+            }
+        });
+    });
+
     document.querySelectorAll('.expand-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
             var uid = this.dataset.target;
@@ -439,6 +516,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
     document.querySelectorAll('.copy-wa-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
             var oid = this.dataset.orderId;
