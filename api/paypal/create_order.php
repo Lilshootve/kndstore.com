@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../includes/pricing.php';
 require_once __DIR__ . '/../../includes/paypal_config.php';
+require_once __DIR__ . '/../../includes/storage.php';
 
 header('Content-Type: application/json');
 
@@ -9,6 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['error' => 'Method not allowed']);
     exit;
 }
+
+ensure_storage_ready();
 
 $payload = json_decode(file_get_contents('php://input'), true);
 if (!is_array($payload)) {
@@ -68,8 +71,11 @@ foreach ($items as $item) {
 $shipping = 0.0;
 $total = $subtotal + $shipping;
 
+storage_log('paypal_create_order: attempt', ['total' => $total, 'item_count' => count($itemsDetailed)]);
+
 $accessToken = getPayPalAccessToken();
 if (!$accessToken) {
+    storage_log('paypal_create_order: auth_failed');
     http_response_code(500);
     echo json_encode(['error' => 'PayPal auth failed']);
     exit;
@@ -101,6 +107,7 @@ $orderBody = [
 $response = paypalApiRequest('POST', '/v2/checkout/orders', $accessToken, $orderBody);
 
 if ($response['status'] < 200 || $response['status'] >= 300) {
+    storage_log('paypal_create_order: api_error', ['http_status' => $response['status']]);
     http_response_code(500);
     echo json_encode(['error' => 'PayPal order creation failed']);
     exit;
@@ -108,9 +115,12 @@ if ($response['status'] < 200 || $response['status'] >= 300) {
 
 $paypalOrderId = $response['body']['id'] ?? null;
 if (!$paypalOrderId) {
+    storage_log('paypal_create_order: missing_order_id', ['http_status' => $response['status']]);
     http_response_code(500);
     echo json_encode(['error' => 'Missing PayPal order id']);
     exit;
 }
+
+storage_log('paypal_create_order: success', ['paypal_order_id' => $paypalOrderId, 'total' => $total]);
 
 echo json_encode(['id' => $paypalOrderId]);

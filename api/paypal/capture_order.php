@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../includes/pricing.php';
 require_once __DIR__ . '/../../includes/paypal_config.php';
+require_once __DIR__ . '/../../includes/storage.php';
 
 header('Content-Type: application/json');
 
@@ -9,6 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['error' => 'Method not allowed']);
     exit;
 }
+
+ensure_storage_ready();
 
 $payload = json_decode(file_get_contents('php://input'), true);
 if (!is_array($payload)) {
@@ -27,6 +30,8 @@ if (!$orderID || !is_array($items) || empty($items)) {
     echo json_encode(['error' => 'Missing order data']);
     exit;
 }
+
+storage_log('paypal_capture: attempt', ['paypal_order_id' => $orderID, 'item_count' => count($items)]);
 
 $itemsDetailed = [];
 $subtotal = 0.0;
@@ -73,21 +78,12 @@ foreach ($items as $item) {
 $shipping = 0.0;
 $total = $subtotal + $shipping;
 
-$storageDir = __DIR__ . '/../../storage';
-$ordersFile = $storageDir . '/orders.json';
-if (!is_dir($storageDir)) {
-    @mkdir($storageDir, 0755, true);
-}
-if (!file_exists($ordersFile)) {
-    @file_put_contents($ordersFile, '[]');
-}
+$ordersFile = storage_path('orders.json');
 
-$existing = json_decode(file_get_contents($ordersFile), true);
-if (!is_array($existing)) {
-    $existing = [];
-}
-foreach ($existing as $record) {
-    if (!empty($record['paypal_order_id']) && $record['paypal_order_id'] === $orderID) {
+$existing = read_json_array($ordersFile);
+foreach ($existing as $rec) {
+    if (!empty($rec['paypal_order_id']) && $rec['paypal_order_id'] === $orderID) {
+        storage_log('paypal_capture: duplicate', ['paypal_order_id' => $orderID]);
         http_response_code(409);
         echo json_encode(['error' => 'Order already captured']);
         exit;
@@ -96,6 +92,7 @@ foreach ($existing as $record) {
 
 $accessToken = getPayPalAccessToken();
 if (!$accessToken) {
+    storage_log('paypal_capture: auth_failed', ['paypal_order_id' => $orderID]);
     http_response_code(500);
     echo json_encode(['error' => 'PayPal auth failed']);
     exit;
@@ -103,36 +100,46 @@ if (!$accessToken) {
 
 $captureResponse = paypalApiRequest('POST', '/v2/checkout/orders/' . rawurlencode($orderID) . '/capture', $accessToken, null);
 if ($captureResponse['status'] < 200 || $captureResponse['status'] >= 300) {
+    storage_log('paypal_capture: api_error', ['paypal_order_id' => $orderID, 'http_status' => $captureResponse['status']]);
     http_response_code(500);
     echo json_encode(['error' => 'PayPal capture failed']);
     exit;
 }
 
 $body = $captureResponse['body'] ?? [];
-$status = $body['status'] ?? '';
+$ppStatus = $body['status'] ?? '';
 $capture = $body['purchase_units'][0]['payments']['captures'][0] ?? [];
 $captureStatus = $capture['status'] ?? '';
 $amountValue = isset($capture['amount']['value']) ? (float) $capture['amount']['value'] : 0.0;
 $currencyCode = $capture['amount']['currency_code'] ?? '';
 
-if ($status !== 'COMPLETED' && $captureStatus !== 'COMPLETED') {
+if ($ppStatus !== 'COMPLETED' && $captureStatus !== 'COMPLETED') {
+    storage_log('paypal_capture: not_completed', ['paypal_order_id' => $orderID, 'pp_status' => $ppStatus, 'capture_status' => $captureStatus]);
     http_response_code(400);
     echo json_encode(['error' => 'Capture not completed']);
     exit;
 }
 
 if (round($amountValue, 2) !== round($total, 2) || $currencyCode !== 'USD') {
+    storage_log('paypal_capture: amount_mismatch', [
+        'paypal_order_id' => $orderID,
+        'expected' => round($total, 2),
+        'got' => $amountValue,
+        'currency' => $currencyCode,
+    ]);
     http_response_code(400);
     echo json_encode(['error' => 'Amount mismatch']);
     exit;
 }
 
-$orderRef = 'KND-' . strtoupper(bin2hex(random_bytes(2)));
+$orderRef = 'KND-' . date('Y') . '-' . str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
 $customerEmail = trim($customer['email'] ?? '');
+
 $record = [
-    'created_at' => date('c'),
     'order_ref' => $orderRef,
     'paypal_order_id' => $orderID,
+    'status' => 'paid',
+    'amount_usd' => number_format(round($total, 2), 2, '.', ''),
     'payer_email' => $body['payer']['email_address'] ?? '',
     'items' => $itemsDetailed,
     'totals' => [
@@ -148,10 +155,20 @@ $record = [
         'email' => $customerEmail ?: null,
         'notes' => $customer['notes'] ?? '',
     ],
+    'created_at' => date('c'),
+    'source' => 'paypal',
 ];
 
-$existing[] = $record;
-@file_put_contents($ordersFile, json_encode($existing, JSON_PRETTY_PRINT), LOCK_EX);
+$persisted = append_json_record($ordersFile, $record);
+
+storage_log('paypal_capture: persist_result', [
+    'paypal_order_id' => $orderID,
+    'order_ref' => $orderRef,
+    'persisted' => $persisted,
+    'file' => $ordersFile,
+    'file_exists' => file_exists($ordersFile),
+    'file_size' => file_exists($ordersFile) ? filesize($ordersFile) : 0,
+]);
 
 require_once __DIR__ . '/../../includes/mailer.php';
 
@@ -181,8 +198,14 @@ if (file_exists($opsSecretsFile)) {
     }
 }
 
-echo json_encode([
+$response = [
     'ok' => true,
     'order_ref' => $orderRef,
     'redirect' => '/thank-you.php?ref=' . urlencode($orderRef),
-]);
+];
+if (!$persisted) {
+    $response['warn'] = 'persist_failed';
+    storage_log('paypal_capture: WARNING persist_failed but returning success to client', ['order_ref' => $orderRef]);
+}
+
+echo json_encode($response);

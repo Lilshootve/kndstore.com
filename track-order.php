@@ -1,30 +1,44 @@
 <?php
 require_once __DIR__ . '/includes/session.php';
 require_once __DIR__ . '/includes/config.php';
+require_once __DIR__ . '/includes/storage.php';
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
+
+ensure_storage_ready();
 
 $searchId = isset($_GET['id']) ? trim((string) $_GET['id']) : '';
 $order = null;
 $source = '';
 
 if ($searchId !== '') {
-    $storageDir = __DIR__ . '/storage';
     $files = [
-        'paypal'  => $storageDir . '/orders.json',
-        'bank'    => $storageDir . '/bank_transfer_requests.json',
-        'other'   => $storageDir . '/other_payment_requests.json',
+        'paypal' => storage_path('orders.json'),
+        'bank'   => storage_path('bank_transfer_requests.json'),
+        'other'  => storage_path('other_payment_requests.json'),
     ];
     foreach ($files as $src => $path) {
-        if (!file_exists($path)) continue;
-        $data = json_decode(file_get_contents($path), true);
-        if (!is_array($data)) continue;
-        $idKey = ($src === 'paypal') ? 'order_ref' : 'order_id';
-        foreach ($data as $r) {
-            if (isset($r[$idKey]) && strcasecmp($r[$idKey], $searchId) === 0) {
-                $order = $r;
-                $source = $src;
-                break 2;
+        $data = read_json_array($path);
+        if (empty($data)) continue;
+
+        if ($src === 'paypal') {
+            foreach ($data as $r) {
+                $matchRef = isset($r['order_ref']) && strcasecmp($r['order_ref'], $searchId) === 0;
+                $matchPP  = isset($r['paypal_order_id']) && strcasecmp($r['paypal_order_id'], $searchId) === 0;
+                if ($matchRef || $matchPP) {
+                    $order = $r;
+                    $source = $src;
+                    break 2;
+                }
+            }
+        } else {
+            $idKey = 'order_id';
+            foreach ($data as $r) {
+                if (isset($r[$idKey]) && strcasecmp($r[$idKey], $searchId) === 0) {
+                    $order = $r;
+                    $source = $src;
+                    break 2;
+                }
             }
         }
     }

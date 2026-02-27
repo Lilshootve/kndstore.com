@@ -231,7 +231,7 @@ return [
     'track.total' => 'Total',
     'track.items' => 'Items',
     'track.status' => 'Status',
-    'track.not_found' => 'Order not found. Please verify your reference.',
+    'track.not_found' => 'We\'re processing your order. If you just paid, refresh in 1–2 minutes. If it persists, contact support@kndstore.com with your PayPal transaction ID.',
     'order.whatsapp_other.info' => 'Alternative methods coordinated via WhatsApp. Supported: USDT (TRC20/BEP20), Binance Pay, Zinli, Pipol Pay, Wally.',
     'order.paypal.loading' => 'Preparing...',
     'order.paypal.error' => 'Something went wrong. Please try again or use WhatsApp.',
