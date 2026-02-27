@@ -3689,14 +3689,22 @@ body.about-page,
 @media (max-width: 991.98px) {
     .navbar-nav .knd-dropdown { position: static; }
     .navbar-nav .knd-dropdown-menu {
-        position: static !important; border: none; box-shadow: none;
-        background: rgba(0,212,255,.04); backdrop-filter: none;
-        margin: 4px 0 4px 1rem; padding: 6px 0; border-radius: 8px;
+        position: static !important;
+        top: auto !important; right: auto !important; left: auto !important;
+        min-width: 0 !important; width: 100%;
+        border: none !important; box-shadow: none !important;
+        background: rgba(0,212,255,.04) !important; backdrop-filter: none;
+        margin: 2px 0 6px 0; padding: 6px 0 6px 12px; border-radius: 8px;
         border-left: 2px solid rgba(0,212,255,.2) !important;
         animation: none !important;
     }
-    .knd-dropdown-hint { padding: 2px 12px 6px; }
-    .knd-dropdown-item { padding: 10px 12px; font-size: 14px; }
+    .navbar-nav .knd-dropdown.open .knd-dropdown-menu { animation: none !important; }
+    .knd-dropdown-hint { padding: 2px 12px 6px; font-size: 10px; }
+    .knd-dropdown-item {
+        padding: 10px 12px; font-size: 14px;
+        white-space: normal !important;
+    }
+    .knd-dropdown-arrow { font-size: 0.5em; }
 }
 
 /* Botones con especificidad para evitar conflictos con Bootstrap */

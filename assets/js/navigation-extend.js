@@ -69,10 +69,14 @@
         ddItems.forEach(function(item) {
             item.addEventListener('click', function() {
                 dd.classList.remove('open');
-                var navCollapse = document.getElementById('navbarNav');
-                if (navCollapse && navCollapse.classList.contains('show')) {
-                    var bsCollapse = bootstrap.Collapse.getInstance(navCollapse);
-                    if (bsCollapse) bsCollapse.hide();
+                if (window.innerWidth < 992) {
+                    var navCollapse = document.getElementById('navbarNav');
+                    if (navCollapse && navCollapse.classList.contains('show')) {
+                        try {
+                            var bsCollapse = bootstrap.Collapse.getInstance(navCollapse);
+                            if (bsCollapse) bsCollapse.hide();
+                        } catch(err) {}
+                    }
                 }
             });
         });
@@ -86,6 +90,13 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') dd.classList.remove('open');
         });
+
+        var navCollapse = document.getElementById('navbarNav');
+        if (navCollapse) {
+            navCollapse.addEventListener('hide.bs.collapse', function() {
+                dd.classList.remove('open');
+            });
+        }
     }
 
     if (document.readyState === 'loading') {
