@@ -146,6 +146,13 @@ if (isset($_GET['update_result'])) {
     elseif ($ur === 'write_failed') { $flashMsg = 'Write failed — check server logs.'; $flashType = 'danger'; }
 }
 
+if (isset($_GET['purged'])) {
+    $purgeDetails = $_SESSION['purge_results'] ?? [];
+    unset($_SESSION['purge_results']);
+    $flashMsg = 'Cache purged. ' . implode(' | ', $purgeDetails);
+    $flashType = 'info';
+}
+
 // --- Load ALL datasets unconditionally (regardless of active tab) ---
 // These arrays + counters must never be overwritten or conditionally zeroed.
 clearstatcache(true, $ordersFile);
@@ -407,6 +414,7 @@ echo generateHeader('Admin - Orders', 'KND Store order management');
             <h1 class="mb-0">Order Management</h1>
             <div>
                 <a href="/admin/test_order.php" class="btn btn-sm btn-cyber me-2">+ Test Order</a>
+                <a href="/admin/purge_cache.php" class="btn btn-sm btn-cyber me-2" title="Purge cache for /admin"><i class="fas fa-sync-alt me-1"></i>Purge Cache</a>
                 <a href="/admin/debug_storage.php" class="btn btn-sm btn-cyber me-2">Debug</a>
                 <a href="/admin/orders.php?logout=1" class="btn btn-outline-light btn-sm">Logout</a>
             </div>
