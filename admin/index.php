@@ -22,6 +22,10 @@ if ($adminUser === '' || $adminPass === '') { http_response_code(500); echo 'Adm
 
 if (isset($_GET['logout'])) {
     $_SESSION = [];
+    if (ini_get('session.use_cookies')) {
+        $p = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 86400, $p['path'], $p['domain'], $p['secure'], $p['httponly']);
+    }
     session_destroy();
     header('Location: /');
     exit;
