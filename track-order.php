@@ -48,13 +48,50 @@ $paymentLabels = ['paypal' => 'PayPal', 'bank' => 'Bank Transfer (ACH / Wire)', 
 $statusMessages = [
     'pending'            => 'Awaiting confirmation',
     'awaiting_transfer'  => 'Awaiting payment transfer',
+    'processing'         => 'Order is being processed',
     'paid'               => 'Payment confirmed. Processing.',
+    'completed'          => 'Completed',
     'delivered'          => 'Completed',
     'cancelled'          => 'Cancelled',
+    'failed'             => 'Payment failed',
+];
+
+$statusClassMap = [
+    'pending' => 'status-pending',
+    'awaiting_transfer' => 'status-awaiting_transfer',
+    'processing' => 'status-processing',
+    'paid' => 'status-paid',
+    'completed' => 'status-completed',
+    'delivered' => 'status-delivered',
+    'cancelled' => 'status-cancelled',
+    'failed' => 'status-failed',
+];
+
+$statusLabelMap = [
+    'pending' => 'Pending',
+    'awaiting_transfer' => 'Awaiting Transfer',
+    'processing' => 'Processing',
+    'paid' => 'Paid',
+    'completed' => 'Completed',
+    'delivered' => 'Delivered',
+    'cancelled' => 'Cancelled',
+    'failed' => 'Failed',
 ];
 
 echo generateHeader(t('track.meta.title'), t('track.meta.description'));
 ?>
+<style>
+.status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: .4px; display: inline-block; text-transform: capitalize; }
+.status-pending { background: #2a2f36; color: #9aa4af; }
+.status-awaiting_transfer { background: rgba(243,156,18,.15); color: #f39c12; }
+.status-paid { background: rgba(46,204,113,.15); color: #2ecc71; }
+.status-completed { background: rgba(39,174,96,.18); color: #27ae60; }
+.status-delivered { background: rgba(39,174,96,.22); color: #27ae60; }
+.status-processing { background: rgba(52,152,219,.15); color: #3498db; }
+.status-cancelled { background: rgba(231,76,60,.18); color: #e74c3c; }
+.status-failed { background: rgba(192,57,43,.20); color: #c0392b; }
+.status-unknown { background: #1f242b; color: #7f8c8d; }
+</style>
 <div id="particles-bg"></div>
 <?php echo generateNavigation(); ?>
 
@@ -116,7 +153,7 @@ echo generateHeader(t('track.meta.title'), t('track.meta.description'));
 
                         <div class="checkout-info-box">
                             <div class="checkout-info-title mb-1"><?php echo t('track.status'); ?></div>
-                            <span class="badge bg-secondary"><?php echo htmlspecialchars($status); ?></span>
+                            <span class="status-badge <?php echo $statusClassMap[$status] ?? 'status-unknown'; ?>"><?php echo htmlspecialchars($statusLabelMap[$status] ?? ucfirst($status)); ?></span>
                             <p class="mb-0 mt-2 checkout-info-hint"><?php echo htmlspecialchars($statusMsg); ?></p>
                         </div>
 
