@@ -47,15 +47,21 @@
         apparelItem.insertAdjacentElement('afterend', customItem);
     }
 
+    var dropdownReady = false;
+
     function initOrdersDropdown() {
+        if (dropdownReady) return;
         var dd = document.querySelector('.knd-dropdown');
         if (!dd) return;
 
         var toggle = dd.querySelector('.knd-dropdown-toggle');
         if (!toggle) return;
 
+        dropdownReady = true;
+
         toggle.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             dd.classList.toggle('open');
         });
 
