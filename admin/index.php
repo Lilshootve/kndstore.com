@@ -23,7 +23,7 @@ if ($adminUser === '' || $adminPass === '') { http_response_code(500); echo 'Adm
 if (isset($_GET['logout'])) {
     $_SESSION = [];
     session_destroy();
-    header('Location: /admin/');
+    header('Location: /');
     exit;
 }
 

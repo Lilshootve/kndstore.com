@@ -39,7 +39,7 @@ if ($adminUser === '' || $adminPass === '') {
 if (isset($_GET['logout'])) {
     $_SESSION = [];
     session_destroy();
-    header('Location: /admin/orders.php');
+    header('Location: /');
     exit;
 }
 
