@@ -149,7 +149,7 @@ require_once 'includes/footer.php';
                             <ul>
                                 <li>Contact form on our website</li>
                                 <li>Direct email: support@kndstore.com</li>
-                                <li>Discord: discord.gg/VXXYakrb7X</li>
+                                <li>Discord: discord.gg/zjP3u5Yztx</li>
                             </ul>
                         </div>
                     </div>
@@ -206,7 +206,7 @@ require_once 'includes/footer.php';
                     <a href="/contact.php" class="btn btn-primary btn-lg me-3">
                         <i class="fas fa-envelope"></i> Contact
                     </a>
-                    <a href="https://discord.gg/VXXYakrb7X" target="_blank" class="btn btn-primary btn-lg">
+                    <a href="https://discord.gg/zjP3u5Yztx" target="_blank" class="btn btn-primary btn-lg">
                         <i class="fab fa-discord"></i> Discord
                     </a>
                 </div>

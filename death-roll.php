@@ -217,10 +217,10 @@ require_once __DIR__ . '/includes/footer.php';
 
 <script>
 function copyDiscordServer() {
-    navigator.clipboard.writeText('discord.gg/VXXYakrb7X').then(function() {
+    navigator.clipboard.writeText('discord.gg/zjP3u5Yztx').then(function() {
         alert('Discord invite copied!');
     }).catch(function() {
-        alert('Discord invite: discord.gg/VXXYakrb7X');
+        alert('Discord invite: discord.gg/zjP3u5Yztx');
     });
 }
 </script>

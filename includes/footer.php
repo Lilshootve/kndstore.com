@@ -15,17 +15,17 @@ function generateFooter() {
     $footer .= '                        ' . t('footer.about_text') . "\n";
     $footer .= '                    </p>' . "\n";
     $footer .= '                    <div class="d-flex mt-4">' . "\n";
-    $footer .= '                        <a href="#" class="btn btn-outline-neon btn-icon me-3">' . "\n";
+    $footer .= '                        <a href="https://discord.gg/zjP3u5Yztx" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon me-3" title="Discord">' . "\n";
     $footer .= '                            <i class="fab fa-discord"></i>' . "\n";
     $footer .= '                        </a>' . "\n";
-    $footer .= '                        <a href="#" class="btn btn-outline-neon btn-icon me-3">' . "\n";
-    $footer .= '                            <i class="fab fa-twitter"></i>' . "\n";
-    $footer .= '                        </a>' . "\n";
-    $footer .= '                        <a href="#" class="btn btn-outline-neon btn-icon me-3">' . "\n";
+    $footer .= '                        <a href="https://www.instagram.com/kndofficialstore" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon me-3" title="Instagram">' . "\n";
     $footer .= '                            <i class="fab fa-instagram"></i>' . "\n";
     $footer .= '                        </a>' . "\n";
-    $footer .= '                        <a href="#" class="btn btn-outline-neon btn-icon">' . "\n";
-    $footer .= '                            <i class="fab fa-youtube"></i>' . "\n";
+    $footer .= '                        <a href="https://x.com/knd_store" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon me-3" title="X">' . "\n";
+    $footer .= '                            <i class="fab fa-x-twitter"></i>' . "\n";
+    $footer .= '                        </a>' . "\n";
+    $footer .= '                        <a href="https://www.tiktok.com/@kndstoreofficial" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon" title="TikTok">' . "\n";
+    $footer .= '                            <i class="fab fa-tiktok"></i>' . "\n";
     $footer .= '                        </a>' . "\n";
     $footer .= '                    </div>' . "\n";
     $footer .= '                </div>' . "\n";
@@ -57,7 +57,7 @@ function generateFooter() {
     $footer .= '                                </li>' . "\n";
     $footer .= '                                <li class="mb-3 d-flex align-items-center">' . "\n";
     $footer .= '                                    <i class="fab fa-discord me-3" style="color: var(--knd-neon-blue);"></i>' . "\n";
-    $footer .= '                                    <span style="opacity: 0.8;">Discord: KND_Store</span>' . "\n";
+    $footer .= '                                    <a href="https://discord.gg/zjP3u5Yztx" target="_blank" rel="noopener" class="text-decoration-none" style="opacity: 0.8;">Discord: KND Store</a>' . "\n";
     $footer .= '                                </li>' . "\n";
     $footer .= '                            </ul>' . "\n";
     $footer .= '                            ' . "\n";
@@ -331,7 +331,7 @@ function generateScripts() {
     $scripts .= generateColorPanel();
     
     // Botón flotante de Discord
-    $scripts .= '<a href="https://discord.gg/VXXYakrb7X" target="_blank" class="discord-float-btn" title="Discord">' . "\n";
+    $scripts .= '<a href="https://discord.gg/zjP3u5Yztx" target="_blank" rel="noopener" class="discord-float-btn" title="Discord">' . "\n";
     $scripts .= '    <i class="fab fa-discord"></i>' . "\n";
     $scripts .= '</a>' . "\n";
     

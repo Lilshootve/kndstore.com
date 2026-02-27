@@ -217,7 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             <h4><?php echo t('contact.info.mothership'); ?></h4>
                             <p><?php echo t('contact.info.mothership'); ?></p>
-                            <a href="https://discord.gg/VXXYakrb7X" target="_blank" class="btn btn-primary btn-sm">
+                            <a href="https://discord.gg/zjP3u5Yztx" target="_blank" class="btn btn-primary btn-sm">
                                 <i class="fab fa-discord me-2"></i>
                                 <?php echo t('contact.info.join_discord'); ?>
                             </a>
@@ -283,7 +283,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php echo t('contact.cta.urgent_text'); ?>
                 </p>
                 <div class="cta-buttons">
-                    <a href="https://discord.gg/VXXYakrb7X" target="_blank" class="btn btn-primary btn-lg me-3">
+                    <a href="https://discord.gg/zjP3u5Yztx" target="_blank" class="btn btn-primary btn-lg me-3">
                         <i class="fab fa-discord"></i> <?php echo t('contact.cta.discord_immediate'); ?>
                     </a>
                     <a href="mailto:support@kndstore.com" class="btn btn-primary btn-lg">

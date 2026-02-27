@@ -272,11 +272,10 @@ $typeLabels = [
 
 <script>
 function copyDiscordServer() {
-    navigator.clipboard.writeText('knd_store').then(function() {
-        // Mostrar notificación
+    navigator.clipboard.writeText('https://discord.gg/zjP3u5Yztx').then(function() {
         const notification = document.createElement('div');
         notification.className = 'discord-notification';
-        notification.innerHTML = '<i class="fab fa-discord me-2"></i>Server copied: knd_store';
+        notification.innerHTML = '<i class="fab fa-discord me-2"></i>Discord invite copied!';
         document.body.appendChild(notification);
         
         setTimeout(() => {
@@ -284,7 +283,7 @@ function copyDiscordServer() {
         }, 3000);
     }).catch(function(err) {
         console.error('Copy error: ', err);
-        alert('Discord server: knd_store');
+        alert('Discord invite: discord.gg/zjP3u5Yztx');
     });
 }
 

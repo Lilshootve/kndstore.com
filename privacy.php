@@ -239,7 +239,7 @@ require_once __DIR__ . '/includes/footer.php';
                             <div class="card bg-dark border-primary h-100">
                                 <div class="card-body">
                                     <h5 class="text-white mb-2"><i class="fab fa-discord me-2"></i>Discord</h5>
-                                    <p class="text-white-50 mb-0">discord.gg/VXXYakrb7X</p>
+                                    <p class="text-white-50 mb-0">discord.gg/zjP3u5Yztx</p>
                                 </div>
                             </div>
                         </div>
