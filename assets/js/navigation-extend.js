@@ -1,7 +1,10 @@
-// KND Store - Navigation extensions + Orders dropdown (event delegation)
+// KND Store - Navigation extensions + Orders dropdown
+// Single source of truth for the Orders dropdown toggle logic.
 
 (function() {
     'use strict';
+
+    // ─── Nav item injection (Apparel / Custom Design) ───
 
     function extendNavigation() {
         var currentPage = window.location.pathname.split('/').pop() || 'index.php';
@@ -12,16 +15,11 @@
             return;
         }
 
-        if (navList.querySelector('a[href="/apparel.php"]')) {
-            return;
-        }
+        if (navList.querySelector('a[href="/apparel.php"]')) return;
 
         var aboutItem = navList.querySelector('a[href="/about.php"]');
         var contactItem = navList.querySelector('a[href="/contact.php"]');
-
-        if (!aboutItem || !contactItem) {
-            return;
-        }
+        if (!aboutItem || !contactItem) return;
 
         function tJs(key, fallback) {
             return (window.I18N && window.I18N[key]) || fallback || key;
@@ -47,61 +45,99 @@
         apparelItem.insertAdjacentElement('afterend', customItem);
     }
 
-    // Single document-level handler for all dropdown interactions
+    // ─── Orders dropdown (ID-based, single implementation) ───
+
+    var DESKTOP_BP = 992;
+
+    function getToggle() { return document.getElementById('ordersDropdownToggle'); }
+    function getMenu()   { return document.getElementById('ordersDropdownMenu'); }
+
+    function isOpen() {
+        var menu = getMenu();
+        return menu && menu.classList.contains('open');
+    }
+
+    function openDropdown() {
+        var toggle = getToggle();
+        var menu   = getMenu();
+        if (!toggle || !menu) return;
+        menu.classList.add('open');
+        toggle.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeDropdown() {
+        var toggle = getToggle();
+        var menu   = getMenu();
+        if (!toggle || !menu) return;
+        menu.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    // 1) Toggle click — stopPropagation prevents document handler from closing it
     document.addEventListener('click', function(e) {
-        // Check if click is on the dropdown toggle (or a child of it)
-        var toggle = e.target.closest('.knd-dropdown-toggle');
-        if (toggle) {
+        var toggle = getToggle();
+        var menu   = getMenu();
+        if (!toggle || !menu) return;
+
+        // Clicked on toggle or any child of toggle
+        if (toggle === e.target || toggle.contains(e.target)) {
             e.preventDefault();
             e.stopPropagation();
-            var dd = toggle.closest('.knd-dropdown');
-            if (dd) {
-                dd.classList.toggle('open');
+            if (isOpen()) {
+                closeDropdown();
+            } else {
+                openDropdown();
             }
             return;
         }
 
-        // Check if click is on a dropdown item
+        // Clicked on a link inside the menu — navigate, close dropdown
         var item = e.target.closest('.knd-dropdown-item');
-        if (item) {
-            var dd = item.closest('.knd-dropdown');
-            if (dd) dd.classList.remove('open');
-            if (window.innerWidth < 992) {
-                var navCollapse = document.getElementById('navbarNav');
-                if (navCollapse && navCollapse.classList.contains('show')) {
-                    try {
+        if (item && menu.contains(item)) {
+            closeDropdown();
+            if (window.innerWidth < DESKTOP_BP) {
+                try {
+                    var navCollapse = document.getElementById('navbarNav');
+                    if (navCollapse && navCollapse.classList.contains('show')) {
                         var bsCollapse = bootstrap.Collapse.getInstance(navCollapse);
                         if (bsCollapse) bsCollapse.hide();
-                    } catch(err) {}
-                }
+                    }
+                } catch (err) { /* bootstrap not loaded yet */ }
             }
             return;
         }
 
-        // Click outside — close any open dropdown
-        var openDd = document.querySelector('.knd-dropdown.open');
-        if (openDd && !openDd.contains(e.target)) {
-            openDd.classList.remove('open');
+        // Clicked outside toggle + menu — close
+        if (!menu.contains(e.target)) {
+            closeDropdown();
         }
-    });
+    }, true);  // useCapture = true so toggle handler fires first
 
+    // 2) Escape key
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            var openDd = document.querySelector('.knd-dropdown.open');
-            if (openDd) openDd.classList.remove('open');
-        }
+        if (e.key === 'Escape') closeDropdown();
     });
 
-    // Close dropdown when Bootstrap collapse hides
+    // 3) Reset on resize / orientation change (close if going to desktop)
+    function onViewportChange() {
+        if (window.innerWidth >= DESKTOP_BP) {
+            closeDropdown();
+        }
+    }
+    window.addEventListener('resize', onViewportChange);
+    window.addEventListener('orientationchange', onViewportChange);
+
+    // 4) Close when Bootstrap hamburger collapse hides
     function bindCollapseReset() {
         var navCollapse = document.getElementById('navbarNav');
         if (navCollapse) {
             navCollapse.addEventListener('hide.bs.collapse', function() {
-                var openDd = document.querySelector('.knd-dropdown.open');
-                if (openDd) openDd.classList.remove('open');
+                closeDropdown();
             });
         }
     }
+
+    // ─── Init ───
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {

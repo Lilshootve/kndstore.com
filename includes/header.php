@@ -64,13 +64,13 @@ function generateNavigation() {
     $nav .= '                </li>' . "\n";
     $ordersActive = in_array($current_page, ['order.php', 'track-order.php']);
     $nav .= '                <li class="nav-item knd-dropdown">' . "\n";
-    $nav .= '                    <a class="nav-link knd-dropdown-toggle' . ($ordersActive ? ' active' : '') . '" href="javascript:void(0)" role="button" aria-expanded="false">' . "\n";
+    $nav .= '                    <a id="ordersDropdownToggle" class="nav-link knd-dropdown-toggle' . ($ordersActive ? ' active' : '') . '" href="javascript:void(0)" role="button" aria-expanded="false">' . "\n";
     $nav .= '                        <i class="fas fa-shopping-cart me-1"></i>' . "\n";
     $nav .= '                        ' . t('nav.orders') . "\n";
     $nav .= '                        <span id="order-count" class="badge rounded-pill bg-primary ms-1" style="display:none; min-width: 20px; justify-content: center; align-items: center;"></span>' . "\n";
     $nav .= '                        <i class="fas fa-chevron-down knd-dropdown-arrow ms-1"></i>' . "\n";
     $nav .= '                    </a>' . "\n";
-    $nav .= '                    <div class="knd-dropdown-menu">' . "\n";
+    $nav .= '                    <div id="ordersDropdownMenu" class="knd-dropdown-menu">' . "\n";
     $nav .= '                        <span class="knd-dropdown-hint">View &amp; track purchases</span>' . "\n";
     $nav .= '                        <a class="knd-dropdown-item' . ($current_page == 'order.php' ? ' active' : '') . '" href="/order.php"><i class="fas fa-cart-shopping me-2"></i>My Orders</a>' . "\n";
     $nav .= '                        <a class="knd-dropdown-item' . ($current_page == 'track-order.php' ? ' active' : '') . '" href="/track-order.php"><i class="fas fa-magnifying-glass me-2"></i>Track Order</a>' . "\n";
