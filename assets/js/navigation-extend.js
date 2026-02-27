@@ -1,4 +1,4 @@
-// KND Store - Navigation extensions (apparel/custom-design items + Orders dropdown)
+// KND Store - Navigation extensions + Orders dropdown (event delegation)
 
 (function() {
     'use strict';
@@ -47,54 +47,58 @@
         apparelItem.insertAdjacentElement('afterend', customItem);
     }
 
-    var dropdownReady = false;
-
-    function initOrdersDropdown() {
-        if (dropdownReady) return;
-        var dd = document.querySelector('.knd-dropdown');
-        if (!dd) return;
-
-        var toggle = dd.querySelector('.knd-dropdown-toggle');
-        if (!toggle) return;
-
-        dropdownReady = true;
-
-        toggle.addEventListener('click', function(e) {
+    // Single document-level handler for all dropdown interactions
+    document.addEventListener('click', function(e) {
+        // Check if click is on the dropdown toggle (or a child of it)
+        var toggle = e.target.closest('.knd-dropdown-toggle');
+        if (toggle) {
             e.preventDefault();
             e.stopPropagation();
-            dd.classList.toggle('open');
-        });
-
-        var ddItems = dd.querySelectorAll('.knd-dropdown-item');
-        ddItems.forEach(function(item) {
-            item.addEventListener('click', function() {
-                dd.classList.remove('open');
-                if (window.innerWidth < 992) {
-                    var navCollapse = document.getElementById('navbarNav');
-                    if (navCollapse && navCollapse.classList.contains('show')) {
-                        try {
-                            var bsCollapse = bootstrap.Collapse.getInstance(navCollapse);
-                            if (bsCollapse) bsCollapse.hide();
-                        } catch(err) {}
-                    }
-                }
-            });
-        });
-
-        document.addEventListener('click', function(e) {
-            if (!dd.contains(e.target)) {
-                dd.classList.remove('open');
+            var dd = toggle.closest('.knd-dropdown');
+            if (dd) {
+                dd.classList.toggle('open');
             }
-        });
+            return;
+        }
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') dd.classList.remove('open');
-        });
+        // Check if click is on a dropdown item
+        var item = e.target.closest('.knd-dropdown-item');
+        if (item) {
+            var dd = item.closest('.knd-dropdown');
+            if (dd) dd.classList.remove('open');
+            if (window.innerWidth < 992) {
+                var navCollapse = document.getElementById('navbarNav');
+                if (navCollapse && navCollapse.classList.contains('show')) {
+                    try {
+                        var bsCollapse = bootstrap.Collapse.getInstance(navCollapse);
+                        if (bsCollapse) bsCollapse.hide();
+                    } catch(err) {}
+                }
+            }
+            return;
+        }
 
+        // Click outside — close any open dropdown
+        var openDd = document.querySelector('.knd-dropdown.open');
+        if (openDd && !openDd.contains(e.target)) {
+            openDd.classList.remove('open');
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            var openDd = document.querySelector('.knd-dropdown.open');
+            if (openDd) openDd.classList.remove('open');
+        }
+    });
+
+    // Close dropdown when Bootstrap collapse hides
+    function bindCollapseReset() {
         var navCollapse = document.getElementById('navbarNav');
         if (navCollapse) {
             navCollapse.addEventListener('hide.bs.collapse', function() {
-                dd.classList.remove('open');
+                var openDd = document.querySelector('.knd-dropdown.open');
+                if (openDd) openDd.classList.remove('open');
             });
         }
     }
@@ -102,16 +106,12 @@
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
             extendNavigation();
-            initOrdersDropdown();
+            bindCollapseReset();
         });
     } else {
         extendNavigation();
-        initOrdersDropdown();
+        bindCollapseReset();
     }
 
-    setTimeout(function() {
-        extendNavigation();
-        initOrdersDropdown();
-    }, 200);
+    setTimeout(extendNavigation, 200);
 })();
-
