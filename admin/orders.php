@@ -413,6 +413,7 @@ echo generateHeader('Admin - Orders', 'KND Store order management');
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="mb-0">Order Management</h1>
             <div>
+                <a href="/admin/" class="btn btn-sm btn-cyber me-2"><i class="fas fa-home me-1"></i>Admin Home</a>
                 <a href="/admin/test_order.php" class="btn btn-sm btn-cyber me-2">+ Test Order</a>
                 <a href="/admin/purge_cache.php" class="btn btn-sm btn-cyber me-2" title="Purge cache for /admin"><i class="fas fa-sync-alt me-1"></i>Purge Cache</a>
                 <a href="/admin/debug_storage.php" class="btn btn-sm btn-cyber me-2">Debug</a>
