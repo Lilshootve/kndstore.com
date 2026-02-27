@@ -568,31 +568,22 @@ h1, h2, h3, h4, h5, h6 {
 /* Botón flotante de Discord */
 .discord-float-btn {
     position: fixed;
-    bottom: 92px;
-    right: 30px;
-    width: 70px;
-    height: 70px;
-    background: linear-gradient(135deg, #259cae 0%, #ae2565 100%);
+    bottom: 90px;
+    right: 24px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #5865f2 0%, #7b68ee 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 28px;
+    font-size: 22px;
     text-decoration: none;
-    box-shadow: 
-        0 0 30px rgba(88, 101, 242, 0.6),
-        0 8px 25px rgba(0, 0, 0, 0.3);
-    transition: all 0.4s ease;
-    z-index: 1000;
-    border: 2px solid rgba(0, 0, 0, 0.13);
-    border-image: none;
-    gap: 0px;
-    column-gap: 0px;
-    row-gap: 0px;
-    flex-wrap: wrap;
-    padding-left: 16px;
-    padding-right: 16px;
+    box-shadow: 0 4px 18px rgba(88, 101, 242, 0.4);
+    transition: all 0.3s ease;
+    z-index: 9997;
+    border: none;
 }
 
 .discord-float-btn:hover {
