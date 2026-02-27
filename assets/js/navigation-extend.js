@@ -65,6 +65,18 @@
             dd.classList.toggle('open');
         });
 
+        var ddItems = dd.querySelectorAll('.knd-dropdown-item');
+        ddItems.forEach(function(item) {
+            item.addEventListener('click', function() {
+                dd.classList.remove('open');
+                var navCollapse = document.getElementById('navbarNav');
+                if (navCollapse && navCollapse.classList.contains('show')) {
+                    var bsCollapse = bootstrap.Collapse.getInstance(navCollapse);
+                    if (bsCollapse) bsCollapse.hide();
+                }
+            });
+        });
+
         document.addEventListener('click', function(e) {
             if (!dd.contains(e.target)) {
                 dd.classList.remove('open');

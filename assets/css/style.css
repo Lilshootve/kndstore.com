@@ -3687,11 +3687,16 @@ body.about-page,
 /* Prevent the nav-link underline pseudo-element on the dropdown toggle */
 .knd-dropdown-toggle::after { display: none !important; }
 @media (max-width: 991.98px) {
+    .navbar-nav .knd-dropdown { position: static; }
     .navbar-nav .knd-dropdown-menu {
         position: static !important; border: none; box-shadow: none;
-        background: rgba(10,12,18,.6); backdrop-filter: none;
-        margin: 0 0 0 1rem; padding: 4px 0; border-radius: 8px;
+        background: rgba(0,212,255,.04); backdrop-filter: none;
+        margin: 4px 0 4px 1rem; padding: 6px 0; border-radius: 8px;
+        border-left: 2px solid rgba(0,212,255,.2) !important;
+        animation: none !important;
     }
+    .knd-dropdown-hint { padding: 2px 12px 6px; }
+    .knd-dropdown-item { padding: 10px 12px; font-size: 14px; }
 }
 
 /* Botones con especificidad para evitar conflictos con Bootstrap */
