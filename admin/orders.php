@@ -2,21 +2,22 @@
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/config.php';
 
-$secretsFile = __DIR__ . '/../config/admin_secrets.local.php';
-if (!file_exists($secretsFile)) {
+$secretsPath = __DIR__ . '/../config/admin_secrets.local.php';
+if (!file_exists($secretsPath)) {
     header('Content-Type: text/html; charset=utf-8');
     http_response_code(500);
     echo '<!DOCTYPE html><html><head><title>Admin - Configuration Error</title></head><body style="font-family:sans-serif;padding:2rem;background:#0a0a0a;color:#fff;">';
-    echo '<h1>Configuration Error</h1><p>Admin secrets file is missing. Copy <code>config/admin_secrets.local.example.php</code> to <code>config/admin_secrets.local.php</code> and set your credentials.</p>';
+    echo '<h1>Configuration Error</h1><p>Admin secrets file not found at:<br><code>' . htmlspecialchars($secretsPath) . '</code></p>';
+    echo '<p>Copy <code>config/admin_secrets.local.example.php</code> to that path and set your credentials.</p>';
     echo '</body></html>';
     exit;
 }
-$adminSecrets = include $secretsFile;
-if (!is_array($adminSecrets) || empty($adminSecrets['admin_user']) || empty($adminSecrets['admin_pass'])) {
+$adminSecrets = require $secretsPath;
+if (!is_array($adminSecrets) || empty(trim($adminSecrets['admin_user'] ?? '')) || empty(trim($adminSecrets['admin_pass'] ?? ''))) {
     header('Content-Type: text/html; charset=utf-8');
     http_response_code(500);
     echo '<!DOCTYPE html><html><head><title>Admin - Configuration Error</title></head><body style="font-family:sans-serif;padding:2rem;background:#0a0a0a;color:#fff;">';
-    echo '<h1>Configuration Error</h1><p>Admin credentials not configured in admin_secrets.local.php.</p></body></html>';
+    echo '<h1>Configuration Error</h1><p>admin_user and/or admin_pass are empty in:<br><code>' . htmlspecialchars($secretsPath) . '</code></p></body></html>';
     exit;
 }
 

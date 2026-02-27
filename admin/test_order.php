@@ -3,16 +3,16 @@ require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/storage.php';
 
-$secretsFile = __DIR__ . '/../config/admin_secrets.local.php';
-if (!file_exists($secretsFile)) {
+$secretsPath = __DIR__ . '/../config/admin_secrets.local.php';
+if (!file_exists($secretsPath)) {
     http_response_code(500);
-    echo 'Admin config missing.';
+    echo 'Admin secrets file not found at: ' . htmlspecialchars($secretsPath);
     exit;
 }
-$adminSecrets = include $secretsFile;
-if (!is_array($adminSecrets) || empty($adminSecrets['admin_user']) || empty($adminSecrets['admin_pass'])) {
+$adminSecrets = require $secretsPath;
+if (!is_array($adminSecrets) || empty(trim($adminSecrets['admin_user'] ?? '')) || empty(trim($adminSecrets['admin_pass'] ?? ''))) {
     http_response_code(500);
-    echo 'Admin credentials not configured.';
+    echo 'admin_user/admin_pass empty in: ' . htmlspecialchars($secretsPath);
     exit;
 }
 if (empty($_SESSION['admin_logged_in'])) {
