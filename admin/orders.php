@@ -146,6 +146,8 @@ if (isset($_GET['update_result'])) {
     elseif ($ur === 'write_failed') { $flashMsg = 'Write failed — check server logs.'; $flashType = 'danger'; }
 }
 
+// --- Load ALL datasets unconditionally (regardless of active tab) ---
+// These arrays + counters must never be overwritten or conditionally zeroed.
 clearstatcache(true, $ordersFile);
 clearstatcache(true, $bankFile);
 clearstatcache(true, $otherFile);
@@ -174,29 +176,36 @@ foreach ($otherRequests as $i => $r) {
     if (empty($r['status'])) $otherRequests[$i]['status'] = 'pending';
 }
 
+// --- Global counters — computed once, used in all tabs and diagnostics ---
+$countPaypal = count($paypalOrders);
+$countTest   = count($testOrders);
+$countBank   = count($bankRequests);
+$countOther  = count($otherRequests);
+$countTotal  = count($allOrders);
+
 $diagFiles = [
     'orders.json' => $ordersFile,
     'bank_transfer_requests.json' => $bankFile,
     'other_payment_requests.json' => $otherFile,
 ];
 $diagData = [];
-foreach ($diagFiles as $label => $fp) {
-    clearstatcache(true, $fp);
-    $exists   = file_exists($fp);
+foreach ($diagFiles as $label => $dfp) {
+    clearstatcache(true, $dfp);
+    $exists = file_exists($dfp);
     $diagData[$label] = [
-        'path'     => $fp,
+        'path'     => $dfp,
         'exists'   => $exists,
-        'readable' => $exists && is_readable($fp),
-        'writable' => $exists && is_writable($fp),
-        'size'     => $exists ? filesize($fp) : 0,
-        'mtime'    => $exists ? date('Y-m-d H:i:s', filemtime($fp)) : '-',
+        'readable' => $exists && is_readable($dfp),
+        'writable' => $exists && is_writable($dfp),
+        'size'     => $exists ? filesize($dfp) : 0,
+        'mtime'    => $exists ? date('Y-m-d H:i:s', filemtime($dfp)) : '-',
     ];
 }
-$diagData['orders.json']['count_paypal'] = count($paypalOrders);
-$diagData['orders.json']['count_test']   = count($testOrders);
-$diagData['orders.json']['count_total']  = count($allOrders);
-$diagData['bank_transfer_requests.json']['count'] = count($bankRequests);
-$diagData['other_payment_requests.json']['count'] = count($otherRequests);
+$diagData['orders.json']['count_paypal'] = $countPaypal;
+$diagData['orders.json']['count_test']   = $countTest;
+$diagData['orders.json']['count_total']  = $countTotal;
+$diagData['bank_transfer_requests.json']['count'] = $countBank;
+$diagData['other_payment_requests.json']['count'] = $countOther;
 
 require_once __DIR__ . '/../includes/header.php';
 require_once __DIR__ . '/../includes/footer.php';
@@ -273,10 +282,10 @@ echo generateHeader('Admin - Orders', 'KND Store order management');
         </details>
 
         <ul class="nav nav-tabs mb-4">
-            <li class="nav-item"><a class="nav-link <?php echo $activeTab === 'paypal' ? 'active' : ''; ?>" href="?tab=paypal">PayPal (<?php echo count($paypalOrders); ?>)</a></li>
-            <li class="nav-item"><a class="nav-link <?php echo $activeTab === 'bank' ? 'active' : ''; ?>" href="?tab=bank">Bank Transfer (<?php echo count($bankRequests); ?>)</a></li>
-            <li class="nav-item"><a class="nav-link <?php echo $activeTab === 'whatsapp' ? 'active' : ''; ?>" href="?tab=whatsapp">WhatsApp Other (<?php echo count($otherRequests); ?>)</a></li>
-            <li class="nav-item"><a class="nav-link <?php echo $activeTab === 'test' ? 'active' : ''; ?>" href="?tab=test">Test (<?php echo count($testOrders); ?>)</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo $activeTab === 'paypal' ? 'active' : ''; ?>" href="?tab=paypal">PayPal (<?php echo $countPaypal; ?>)</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo $activeTab === 'bank' ? 'active' : ''; ?>" href="?tab=bank">Bank Transfer (<?php echo $countBank; ?>)</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo $activeTab === 'whatsapp' ? 'active' : ''; ?>" href="?tab=whatsapp">WhatsApp Other (<?php echo $countOther; ?>)</a></li>
+            <li class="nav-item"><a class="nav-link <?php echo $activeTab === 'test' ? 'active' : ''; ?>" href="?tab=test">Test (<?php echo $countTest; ?>)</a></li>
         </ul>
 
         <?php if ($activeTab === 'paypal'): ?>
