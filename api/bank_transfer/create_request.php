@@ -92,39 +92,15 @@ $record = [
     'payment_method' => 'Bank Transfer',
 ];
 
-$storageDir = __DIR__ . '/../../storage';
-$requestsFile = $storageDir . '/bank_transfer_requests.json';
+require_once __DIR__ . '/../../includes/storage.php';
+ensure_storage_ready();
 
-if (!is_dir($storageDir)) {
-    @mkdir($storageDir, 0755, true);
-}
-if (!file_exists($requestsFile)) {
-    @file_put_contents($requestsFile, '[]');
-}
-
-$fp = fopen($requestsFile, 'r+b');
-if (!$fp) {
+$ok = append_json_record(storage_path('bank_transfer_requests.json'), $record);
+if (!$ok) {
     http_response_code(500);
-    echo json_encode(['error' => 'Storage error']);
+    echo json_encode(['error' => 'Storage write error']);
     exit;
 }
-if (!flock($fp, LOCK_EX)) {
-    fclose($fp);
-    http_response_code(500);
-    echo json_encode(['error' => 'Storage lock error']);
-    exit;
-}
-
-$existing = json_decode(stream_get_contents($fp), true);
-if (!is_array($existing)) {
-    $existing = [];
-}
-$existing[] = $record;
-ftruncate($fp, 0);
-rewind($fp);
-fwrite($fp, json_encode($existing, JSON_PRETTY_PRINT));
-flock($fp, LOCK_UN);
-fclose($fp);
 
 echo json_encode([
     'ok' => true,

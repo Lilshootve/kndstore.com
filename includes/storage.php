@@ -1,7 +1,8 @@
 <?php
 /**
  * KND Store — Storage helpers
- * Production-safe JSON persistence + forensic logging.
+ * All JSON reads use LOCK_SH, all writes use LOCK_EX on the same file handle.
+ * No temp files, no rename — prevents partial-read corruption.
  */
 
 function storage_path(string $relative = ''): string {
@@ -19,99 +20,170 @@ function ensure_storage_ready(): void {
         if (!is_dir($dir)) {
             @mkdir($dir, 0750, true);
         }
-        @chmod($dir, 0750);
     }
     $jsonFiles = ['orders.json', 'bank_transfer_requests.json', 'other_payment_requests.json'];
     foreach ($jsonFiles as $f) {
         $path = storage_path($f);
         if (!file_exists($path)) {
-            @file_put_contents($path, "[]");
+            $fh = @fopen($path, 'c+');
+            if ($fh) {
+                if (flock($fh, LOCK_EX)) {
+                    fwrite($fh, '[]');
+                    fflush($fh);
+                    flock($fh, LOCK_UN);
+                }
+                fclose($fh);
+            }
             @chmod($path, 0640);
         }
     }
 }
 
+/**
+ * Read a JSON array file with shared lock to prevent reading mid-write.
+ */
 function read_json_array(string $path): array {
     if (!file_exists($path)) return [];
     clearstatcache(true, $path);
-    $raw = @file_get_contents($path);
-    if ($raw === false) {
-        storage_log('read_json_array: failed to read file', ['path' => $path]);
+
+    $fh = @fopen($path, 'r');
+    if (!$fh) {
+        storage_log('read_json_array: cannot open', ['path' => $path]);
         return [];
     }
-    $trimmed = trim($raw);
-    if ($trimmed === '') {
-        storage_log('read_json_array: empty file, resetting to []', ['path' => $path]);
-        @file_put_contents($path, "[]");
-        @chmod($path, 0640);
+    if (!flock($fh, LOCK_SH)) {
+        fclose($fh);
+        storage_log('read_json_array: cannot lock_sh', ['path' => $path]);
         return [];
     }
-    $data = json_decode($trimmed, true);
-    if (!is_array($data)) {
-        storage_log('read_json_array: invalid JSON, backing up', [
-            'path' => $path,
-            'size' => strlen($raw),
-            'json_error' => json_last_error_msg(),
-        ]);
-        $backup = $path . '.bak.' . date('Ymd_His');
-        @copy($path, $backup);
-        @file_put_contents($path, "[]");
-        @chmod($path, 0640);
+
+    $raw = stream_get_contents($fh);
+    flock($fh, LOCK_UN);
+    fclose($fh);
+
+    if ($raw === false || trim($raw) === '') {
         return [];
     }
-    return $data;
+
+    $data = json_decode($raw, true);
+    if (is_array($data)) {
+        return $data;
+    }
+
+    storage_log('read_json_array: invalid JSON (read-only, not wiping)', [
+        'path' => $path,
+        'size' => strlen($raw),
+        'json_error' => json_last_error_msg(),
+        'first_64' => substr($raw, 0, 64),
+    ]);
+    return [];
 }
 
 /**
- * Append a record to a JSON array file atomically.
- * Uses flock for concurrency and writes to a temp file before renaming.
+ * Overwrite a JSON file with a full array. Uses exclusive lock on the same handle.
+ * Returns true on success.
  */
-function append_json_record(string $path, array $record): bool {
-    ensure_storage_ready();
-    $dir = dirname($path);
-    $tmpFile = $dir . DIRECTORY_SEPARATOR . '.tmp_' . basename($path) . '.' . getmypid();
-
-    $fp = @fopen($path, 'c+');
-    if (!$fp) {
-        storage_log('append_json_record: cannot open file', ['path' => $path]);
+function write_json_array(string $path, array $data): bool {
+    $fh = @fopen($path, 'c+');
+    if (!$fh) {
+        storage_log('write_json_array: cannot open', ['path' => $path]);
         return false;
     }
-    if (!flock($fp, LOCK_EX)) {
-        fclose($fp);
-        storage_log('append_json_record: cannot lock file', ['path' => $path]);
+    if (!flock($fh, LOCK_EX)) {
+        fclose($fh);
+        storage_log('write_json_array: cannot lock_ex', ['path' => $path]);
         return false;
     }
 
-    $raw = stream_get_contents($fp);
-    $existing = json_decode($raw ?: '[]', true);
-    if (!is_array($existing)) {
-        storage_log('append_json_record: corrupt JSON, resetting with backup', ['path' => $path]);
-        $backup = $path . '.bak.' . date('Ymd_His');
-        @file_put_contents($backup, $raw);
-        $existing = [];
+    $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($json === false) {
+        flock($fh, LOCK_UN);
+        fclose($fh);
+        storage_log('write_json_array: json_encode failed', ['path' => $path, 'error' => json_last_error_msg()]);
+        return false;
     }
 
-    $existing[] = $record;
-    $json = json_encode($existing, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    rewind($fh);
+    ftruncate($fh, 0);
+    $written = fwrite($fh, $json);
+    fflush($fh);
+    flock($fh, LOCK_UN);
+    fclose($fh);
 
-    $written = @file_put_contents($tmpFile, $json);
     if ($written === false) {
-        flock($fp, LOCK_UN);
-        fclose($fp);
-        storage_log('append_json_record: tmp write failed', ['path' => $path, 'tmp' => $tmpFile]);
+        storage_log('write_json_array: fwrite failed', ['path' => $path]);
         return false;
-    }
-
-    if (!@rename($tmpFile, $path)) {
-        ftruncate($fp, 0);
-        rewind($fp);
-        fwrite($fp, $json);
     }
 
     @chmod($path, 0640);
-    flock($fp, LOCK_UN);
-    fclose($fp);
-    @unlink($tmpFile);
+    return true;
+}
+
+/**
+ * Append a record to a JSON array file.
+ * Opens once, locks exclusive, reads, appends, writes back, unlocks.
+ */
+function append_json_record(string $path, array $record): bool {
+    ensure_storage_ready();
+
+    $fh = @fopen($path, 'c+');
+    if (!$fh) {
+        storage_log('append_json_record: cannot open', ['path' => $path]);
+        return false;
+    }
+    if (!flock($fh, LOCK_EX)) {
+        fclose($fh);
+        storage_log('append_json_record: cannot lock_ex', ['path' => $path]);
+        return false;
+    }
+
+    $raw = stream_get_contents($fh);
+    $trimmed = ($raw !== false) ? trim($raw) : '';
+
+    if ($trimmed === '') {
+        $existing = [];
+    } else {
+        $existing = json_decode($trimmed, true);
+        if (!is_array($existing)) {
+            rewind($fh);
+            $raw2 = stream_get_contents($fh);
+            $existing = json_decode(trim($raw2 ?: ''), true);
+            if (!is_array($existing)) {
+                storage_log('append_json_record: corrupt JSON, backing up', [
+                    'path' => $path,
+                    'size' => strlen($raw),
+                    'json_error' => json_last_error_msg(),
+                ]);
+                $backup = $path . '.bak.' . date('Ymd_His');
+                $backupOk = @file_put_contents($backup, $raw);
+                if ($backupOk !== false) {
+                    $existing = [];
+                } else {
+                    flock($fh, LOCK_UN);
+                    fclose($fh);
+                    storage_log('append_json_record: backup failed, aborting to protect data', ['path' => $path]);
+                    return false;
+                }
+            }
+        }
+    }
+
+    $existing[] = $record;
+    $json = json_encode($existing, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+    rewind($fh);
+    ftruncate($fh, 0);
+    $written = fwrite($fh, $json);
+    fflush($fh);
+    flock($fh, LOCK_UN);
+    fclose($fh);
+
+    if ($written === false) {
+        storage_log('append_json_record: fwrite failed', ['path' => $path]);
+        return false;
+    }
+
+    @chmod($path, 0640);
     return true;
 }
 

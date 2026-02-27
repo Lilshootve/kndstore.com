@@ -72,28 +72,6 @@ $ordersFile = storage_path('orders.json');
 $bankFile   = storage_path('bank_transfer_requests.json');
 $otherFile  = storage_path('other_payment_requests.json');
 
-function saveJsonAtomic($path, $data) {
-    $dir = dirname($path);
-    if (!is_dir($dir)) @mkdir($dir, 0755, true);
-    $tmp = $path . '.tmp.' . getmypid();
-    $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    if (@file_put_contents($tmp, $json) === false) return false;
-    $fp = @fopen($path, 'c');
-    if (!$fp) { @unlink($tmp); return false; }
-    if (!flock($fp, LOCK_EX)) { fclose($fp); @unlink($tmp); return false; }
-    $ok = @rename($tmp, $path);
-    if (!$ok) {
-        ftruncate($fp, 0);
-        rewind($fp);
-        fwrite($fp, $json);
-    }
-    flock($fp, LOCK_UN);
-    fclose($fp);
-    @unlink($tmp);
-    @chmod($path, 0640);
-    return true;
-}
-
 $validTabs = ['paypal', 'bank', 'whatsapp', 'test'];
 $activeTab = in_array($_GET['tab'] ?? '', $validTabs) ? $_GET['tab'] : 'paypal';
 $flashMsg = '';
@@ -137,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 }
             }
             if ($found) {
-                $writeOk = saveJsonAtomic($targetFile, $data);
+                $writeOk = write_json_array($targetFile, $data);
                 $result = $writeOk ? 'ok' : 'write_failed';
                 storage_log('admin_status_update', [
                     'order_id' => $orderId,
