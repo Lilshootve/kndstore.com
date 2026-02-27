@@ -1,4 +1,9 @@
 <?php
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+header('X-Robots-Tag: noindex, nofollow');
+
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/storage.php';
@@ -80,7 +85,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     $ok = append_json_record(storage_path('orders.json'), $record);
-    storage_log('test_order: created', ['order_ref' => $orderRef, 'persisted' => $ok]);
+    storage_log('test_order: created', [
+        'order_ref' => $orderRef,
+        'persisted' => $ok,
+        'file' => storage_path('orders.json'),
+    ]);
 
     $result = ['ok' => $ok, 'order_ref' => $orderRef];
 }
@@ -103,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 <h1>Create Test Order</h1>
-<p><a href="/admin/orders.php">&larr; Admin Panel</a> &nbsp;|&nbsp; <a href="/admin/debug_storage.php">Debug Storage</a></p>
+<p><a href="/admin/orders.php?tab=test">&larr; Admin Panel (Test tab)</a> &nbsp;|&nbsp; <a href="/admin/debug_storage.php">Debug Storage</a></p>
 
 <div class="card">
 <?php if ($result): ?>
@@ -112,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p class="ref"><?php echo htmlspecialchars($result['order_ref']); ?></p>
         <div class="links">
             <a href="/track-order.php?id=<?php echo urlencode($result['order_ref']); ?>">View on Track Order page &rarr;</a>
-            <a href="/admin/orders.php">View in Admin Panel &rarr;</a>
+            <a href="/admin/orders.php?tab=test">View in Admin Panel (Test tab) &rarr;</a>
         </div>
     <?php else: ?>
         <p class="fail">Persist failed. Check <code>storage/logs/payments.log</code> and <code>admin/debug_storage.php</code>.</p>

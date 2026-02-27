@@ -1,4 +1,9 @@
 <?php
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+header('X-Robots-Tag: noindex, nofollow');
+
 require_once __DIR__ . '/../includes/session.php';
 
 $secretsPath = __DIR__ . '/../config/admin_secrets.local.php';

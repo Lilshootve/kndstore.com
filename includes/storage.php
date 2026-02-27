@@ -33,14 +33,26 @@ function ensure_storage_ready(): void {
 
 function read_json_array(string $path): array {
     if (!file_exists($path)) return [];
+    clearstatcache(true, $path);
     $raw = @file_get_contents($path);
     if ($raw === false) {
         storage_log('read_json_array: failed to read file', ['path' => $path]);
         return [];
     }
-    $data = json_decode($raw, true);
+    $trimmed = trim($raw);
+    if ($trimmed === '') {
+        storage_log('read_json_array: empty file, resetting to []', ['path' => $path]);
+        @file_put_contents($path, "[]");
+        @chmod($path, 0640);
+        return [];
+    }
+    $data = json_decode($trimmed, true);
     if (!is_array($data)) {
-        storage_log('read_json_array: invalid JSON, backing up', ['path' => $path, 'size' => strlen($raw)]);
+        storage_log('read_json_array: invalid JSON, backing up', [
+            'path' => $path,
+            'size' => strlen($raw),
+            'json_error' => json_last_error_msg(),
+        ]);
         $backup = $path . '.bak.' . date('Ymd_His');
         @copy($path, $backup);
         @file_put_contents($path, "[]");

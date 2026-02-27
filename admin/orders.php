@@ -1,4 +1,9 @@
 <?php
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+header('X-Robots-Tag: noindex, nofollow');
+
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/config.php';
 
@@ -67,19 +72,25 @@ $ordersFile = storage_path('orders.json');
 $bankFile   = storage_path('bank_transfer_requests.json');
 $otherFile  = storage_path('other_payment_requests.json');
 
-function loadJson($path) {
-    return read_json_array($path);
-}
-function saveJson($path, $data) {
+function saveJsonAtomic($path, $data) {
     $dir = dirname($path);
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
-    $fp = @fopen($path, 'c+');
-    if (!$fp || !flock($fp, LOCK_EX)) return false;
-    ftruncate($fp, 0);
-    rewind($fp);
-    fwrite($fp, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    $tmp = $path . '.tmp.' . getmypid();
+    $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    if (@file_put_contents($tmp, $json) === false) return false;
+    $fp = @fopen($path, 'c');
+    if (!$fp) { @unlink($tmp); return false; }
+    if (!flock($fp, LOCK_EX)) { fclose($fp); @unlink($tmp); return false; }
+    $ok = @rename($tmp, $path);
+    if (!$ok) {
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, $json);
+    }
     flock($fp, LOCK_UN);
     fclose($fp);
+    @unlink($tmp);
+    @chmod($path, 0640);
     return true;
 }
 
@@ -104,30 +115,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     if ($orderId && $source && in_array($newStatus, $allowed)) {
         $fileMap = [
-            'paypal' => $ordersFile,
-            'test'   => $ordersFile,
-            'bank'   => $bankFile,
+            'paypal'   => $ordersFile,
+            'test'     => $ordersFile,
+            'bank'     => $bankFile,
             'whatsapp' => $otherFile,
         ];
         $targetFile = $fileMap[$source] ?? null;
 
         if ($targetFile) {
-            $data = loadJson($targetFile);
+            clearstatcache(true, $targetFile);
+            $data = read_json_array($targetFile);
             $found = false;
             foreach ($data as $i => $r) {
                 $refMatch = isset($r['order_ref']) && strcasecmp($r['order_ref'], $orderId) === 0;
                 $idMatch  = isset($r['order_id']) && strcasecmp($r['order_id'], $orderId) === 0;
-                if ($refMatch || $idMatch) {
+                $ppMatch  = isset($r['paypal_order_id']) && strcasecmp($r['paypal_order_id'], $orderId) === 0;
+                if ($refMatch || $idMatch || $ppMatch) {
                     $data[$i]['status'] = $newStatus;
                     $found = true;
                     break;
                 }
             }
             if ($found) {
-                $result = saveJson($targetFile, $data) ? 'ok' : 'write_failed';
-                if ($result === 'write_failed') {
-                    storage_log('admin_status_update: write_failed', ['order_id' => $orderId, 'file' => $targetFile]);
-                }
+                $writeOk = saveJsonAtomic($targetFile, $data);
+                $result = $writeOk ? 'ok' : 'write_failed';
+                storage_log('admin_status_update', [
+                    'order_id' => $orderId,
+                    'new_status' => $newStatus,
+                    'file' => basename($targetFile),
+                    'write_ok' => $writeOk,
+                ]);
+            } else {
+                storage_log('admin_status_update: not_found', [
+                    'order_id' => $orderId,
+                    'source' => $source,
+                    'file' => basename($targetFile),
+                    'record_count' => count($data),
+                ]);
             }
         }
     }
@@ -139,21 +163,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 if (isset($_GET['update_result'])) {
     $ur = $_GET['update_result'];
-    if ($ur === 'ok') { $flashMsg = 'Status updated.'; $flashType = 'success'; }
-    elseif ($ur === 'not_found') { $flashMsg = 'Order not found in file.'; $flashType = 'warning'; }
+    if ($ur === 'ok')           { $flashMsg = 'Status updated.';                  $flashType = 'success'; }
+    elseif ($ur === 'not_found') { $flashMsg = 'Order not found in file.';         $flashType = 'warning'; }
     elseif ($ur === 'write_failed') { $flashMsg = 'Write failed — check server logs.'; $flashType = 'danger'; }
 }
 
-$allOrders    = loadJson($ordersFile);
-$bankRequests = loadJson($bankFile);
-$otherRequests = loadJson($otherFile);
+clearstatcache(true, $ordersFile);
+clearstatcache(true, $bankFile);
+clearstatcache(true, $otherFile);
+
+$allOrders     = read_json_array($ordersFile);
+$bankRequests  = read_json_array($bankFile);
+$otherRequests = read_json_array($otherFile);
 
 $paypalOrders = [];
 $testOrders   = [];
-foreach ($allOrders as $i => $r) {
+foreach ($allOrders as $r) {
     if (empty($r['status'])) $r['status'] = 'paid';
-    if (($r['source'] ?? 'paypal') === 'test') {
+    $src = $r['source'] ?? null;
+    if ($src === 'test') {
         $testOrders[] = $r;
+    } elseif ($src === 'paypal' || !empty($r['paypal_order_id'])) {
+        $paypalOrders[] = $r;
     } else {
         $paypalOrders[] = $r;
     }
@@ -164,6 +195,30 @@ foreach ($bankRequests as $i => $r) {
 foreach ($otherRequests as $i => $r) {
     if (empty($r['status'])) $otherRequests[$i]['status'] = 'pending';
 }
+
+$diagFiles = [
+    'orders.json' => $ordersFile,
+    'bank_transfer_requests.json' => $bankFile,
+    'other_payment_requests.json' => $otherFile,
+];
+$diagData = [];
+foreach ($diagFiles as $label => $fp) {
+    clearstatcache(true, $fp);
+    $exists   = file_exists($fp);
+    $diagData[$label] = [
+        'path'     => $fp,
+        'exists'   => $exists,
+        'readable' => $exists && is_readable($fp),
+        'writable' => $exists && is_writable($fp),
+        'size'     => $exists ? filesize($fp) : 0,
+        'mtime'    => $exists ? date('Y-m-d H:i:s', filemtime($fp)) : '-',
+    ];
+}
+$diagData['orders.json']['count_paypal'] = count($paypalOrders);
+$diagData['orders.json']['count_test']   = count($testOrders);
+$diagData['orders.json']['count_total']  = count($allOrders);
+$diagData['bank_transfer_requests.json']['count'] = count($bankRequests);
+$diagData['other_payment_requests.json']['count'] = count($otherRequests);
 
 require_once __DIR__ . '/../includes/header.php';
 require_once __DIR__ . '/../includes/footer.php';
@@ -185,6 +240,12 @@ echo generateHeader('Admin - Orders', 'KND Store order management');
 .admin-lux .btn-cyber:hover { background: rgba(0,212,255,0.25); color: #fff; }
 .admin-lux .badge-status { font-size: 0.75rem; }
 .admin-lux select.form-select { background: #0c0f16; color: #f0f4f8; border-color: rgba(255,255,255,0.12); }
+.diag-panel { background: rgba(0,212,255,0.04); border: 1px solid rgba(0,212,255,0.12); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; font-size: 0.8rem; }
+.diag-panel summary { cursor: pointer; color: #00d4ff; font-weight: 600; }
+.diag-panel table { width: 100%; }
+.diag-panel td, .diag-panel th { padding: .2rem .5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.diag-panel .ok { color: #4ade80; }
+.diag-panel .fail { color: #f87171; }
 </style>
 <div id="particles-bg"></div>
 <?php echo generateNavigation(); ?>
@@ -207,6 +268,31 @@ echo generateHeader('Admin - Orders', 'KND Store order management');
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         <?php endif; ?>
+
+        <details class="diag-panel">
+            <summary>Storage Diagnostics</summary>
+            <table class="mt-2">
+                <tr><th>File</th><th>Path</th><th>Exists</th><th>R</th><th>W</th><th>Size</th><th>Modified</th><th>Records</th></tr>
+                <?php foreach ($diagData as $label => $d): ?>
+                <tr>
+                    <td><code><?php echo $label; ?></code></td>
+                    <td style="word-break:break-all;max-width:300px;"><code><?php echo htmlspecialchars($d['path']); ?></code></td>
+                    <td class="<?php echo $d['exists'] ? 'ok' : 'fail'; ?>"><?php echo $d['exists'] ? 'Y' : 'N'; ?></td>
+                    <td class="<?php echo $d['readable'] ? 'ok' : 'fail'; ?>"><?php echo $d['readable'] ? 'Y' : 'N'; ?></td>
+                    <td class="<?php echo $d['writable'] ? 'ok' : 'fail'; ?>"><?php echo $d['writable'] ? 'Y' : 'N'; ?></td>
+                    <td><?php echo number_format($d['size']); ?>B</td>
+                    <td><?php echo $d['mtime']; ?></td>
+                    <td>
+                        <?php if ($label === 'orders.json'): ?>
+                            <?php echo $d['count_total']; ?> total (<?php echo $d['count_paypal']; ?> paypal, <?php echo $d['count_test']; ?> test)
+                        <?php else: ?>
+                            <?php echo $d['count'] ?? 0; ?>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+        </details>
 
         <ul class="nav nav-tabs mb-4">
             <li class="nav-item"><a class="nav-link <?php echo $activeTab === 'paypal' ? 'active' : ''; ?>" href="?tab=paypal">PayPal (<?php echo count($paypalOrders); ?>)</a></li>
