@@ -859,8 +859,7 @@ h1, h2, h3, h4, h5, h6 {
 .color-panel-toggle {
     position: fixed;
     left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 80px;
     width: 50px;
     height: 50px;
     background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 1) 0%, rgba(255, 255, 255, 1) 100%);
@@ -1031,12 +1030,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .color-panel-toggle:hover {
-    transform: translateY(-50%) scale(1.1);
+    transform: scale(1.1);
     box-shadow: 0 0 30px rgba(37, 156, 174, 0.8);
 }
 
 .color-panel-toggle.active {
-    transform: translateY(-50%) rotate(180deg);
+    transform: rotate(180deg);
 }
 
 /* Sidebar de colores */
