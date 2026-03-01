@@ -77,6 +77,27 @@ function generateNavigation() {
     $nav .= '                        <a class="knd-dropdown-item" href="/contact.php"><i class="fas fa-headset me-2"></i>Support</a>' . "\n";
     $nav .= '                    </div>' . "\n";
     $nav .= '                </li>' . "\n";
+    // Death Roll 1v1 link
+    $drActive = in_array($current_page, ['death-roll-lobby.php', 'death-roll-game.php']);
+    $nav .= '                <li class="nav-item">' . "\n";
+    $nav .= '                    <a class="nav-link' . ($drActive ? ' active' : '') . '" href="/death-roll-lobby.php"><i class="fas fa-dice-d20 me-1"></i>' . t('nav.deathroll', 'Death Roll') . '</a>' . "\n";
+    $nav .= '                </li>' . "\n";
+    // Auth: show username+logout if logged in, or Login link
+    $drLoggedIn = !empty($_SESSION['dr_user_id']);
+    if ($drLoggedIn) {
+        $drUsername = htmlspecialchars($_SESSION['dr_username'] ?? '');
+        $nav .= '                <li class="nav-item">' . "\n";
+        $nav .= '                    <span class="nav-link text-white-50"><i class="fas fa-user me-1"></i>' . $drUsername . '</span>' . "\n";
+        $nav .= '                </li>' . "\n";
+        $nav .= '                <li class="nav-item">' . "\n";
+        $nav .= '                    <a class="nav-link" href="/logout.php"><i class="fas fa-sign-out-alt me-1"></i>' . t('nav.logout', 'Logout') . '</a>' . "\n";
+        $nav .= '                </li>' . "\n";
+    } else {
+        $authActive = ($current_page === 'auth.php');
+        $nav .= '                <li class="nav-item">' . "\n";
+        $nav .= '                    <a class="nav-link' . ($authActive ? ' active' : '') . '" href="/auth.php"><i class="fas fa-sign-in-alt me-1"></i>' . t('nav.login', 'Login') . '</a>' . "\n";
+        $nav .= '                </li>' . "\n";
+    }
     $nav .= '            </ul>' . "\n";
     $nav .= '        </div>' . "\n";
     $nav .= '    </div>' . "\n";
