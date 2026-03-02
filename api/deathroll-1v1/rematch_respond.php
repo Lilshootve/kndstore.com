@@ -76,8 +76,8 @@ $newCode = generate_room_code($pdo);
 $stmt = $pdo->prepare(
     'INSERT INTO deathroll_games_1v1
      (code, visibility, status, created_by_user_id, player1_user_id, player2_user_id,
-      current_max, turn_user_id, created_at, updated_at)
-     VALUES (?, ?, "playing", ?, ?, ?, 1000, ?, ?, ?)'
+      current_max, turn_user_id, turn_started_at, created_at, updated_at, last_activity_at)
+     VALUES (?, ?, "playing", ?, ?, ?, 1000, ?, ?, ?, ?, ?)'
 );
 $stmt->execute([
     $newCode,
@@ -85,7 +85,9 @@ $stmt->execute([
     $userId,
     $loserId,
     $winnerId,
-    $loserId, // loser goes first
+    $loserId,
+    $now,
+    $now,
     $now,
     $now,
 ]);

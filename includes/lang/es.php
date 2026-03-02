@@ -243,4 +243,8 @@ return [
     'dr.game.rematch_incoming' => '¡quiere la revancha!',
     'dr.game.accept' => 'Aceptar',
     'dr.game.decline' => 'Rechazar',
+    'dr.game.timeout_you' => '¡Perdiste por tiempo!',
+    'dr.game.timeout_opponent' => '¡Tu oponente perdió por tiempo!',
+    'dr.game.turn_timer' => 'Tiempo restante',
+    'dr.game.abandoned' => 'Partida abandonada',
 ];

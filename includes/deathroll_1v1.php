@@ -58,6 +58,81 @@ function validate_username(string $username): bool {
 }
 
 /**
+ * Opportunistic garbage collection for stale/abandoned games.
+ * Called with low probability (~5%) to avoid extra load.
+ */
+function deathroll_gc(PDO $pdo): void {
+    if (random_int(1, 100) > 5) {
+        return;
+    }
+    $now = gmdate('Y-m-d H:i:s');
+
+    $pdo->prepare(
+        "UPDATE deathroll_games_1v1
+         SET status = 'finished', finished_reason = 'abandoned', updated_at = ?
+         WHERE status = 'waiting' AND last_activity_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 MINUTE)"
+    )->execute([$now]);
+
+    $pdo->prepare(
+        "UPDATE deathroll_games_1v1
+         SET status = 'finished', finished_reason = 'abandoned', turn_user_id = NULL, updated_at = ?
+         WHERE status = 'playing' AND last_activity_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 5 MINUTE)"
+    )->execute([$now]);
+
+    $pdo->prepare(
+        "DELETE FROM deathroll_games_1v1
+         WHERE status = 'finished' AND updated_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 7 DAY)"
+    )->execute();
+}
+
+/**
+ * Check and apply turn timeout (13s). Returns updated $game array.
+ * Uses optimistic locking on turn_started_at to prevent double-finish.
+ */
+function check_turn_timeout(PDO $pdo, array $game): array {
+    if ($game['status'] !== 'playing' || !$game['turn_started_at'] || !$game['turn_user_id']) {
+        return $game;
+    }
+
+    $turnStart = strtotime($game['turn_started_at']);
+    $serverNow = time();
+    $elapsed = $serverNow - $turnStart;
+
+    if ($elapsed < 13) {
+        return $game;
+    }
+
+    $now = gmdate('Y-m-d H:i:s');
+    $turnUserId = (int) $game['turn_user_id'];
+    $opponent = ((int) $game['player1_user_id'] === $turnUserId)
+        ? (int) $game['player2_user_id']
+        : (int) $game['player1_user_id'];
+
+    if (!$opponent) {
+        return $game;
+    }
+
+    $stmt = $pdo->prepare(
+        "UPDATE deathroll_games_1v1
+         SET status = 'finished', finished_reason = 'timeout',
+             loser_user_id = ?, winner_user_id = ?,
+             turn_user_id = NULL, updated_at = ?, last_activity_at = ?
+         WHERE id = ? AND status = 'playing' AND turn_started_at = ?"
+    );
+    $stmt->execute([$turnUserId, $opponent, $now, $now, $game['id'], $game['turn_started_at']]);
+
+    if ($stmt->rowCount() > 0) {
+        $game['status'] = 'finished';
+        $game['finished_reason'] = 'timeout';
+        $game['loser_user_id'] = $turnUserId;
+        $game['winner_user_id'] = $opponent;
+        $game['turn_user_id'] = null;
+    }
+
+    return $game;
+}
+
+/**
  * Build the full game state array for API responses.
  */
 function build_game_state(PDO $pdo, array $game, int $currentUserId): array {
@@ -87,15 +162,26 @@ function build_game_state(PDO $pdo, array $game, int $currentUserId): array {
     $stmt->execute([$game['id']]);
     $rolls = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    $turnSecondsLeft = null;
+    $serverTime = gmdate('Y-m-d H:i:s');
+    if ($game['status'] === 'playing' && !empty($game['turn_started_at'])) {
+        $elapsed = time() - strtotime($game['turn_started_at']);
+        $turnSecondsLeft = max(0, 13 - $elapsed);
+    }
+
     return [
         'game' => [
-            'code'           => $game['code'],
-            'visibility'     => $game['visibility'],
-            'status'         => $game['status'],
-            'current_max'    => (int) $game['current_max'],
-            'turn_user_id'   => $game['turn_user_id'] ? (int) $game['turn_user_id'] : null,
-            'winner_user_id' => $game['winner_user_id'] ? (int) $game['winner_user_id'] : null,
-            'loser_user_id'  => $game['loser_user_id'] ? (int) $game['loser_user_id'] : null,
+            'code'              => $game['code'],
+            'visibility'        => $game['visibility'],
+            'status'            => $game['status'],
+            'current_max'       => (int) $game['current_max'],
+            'turn_user_id'      => $game['turn_user_id'] ? (int) $game['turn_user_id'] : null,
+            'winner_user_id'    => $game['winner_user_id'] ? (int) $game['winner_user_id'] : null,
+            'loser_user_id'     => $game['loser_user_id'] ? (int) $game['loser_user_id'] : null,
+            'finished_reason'   => $game['finished_reason'] ?? null,
+            'turn_seconds_left' => $turnSecondsLeft,
+            'turn_started_at'   => $game['turn_started_at'] ?? null,
+            'server_time'       => $serverTime,
         ],
         'players' => [
             'p1' => $p1 ? ['id' => (int)$p1['id'], 'username' => $p1['username']] : null,

@@ -1,4 +1,8 @@
 <?php
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 require_once __DIR__ . '/includes/session.php';
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/auth.php';
@@ -73,6 +77,17 @@ $csrfToken = csrf_token();
                     <div class="text-center mb-4">
                         <div class="small text-white-50 mb-1"><?php echo t('dr.game.current_max', 'Current Max'); ?></div>
                         <div id="current-max-display" style="font-size: 4rem; font-weight: 900; line-height: 1; font-family: 'Orbitron', monospace; color: var(--knd-neon-blue);">1000</div>
+                    </div>
+
+                    <!-- Turn Timer -->
+                    <div id="turn-timer-bar" class="text-center mb-3" style="display:none;">
+                        <div class="small text-white-50 mb-1"><?php echo t('dr.game.turn_timer', 'Time left'); ?></div>
+                        <div class="d-flex justify-content-center align-items-center gap-3">
+                            <div id="turn-timer-value" style="font-size: 2rem; font-weight: 900; font-family: 'Orbitron', monospace; color: var(--knd-neon-blue); min-width: 60px;">13</div>
+                            <div style="flex: 1; max-width: 200px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                                <div id="turn-timer-progress" style="height: 100%; width: 100%; background: var(--knd-neon-blue); transition: width 0.3s linear, background 0.3s;"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Roll Button -->
@@ -157,6 +172,10 @@ const TEXTS = {
     rematchWaiting: <?php echo json_encode(t('dr.game.rematch_waiting', 'Waiting for opponent to accept...')); ?>,
     rematchDeclined: <?php echo json_encode(t('dr.game.rematch_declined', 'Opponent declined the rematch.')); ?>,
     rematchRequested: <?php echo json_encode(t('dr.game.rematch_incoming', 'wants a rematch!')); ?>,
+    timeoutYou:      <?php echo json_encode(t('dr.game.timeout_you', 'You lost by timeout!')); ?>,
+    timeoutOpponent: <?php echo json_encode(t('dr.game.timeout_opponent', 'Opponent timed out!')); ?>,
+    turnTimer:       <?php echo json_encode(t('dr.game.turn_timer', 'Time left')); ?>,
+    abandoned:       <?php echo json_encode(t('dr.game.abandoned', 'Game abandoned')); ?>,
 };
 </script>
 <script src="/assets/js/deathroll-1v1.js?v=<?php echo filemtime(__DIR__ . '/assets/js/deathroll-1v1.js'); ?>" defer></script>

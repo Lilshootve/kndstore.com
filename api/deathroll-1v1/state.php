@@ -33,5 +33,11 @@ if (!$game) {
     json_error('ROOM_NOT_FOUND', 'Room not found.', 404);
 }
 
+$game = check_turn_timeout($pdo, $game);
+
+$now = gmdate('Y-m-d H:i:s');
+$pdo->prepare('UPDATE deathroll_games_1v1 SET last_activity_at = ? WHERE id = ? AND status != "finished"')
+    ->execute([$now, $game['id']]);
+
 $state = build_game_state($pdo, $game, $userId);
 json_success($state);

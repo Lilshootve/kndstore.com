@@ -158,12 +158,56 @@
         var gameFinished = false;
         var rematchPolling = false;
         var rematchOffered = false;
+        var countdownInterval = null;
+        var serverSecondsLeft = null;
+        var localCountdownStart = null;
 
         var btnRoll = document.getElementById('btn-roll');
         var btnRematchReq = document.getElementById('btn-rematch-request');
         var btnRematchAccept = document.getElementById('btn-rematch-accept');
         var btnRematchDecline = document.getElementById('btn-rematch-decline');
         var btnCopy = document.getElementById('btn-copy-link');
+        var timerBar = document.getElementById('turn-timer-bar');
+        var timerValue = document.getElementById('turn-timer-value');
+        var timerProgress = document.getElementById('turn-timer-progress');
+
+        function startLocalCountdown(secondsLeft) {
+            serverSecondsLeft = secondsLeft;
+            localCountdownStart = Date.now();
+            if (countdownInterval) clearInterval(countdownInterval);
+            updateTimerDisplay();
+            countdownInterval = setInterval(updateTimerDisplay, 200);
+        }
+
+        function stopCountdown() {
+            if (countdownInterval) clearInterval(countdownInterval);
+            countdownInterval = null;
+            if (timerBar) timerBar.style.display = 'none';
+        }
+
+        function updateTimerDisplay() {
+            if (serverSecondsLeft === null || !timerBar) return;
+            var elapsed = (Date.now() - localCountdownStart) / 1000;
+            var left = Math.max(0, serverSecondsLeft - elapsed);
+            var secs = Math.ceil(left);
+
+            timerBar.style.display = 'block';
+            timerValue.textContent = secs;
+
+            var pct = (left / 13) * 100;
+            timerProgress.style.width = pct + '%';
+
+            if (left <= 3) {
+                timerValue.style.color = '#ff4444';
+                timerProgress.style.background = '#ff4444';
+            } else if (left <= 6) {
+                timerValue.style.color = '#ffaa00';
+                timerProgress.style.background = '#ffaa00';
+            } else {
+                timerValue.style.color = 'var(--knd-neon-blue)';
+                timerProgress.style.background = 'var(--knd-neon-blue)';
+            }
+        }
 
         function pollState() {
             if (isRolling) return;
@@ -206,7 +250,19 @@
             } else if (s.game.status === 'playing') {
                 statusEl.textContent = TEXTS.playing || 'Game in progress';
             } else {
-                statusEl.textContent = TEXTS.finished || 'Game over';
+                if (s.game.finished_reason === 'timeout') {
+                    statusEl.textContent = 'Timeout';
+                } else if (s.game.finished_reason === 'abandoned') {
+                    statusEl.textContent = TEXTS.abandoned || 'Game abandoned';
+                } else {
+                    statusEl.textContent = TEXTS.finished || 'Game over';
+                }
+            }
+
+            if (s.game.status === 'playing' && s.game.turn_seconds_left !== null && s.game.turn_seconds_left !== undefined) {
+                startLocalCountdown(s.game.turn_seconds_left);
+            } else {
+                stopCountdown();
             }
 
             var turnInfo = document.getElementById('turn-info');
@@ -282,19 +338,22 @@
         }
 
         function showGameOver(s) {
+            stopCountdown();
             var panel = document.getElementById('game-over-panel');
             var icon = document.getElementById('game-over-icon');
             var text = document.getElementById('game-over-text');
             var iWon = s.game.winner_user_id === MY_USER_ID;
+            var isTimeout = s.game.finished_reason === 'timeout';
+
             if (iWon) {
                 icon.innerHTML = '\uD83C\uDFC6';
-                text.textContent = TEXTS.youWin || 'YOU WIN!';
+                text.textContent = isTimeout ? (TEXTS.timeoutOpponent || 'Opponent timed out!') : (TEXTS.youWin || 'YOU WIN!');
                 text.style.color = '#00ff88';
                 panel.style.background = 'rgba(0,255,136,0.05)';
                 panel.style.border = '2px solid rgba(0,255,136,0.3)';
             } else {
-                icon.innerHTML = '\uD83D\uDC80';
-                text.textContent = TEXTS.youLose || 'YOU LOSE!';
+                icon.innerHTML = isTimeout ? '\u23F0' : '\uD83D\uDC80';
+                text.textContent = isTimeout ? (TEXTS.timeoutYou || 'You lost by timeout!') : (TEXTS.youLose || 'YOU LOSE!');
                 text.style.color = '#ff4444';
                 panel.style.background = 'rgba(255,68,68,0.05)';
                 panel.style.border = '2px solid rgba(255,68,68,0.3)';

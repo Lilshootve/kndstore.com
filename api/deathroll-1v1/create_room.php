@@ -47,10 +47,10 @@ $now = gmdate('Y-m-d H:i:s');
 
 $stmt = $pdo->prepare(
     'INSERT INTO deathroll_games_1v1
-     (code, visibility, status, created_by_user_id, player1_user_id, current_max, turn_user_id, created_at, updated_at)
-     VALUES (?, ?, "waiting", ?, ?, 1000, ?, ?, ?)'
+     (code, visibility, status, created_by_user_id, player1_user_id, current_max, turn_user_id, created_at, updated_at, last_activity_at)
+     VALUES (?, ?, "waiting", ?, ?, 1000, ?, ?, ?, ?)'
 );
-$stmt->execute([$code, $visibility, $userId, $userId, $userId, $now, $now]);
+$stmt->execute([$code, $visibility, $userId, $userId, $userId, $now, $now, $now]);
 
 json_success([
     'code' => $code,

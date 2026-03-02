@@ -19,7 +19,8 @@ api_require_login();
 $pdo = getDBConnection();
 if (!$pdo) { json_error('DB_CONNECTION_FAILED', 'Database connection failed.', 500); }
 
-// Online users (seen in last 60 seconds)
+deathroll_gc($pdo);
+
 $stmt = $pdo->prepare(
     'SELECT u.id, u.username
      FROM user_presence p
@@ -31,27 +32,27 @@ $stmt = $pdo->prepare(
 $stmt->execute();
 $onlineUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Cast ids to int
 foreach ($onlineUsers as &$u) {
     $u['id'] = (int) $u['id'];
 }
 unset($u);
 
-// Public waiting rooms
 $stmt = $pdo->prepare(
     'SELECT g.code, g.created_at, u.username AS creator
      FROM deathroll_games_1v1 g
      JOIN users u ON u.id = g.created_by_user_id
      WHERE g.visibility = "public" AND g.status = "waiting"
+       AND g.last_activity_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 MINUTE)
      ORDER BY g.updated_at DESC
      LIMIT 30'
 );
 $stmt->execute();
 $publicRooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Active games count
 $stmt = $pdo->prepare(
-    'SELECT COUNT(*) as cnt FROM deathroll_games_1v1 WHERE status = "playing"'
+    'SELECT COUNT(*) as cnt FROM deathroll_games_1v1
+     WHERE status = "playing"
+       AND last_activity_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 10 MINUTE)'
 );
 $stmt->execute();
 $activeGames = (int) $stmt->fetch(PDO::FETCH_ASSOC)['cnt'];

@@ -22,7 +22,7 @@ function generateHeader($title = 'KND Store - Tienda Galáctica', $description =
     $header .= $favicon;
     $header .= '    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">' . "\n";
     $header .= '    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css?v=652">' . "\n";
-    $header .= '    <link rel="stylesheet" href="/assets/css/style.css">' . "\n";
+    $header .= '    <link rel="stylesheet" href="/assets/css/style.css?v=' . @filemtime(__DIR__ . '/../assets/css/style.css') . '">' . "\n";
     $header .= '    <link rel="stylesheet" href="/assets/css/mobile-optimization.css">' . "\n";
     $header .= '    <link rel="manifest" href="/assets/images/site.webmanifest">' . "\n";
     $header .= '</head>' . "\n";

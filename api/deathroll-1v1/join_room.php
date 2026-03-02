@@ -58,13 +58,15 @@ try {
     $now = gmdate('Y-m-d H:i:s');
     $stmt = $pdo->prepare(
         'UPDATE deathroll_games_1v1
-         SET player2_user_id = ?, status = "playing", updated_at = ?
+         SET player2_user_id = ?, status = "playing",
+             turn_started_at = ?, updated_at = ?, last_activity_at = ?
          WHERE id = ?'
     );
-    $stmt->execute([$userId, $now, $game['id']]);
+    $stmt->execute([$userId, $now, $now, $now, $game['id']]);
 
     $game['player2_user_id'] = $userId;
     $game['status'] = 'playing';
+    $game['turn_started_at'] = $now;
 
     $state = build_game_state($pdo, $game, $userId);
 

@@ -322,4 +322,8 @@ return [
     'dr.game.rematch_incoming' => 'wants a rematch!',
     'dr.game.accept' => 'Accept',
     'dr.game.decline' => 'Decline',
+    'dr.game.timeout_you' => 'You lost by timeout!',
+    'dr.game.timeout_opponent' => 'Opponent timed out!',
+    'dr.game.turn_timer' => 'Time left',
+    'dr.game.abandoned' => 'Game abandoned',
 ];
