@@ -185,7 +185,8 @@ return [
     'home.lastroll.step3' => 'Saca un 1 y pierdes. El último en pie gana.',
     'home.lastroll.disclaimer' => 'BETA: las funciones y el balance pueden cambiar.',
 
-    // Navigation - KND LastRoll
+    // Navigation - KND Arena
+    'nav.arena' => 'KND Arena',
     'nav.deathroll' => 'KND LastRoll',
     'nav.login' => 'Iniciar Sesión',
     'nav.logout' => 'Cerrar Sesión',
@@ -352,4 +353,25 @@ return [
     'nav.credits' => 'Créditos',
     'nav.rewards' => 'Recompensas',
     'nav.credits_badge_tooltip' => 'Créditos de soporte disponibles',
+
+    // KND Arena
+    'arena.title' => 'KND Arena',
+    'arena.subtitle' => 'Duelos RNG de nueva generación, drops promocionales y badges de temporada.',
+    'arena.beta' => 'BETA',
+    'arena.live' => 'EN VIVO',
+    'arena.coming' => 'PRÓXIMAMENTE',
+    'arena.enter' => 'Entrar',
+    'arena.preview' => 'Vista previa',
+    'arena.locked' => 'Bloqueado',
+    'arena.back' => 'Volver a la Arena',
+    'arena.card_lastroll' => 'KND LastRoll',
+    'arena.card_lastroll_desc' => 'Death Roll 1v1 — rola desde el máximo hasta 1. Quien saque 1 pierde. Salas en tiempo real, timer de 8s, sistema de revancha.',
+    'arena.card_aboveunder' => 'Above / Under',
+    'arena.card_aboveunder_desc' => 'Predice si el próximo número será mayor o menor que el umbral. Rondas rápidas, probabilidad pura.',
+    'arena.card_leaderboard' => 'Tabla de Posiciones',
+    'arena.card_leaderboard_desc' => 'Rankings globales, rachas de victorias y badges de temporada. Compite por el primer lugar en todos los juegos de KND Arena.',
+    'arena.comingsoon' => 'Más Juegos',
+    'arena.comingsoon_desc' => 'Nuevos modos de juego y eventos de temporada están en desarrollo. Mantente atento.',
+    'arena.disclaimer' => 'BETA: las mecánicas y balances pueden cambiar mientras estabilizamos el ecosistema.',
+    'arena.inspired' => 'Inspirado en el formato clásico de Death Roll. KND Arena es una experiencia next-gen de death roll.',
 ];

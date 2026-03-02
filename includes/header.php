@@ -62,10 +62,10 @@ function generateNavigation() {
     $nav .= '                <li class="nav-item">' . "\n";
     $nav .= '                    <a class="nav-link' . ($current_page == 'contact.php' ? ' active' : '') . '" href="/contact.php">' . t('nav.contact') . '</a>' . "\n";
     $nav .= '                </li>' . "\n";
-    // Death Roll 1v1 link
-    $drActive = in_array($current_page, ['death-roll-lobby.php', 'death-roll-game.php']);
+    // KND Arena hub link
+    $arenaActive = in_array($current_page, ['knd-arena.php', 'death-roll-lobby.php', 'death-roll-game.php', 'above-under.php', 'leaderboard.php']);
     $nav .= '                <li class="nav-item">' . "\n";
-    $nav .= '                    <a class="nav-link' . ($drActive ? ' active' : '') . '" href="/death-roll-lobby.php"><i class="fas fa-dice-d20 me-1"></i>' . t('nav.deathroll', 'KND LastRoll') . '</a>' . "\n";
+    $nav .= '                    <a class="nav-link' . ($arenaActive ? ' active' : '') . '" href="/knd-arena.php"><i class="fas fa-gamepad me-1"></i>' . t('nav.arena', 'KND Arena') . '</a>' . "\n";
     $nav .= '                </li>' . "\n";
     // My Account dropdown
     $drLoggedIn = !empty($_SESSION['dr_user_id']);

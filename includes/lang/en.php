@@ -264,7 +264,8 @@ return [
     'home.lastroll.step3' => 'Roll a 1 and you lose. Last one standing wins.',
     'home.lastroll.disclaimer' => 'BETA: features and balance may change.',
 
-    // Navigation - KND LastRoll
+    // Navigation - KND Arena
+    'nav.arena' => 'KND Arena',
     'nav.deathroll' => 'KND LastRoll',
     'nav.login' => 'Login',
     'nav.logout' => 'Logout',
@@ -431,4 +432,25 @@ return [
     'nav.credits' => 'Credits',
     'nav.rewards' => 'Rewards',
     'nav.credits_badge_tooltip' => 'Available Support Credits',
+
+    // KND Arena
+    'arena.title' => 'KND Arena',
+    'arena.subtitle' => 'Next-gen RNG duels, promo drops, and seasonal badges.',
+    'arena.beta' => 'BETA',
+    'arena.live' => 'LIVE',
+    'arena.coming' => 'COMING SOON',
+    'arena.enter' => 'Enter',
+    'arena.preview' => 'Preview',
+    'arena.locked' => 'Locked',
+    'arena.back' => 'Back to Arena',
+    'arena.card_lastroll' => 'KND LastRoll',
+    'arena.card_lastroll_desc' => '1v1 Death Roll — roll down from max to 1. The one who rolls 1 loses. Real-time rooms, 8s turn timer, rematch system.',
+    'arena.card_aboveunder' => 'Above / Under',
+    'arena.card_aboveunder_desc' => 'Predict if the next number will be above or under the threshold. Fast rounds, pure probability.',
+    'arena.card_leaderboard' => 'Leaderboard',
+    'arena.card_leaderboard_desc' => 'Global rankings, win streaks, and seasonal badges. Compete for the top spot across all KND Arena games.',
+    'arena.comingsoon' => 'More Games',
+    'arena.comingsoon_desc' => 'New game modes and seasonal events are in development. Stay tuned.',
+    'arena.disclaimer' => 'BETA: mechanics and balances may change while we stabilize the ecosystem.',
+    'arena.inspired' => 'Inspired by the classic Death Roll format. KND Arena is a next-gen death roll experience.',
 ];
