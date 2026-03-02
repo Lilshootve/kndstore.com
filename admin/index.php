@@ -98,17 +98,20 @@ if (file_exists($logFile) && filesize($logFile) > 0) {
 // Support Credits counters
 $scPendingPayments = 0;
 $scRequestedRedemptions = 0;
+$totalRegisteredUsers = 0;
 try {
     $pdo = getDBConnection();
     if ($pdo) {
         $scPendingPayments = (int) $pdo->query("SELECT COUNT(*) FROM support_payments WHERE status='pending'")->fetchColumn();
         $scRequestedRedemptions = (int) $pdo->query("SELECT COUNT(*) FROM reward_redemptions WHERE status='requested'")->fetchColumn();
+        $totalRegisteredUsers = (int) $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
     }
 } catch (\Throwable $e) {
     error_log('admin dashboard SC counters: ' . $e->getMessage());
 }
 
 $navCards = [
+    ['title' => 'User Management', 'desc' => 'List, search, filter and inspect all users', 'href' => '/admin/users.php', 'icon' => 'fa-users', 'badge' => $totalRegisteredUsers, 'show' => true],
     ['title' => 'Order Management', 'desc' => 'View, filter and update all orders', 'href' => '/admin/orders.php', 'icon' => 'fa-clipboard-list', 'badge' => null, 'show' => true],
     ['title' => 'KND Points', 'desc' => 'Review pending point purchases + redemptions', 'href' => '/admin/support-credits.php', 'icon' => 'fa-coins', 'badge' => $scPendingPayments, 'show' => true],
     ['title' => 'Wallet Inspector', 'desc' => 'Audit and manage user KND Points balances', 'href' => '/admin/knd-points.php', 'icon' => 'fa-wallet', 'badge' => null, 'show' => true],
