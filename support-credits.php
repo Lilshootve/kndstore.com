@@ -279,3 +279,5 @@ echo generateHeader($seoTitle, $seoDesc);
     });
 })();
 </script>
+
+<?php echo generateScripts(); ?>
