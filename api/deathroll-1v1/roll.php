@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../includes/csrf.php';
 require_once __DIR__ . '/../../includes/rate_limit.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/deathroll_1v1.php';
+require_once __DIR__ . '/../../includes/support_credits.php';
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -95,6 +96,30 @@ try {
         );
         $stmt->execute([$rolled, $userId, $opponent, $now, $now, $game['id']]);
 
+        // Payout winner if game was charged and not yet paid
+        if (!empty($game['charged_at']) && empty($game['payout_at'])) {
+            $payoutKp = defined('LASTROLL_PAYOUT_KP') ? LASTROLL_PAYOUT_KP : 150;
+            $expiresAt = gmdate('Y-m-d H:i:s', strtotime('+12 months'));
+            $pdo->prepare(
+                "INSERT INTO points_ledger (user_id, source_type, source_id, entry_type, status, points, available_at, expires_at, created_at)
+                 VALUES (?, 'adjustment', ?, 'earn', 'available', ?, ?, ?, ?)"
+            )->execute([$opponent, $game['id'], $payoutKp, $now, $expiresAt, $now]);
+
+            $pdo->prepare(
+                'UPDATE deathroll_games_1v1 SET payout_at = ? WHERE id = ?'
+            )->execute([$now, $game['id']]);
+
+            // XP: winner +20, loser +5
+            $pdo->prepare(
+                "INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, 20, ?)
+                 ON DUPLICATE KEY UPDATE xp = xp + 20, updated_at = VALUES(updated_at)"
+            )->execute([$opponent, $now]);
+            $pdo->prepare(
+                "INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, 5, ?)
+                 ON DUPLICATE KEY UPDATE xp = xp + 5, updated_at = VALUES(updated_at)"
+            )->execute([$userId, $now]);
+        }
+
         $game['status'] = 'finished';
         $game['finished_reason'] = 'normal';
         $game['current_max'] = $rolled;
@@ -119,6 +144,7 @@ try {
     $state = build_game_state($pdo, $game, $userId);
 
     $pdo->commit();
+    unset($_SESSION['sc_badge_cache']);
     json_success($state);
 } catch (Throwable $e) {
     if (isset($pdo) && $pdo && $pdo->inTransaction()) {

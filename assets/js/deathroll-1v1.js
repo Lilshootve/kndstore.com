@@ -53,6 +53,7 @@
                 return;
             }
             var html = '';
+            var entryKp = (typeof LASTROLL_ENTRY_KP !== 'undefined') ? LASTROLL_ENTRY_KP : 100;
             rooms.forEach(function (r) {
                 var maxVal = r.initial_max || 1000;
                 html += '<tr>';
@@ -60,7 +61,7 @@
                 html += '<td>' + escHtml(r.creator) + '</td>';
                 html += '<td><span class="badge bg-secondary">' + Number(maxVal).toLocaleString() + '</span></td>';
                 html += '<td class="text-white-50">' + timeAgo(r.created_at) + ' ago</td>';
-                html += '<td><button class="btn btn-sm btn-outline-neon btn-join-room" data-code="' + r.code + '"><i class="fas fa-sign-in-alt me-1"></i>Join</button></td>';
+                html += '<td><button class="btn btn-sm btn-outline-neon btn-join-room" data-code="' + r.code + '"><i class="fas fa-sign-in-alt me-1"></i>Join <small class="opacity-75">(' + entryKp + ' KP)</small></button></td>';
                 html += '</tr>';
             });
             tbody.innerHTML = html;
@@ -465,6 +466,16 @@
                 }
             }
 
+            // KP info
+            var kpInfoEl = document.getElementById('game-kp-info');
+            if (kpInfoEl && s.game.entry_kp) {
+                kpInfoEl.style.display = '';
+                var entryEl = document.getElementById('game-entry-kp');
+                var payoutEl = document.getElementById('game-payout-kp');
+                if (entryEl) entryEl.textContent = Number(s.game.entry_kp).toLocaleString();
+                if (payoutEl) payoutEl.textContent = Number(s.game.payout_kp).toLocaleString();
+            }
+
             syncCountdown(s);
 
             var turnInfo = document.getElementById('turn-info');
@@ -555,15 +566,22 @@
             var iWon = s.game.winner_user_id === MY_USER_ID;
             var isTimeout = s.game.finished_reason === 'timeout';
 
+            var kpMsg = '';
+            if (s.game.charged && s.game.payout_kp) {
+                kpMsg = iWon
+                    ? '<div class="mt-2" style="font-size:.95rem;"><i class="fas fa-coins me-1" style="color:var(--knd-neon-blue);"></i>+' + Number(s.game.payout_kp).toLocaleString() + ' KP</div>'
+                    : '<div class="mt-2 text-white-50" style="font-size:.85rem;"><i class="fas fa-coins me-1"></i>&minus;' + Number(s.game.entry_kp).toLocaleString() + ' KP</div>';
+            }
+
             if (iWon) {
                 icon.innerHTML = '\uD83C\uDFC6';
-                text.textContent = isTimeout ? (TEXTS.timeoutOpponent || 'Opponent timed out!') : (TEXTS.youWin || 'YOU WIN!');
+                text.innerHTML = (isTimeout ? (TEXTS.timeoutOpponent || 'Opponent timed out!') : (TEXTS.youWin || 'YOU WIN!')) + kpMsg;
                 text.style.color = '#00ff88';
                 panel.style.background = 'rgba(0,255,136,0.05)';
                 panel.style.border = '2px solid rgba(0,255,136,0.3)';
             } else {
                 icon.innerHTML = isTimeout ? '\u23F0' : '\uD83D\uDC80';
-                text.textContent = isTimeout ? (TEXTS.timeoutYou || 'You lost by timeout!') : (TEXTS.youLose || 'YOU LOSE!');
+                text.innerHTML = (isTimeout ? (TEXTS.timeoutYou || 'You lost by timeout!') : (TEXTS.youLose || 'YOU LOSE!')) + kpMsg;
                 text.style.color = '#ff4444';
                 panel.style.background = 'rgba(255,68,68,0.05)';
                 panel.style.border = '2px solid rgba(255,68,68,0.3)';

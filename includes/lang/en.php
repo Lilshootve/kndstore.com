@@ -379,6 +379,12 @@ return [
     'dr.game.timeout_opponent' => 'Opponent timed out!',
     'dr.game.turn_timer' => 'Time left',
     'dr.game.abandoned' => 'Game abandoned',
+    'dr.game.kp_entry' => 'Entry',
+    'dr.game.kp_winner' => 'Winner',
+    'dr.game.kp_insufficient' => 'You need at least %d KP to join this match.',
+    'dr.game.kp_won' => '+%d KP won!',
+    'dr.game.kp_lost' => '-%d KP entry fee',
+    'dr.lobby.kp_entry_info' => 'Entry: %d KP | Winner: %d KP',
 
     // ── KND Points ──
     'sc.page_title' => 'KND Points',

@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../includes/csrf.php';
 require_once __DIR__ . '/../../includes/rate_limit.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/deathroll_1v1.php';
+require_once __DIR__ . '/../../includes/support_credits.php';
 
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
@@ -68,40 +69,65 @@ if ($action === 'decline') {
     json_success(['offer_status' => 'declined']);
 }
 
-// Accept: create new game
+// Accept: charge both players and create new game
 $loserId = (int) $game['loser_user_id'];
 $winnerId = (int) $game['winner_user_id'];
-$newCode = generate_room_code($pdo);
+$entryKp = defined('LASTROLL_ENTRY_KP') ? LASTROLL_ENTRY_KP : 100;
 
-$rematchMax = (int) ($game['initial_max'] ?? 1000);
-$stmt = $pdo->prepare(
-    'INSERT INTO deathroll_games_1v1
-     (code, visibility, status, created_by_user_id, player1_user_id, player2_user_id,
-      current_max, initial_max, turn_user_id, turn_started_at, created_at, updated_at, last_activity_at)
-     VALUES (?, ?, "playing", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-);
-$stmt->execute([
-    $newCode,
-    $game['visibility'],
-    $userId,
-    $loserId,
-    $winnerId,
-    $rematchMax,
-    $rematchMax,
-    $loserId,
-    $now,
-    $now,
-    $now,
-    $now,
-]);
+$pdo->beginTransaction();
+try {
+    $p1Bal = get_available_points($pdo, $loserId);
+    if ($p1Bal < $entryKp) {
+        $pdo->rollBack();
+        json_error('P1_INSUFFICIENT_KP', 'Opponent does not have enough KND Points for rematch.');
+    }
+    $p2Bal = get_available_points($pdo, $winnerId);
+    if ($p2Bal < $entryKp) {
+        $pdo->rollBack();
+        json_error('INSUFFICIENT_KP', 'You need at least ' . $entryKp . ' KP for rematch.');
+    }
 
-$stmt = $pdo->prepare(
-    'UPDATE deathroll_rematch_offers SET status = "accepted", new_game_code = ?, updated_at = ? WHERE id = ?'
-);
-$stmt->execute([$newCode, $now, $offer['id']]);
+    $newCode = generate_room_code($pdo);
+    $rematchMax = (int) ($game['initial_max'] ?? 1000);
 
-json_success([
-    'offer_status' => 'accepted',
-    'new_code' => $newCode,
-    'join_url' => '/death-roll-game.php?code=' . $newCode,
-]);
+    $stmt = $pdo->prepare(
+        'INSERT INTO deathroll_games_1v1
+         (code, visibility, status, created_by_user_id, player1_user_id, player2_user_id,
+          current_max, initial_max, turn_user_id, turn_started_at, created_at, updated_at, last_activity_at, charged_at)
+         VALUES (?, ?, "playing", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    );
+    $stmt->execute([
+        $newCode, $game['visibility'], $userId,
+        $loserId, $winnerId, $rematchMax, $rematchMax, $loserId,
+        $now, $now, $now, $now, $now,
+    ]);
+    $newGameId = (int) $pdo->lastInsertId();
+
+    // Debit both players
+    $pdo->prepare(
+        "INSERT INTO points_ledger (user_id, source_type, source_id, entry_type, status, points, created_at)
+         VALUES (?, 'adjustment', ?, 'spend', 'spent', ?, ?)"
+    )->execute([$loserId, $newGameId, -$entryKp, $now]);
+    $pdo->prepare(
+        "INSERT INTO points_ledger (user_id, source_type, source_id, entry_type, status, points, created_at)
+         VALUES (?, 'adjustment', ?, 'spend', 'spent', ?, ?)"
+    )->execute([$winnerId, $newGameId, -$entryKp, $now]);
+
+    $stmt = $pdo->prepare(
+        'UPDATE deathroll_rematch_offers SET status = "accepted", new_game_code = ?, updated_at = ? WHERE id = ?'
+    );
+    $stmt->execute([$newCode, $now, $offer['id']]);
+
+    $pdo->commit();
+    unset($_SESSION['sc_badge_cache']);
+
+    json_success([
+        'offer_status' => 'accepted',
+        'new_code' => $newCode,
+        'join_url' => '/death-roll-game.php?code=' . $newCode,
+    ]);
+} catch (\Throwable $e) {
+    if ($pdo->inTransaction()) $pdo->rollBack();
+    error_log('LASTROLL_POINTS_FATAL rematch: ' . $e->getMessage());
+    json_error('SERVER_ERROR', 'Internal error.', 500);
+}

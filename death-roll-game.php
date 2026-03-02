@@ -53,6 +53,13 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                         </h2>
                         <p class="text-white-50 mb-0 small" style="opacity:0.6;"><?php echo t('dr.game.subtitle_seo', 'Next-gen Death Roll rules — roll until someone hits 1'); ?></p>
                         <p class="text-white-50 mb-0" id="game-status-text"><?php echo t('dr.game.loading', 'Loading game...'); ?></p>
+                        <p class="mb-0 mt-1" id="game-kp-info" style="font-size:.85rem; display:none;">
+                            <span class="badge bg-dark border border-info" style="font-size:.8rem;">
+                                <i class="fas fa-coins me-1" style="color:var(--knd-neon-blue);"></i>
+                                Entry: <strong id="game-entry-kp">—</strong> KP
+                                &nbsp;|&nbsp; Winner: <strong id="game-payout-kp">—</strong> KP
+                            </span>
+                        </p>
                     </div>
                     <div class="d-flex gap-2">
                         <button class="btn btn-sm btn-outline-light" id="btn-copy-link" title="<?php echo t('dr.game.copy_link', 'Copy invite link'); ?>">

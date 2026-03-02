@@ -300,6 +300,12 @@ return [
     'dr.game.timeout_opponent' => '¡Tu oponente perdió por tiempo!',
     'dr.game.turn_timer' => 'Tiempo restante',
     'dr.game.abandoned' => 'Partida abandonada',
+    'dr.game.kp_entry' => 'Entrada',
+    'dr.game.kp_winner' => 'Ganador',
+    'dr.game.kp_insufficient' => 'Necesitas al menos %d KP para unirte a esta partida.',
+    'dr.game.kp_won' => '+%d KP ganados!',
+    'dr.game.kp_lost' => '-%d KP cuota de entrada',
+    'dr.lobby.kp_entry_info' => 'Entrada: %d KP | Ganador: %d KP',
 
     // ── KND Points ──
     'sc.page_title' => 'KND Points',

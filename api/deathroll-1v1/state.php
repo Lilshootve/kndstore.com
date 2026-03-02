@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/deathroll_1v1.php';
+require_once __DIR__ . '/../../includes/support_credits.php';
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'GET') {

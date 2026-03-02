@@ -1,6 +1,11 @@
 <?php
 // KND Store - Death Roll 1v1 helper functions (isolated from single-player)
 
+// Fallback constants if config.php hasn't been updated yet
+if (!defined('LASTROLL_ENTRY_KP'))  define('LASTROLL_ENTRY_KP', 100);
+if (!defined('LASTROLL_PAYOUT_KP')) define('LASTROLL_PAYOUT_KP', 150);
+if (!defined('LASTROLL_HOUSE_KP'))  define('LASTROLL_HOUSE_KP', 50);
+
 /**
  * Generate a unique 8-char uppercase alphanumeric room code.
  */
@@ -73,11 +78,37 @@ function deathroll_gc(PDO $pdo): void {
          WHERE status = 'waiting' AND last_activity_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 MINUTE)"
     )->execute([$now]);
 
-    $pdo->prepare(
-        "UPDATE deathroll_games_1v1
-         SET status = 'finished', finished_reason = 'abandoned', turn_user_id = NULL, updated_at = ?
-         WHERE status = 'playing' AND last_activity_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 5 MINUTE)"
-    )->execute([$now]);
+    // For playing games: refund KP if charged before marking abandoned
+    $staleGames = $pdo->prepare(
+        "SELECT id, player1_user_id, player2_user_id, entry_kp, charged_at, payout_at
+         FROM deathroll_games_1v1
+         WHERE status = 'playing' AND last_activity_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 5 MINUTE)
+         LIMIT 20"
+    );
+    $staleGames->execute();
+    $abandoned = $staleGames->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($abandoned as $sg) {
+        // Refund both players if game was charged and not yet paid out
+        if (!empty($sg['charged_at']) && empty($sg['payout_at'])) {
+            $refundKp = (int) ($sg['entry_kp'] ?? 100);
+            $expiresRef = gmdate('Y-m-d H:i:s', strtotime('+12 months'));
+            foreach ([$sg['player1_user_id'], $sg['player2_user_id']] as $pid) {
+                if ($pid) {
+                    $pdo->prepare(
+                        "INSERT INTO points_ledger (user_id, source_type, source_id, entry_type, status, points, available_at, expires_at, created_at)
+                         VALUES (?, 'adjustment', ?, 'earn', 'available', ?, ?, ?, ?)"
+                    )->execute([(int)$pid, (int)$sg['id'], $refundKp, $now, $expiresRef, $now]);
+                }
+            }
+            $pdo->prepare('UPDATE deathroll_games_1v1 SET payout_at = ? WHERE id = ?')
+                ->execute([$now, $sg['id']]);
+        }
+        $pdo->prepare(
+            "UPDATE deathroll_games_1v1
+             SET status = 'finished', finished_reason = 'abandoned', turn_user_id = NULL, updated_at = ?
+             WHERE id = ? AND status = 'playing'"
+        )->execute([$now, $sg['id']]);
+    }
 
     $pdo->prepare(
         "DELETE FROM deathroll_games_1v1
@@ -127,6 +158,30 @@ function check_turn_timeout(PDO $pdo, array $game): array {
         $game['loser_user_id'] = $turnUserId;
         $game['winner_user_id'] = $opponent;
         $game['turn_user_id'] = null;
+
+        // Payout on timeout if charged and not yet paid
+        if (!empty($game['charged_at']) && empty($game['payout_at'])) {
+            $payoutKp = defined('LASTROLL_PAYOUT_KP') ? LASTROLL_PAYOUT_KP : 150;
+            $expiresAt = gmdate('Y-m-d H:i:s', strtotime('+12 months'));
+            $pdo->prepare(
+                "INSERT INTO points_ledger (user_id, source_type, source_id, entry_type, status, points, available_at, expires_at, created_at)
+                 VALUES (?, 'adjustment', ?, 'earn', 'available', ?, ?, ?, ?)"
+            )->execute([$opponent, $game['id'], $payoutKp, $now, $expiresAt, $now]);
+
+            $pdo->prepare('UPDATE deathroll_games_1v1 SET payout_at = ? WHERE id = ?')
+                ->execute([$now, $game['id']]);
+
+            $pdo->prepare(
+                "INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, 20, ?)
+                 ON DUPLICATE KEY UPDATE xp = xp + 20, updated_at = VALUES(updated_at)"
+            )->execute([$opponent, $now]);
+            $pdo->prepare(
+                "INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, 5, ?)
+                 ON DUPLICATE KEY UPDATE xp = xp + 5, updated_at = VALUES(updated_at)"
+            )->execute([$turnUserId, $now]);
+
+            $game['payout_at'] = $now;
+        }
     }
 
     return $game;
@@ -185,6 +240,10 @@ function build_game_state(PDO $pdo, array $game, int $currentUserId): array {
             'turn_seconds_left' => $turnSecondsLeft,
             'turn_started_at'   => $game['turn_started_at'] ?? null,
             'server_time'       => $serverTime,
+            'entry_kp'          => (int) ($game['entry_kp'] ?? (defined('LASTROLL_ENTRY_KP') ? LASTROLL_ENTRY_KP : 100)),
+            'payout_kp'         => (int) ($game['payout_kp'] ?? (defined('LASTROLL_PAYOUT_KP') ? LASTROLL_PAYOUT_KP : 150)),
+            'charged'           => !empty($game['charged_at']),
+            'paid_out'          => !empty($game['payout_at']),
         ],
         'players' => [
             'p1' => $p1 ? ['id' => (int)$p1['id'], 'username' => $p1['username']] : null,

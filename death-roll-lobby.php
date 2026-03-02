@@ -9,12 +9,23 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/csrf.php';
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
+require_once __DIR__ . '/includes/support_credits.php';
 
 require_login();
 require_verified_email();
 
 $csrfToken = csrf_token();
 $username = htmlspecialchars(current_username());
+$entryKp = defined('LASTROLL_ENTRY_KP') ? LASTROLL_ENTRY_KP : 100;
+$payoutKp = defined('LASTROLL_PAYOUT_KP') ? LASTROLL_PAYOUT_KP : 150;
+
+$myKpBalance = 0;
+try {
+    $pdoLobby = getDBConnection();
+    if ($pdoLobby) {
+        $myKpBalance = get_available_points($pdoLobby, current_user_id());
+    }
+} catch (\Throwable $e) { /* graceful */ }
 ?>
 
 <?php
@@ -47,6 +58,18 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                             <?php echo t('dr.lobby.subtitle_seo', 'A next-gen Death Roll 1v1 experience'); ?>
                             &mdash; <?php echo t('dr.lobby.welcome', 'Welcome'); ?>, <strong><?php echo $username; ?></strong>
                             &mdash; <span id="lobby-active-games">0</span> <?php echo t('dr.lobby.active_games', 'active games'); ?>
+                        </p>
+                        <p class="mb-0 mt-1" style="font-size:.9rem;">
+                            <span class="badge bg-dark border border-info" style="font-size:.85rem;">
+                                <i class="fas fa-coins me-1" style="color:var(--knd-neon-blue);"></i>
+                                Entry: <strong><?php echo number_format($entryKp); ?> KP</strong>
+                                &nbsp;|&nbsp; Winner: <strong><?php echo number_format($payoutKp); ?> KP</strong>
+                            </span>
+                            &nbsp;
+                            <span id="my-kp-balance" class="badge <?php echo $myKpBalance >= $entryKp ? 'bg-success' : 'bg-danger'; ?>" style="font-size:.85rem;">
+                                <i class="fas fa-wallet me-1"></i>
+                                Your KP: <strong><?php echo number_format($myKpBalance); ?></strong>
+                            </span>
                         </p>
                     </div>
                     <div class="d-flex gap-2 flex-wrap">
@@ -202,6 +225,9 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 <script>
 const CSRF = <?php echo json_encode($csrfToken); ?>;
 const MY_USERNAME = <?php echo json_encode(current_username()); ?>;
+const LASTROLL_ENTRY_KP = <?php echo (int)$entryKp; ?>;
+const LASTROLL_PAYOUT_KP = <?php echo (int)$payoutKp; ?>;
+const MY_KP_BALANCE = <?php echo (int)$myKpBalance; ?>;
 </script>
 <script src="/assets/js/deathroll-1v1.js?v=<?php echo filemtime(__DIR__ . '/assets/js/deathroll-1v1.js'); ?>" defer></script>
 

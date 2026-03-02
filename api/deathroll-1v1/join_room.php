@@ -1,6 +1,4 @@
 <?php
-// KND Store - Join room endpoint (Death Roll 1v1)
-
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
@@ -12,6 +10,7 @@ require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/deathroll_1v1.php';
+require_once __DIR__ . '/../../includes/support_credits.php';
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -29,6 +28,8 @@ try {
     if (!validate_room_code($code)) {
         json_error('INVALID_CODE', 'Room code must be 8 uppercase alphanumeric characters.');
     }
+
+    $entryKp = defined('LASTROLL_ENTRY_KP') ? LASTROLL_ENTRY_KP : 100;
 
     $pdo->beginTransaction();
 
@@ -58,22 +59,62 @@ try {
         json_error('CANNOT_JOIN_OWN', 'You cannot join your own room.');
     }
 
+    if ($game['charged_at'] !== null) {
+        $pdo->rollBack();
+        json_error('ALREADY_CHARGED', 'This game was already charged.');
+    }
+
+    $p1Id = (int) $game['player1_user_id'];
+    $p2Id = $userId;
+
+    $p1Balance = get_available_points($pdo, $p1Id);
+    if ($p1Balance < $entryKp) {
+        $pdo->rollBack();
+        json_error('P1_INSUFFICIENT_KP', 'Room creator does not have enough KND Points. Match cancelled.');
+    }
+
+    $p2Balance = get_available_points($pdo, $p2Id);
+    if ($p2Balance < $entryKp) {
+        $pdo->rollBack();
+        json_error('INSUFFICIENT_KP', 'You need at least ' . $entryKp . ' KP to join this match.');
+    }
+
     $now = gmdate('Y-m-d H:i:s');
+    $gameId = (int) $game['id'];
+
+    // Debit P1
+    $pdo->prepare(
+        "INSERT INTO points_ledger (user_id, source_type, source_id, entry_type, status, points, created_at)
+         VALUES (?, 'adjustment', ?, 'spend', 'spent', ?, ?)"
+    )->execute([$p1Id, $gameId, -$entryKp, $now]);
+
+    // Debit P2
+    $pdo->prepare(
+        "INSERT INTO points_ledger (user_id, source_type, source_id, entry_type, status, points, created_at)
+         VALUES (?, 'adjustment', ?, 'spend', 'spent', ?, ?)"
+    )->execute([$p2Id, $gameId, -$entryKp, $now]);
+
+    // Update game
     $stmt = $pdo->prepare(
         'UPDATE deathroll_games_1v1
          SET player2_user_id = ?, status = "playing",
-             turn_started_at = ?, updated_at = ?, last_activity_at = ?
+             turn_started_at = ?, updated_at = ?, last_activity_at = ?,
+             charged_at = ?
          WHERE id = ?'
     );
-    $stmt->execute([$userId, $now, $now, $now, $game['id']]);
+    $stmt->execute([$userId, $now, $now, $now, $now, $gameId]);
 
     $game['player2_user_id'] = $userId;
     $game['status'] = 'playing';
     $game['turn_started_at'] = $now;
+    $game['charged_at'] = $now;
 
     $state = build_game_state($pdo, $game, $userId);
 
     $pdo->commit();
+
+    unset($_SESSION['sc_badge_cache']);
+
     json_success($state);
 } catch (Throwable $e) {
     if ($pdo && $pdo->inTransaction()) {
