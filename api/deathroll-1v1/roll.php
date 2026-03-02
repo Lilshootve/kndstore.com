@@ -98,7 +98,7 @@ try {
 
         // Payout winner if game was charged and not yet paid
         if (!empty($game['charged_at']) && empty($game['payout_at'])) {
-            $payoutKp = defined('LASTROLL_PAYOUT_KP') ? LASTROLL_PAYOUT_KP : 150;
+            $payoutKp = (int) ($game['payout_kp'] ?? 150);
             $expiresAt = gmdate('Y-m-d H:i:s', strtotime('+12 months'));
             $pdo->prepare(
                 "INSERT INTO points_ledger (user_id, source_type, source_id, entry_type, status, points, available_at, expires_at, created_at)

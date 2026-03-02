@@ -29,8 +29,6 @@ try {
         json_error('INVALID_CODE', 'Room code must be 8 uppercase alphanumeric characters.');
     }
 
-    $entryKp = defined('LASTROLL_ENTRY_KP') ? LASTROLL_ENTRY_KP : 100;
-
     $pdo->beginTransaction();
 
     $stmt = $pdo->prepare(
@@ -63,6 +61,8 @@ try {
         $pdo->rollBack();
         json_error('ALREADY_CHARGED', 'This game was already charged.');
     }
+
+    $entryKp = (int) ($game['entry_kp'] ?? 100);
 
     $p1Id = (int) $game['player1_user_id'];
     $p2Id = $userId;

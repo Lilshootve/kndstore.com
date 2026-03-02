@@ -16,8 +16,6 @@ require_verified_email();
 
 $csrfToken = csrf_token();
 $username = htmlspecialchars(current_username());
-$entryKp = defined('LASTROLL_ENTRY_KP') ? LASTROLL_ENTRY_KP : 100;
-$payoutKp = defined('LASTROLL_PAYOUT_KP') ? LASTROLL_PAYOUT_KP : 150;
 
 $myKpBalance = 0;
 try {
@@ -60,13 +58,7 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                             &mdash; <span id="lobby-active-games">0</span> <?php echo t('dr.lobby.active_games', 'active games'); ?>
                         </p>
                         <p class="mb-0 mt-1" style="font-size:.9rem;">
-                            <span class="badge bg-dark border border-info" style="font-size:.85rem;">
-                                <i class="fas fa-coins me-1" style="color:var(--knd-neon-blue);"></i>
-                                Entry: <strong><?php echo number_format($entryKp); ?> KP</strong>
-                                &nbsp;|&nbsp; Winner: <strong><?php echo number_format($payoutKp); ?> KP</strong>
-                            </span>
-                            &nbsp;
-                            <span id="my-kp-balance" class="badge <?php echo $myKpBalance >= $entryKp ? 'bg-success' : 'bg-danger'; ?>" style="font-size:.85rem;">
+                            <span id="my-kp-balance" class="badge <?php echo $myKpBalance > 0 ? 'bg-success' : 'bg-secondary'; ?>" style="font-size:.85rem;">
                                 <i class="fas fa-wallet me-1"></i>
                                 Your KP: <strong><?php echo number_format($myKpBalance); ?></strong>
                             </span>
@@ -99,12 +91,13 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                                     <th><?php echo t('dr.lobby.room_code', 'Code'); ?></th>
                                     <th><?php echo t('dr.lobby.creator', 'Creator'); ?></th>
                                     <th>Max</th>
+                                    <th>Entry</th>
                                     <th><?php echo t('dr.lobby.created', 'Created'); ?></th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody id="rooms-tbody">
-                                <tr><td colspan="4" class="text-center text-white-50"><?php echo t('dr.lobby.loading', 'Loading...'); ?></td></tr>
+                                <tr><td colspan="6" class="text-center text-white-50"><?php echo t('dr.lobby.loading', 'Loading...'); ?></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -166,6 +159,22 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                             <option value="10000">10,000</option>
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-coins me-1" style="color:var(--knd-neon-blue);"></i>Entry Fee (KP)</label>
+                        <select name="entry_kp" id="create-entry-kp" class="form-select">
+                            <option value="5">5 KP</option>
+                            <option value="10">10 KP</option>
+                            <option value="25">25 KP</option>
+                            <option value="50">50 KP</option>
+                            <option value="100" selected>100 KP</option>
+                            <option value="200">200 KP</option>
+                            <option value="500">500 KP</option>
+                            <option value="1000">1,000 KP</option>
+                        </select>
+                        <div class="mt-2 small" style="color:var(--knd-neon-blue);">
+                            <i class="fas fa-trophy me-1"></i>Winner gets: <strong id="create-payout-preview">150</strong> KP
+                        </div>
+                    </div>
                     <button type="submit" class="btn btn-neon-primary w-100">
                         <i class="fas fa-rocket me-2"></i><?php echo t('dr.lobby.create_go', 'Create & Wait'); ?>
                     </button>
@@ -225,8 +234,6 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 <script>
 const CSRF = <?php echo json_encode($csrfToken); ?>;
 const MY_USERNAME = <?php echo json_encode(current_username()); ?>;
-const LASTROLL_ENTRY_KP = <?php echo (int)$entryKp; ?>;
-const LASTROLL_PAYOUT_KP = <?php echo (int)$payoutKp; ?>;
 const MY_KP_BALANCE = <?php echo (int)$myKpBalance; ?>;
 </script>
 <script src="/assets/js/deathroll-1v1.js?v=<?php echo filemtime(__DIR__ . '/assets/js/deathroll-1v1.js'); ?>" defer></script>

@@ -40,6 +40,14 @@ try {
         json_error('INVALID_INITIAL_MAX', 'Initial max must be between 10 and 10000.');
     }
 
+    $entryKp = isset($_POST['entry_kp']) ? (int) $_POST['entry_kp'] : 100;
+    if ($entryKp < 5 || $entryKp > 1000) {
+        json_error('INVALID_ENTRY_KP', 'Entry KP must be between 5 and 1000.');
+    }
+    $payoutKp = (int) floor($entryKp * 1.5);
+    $houseKp  = ($entryKp * 2) - $payoutKp;
+    if ($houseKp < 0) { $houseKp = 0; }
+
     $stmt = $pdo->prepare(
         'SELECT COUNT(*) as cnt FROM deathroll_games_1v1
          WHERE created_by_user_id = ? AND status IN ("waiting", "playing")'
@@ -55,10 +63,11 @@ try {
 
     $stmt = $pdo->prepare(
         'INSERT INTO deathroll_games_1v1
-         (code, visibility, status, created_by_user_id, player1_user_id, current_max, initial_max, turn_user_id, created_at, updated_at, last_activity_at)
-         VALUES (?, ?, "waiting", ?, ?, ?, ?, ?, ?, ?, ?)'
+         (code, visibility, status, created_by_user_id, player1_user_id, current_max, initial_max,
+          turn_user_id, entry_kp, payout_kp, house_kp, created_at, updated_at, last_activity_at)
+         VALUES (?, ?, "waiting", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     );
-    $stmt->execute([$code, $visibility, $userId, $userId, $initialMax, $initialMax, $userId, $now, $now, $now]);
+    $stmt->execute([$code, $visibility, $userId, $userId, $initialMax, $initialMax, $userId, $entryKp, $payoutKp, $houseKp, $now, $now, $now]);
 
     json_success([
         'code' => $code,

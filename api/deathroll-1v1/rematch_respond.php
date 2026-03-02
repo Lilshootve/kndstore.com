@@ -70,16 +70,18 @@ if ($action === 'decline') {
 }
 
 // Accept: charge both players and create new game
-$loserId = (int) $game['loser_user_id'];
+$loserId  = (int) $game['loser_user_id'];
 $winnerId = (int) $game['winner_user_id'];
-$entryKp = defined('LASTROLL_ENTRY_KP') ? LASTROLL_ENTRY_KP : 100;
+$entryKp  = (int) ($game['entry_kp'] ?? 100);
+$payoutKp = (int) ($game['payout_kp'] ?? (int) floor($entryKp * 1.5));
+$houseKp  = (int) ($game['house_kp'] ?? (($entryKp * 2) - $payoutKp));
 
 $pdo->beginTransaction();
 try {
     $p1Bal = get_available_points($pdo, $loserId);
     if ($p1Bal < $entryKp) {
         $pdo->rollBack();
-        json_error('P1_INSUFFICIENT_KP', 'Opponent does not have enough KND Points for rematch.');
+        json_error('P1_INSUFFICIENT_KP', 'Opponent does not have enough KND Points (' . $entryKp . ' KP) for rematch.');
     }
     $p2Bal = get_available_points($pdo, $winnerId);
     if ($p2Bal < $entryKp) {
@@ -93,13 +95,17 @@ try {
     $stmt = $pdo->prepare(
         'INSERT INTO deathroll_games_1v1
          (code, visibility, status, created_by_user_id, player1_user_id, player2_user_id,
-          current_max, initial_max, turn_user_id, turn_started_at, created_at, updated_at, last_activity_at, charged_at)
-         VALUES (?, ?, "playing", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+          current_max, initial_max, turn_user_id, turn_started_at,
+          entry_kp, payout_kp, house_kp, charged_at,
+          created_at, updated_at, last_activity_at)
+         VALUES (?, ?, "playing", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     );
     $stmt->execute([
         $newCode, $game['visibility'], $userId,
         $loserId, $winnerId, $rematchMax, $rematchMax, $loserId,
-        $now, $now, $now, $now, $now,
+        $now,
+        $entryKp, $payoutKp, $houseKp, $now,
+        $now, $now, $now,
     ]);
     $newGameId = (int) $pdo->lastInsertId();
 

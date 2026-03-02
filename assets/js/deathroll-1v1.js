@@ -60,19 +60,20 @@
         function renderRooms(rooms) {
             var tbody = document.getElementById('rooms-tbody');
             if (!rooms || rooms.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-white-50">No rooms available. Create one!</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-white-50">No rooms available. Create one!</td></tr>';
                 return;
             }
             var html = '';
-            var entryKp = (typeof LASTROLL_ENTRY_KP !== 'undefined') ? LASTROLL_ENTRY_KP : 100;
             rooms.forEach(function (r) {
                 var maxVal = r.initial_max || 1000;
+                var rEntry = parseInt(r.entry_kp) || 100;
                 html += '<tr>';
                 html += '<td><code style="font-size:1.1em; letter-spacing:2px;">' + r.code + '</code></td>';
                 html += '<td>' + escHtml(r.creator) + '</td>';
                 html += '<td><span class="badge bg-secondary">' + Number(maxVal).toLocaleString() + '</span></td>';
+                html += '<td><span class="badge bg-dark border border-info" style="font-size:.8rem;"><i class="fas fa-coins me-1" style="color:var(--knd-neon-blue);"></i>' + rEntry + ' KP</span></td>';
                 html += '<td class="text-white-50">' + timeAgo(r.created_at) + ' ago</td>';
-                html += '<td><button class="btn btn-sm btn-outline-neon btn-join-room" data-code="' + r.code + '"><i class="fas fa-sign-in-alt me-1"></i>Join <small class="opacity-75">(' + entryKp + ' KP)</small></button></td>';
+                html += '<td><button class="btn btn-sm btn-outline-neon btn-join-room" data-code="' + r.code + '"><i class="fas fa-sign-in-alt me-1"></i>Join</button></td>';
                 html += '</tr>';
             });
             tbody.innerHTML = html;
@@ -107,16 +108,28 @@
             joinRoom(btn.getAttribute('data-code'));
         });
 
+        // Entry KP payout preview
+        var entryKpSelect = document.getElementById('create-entry-kp');
+        var payoutPreview = document.getElementById('create-payout-preview');
+        if (entryKpSelect && payoutPreview) {
+            entryKpSelect.addEventListener('change', function () {
+                var e = parseInt(entryKpSelect.value) || 100;
+                payoutPreview.textContent = Math.floor(e * 1.5).toLocaleString();
+            });
+        }
+
         var createForm = document.getElementById('form-create-room');
         if (createForm) {
             createForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 var vis = createForm.querySelector('[name=visibility]').value;
                 var iMax = createForm.querySelector('[name=initial_max]');
+                var eKp = createForm.querySelector('[name=entry_kp]');
                 post('/api/deathroll-1v1/create_room.php', {
                     csrf_token: CSRF,
                     visibility: vis,
-                    initial_max: iMax ? iMax.value : '1000'
+                    initial_max: iMax ? iMax.value : '1000',
+                    entry_kp: eKp ? eKp.value : '100'
                 }).then(function (d) {
                     if (d.ok) {
                         window.location.href = d.data.join_url;
