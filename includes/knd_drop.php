@@ -3,6 +3,7 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/support_credits.php';
+require_once __DIR__ . '/knd_xp.php';
 
 if (!defined('DROP_ENTRY_KP')) define('DROP_ENTRY_KP', 100);
 if (!defined('DROP_COOLDOWN_SEC')) define('DROP_COOLDOWN_SEC', 3);
@@ -117,12 +118,9 @@ function drop_play(PDO $pdo, int $userId): array {
             )->execute([$userId, $rewardKp]);
         }
 
-        // XP
+        // XP (season + all-time)
         if ($xp > 0) {
-            $pdo->prepare(
-                "INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, ?, NOW())
-                 ON DUPLICATE KEY UPDATE xp = xp + VALUES(xp), updated_at = NOW()"
-            )->execute([$userId, $xp]);
+            xp_add($pdo, $userId, $xp, null, null, false);
         }
 
         // Record drop

@@ -465,6 +465,15 @@ return [
     'arena.comingsoon_desc' => 'New game modes and seasonal events are in development. Stay tuned.',
     'arena.disclaimer' => 'BETA: mechanics and balances may change while we stabilize the ecosystem.',
     'arena.inspired' => 'Inspired by the classic Death Roll format. KND Arena is a next-gen death roll experience.',
+    'lb.ends_in' => 'Ends in',
+    'lb.xp_note' => 'Rankings are based on XP (not Points).',
+    'lb.your_rank' => 'Your Rank',
+    'lb.season' => 'Season',
+    'lb.hall_of_fame' => 'Hall of Fame',
+    'lb.player' => 'Player',
+    'lb.level' => 'Level',
+    'lb.winrate' => 'Winrate',
+    'lb.loading' => 'Loading…',
 
     // KND Insight (Above/Under)
     'au.page_title' => 'KND Insight',

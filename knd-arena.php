@@ -98,12 +98,12 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
         <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card">
           <div class="d-flex align-items-start justify-content-between mb-3">
             <div class="arena-card-icon"><i class="fas fa-trophy"></i></div>
-            <span class="badge px-2 py-1" style="font-size:.7rem; background:rgba(0,212,255,.15); color:var(--cyan, #00d4ff); border:1px solid rgba(0,212,255,.3);"><?php echo t('arena.coming', 'COMING SOON'); ?></span>
+            <span class="badge bg-success px-2 py-1" style="font-size:.7rem;"><?php echo t('arena.live', 'LIVE'); ?></span>
           </div>
           <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('arena.card_leaderboard', 'Leaderboard'); ?></h3>
-          <p class="text-white-50 small flex-grow-1"><?php echo t('arena.card_leaderboard_desc', 'Global rankings, win streaks, and seasonal badges. Compete for the top spot across all KND Arena games.'); ?></p>
-          <a href="/leaderboard.php" class="btn btn-outline-neon w-100 mt-auto">
-            <i class="fas fa-eye me-2"></i><?php echo t('arena.preview', 'Preview'); ?>
+          <p class="text-white-50 small flex-grow-1"><?php echo t('arena.card_leaderboard_desc', 'Global rankings by XP — season standings and Hall of Fame. Compete for the top spot.'); ?></p>
+          <a href="/leaderboard.php" class="btn btn-neon-primary w-100 mt-auto">
+            <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>
           </a>
         </div>
       </div>

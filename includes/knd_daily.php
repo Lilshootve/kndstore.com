@@ -3,6 +3,7 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/support_credits.php';
+require_once __DIR__ . '/knd_xp.php';
 
 $DAILY_REWARDS_KP = [1 => 20, 2 => 25, 3 => 30, 4 => 35, 5 => 40, 6 => 45, 7 => 60];
 $DAILY_DAY7_BONUS_XP = 20;
@@ -103,10 +104,7 @@ function daily_claim(PDO $pdo, int $userId): array {
         )->execute([$userId, $rewardKp, $now, $expiresAt, $now]);
 
         if ($bonusXp > 0) {
-            $pdo->prepare(
-                "INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, ?, ?)
-                 ON DUPLICATE KEY UPDATE xp = xp + VALUES(xp), updated_at = VALUES(updated_at)"
-            )->execute([$userId, $bonusXp, $now]);
+            xp_add($pdo, $userId, $bonusXp, null, null, false);
         }
 
         $pdo->commit();

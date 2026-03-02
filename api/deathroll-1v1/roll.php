@@ -15,6 +15,7 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/deathroll_1v1.php';
 require_once __DIR__ . '/../../includes/support_credits.php';
 require_once __DIR__ . '/../../includes/knd_daily.php';
+require_once __DIR__ . '/../../includes/knd_xp.php';
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -110,15 +111,9 @@ try {
                 'UPDATE deathroll_games_1v1 SET payout_at = ? WHERE id = ?'
             )->execute([$now, $game['id']]);
 
-            // XP: winner +20, loser +5
-            $pdo->prepare(
-                "INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, 20, ?)
-                 ON DUPLICATE KEY UPDATE xp = xp + 20, updated_at = VALUES(updated_at)"
-            )->execute([$opponent, $now]);
-            $pdo->prepare(
-                "INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, 5, ?)
-                 ON DUPLICATE KEY UPDATE xp = xp + 5, updated_at = VALUES(updated_at)"
-            )->execute([$userId, $now]);
+            // XP: winner +20, loser +5 (season + all-time)
+            xp_add($pdo, $opponent, 20, null, true);
+            xp_add($pdo, $userId, 5, null, false);
         }
 
         $game['status'] = 'finished';

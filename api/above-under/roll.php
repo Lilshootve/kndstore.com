@@ -12,6 +12,7 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/json.php';
 require_once __DIR__ . '/../../includes/support_credits.php';
 require_once __DIR__ . '/../../includes/knd_daily.php';
+require_once __DIR__ . '/../../includes/knd_xp.php';
 
 define('AU_ENTRY_MIN', 10);
 define('AU_ENTRY_MAX', 5000);
@@ -85,10 +86,7 @@ try {
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         )->execute([$userId, $choice, $rolled, $win ? 1 : 0, $entryKp, $payout, $xp, $now]);
 
-        $pdo->prepare(
-            "INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, ?, ?)
-             ON DUPLICATE KEY UPDATE xp = xp + VALUES(xp), updated_at = VALUES(updated_at)"
-        )->execute([$userId, $xp, $now]);
+        xp_add($pdo, $userId, $xp, null, $win);
 
         $pdo->commit();
 
