@@ -93,13 +93,28 @@ $csrfToken = csrf_token();
                     <div id="game-over-panel" style="display:none;" class="text-center p-4 rounded" >
                         <div id="game-over-icon" style="font-size: 4rem;"></div>
                         <h3 id="game-over-text" class="mt-2"></h3>
-                        <div class="d-flex justify-content-center gap-3 mt-3">
-                            <button id="btn-rematch" class="btn btn-neon-primary">
+                        <div class="d-flex justify-content-center gap-3 mt-3" id="game-over-actions">
+                            <button id="btn-rematch-request" class="btn btn-neon-primary">
                                 <i class="fas fa-redo me-2"></i><?php echo t('dr.game.rematch', 'Rematch'); ?>
                             </button>
                             <a href="/death-roll-lobby.php" class="btn btn-outline-light">
                                 <i class="fas fa-arrow-left me-2"></i><?php echo t('dr.game.back_lobby', 'Lobby'); ?>
                             </a>
+                        </div>
+                        <div id="rematch-status" class="mt-3" style="display:none;"></div>
+                    </div>
+
+                    <!-- Rematch Incoming Offer -->
+                    <div id="rematch-offer-panel" style="display:none;" class="text-center p-4 mt-3 rounded" style="background: rgba(37,156,174,0.05); border: 2px solid rgba(37,156,174,0.3);">
+                        <h4><i class="fas fa-handshake me-2"></i><?php echo t('dr.game.rematch_incoming', 'Rematch Requested!'); ?></h4>
+                        <p class="text-white-50" id="rematch-offer-who"></p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <button id="btn-rematch-accept" class="btn btn-neon-primary">
+                                <i class="fas fa-check me-2"></i><?php echo t('dr.game.accept', 'Accept'); ?>
+                            </button>
+                            <button id="btn-rematch-decline" class="btn btn-outline-light">
+                                <i class="fas fa-times me-2"></i><?php echo t('dr.game.decline', 'Decline'); ?>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -139,8 +154,11 @@ const TEXTS = {
     playing:       <?php echo json_encode(t('dr.game.status_playing', 'Game in progress')); ?>,
     waiting:       <?php echo json_encode(t('dr.game.status_waiting', 'Waiting for opponent')); ?>,
     finished:      <?php echo json_encode(t('dr.game.status_finished', 'Game over')); ?>,
+    rematchWaiting: <?php echo json_encode(t('dr.game.rematch_waiting', 'Waiting for opponent to accept...')); ?>,
+    rematchDeclined: <?php echo json_encode(t('dr.game.rematch_declined', 'Opponent declined the rematch.')); ?>,
+    rematchRequested: <?php echo json_encode(t('dr.game.rematch_incoming', 'wants a rematch!')); ?>,
 };
 </script>
-<script src="/assets/js/deathroll-1v1.js" defer></script>
+<script src="/assets/js/deathroll-1v1.js?v=<?php echo filemtime(__DIR__ . '/assets/js/deathroll-1v1.js'); ?>" defer></script>
 
 <?php echo generateScripts(); ?>

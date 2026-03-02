@@ -238,4 +238,9 @@ return [
     'dr.game.status_playing' => 'Partida en curso',
     'dr.game.status_waiting' => 'Esperando oponente',
     'dr.game.status_finished' => 'Partida terminada',
+    'dr.game.rematch_waiting' => 'Esperando que el oponente acepte...',
+    'dr.game.rematch_declined' => 'El oponente rechazó la revancha.',
+    'dr.game.rematch_incoming' => '¡quiere la revancha!',
+    'dr.game.accept' => 'Aceptar',
+    'dr.game.decline' => 'Rechazar',
 ];

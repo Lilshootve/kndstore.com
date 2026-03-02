@@ -317,4 +317,9 @@ return [
     'dr.game.status_playing' => 'Game in progress',
     'dr.game.status_waiting' => 'Waiting for opponent',
     'dr.game.status_finished' => 'Game over',
+    'dr.game.rematch_waiting' => 'Waiting for opponent to accept...',
+    'dr.game.rematch_declined' => 'Opponent declined the rematch.',
+    'dr.game.rematch_incoming' => 'wants a rematch!',
+    'dr.game.accept' => 'Accept',
+    'dr.game.decline' => 'Decline',
 ];

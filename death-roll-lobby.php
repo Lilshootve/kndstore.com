@@ -151,6 +151,6 @@ $username = htmlspecialchars(current_username());
 const CSRF = <?php echo json_encode($csrfToken); ?>;
 const MY_USERNAME = <?php echo json_encode(current_username()); ?>;
 </script>
-<script src="/assets/js/deathroll-1v1.js" defer></script>
+<script src="/assets/js/deathroll-1v1.js?v=<?php echo filemtime(__DIR__ . '/assets/js/deathroll-1v1.js'); ?>" defer></script>
 
 <?php echo generateScripts(); ?>

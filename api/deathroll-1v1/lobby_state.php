@@ -6,6 +6,10 @@ require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/deathroll_1v1.php';
 
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     json_error('METHOD_NOT_ALLOWED', 'GET only.', 405);
 }
@@ -13,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 api_require_login();
 
 $pdo = getDBConnection();
+if (!$pdo) { json_error('DB_CONNECTION_FAILED', 'Database connection failed.', 500); }
 
 // Online users (seen in last 60 seconds)
 $stmt = $pdo->prepare(

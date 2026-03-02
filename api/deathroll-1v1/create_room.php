@@ -8,6 +8,10 @@ require_once __DIR__ . '/../../includes/rate_limit.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/deathroll_1v1.php';
 
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     json_error('METHOD_NOT_ALLOWED', 'POST only.', 405);
 }
@@ -16,6 +20,7 @@ csrf_guard();
 api_require_login();
 
 $pdo = getDBConnection();
+if (!$pdo) { json_error('DB_CONNECTION_FAILED', 'Database connection failed.', 500); }
 $userId = current_user_id();
 
 rate_limit_guard($pdo, "create_room:{$userId}", 10, 60);

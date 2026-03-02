@@ -8,6 +8,10 @@ require_once __DIR__ . '/../../includes/rate_limit.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/deathroll_1v1.php';
 
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     json_error('METHOD_NOT_ALLOWED', 'POST only.', 405);
 }
@@ -15,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 csrf_guard();
 
 $pdo = getDBConnection();
+if (!$pdo) { json_error('DB_CONNECTION_FAILED', 'Database connection failed.', 500); }
 
 $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 rate_limit_guard($pdo, "register:{$ip}", 5, 300);
