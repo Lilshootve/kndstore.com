@@ -81,9 +81,16 @@
     Header set Cache-Control "public, max-age=31536000, immutable"
 </FilesMatch>
 
-# Configuración de cache para HTML
-<FilesMatch "\.(html|php)$">
+# Configuración de cache para HTML estático
+<FilesMatch "\.html$">
     Header set Cache-Control "public, max-age=3600"
+</FilesMatch>
+
+# PHP: no cachear por defecto (cada script controla su propio cache via header())
+<FilesMatch "\.php$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
 </FilesMatch>
 
 # Redirección de HTTP a HTTPS

@@ -1,34 +1,37 @@
 <?php
 // KND Store - Join room endpoint (Death Roll 1v1)
 
+header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+ini_set('display_errors', '0');
+
 require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/deathroll_1v1.php';
 
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-header('Pragma: no-cache');
-header('Expires: 0');
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    json_error('METHOD_NOT_ALLOWED', 'POST only.', 405);
-}
-
-csrf_guard();
-api_require_login();
-
-$pdo = getDBConnection();
-if (!$pdo) { json_error('DB_CONNECTION_FAILED', 'Database connection failed.', 500); }
-$userId = current_user_id();
-
-$code = strtoupper(trim($_POST['code'] ?? ''));
-if (!validate_room_code($code)) {
-    json_error('INVALID_CODE', 'Room code must be 8 uppercase alphanumeric characters.');
-}
-
-$pdo->beginTransaction();
 try {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        json_error('METHOD_NOT_ALLOWED', 'POST only.', 405);
+    }
+
+    csrf_guard();
+    api_require_login();
+
+    $pdo = getDBConnection();
+    if (!$pdo) { json_error('DB_CONNECTION_FAILED', 'Database connection failed.', 500); }
+    $userId = current_user_id();
+
+    $code = strtoupper(trim($_POST['code'] ?? ''));
+    if (!validate_room_code($code)) {
+        json_error('INVALID_CODE', 'Room code must be 8 uppercase alphanumeric characters.');
+    }
+
+    $pdo->beginTransaction();
+
     $stmt = $pdo->prepare(
         'SELECT * FROM deathroll_games_1v1 WHERE code = ? FOR UPDATE'
     );
@@ -72,7 +75,13 @@ try {
 
     $pdo->commit();
     json_success($state);
-} catch (Exception $e) {
-    $pdo->rollBack();
-    json_error('SERVER_ERROR', 'An error occurred.', 500);
+} catch (Throwable $e) {
+    if ($pdo && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    error_log('DR1V1_FATAL ' . basename(__FILE__) . ': ' . $e->getMessage());
+    error_log($e->getTraceAsString());
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => ['code' => 'SERVER_ERROR', 'message' => 'Internal error']]);
+    exit;
 }

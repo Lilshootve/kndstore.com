@@ -1,6 +1,12 @@
 <?php
 // KND Store - Roll endpoint (Death Roll 1v1)
 
+header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+ini_set('display_errors', '0');
+
 require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
@@ -8,30 +14,27 @@ require_once __DIR__ . '/../../includes/rate_limit.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/deathroll_1v1.php';
 
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-header('Pragma: no-cache');
-header('Expires: 0');
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    json_error('METHOD_NOT_ALLOWED', 'POST only.', 405);
-}
-
-csrf_guard();
-api_require_login();
-
-$code = strtoupper(trim($_POST['code'] ?? ''));
-if (!validate_room_code($code)) {
-    json_error('INVALID_CODE', 'Invalid room code.');
-}
-
-$pdo = getDBConnection();
-if (!$pdo) { json_error('DB_CONNECTION_FAILED', 'Database connection failed.', 500); }
-$userId = current_user_id();
-
-rate_limit_guard($pdo, "roll:{$userId}:{$code}", 5, 10);
-
-$pdo->beginTransaction();
 try {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        json_error('METHOD_NOT_ALLOWED', 'POST only.', 405);
+    }
+
+    csrf_guard();
+    api_require_login();
+
+    $code = strtoupper(trim($_POST['code'] ?? ''));
+    if (!validate_room_code($code)) {
+        json_error('INVALID_CODE', 'Invalid room code.');
+    }
+
+    $pdo = getDBConnection();
+    if (!$pdo) { json_error('DB_CONNECTION_FAILED', 'Database connection failed.', 500); }
+    $userId = current_user_id();
+
+    rate_limit_guard($pdo, "roll:{$userId}:{$code}", 5, 10);
+
+    $pdo->beginTransaction();
+
     $stmt = $pdo->prepare(
         'SELECT * FROM deathroll_games_1v1 WHERE code = ? FOR UPDATE'
     );
@@ -48,6 +51,7 @@ try {
         json_error('GAME_NOT_PLAYING', 'Game is not in progress.');
     }
 
+    // Check turn timeout inside transaction
     if (!empty($game['turn_started_at'])) {
         $elapsed = time() - strtotime($game['turn_started_at']);
         if ($elapsed >= 13) {
@@ -74,7 +78,6 @@ try {
     $rolled = random_int(1, $maxBefore);
     $now = gmdate('Y-m-d H:i:s');
 
-    // Insert roll record
     $stmt = $pdo->prepare(
         'INSERT INTO deathroll_game_rolls_1v1 (game_id, user_id, max_value, roll_value, created_at)
          VALUES (?, ?, ?, ?, ?)'
@@ -117,7 +120,13 @@ try {
 
     $pdo->commit();
     json_success($state);
-} catch (Exception $e) {
-    $pdo->rollBack();
-    json_error('SERVER_ERROR', 'An error occurred.', 500);
+} catch (Throwable $e) {
+    if (isset($pdo) && $pdo && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    error_log('DR1V1_FATAL ' . basename(__FILE__) . ': ' . $e->getMessage());
+    error_log($e->getTraceAsString());
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => ['code' => 'SERVER_ERROR', 'message' => 'Internal error']]);
+    exit;
 }
