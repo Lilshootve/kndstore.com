@@ -280,4 +280,5 @@ echo generateHeader($seoTitle, $seoDesc);
 })();
 </script>
 
+<script src="/assets/js/navigation-extend.js"></script>
 <?php echo generateScripts(); ?>
