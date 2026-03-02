@@ -405,4 +405,5 @@ return [
     // Nav
     'nav.credits' => 'Credits',
     'nav.rewards' => 'Rewards',
+    'nav.credits_badge_tooltip' => 'Available Support Credits',
 ];

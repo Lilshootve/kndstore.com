@@ -6384,3 +6384,43 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 0 20px rgba(37, 156, 174, 0.15);
 }
+
+/* ── Credits Nav Badge ── */
+.sc-nav-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 6px;
+    padding: 2px 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--knd-neon-blue);
+    background: rgba(10, 15, 30, 0.7);
+    border: 1px solid rgba(37, 156, 174, 0.35);
+    border-radius: 12px;
+    backdrop-filter: blur(6px);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    vertical-align: middle;
+}
+
+.sc-nav-badge:hover {
+    border-color: var(--knd-neon-blue);
+    box-shadow: 0 0 8px rgba(37, 156, 174, 0.3);
+    color: #fff;
+    text-decoration: none;
+}
+
+.sc-nav-badge .fas {
+    font-size: 0.6rem;
+}
+
+@media (max-width: 991px) {
+    .sc-nav-badge {
+        font-size: 0.62rem;
+        padding: 1px 6px;
+        margin-left: 4px;
+    }
+}

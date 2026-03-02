@@ -326,4 +326,5 @@ return [
     // Nav
     'nav.credits' => 'Créditos',
     'nav.rewards' => 'Recompensas',
+    'nav.credits_badge_tooltip' => 'Créditos de soporte disponibles',
 ];

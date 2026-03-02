@@ -75,6 +75,36 @@ function generateNavigation() {
     $drUsername = $drLoggedIn ? htmlspecialchars($_SESSION['dr_username'] ?? '') : '';
     $scActive = in_array($current_page, ['support-credits.php', 'rewards.php']);
     $accountActive = in_array($current_page, ['order.php', 'track-order.php', 'auth.php', 'support-credits.php', 'rewards.php']);
+
+    // Credits badge (cached 60s)
+    $creditsBadgeHtml = '';
+    if ($drLoggedIn) {
+        $scCacheTTL = 60;
+        $scCache = $_SESSION['sc_badge_cache'] ?? null;
+        $scAvailable = 0;
+        if ($scCache && isset($scCache['ts']) && (time() - $scCache['ts']) < $scCacheTTL) {
+            $scAvailable = (int) $scCache['available'];
+        } else {
+            $scIncPath = __DIR__ . '/support_credits.php';
+            if (file_exists($scIncPath)) {
+                require_once $scIncPath;
+                $scPdo = getDBConnection();
+                if ($scPdo) {
+                    $scUid = (int) $_SESSION['dr_user_id'];
+                    release_available_points_if_due($scPdo, $scUid);
+                    expire_points_if_due($scPdo, $scUid);
+                    $scAvailable = get_available_points($scPdo, $scUid);
+                }
+            }
+            $_SESSION['sc_badge_cache'] = ['ts' => time(), 'available' => $scAvailable];
+        }
+        if ($scAvailable > 0) {
+            $creditsBadgeHtml = '<a href="/credits" class="sc-nav-badge" title="' . htmlspecialchars(t('nav.credits_badge_tooltip', 'Available Support Credits')) . '">'
+                . '<i class="fas fa-coins"></i> ' . number_format($scAvailable)
+                . '</a>';
+        }
+    }
+
     $nav .= '                <li class="nav-item knd-dropdown">' . "\n";
     $nav .= '                    <a id="ordersDropdownToggle" class="nav-link knd-dropdown-toggle' . ($accountActive ? ' active' : '') . '" href="javascript:void(0)" role="button" aria-expanded="false">' . "\n";
     $nav .= '                        <i class="fas fa-user-circle me-1"></i>' . "\n";
@@ -84,6 +114,9 @@ function generateNavigation() {
         $nav .= '                        ' . t('nav.my_account', 'My Account') . "\n";
     }
     $nav .= '                        <span id="order-count" class="badge rounded-pill bg-primary ms-1" style="display:none; min-width: 20px; justify-content: center; align-items: center;"></span>' . "\n";
+    if ($creditsBadgeHtml) {
+        $nav .= '                        ' . $creditsBadgeHtml . "\n";
+    }
     $nav .= '                        <i class="fas fa-chevron-down knd-dropdown-arrow ms-1"></i>' . "\n";
     $nav .= '                    </a>' . "\n";
     $nav .= '                    <div id="ordersDropdownMenu" class="knd-dropdown-menu">' . "\n";
