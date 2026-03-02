@@ -219,6 +219,18 @@ return [
     'dr.auth.email_verified' => '¡Correo verificado! Redirigiendo…',
     'dr.auth.code_resent' => '¡Nuevo código enviado! Revisa tu bandeja de entrada.',
     'dr.auth.email_not_verified' => 'Por favor verifica tu correo para continuar.',
+    'dr.auth.forgot_link' => '¿Olvidaste tu contraseña o usuario?',
+    'dr.auth.forgot_title' => 'Recuperar Cuenta',
+    'dr.auth.forgot_subtitle' => 'Ingresa el correo vinculado a tu cuenta',
+    'dr.auth.reset_password_btn' => 'Restablecer Contraseña',
+    'dr.auth.send_username_btn' => 'Enviarme mi usuario',
+    'dr.auth.new_password' => 'Nueva Contraseña',
+    'dr.auth.set_new_password_btn' => 'Guardar Nueva Contraseña',
+    'dr.auth.back_to_login' => 'Volver al login',
+    'dr.auth.enter_email' => 'Por favor ingresa tu correo.',
+    'dr.auth.username_sent' => 'Si existe una cuenta con ese correo, el usuario fue enviado. Revisa tu bandeja.',
+    'dr.auth.reset_code_sent' => 'Si existe una cuenta con ese correo, se envió un código de restablecimiento. Revisa tu bandeja.',
+    'dr.auth.password_reset_success' => '¡Contraseña restablecida! Ahora puedes iniciar sesión con tu nueva contraseña.',
 
     // Lobby
     'dr.lobby.title' => 'KND LastRoll — Lobby',

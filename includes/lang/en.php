@@ -298,6 +298,18 @@ return [
     'dr.auth.email_verified' => 'Email verified! Redirecting…',
     'dr.auth.code_resent' => 'New code sent! Check your inbox.',
     'dr.auth.email_not_verified' => 'Please verify your email to continue.',
+    'dr.auth.forgot_link' => 'Forgot your password or username?',
+    'dr.auth.forgot_title' => 'Account Recovery',
+    'dr.auth.forgot_subtitle' => 'Enter the email linked to your account',
+    'dr.auth.reset_password_btn' => 'Reset Password',
+    'dr.auth.send_username_btn' => 'Send me my username',
+    'dr.auth.new_password' => 'New Password',
+    'dr.auth.set_new_password_btn' => 'Set New Password',
+    'dr.auth.back_to_login' => 'Back to login',
+    'dr.auth.enter_email' => 'Please enter your email.',
+    'dr.auth.username_sent' => 'If an account exists with that email, the username was sent. Check your inbox.',
+    'dr.auth.reset_code_sent' => 'If an account exists with that email, a reset code was sent. Check your inbox.',
+    'dr.auth.password_reset_success' => 'Password reset! You can now log in with your new password.',
 
     // Lobby
     'dr.lobby.title' => 'KND LastRoll — Lobby',

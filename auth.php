@@ -87,6 +87,11 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                                 <button type="submit" class="btn btn-neon-primary w-100">
                                     <i class="fas fa-sign-in-alt me-2"></i><?php echo t('dr.auth.login', 'Login'); ?>
                                 </button>
+                                <div class="text-center mt-3">
+                                    <a href="#" id="link-forgot" class="text-white-50 small" style="text-decoration:underline;">
+                                        <i class="fas fa-question-circle me-1"></i><?php echo t('dr.auth.forgot_link', 'Forgot your password or username?'); ?>
+                                    </a>
+                                </div>
                             </form>
                         </div>
 
@@ -121,6 +126,64 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                     </div>
 
                     <div id="auth-alert" class="mt-3" style="display:none;"></div>
+                </div>
+
+                <!-- Forgot Password/Username Panel -->
+                <div id="forgot-panel" class="glass-card-neon p-4 p-md-5 mt-4" style="display:none;">
+                    <div class="text-center mb-4">
+                        <h3 class="glow-text mb-2"><i class="fas fa-key me-2"></i><?php echo t('dr.auth.forgot_title', 'Account Recovery'); ?></h3>
+                        <p class="text-white-50"><?php echo t('dr.auth.forgot_subtitle', 'Enter the email linked to your account'); ?></p>
+                    </div>
+
+                    <!-- Step 1: Enter email & choose action -->
+                    <div id="forgot-step1">
+                        <div class="mb-3">
+                            <label class="form-label"><?php echo t('dr.auth.email', 'Email'); ?></label>
+                            <input type="email" id="forgot-email" class="form-control" required maxlength="255" autocomplete="email">
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button id="btn-forgot-password" class="btn btn-neon-primary">
+                                <i class="fas fa-lock me-2"></i><?php echo t('dr.auth.reset_password_btn', 'Reset Password'); ?>
+                            </button>
+                            <button id="btn-forgot-username" class="btn btn-outline-neon">
+                                <i class="fas fa-user me-2"></i><?php echo t('dr.auth.send_username_btn', 'Send me my username'); ?>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Enter code + new password (only for password reset) -->
+                    <div id="forgot-step2" style="display:none;">
+                        <form id="form-reset-password" autocomplete="off">
+                            <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                            <input type="hidden" name="email" id="reset-email-hidden">
+                            <div class="mb-3">
+                                <label class="form-label"><?php echo t('dr.auth.verify_code', 'Verification Code'); ?></label>
+                                <input type="text" name="code" class="form-control text-center"
+                                       required pattern="\d{6}" maxlength="6" inputmode="numeric"
+                                       placeholder="000000"
+                                       style="font-size:1.8rem; letter-spacing:0.5em; font-family:'Orbitron',monospace;">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label"><?php echo t('dr.auth.new_password', 'New Password'); ?></label>
+                                <input type="password" name="password" class="form-control" required minlength="8" autocomplete="new-password">
+                                <div class="form-text text-white-50"><?php echo t('dr.auth.password_hint', 'Minimum 8 characters'); ?></div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label"><?php echo t('dr.auth.confirm_password', 'Confirm Password'); ?></label>
+                                <input type="password" name="password_confirm" class="form-control" required minlength="8" autocomplete="new-password">
+                            </div>
+                            <button type="submit" class="btn btn-neon-primary w-100">
+                                <i class="fas fa-save me-2"></i><?php echo t('dr.auth.set_new_password_btn', 'Set New Password'); ?>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a href="#" id="link-back-login" class="text-white-50 small" style="text-decoration:underline;">
+                            <i class="fas fa-arrow-left me-1"></i><?php echo t('dr.auth.back_to_login', 'Back to login'); ?>
+                        </a>
+                    </div>
+                    <div id="forgot-alert" class="mt-3" style="display:none;"></div>
                 </div>
 
                 <!-- Email Verification Panel (hidden by default) -->
@@ -296,6 +359,114 @@ document.getElementById('btn-resend').addEventListener('click', function() {
             }
         })
         .catch(() => { document.getElementById('btn-resend').disabled = false; showVerifyAlert('Connection error.', 'danger'); });
+});
+
+/* ---- Forgot Password/Username ---- */
+const forgotPanel = document.getElementById('forgot-panel');
+const forgotStep1 = document.getElementById('forgot-step1');
+const forgotStep2 = document.getElementById('forgot-step2');
+const authCard = document.querySelector('.glass-card-neon.p-4');
+
+function showForgotAlert(msg, type) {
+    const el = document.getElementById('forgot-alert');
+    el.innerHTML = '<div class="alert alert-' + type + ' mb-0">' + msg + '</div>';
+    el.style.display = 'block';
+}
+
+function switchToForgot() {
+    authCard.style.display = 'none';
+    document.getElementById('verify-panel').style.display = 'none';
+    forgotPanel.style.display = 'block';
+    forgotStep1.style.display = 'block';
+    forgotStep2.style.display = 'none';
+    document.getElementById('forgot-alert').style.display = 'none';
+    document.getElementById('forgot-email').focus();
+}
+
+function switchToLogin() {
+    forgotPanel.style.display = 'none';
+    document.getElementById('verify-panel').style.display = 'none';
+    authCard.style.display = 'block';
+    document.getElementById('auth-alert').style.display = 'none';
+}
+
+document.getElementById('link-forgot').addEventListener('click', function(e) {
+    e.preventDefault();
+    switchToForgot();
+});
+
+document.getElementById('link-back-login').addEventListener('click', function(e) {
+    e.preventDefault();
+    switchToLogin();
+});
+
+document.getElementById('btn-forgot-username').addEventListener('click', function() {
+    const email = document.getElementById('forgot-email').value.trim();
+    if (!email) { showForgotAlert('<?php echo t("dr.auth.enter_email", "Please enter your email."); ?>', 'warning'); return; }
+    this.disabled = true;
+    const fd = new FormData();
+    fd.append('csrf_token', '<?php echo $csrfToken; ?>');
+    fd.append('email', email);
+    fetch('/api/auth/forgot_username.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(d => {
+            document.getElementById('btn-forgot-username').disabled = false;
+            if (d.ok) {
+                showForgotAlert('<?php echo t("dr.auth.username_sent", "If an account exists with that email, the username was sent. Check your inbox."); ?>', 'success');
+            } else {
+                showForgotAlert(d.error.message, 'danger');
+            }
+        })
+        .catch(() => { document.getElementById('btn-forgot-username').disabled = false; showForgotAlert('Connection error.', 'danger'); });
+});
+
+document.getElementById('btn-forgot-password').addEventListener('click', function() {
+    const email = document.getElementById('forgot-email').value.trim();
+    if (!email) { showForgotAlert('<?php echo t("dr.auth.enter_email", "Please enter your email."); ?>', 'warning'); return; }
+    this.disabled = true;
+    const fd = new FormData();
+    fd.append('csrf_token', '<?php echo $csrfToken; ?>');
+    fd.append('email', email);
+    fetch('/api/auth/forgot_password.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(d => {
+            document.getElementById('btn-forgot-password').disabled = false;
+            if (d.ok) {
+                showForgotAlert('<?php echo t("dr.auth.reset_code_sent", "If an account exists with that email, a reset code was sent. Check your inbox."); ?>', 'success');
+                document.getElementById('reset-email-hidden').value = email;
+                setTimeout(function() {
+                    forgotStep1.style.display = 'none';
+                    forgotStep2.style.display = 'block';
+                    document.getElementById('forgot-alert').style.display = 'none';
+                }, 1500);
+            } else {
+                showForgotAlert(d.error.message, 'danger');
+            }
+        })
+        .catch(() => { document.getElementById('btn-forgot-password').disabled = false; showForgotAlert('Connection error.', 'danger'); });
+});
+
+document.getElementById('form-reset-password').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const fd = new FormData(this);
+    if (fd.get('password') !== fd.get('password_confirm')) {
+        showForgotAlert('<?php echo t("dr.auth.password_mismatch", "Passwords do not match."); ?>', 'warning');
+        return;
+    }
+    const btn = this.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    fetch('/api/auth/reset_password.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(d => {
+            btn.disabled = false;
+            if (d.ok) {
+                showForgotAlert('<?php echo t("dr.auth.password_reset_success", "Password reset! You can now log in with your new password."); ?>', 'success');
+                setTimeout(switchToLogin, 2000);
+            } else {
+                showForgotAlert(d.error.message, 'danger');
+            }
+        })
+        .catch(() => { btn.disabled = false; showForgotAlert('Connection error.', 'danger'); });
 });
 </script>
 
