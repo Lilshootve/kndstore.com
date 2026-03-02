@@ -41,7 +41,7 @@ try {
     unset($u);
 
     $stmt = $pdo->prepare(
-        'SELECT g.code, g.created_at, u.username AS creator
+        'SELECT g.code, g.created_at, g.initial_max, u.username AS creator
          FROM deathroll_games_1v1 g
          JOIN users u ON u.id = g.created_by_user_id
          WHERE g.visibility = "public" AND g.status = "waiting"

@@ -77,6 +77,7 @@ $csrfToken = csrf_token();
                     <div class="text-center mb-4">
                         <div class="small text-white-50 mb-1"><?php echo t('dr.game.current_max', 'Current Max'); ?></div>
                         <div id="current-max-display" style="font-size: 4rem; font-weight: 900; line-height: 1; font-family: 'Orbitron', monospace; color: var(--knd-neon-blue);">1000</div>
+                        <div id="initial-max-display" class="small text-white-50 mt-1" style="font-size:0.75rem; opacity:0.6;">Initial: <span id="initial-max-value">1000</span></div>
                     </div>
 
                     <!-- Dice Visual -->

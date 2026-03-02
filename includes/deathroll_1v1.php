@@ -175,6 +175,7 @@ function build_game_state(PDO $pdo, array $game, int $currentUserId): array {
             'visibility'        => $game['visibility'],
             'status'            => $game['status'],
             'current_max'       => (int) $game['current_max'],
+            'initial_max'       => (int) ($game['initial_max'] ?? 1000),
             'turn_user_id'      => $game['turn_user_id'] ? (int) $game['turn_user_id'] : null,
             'winner_user_id'    => $game['winner_user_id'] ? (int) $game['winner_user_id'] : null,
             'loser_user_id'     => $game['loser_user_id'] ? (int) $game['loser_user_id'] : null,

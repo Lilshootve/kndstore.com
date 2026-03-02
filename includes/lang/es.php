@@ -207,6 +207,7 @@ return [
     'dr.lobby.created' => 'Creada',
     'dr.lobby.online' => 'En Línea',
     'dr.lobby.loading' => 'Cargando...',
+    'dr.lobby.initial_max' => 'Máximo Inicial',
     'dr.lobby.visibility' => 'Visibilidad',
     'dr.lobby.public' => 'Pública',
     'dr.lobby.public_desc' => 'visible en el lobby',

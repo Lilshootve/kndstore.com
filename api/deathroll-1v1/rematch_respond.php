@@ -73,11 +73,12 @@ $loserId = (int) $game['loser_user_id'];
 $winnerId = (int) $game['winner_user_id'];
 $newCode = generate_room_code($pdo);
 
+$rematchMax = (int) ($game['initial_max'] ?? 1000);
 $stmt = $pdo->prepare(
     'INSERT INTO deathroll_games_1v1
      (code, visibility, status, created_by_user_id, player1_user_id, player2_user_id,
-      current_max, turn_user_id, turn_started_at, created_at, updated_at, last_activity_at)
-     VALUES (?, ?, "playing", ?, ?, ?, 1000, ?, ?, ?, ?, ?)'
+      current_max, initial_max, turn_user_id, turn_started_at, created_at, updated_at, last_activity_at)
+     VALUES (?, ?, "playing", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
 );
 $stmt->execute([
     $newCode,
@@ -85,6 +86,8 @@ $stmt->execute([
     $userId,
     $loserId,
     $winnerId,
+    $rematchMax,
+    $rematchMax,
     $loserId,
     $now,
     $now,

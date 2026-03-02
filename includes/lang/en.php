@@ -286,6 +286,7 @@ return [
     'dr.lobby.created' => 'Created',
     'dr.lobby.online' => 'Online',
     'dr.lobby.loading' => 'Loading...',
+    'dr.lobby.initial_max' => 'Initial Max',
     'dr.lobby.visibility' => 'Visibility',
     'dr.lobby.public' => 'Public',
     'dr.lobby.public_desc' => 'visible in lobby',

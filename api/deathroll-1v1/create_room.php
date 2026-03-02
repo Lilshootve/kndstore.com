@@ -35,6 +35,11 @@ try {
         json_error('INVALID_INPUT', 'Visibility must be "public" or "private".');
     }
 
+    $initialMax = isset($_POST['initial_max']) ? (int) $_POST['initial_max'] : 1000;
+    if ($initialMax < 10 || $initialMax > 10000) {
+        json_error('INVALID_INITIAL_MAX', 'Initial max must be between 10 and 10000.');
+    }
+
     $stmt = $pdo->prepare(
         'SELECT COUNT(*) as cnt FROM deathroll_games_1v1
          WHERE created_by_user_id = ? AND status IN ("waiting", "playing")'
@@ -50,10 +55,10 @@ try {
 
     $stmt = $pdo->prepare(
         'INSERT INTO deathroll_games_1v1
-         (code, visibility, status, created_by_user_id, player1_user_id, current_max, turn_user_id, created_at, updated_at, last_activity_at)
-         VALUES (?, ?, "waiting", ?, ?, 1000, ?, ?, ?, ?)'
+         (code, visibility, status, created_by_user_id, player1_user_id, current_max, initial_max, turn_user_id, created_at, updated_at, last_activity_at)
+         VALUES (?, ?, "waiting", ?, ?, ?, ?, ?, ?, ?, ?)'
     );
-    $stmt->execute([$code, $visibility, $userId, $userId, $userId, $now, $now, $now]);
+    $stmt->execute([$code, $visibility, $userId, $userId, $initialMax, $initialMax, $userId, $now, $now, $now]);
 
     json_success([
         'code' => $code,

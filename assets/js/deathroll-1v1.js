@@ -49,14 +49,16 @@
         function renderRooms(rooms) {
             var tbody = document.getElementById('rooms-tbody');
             if (!rooms || rooms.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-white-50">No rooms available. Create one!</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-white-50">No rooms available. Create one!</td></tr>';
                 return;
             }
             var html = '';
             rooms.forEach(function (r) {
+                var maxVal = r.initial_max || 1000;
                 html += '<tr>';
                 html += '<td><code style="font-size:1.1em; letter-spacing:2px;">' + r.code + '</code></td>';
                 html += '<td>' + escHtml(r.creator) + '</td>';
+                html += '<td><span class="badge bg-secondary">' + Number(maxVal).toLocaleString() + '</span></td>';
                 html += '<td class="text-white-50">' + timeAgo(r.created_at) + ' ago</td>';
                 html += '<td><button class="btn btn-sm btn-outline-neon btn-join-room" data-code="' + r.code + '"><i class="fas fa-sign-in-alt me-1"></i>Join</button></td>';
                 html += '</tr>';
@@ -98,9 +100,11 @@
             createForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 var vis = createForm.querySelector('[name=visibility]').value;
+                var iMax = createForm.querySelector('[name=initial_max]');
                 post('/api/deathroll-1v1/create_room.php', {
                     csrf_token: CSRF,
-                    visibility: vis
+                    visibility: vis,
+                    initial_max: iMax ? iMax.value : '1000'
                 }).then(function (d) {
                     if (d.ok) {
                         window.location.href = d.data.join_url;
@@ -372,6 +376,10 @@
 
             var maxEl = document.getElementById('current-max-display');
             maxEl.textContent = s.game.current_max;
+            var initMaxEl = document.getElementById('initial-max-value');
+            if (initMaxEl && s.game.initial_max) {
+                initMaxEl.textContent = Number(s.game.initial_max).toLocaleString();
+            }
             if (s.game.current_max <= 10) {
                 maxEl.style.color = '#ff4444';
             } else if (s.game.current_max <= 50) {

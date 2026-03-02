@@ -61,6 +61,7 @@ $username = htmlspecialchars(current_username());
                                 <tr>
                                     <th><?php echo t('dr.lobby.room_code', 'Code'); ?></th>
                                     <th><?php echo t('dr.lobby.creator', 'Creator'); ?></th>
+                                    <th>Max</th>
                                     <th><?php echo t('dr.lobby.created', 'Created'); ?></th>
                                     <th></th>
                                 </tr>
@@ -113,6 +114,18 @@ $username = htmlspecialchars(current_username());
                         <select name="visibility" class="form-select">
                             <option value="public"><?php echo t('dr.lobby.public', 'Public'); ?> — <?php echo t('dr.lobby.public_desc', 'visible in lobby'); ?></option>
                             <option value="private"><?php echo t('dr.lobby.private', 'Private'); ?> — <?php echo t('dr.lobby.private_desc', 'invite by code only'); ?></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><?php echo t('dr.lobby.initial_max', 'Initial Max'); ?></label>
+                        <select name="initial_max" class="form-select">
+                            <option value="100">100</option>
+                            <option value="250">250</option>
+                            <option value="500">500</option>
+                            <option value="1000" selected>1,000</option>
+                            <option value="2500">2,500</option>
+                            <option value="5000">5,000</option>
+                            <option value="10000">10,000</option>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-neon-primary w-100">

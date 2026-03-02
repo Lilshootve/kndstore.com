@@ -24,7 +24,7 @@ try {
     $userId = current_user_id();
 
     $stmt = $pdo->prepare(
-        'SELECT g.code, g.visibility, g.status, g.current_max, g.finished_reason,
+        'SELECT g.code, g.visibility, g.status, g.current_max, g.initial_max, g.finished_reason,
                 g.created_at, g.last_activity_at,
                 g.player1_user_id, g.player2_user_id,
                 g.winner_user_id, g.loser_user_id,
@@ -65,6 +65,7 @@ try {
             'visibility'      => $r['visibility'],
             'status'          => $r['status'],
             'current_max'     => (int) $r['current_max'],
+            'initial_max'     => (int) ($r['initial_max'] ?? 1000),
             'finished_reason' => $r['finished_reason'],
             'opponent'        => $opponent,
             'result'          => $wonLost,
