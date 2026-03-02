@@ -83,11 +83,11 @@ setCacheHeaders('html');
                                 <i class="fas fa-gamepad me-2"></i><?php echo t('home.games.title', 'KND Games'); ?>
                             </h2>
                             <p class="text-white-50 mb-3" style="font-size:1.05rem;">
-                                <?php echo t('home.games.subtitle', 'Play KND LastRoll 1v1, Above/Under, and upcoming modes inside KND Arena.'); ?>
+                                <?php echo t('home.games.subtitle', 'Play KND LastRoll 1v1, KND Insight, and upcoming modes inside KND Arena.'); ?>
                             </p>
                             <ul class="lastroll-bullets mb-4">
                                 <li><i class="fas fa-dice-d20 me-2"></i><?php echo t('home.games.bullet1', 'KND LastRoll — 1v1 Death Roll with real-time rooms'); ?></li>
-                                <li><i class="fas fa-arrows-alt-v me-2"></i><?php echo t('home.games.bullet2', 'Above/Under — predict the number, win KND Points'); ?></li>
+                                <li><i class="fas fa-eye me-2"></i><?php echo t('home.games.bullet2', 'KND Insight — predict the number, win KND Points'); ?></li>
                                 <li><i class="fas fa-trophy me-2"></i><?php echo t('home.games.bullet3', 'Earn XP, climb the leaderboard, collect seasonal badges'); ?></li>
                             </ul>
                             <div class="d-flex flex-wrap gap-3">
@@ -143,7 +143,7 @@ setCacheHeaders('html');
                         <div class="col-md-4">
                             <div class="lastroll-step">
                                 <span class="lastroll-step-num">3</span>
-                                <p class="mb-0 small text-white-50"><?php echo t('home.games.how_b3', 'Use KP to enter game modes — LastRoll 1v1, Above/Under, and more.'); ?></p>
+                                <p class="mb-0 small text-white-50"><?php echo t('home.games.how_b3', 'Use KP to enter game modes — LastRoll 1v1, KND Insight, and more.'); ?></p>
                             </div>
                         </div>
                         <div class="col-md-6">

@@ -174,16 +174,16 @@ return [
 
     // Home - KND LastRoll promo
     'home.games.title' => 'KND Games',
-    'home.games.subtitle' => 'Juega KND LastRoll 1v1, Above/Under y próximos modos dentro de KND Arena.',
+    'home.games.subtitle' => 'Juega KND LastRoll 1v1, KND Insight y próximos modos dentro de KND Arena.',
     'home.games.bullet1' => 'KND LastRoll — Death Roll 1v1 con salas en tiempo real',
-    'home.games.bullet2' => 'Above/Under — predice el número, gana KND Points',
+    'home.games.bullet2' => 'KND Insight — predice el número, gana KND Points',
     'home.games.bullet3' => 'Gana XP, escala en el leaderboard, colecciona badges de temporada',
     'home.games.enter_arena' => 'Entrar a KND Arena',
     'home.games.how' => 'Cómo funciona',
     'home.games.how_title' => 'Cómo Funcionan los KND Games',
     'home.games.how_b1' => 'Crea una cuenta o inicia sesión en tu ecosistema KND.',
     'home.games.how_b2' => 'Gana KND Points (KP) con compras o recompensas de actividad.',
-    'home.games.how_b3' => 'Usa KP para entrar a los modos de juego — LastRoll 1v1, Above/Under, y más.',
+    'home.games.how_b3' => 'Usa KP para entrar a los modos de juego — LastRoll 1v1, KND Insight, y más.',
     'home.games.how_b4' => 'Escala el leaderboard, gana XP y colecciona badges de temporada.',
     'home.games.how_b5' => 'Los KND Points son internos y no tienen valor monetario. Sin apuestas reales.',
     'home.games.disclaimer' => 'BETA: las mecánicas y balances pueden cambiar mientras estabilizamos el ecosistema.',
@@ -375,7 +375,7 @@ return [
     'arena.back' => 'Volver a la Arena',
     'arena.card_lastroll' => 'KND LastRoll',
     'arena.card_lastroll_desc' => 'Death Roll 1v1 — rola desde el máximo hasta 1. Quien saque 1 pierde. Salas en tiempo real, timer de 8s, sistema de revancha.',
-    'arena.card_aboveunder' => 'Above / Under',
+    'arena.card_aboveunder' => 'KND Insight',
     'arena.card_aboveunder_desc' => 'Predice si el próximo número será mayor o menor que el umbral. Rondas rápidas, probabilidad pura.',
     'arena.card_leaderboard' => 'Tabla de Posiciones',
     'arena.card_leaderboard_desc' => 'Rankings globales, rachas de victorias y badges de temporada. Compite por el primer lugar en todos los juegos de KND Arena.',
@@ -384,10 +384,10 @@ return [
     'arena.disclaimer' => 'BETA: las mecánicas y balances pueden cambiar mientras estabilizamos el ecosistema.',
     'arena.inspired' => 'Inspirado en el formato clásico de Death Roll. KND Arena es una experiencia next-gen de death roll.',
 
-    // Above/Under
-    'au.page_title' => 'Above / Under',
-    'au.page_desc' => 'Above/Under — predice el número y gana KND Points. Un minijuego next-gen death roll en KND Arena.',
-    'au.title' => 'Above / Under',
+    // KND Insight (Above/Under)
+    'au.page_title' => 'KND Insight',
+    'au.page_desc' => 'KND Insight — predice si el número es mayor o menor y gana KND Points. Un juego de predicción next-gen en KND Arena.',
+    'au.title' => 'KND Insight',
     'au.subtitle' => 'Elige un lado. Rola el número. 1–5 = Under, 6–10 = Above.',
     'au.your_balance' => 'Tus KND Points',
     'au.cost' => 'Costo',

@@ -10,7 +10,7 @@ require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 
 $seoTitle = 'KND Arena | KND Store';
-$seoDesc  = 'KND Arena — next-gen death roll duels, promo drops, and seasonal badges. Play KND LastRoll 1v1, Above/Under, and more.';
+$seoDesc  = 'KND Arena — next-gen death roll duels, promo drops, and seasonal badges. Play KND LastRoll 1v1, KND Insight, and more.';
 $ogHead   = '    <meta property="og:title" content="' . htmlspecialchars($seoTitle) . '">' . "\n";
 $ogHead  .= '    <meta property="og:description" content="' . htmlspecialchars($seoDesc) . '">' . "\n";
 $ogHead  .= '    <meta property="og:type" content="website">' . "\n";
@@ -59,14 +59,14 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
         </div>
       </div>
 
-      <!-- Above / Under -->
+      <!-- KND Insight -->
       <div class="col-12 col-sm-6 col-lg-4">
         <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card">
           <div class="d-flex align-items-start justify-content-between mb-3">
-            <div class="arena-card-icon"><i class="fas fa-arrows-alt-v"></i></div>
+            <div class="arena-card-icon"><i class="fas fa-eye"></i></div>
             <span class="badge bg-success px-2 py-1" style="font-size:.7rem;"><?php echo t('arena.live', 'LIVE'); ?></span>
           </div>
-          <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('arena.card_aboveunder', 'Above / Under'); ?></h3>
+          <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('arena.card_aboveunder', 'KND Insight'); ?></h3>
           <p class="text-white-50 small flex-grow-1"><?php echo t('arena.card_aboveunder_desc', 'Predict if the next number will be above or under the threshold. Fast rounds, pure probability.'); ?></p>
           <a href="/above-under.php" class="btn btn-neon-primary w-100 mt-auto">
             <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>

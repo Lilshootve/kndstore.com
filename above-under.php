@@ -38,8 +38,8 @@ try {
     error_log('above-under page error: ' . $e->getMessage());
 }
 
-$seoTitle = t('au.page_title', 'Above / Under') . ' | KND Arena';
-$seoDesc  = t('au.page_desc', 'Above/Under — predict the number and win KND Points. A next-gen death roll side game in KND Arena.');
+$seoTitle = t('au.page_title', 'KND Insight') . ' | KND Arena';
+$seoDesc  = t('au.page_desc', 'KND Insight — predict if the number is above or under, and win KND Points. A next-gen prediction game in KND Arena.');
 $ogHead   = '    <meta property="og:title" content="' . htmlspecialchars($seoTitle) . '">' . "\n";
 $ogHead  .= '    <meta property="og:description" content="' . htmlspecialchars($seoDesc) . '">' . "\n";
 $ogHead  .= '    <meta property="og:type" content="website">' . "\n";
@@ -60,7 +60,7 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
         <div class="text-center mb-4">
           <span class="badge bg-warning text-dark fw-bold px-3 py-1 mb-2" style="font-size:.75rem;">BETA</span>
           <h1 class="glow-text mb-2" style="font-size:2.2rem;">
-            <i class="fas fa-arrows-alt-v me-2"></i><?php echo t('au.title', 'Above / Under'); ?>
+            <i class="fas fa-eye me-2"></i><?php echo t('au.title', 'KND Insight'); ?>
           </h1>
           <p class="text-white-50 mb-0"><?php echo t('au.subtitle', 'Pick a side. Roll the number. 1–5 = Under, 6–10 = Above.'); ?></p>
         </div>
