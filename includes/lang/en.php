@@ -277,8 +277,8 @@ return [
     'nav.register' => 'Register',
 
     // Auth
-    'dr.auth.title' => 'KND LastRoll — Account',
-    'dr.auth.subtitle' => 'Login or register to play KND LastRoll',
+    'dr.auth.title' => 'KND Access — Sign In',
+    'dr.auth.subtitle' => 'Sign in to your KND ecosystem',
     'dr.auth.login' => 'Login',
     'dr.auth.register' => 'Register',
     'dr.auth.username' => 'Username',

@@ -198,8 +198,8 @@ return [
     'nav.register' => 'Registro',
 
     // Auth
-    'dr.auth.title' => 'KND LastRoll — Cuenta',
-    'dr.auth.subtitle' => 'Inicia sesión o regístrate para jugar KND LastRoll',
+    'dr.auth.title' => 'KND Access — Iniciar Sesión',
+    'dr.auth.subtitle' => 'Accede a tu ecosistema KND',
     'dr.auth.login' => 'Iniciar Sesión',
     'dr.auth.register' => 'Registrarse',
     'dr.auth.username' => 'Usuario',

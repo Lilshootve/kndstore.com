@@ -35,8 +35,8 @@ $csrfToken = csrf_token();
 ?>
 
 <?php
-$seoTitle = 'KND LastRoll — Account';
-$seoDesc  = 'Login or register to play KND LastRoll, a next-gen Death Roll 1v1 game.';
+$seoTitle = 'KND Access — Sign In';
+$seoDesc  = 'Sign in to your KND ecosystem. Access KND Arena, LastRoll, Support Credits, and more.';
 $ogHead   = '    <meta property="og:title" content="' . htmlspecialchars($seoTitle) . '">' . "\n";
 $ogHead  .= '    <meta property="og:description" content="' . htmlspecialchars($seoDesc) . '">' . "\n";
 $ogHead  .= '    <meta property="og:type" content="website">' . "\n";
@@ -56,9 +56,8 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
             <div class="col-md-5">
                 <div class="glass-card-neon p-4 p-md-5">
                     <div class="text-center mb-4">
-                        <h2 class="glow-text mb-2"><i class="fas fa-dice-d20 me-2"></i>KND LastRoll</h2>
-                        <p class="text-white-50"><?php echo t('dr.auth.subtitle', 'Login or register to play'); ?></p>
-                        <p class="text-white-50 small mb-0" style="opacity:0.5; font-style:italic;">Next-gen Death Roll 1v1</p>
+                        <h2 class="glow-text mb-2"><i class="fas fa-shield-alt me-2"></i>KND Access</h2>
+                        <p class="text-white-50"><?php echo t('dr.auth.subtitle', 'Sign in to your KND ecosystem'); ?></p>
                     </div>
 
                     <!-- Tabs -->
