@@ -91,12 +91,17 @@ try {
             }
         }
 
+        // Hall of Fame: prefer knd_user_xp, fallback to user_xp (historical data)
         $stmt = $pdo->prepare(
-            "SELECT x.user_id, x.xp, x.level, u.username
-             FROM knd_user_xp x
-             JOIN users u ON u.id = x.user_id
-             WHERE x.xp > 0
-             ORDER BY x.xp DESC
+            "SELECT u.id AS user_id,
+                    COALESCE(k.xp, ux.xp, 0) AS xp,
+                    COALESCE(k.level, GREATEST(1, FLOOR(SQRT(COALESCE(ux.xp, 0) / 100)) + 1)) AS level,
+                    u.username
+             FROM users u
+             LEFT JOIN knd_user_xp k ON k.user_id = u.id
+             LEFT JOIN user_xp ux ON ux.user_id = u.id
+             WHERE COALESCE(k.xp, ux.xp, 0) > 0
+             ORDER BY COALESCE(k.xp, ux.xp, 0) DESC
              LIMIT ?"
         );
         $stmt->execute([LB_TOP_LIMIT]);
@@ -157,12 +162,28 @@ try {
             ];
         }
 
-        $stmt = $pdo->prepare("SELECT xp, level FROM knd_user_xp WHERE user_id = ?");
+        $stmt = $pdo->prepare(
+            "SELECT COALESCE(k.xp, ux.xp, 0) AS xp,
+                    COALESCE(k.level, GREATEST(1, FLOOR(SQRT(COALESCE(ux.xp, 0) / 100)) + 1)) AS level
+             FROM users u
+             LEFT JOIN knd_user_xp k ON k.user_id = u.id
+             LEFT JOIN user_xp ux ON ux.user_id = u.id
+             WHERE u.id = ?"
+        );
         $stmt->execute([$userId]);
         $my = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($my && (int)$my['xp'] > 0) {
-            $stmt = $pdo->prepare("SELECT 1 + COUNT(*) AS r FROM knd_user_xp WHERE xp > ?");
-            $stmt->execute([(int)$my['xp']]);
+        $myXp = (int) ($my['xp'] ?? 0);
+        if ($myXp > 0) {
+            $stmt = $pdo->prepare(
+                "SELECT 1 + COUNT(*) AS r FROM (
+                   SELECT u.id
+                   FROM users u
+                   LEFT JOIN knd_user_xp k ON k.user_id = u.id
+                   LEFT JOIN user_xp ux ON ux.user_id = u.id
+                   WHERE COALESCE(k.xp, ux.xp, 0) > ?
+                 ) t"
+            );
+            $stmt->execute([$myXp]);
             $myRankAllTime = [
                 'rank'  => (int) $stmt->fetchColumn(),
                 'xp'    => (int) $my['xp'],
