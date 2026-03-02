@@ -251,6 +251,19 @@ return [
     'order.form.submit' => 'Send via WhatsApp',
     'order.form.whatsapp_other_helper' => 'Alternative payment options available via WhatsApp. Cryptocurrency payments supported: USDT, USDC, BTC, ETH, BNB (selected networks confirmed before payment). Binance Pay, Pipol Pay, Zinli and other regional and international methods. Availability and applicable fees confirmed via WhatsApp.',
 
+    // Home - KND LastRoll promo
+    'home.lastroll.title' => 'KND LastRoll',
+    'home.lastroll.subtitle' => 'Next-gen Death Roll 1v1 — roll until someone hits 1',
+    'home.lastroll.bullet1' => 'Real-time 1v1 rooms (public & private)',
+    'home.lastroll.bullet2' => '8-second turn timer',
+    'home.lastroll.bullet3' => 'Rematch with acceptance',
+    'home.lastroll.play_now' => 'Play Now',
+    'home.lastroll.how' => 'How it works',
+    'home.lastroll.step1' => 'Create or join a room — public or private code.',
+    'home.lastroll.step2' => 'Take turns rolling 1 to the current max.',
+    'home.lastroll.step3' => 'Roll a 1 and you lose. Last one standing wins.',
+    'home.lastroll.disclaimer' => 'BETA: features and balance may change.',
+
     // Navigation - KND LastRoll
     'nav.deathroll' => 'KND LastRoll',
     'nav.login' => 'Login',

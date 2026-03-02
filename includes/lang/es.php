@@ -172,6 +172,19 @@ return [
     'contact.cta.discord_immediate' => 'Discord inmediato',
     'contact.cta.emergency_email' => 'Email urgente',
 
+    // Home - KND LastRoll promo
+    'home.lastroll.title' => 'KND LastRoll',
+    'home.lastroll.subtitle' => 'Death Roll 1v1 de nueva generación — tira hasta que alguien saque 1',
+    'home.lastroll.bullet1' => 'Salas 1v1 en tiempo real (públicas y privadas)',
+    'home.lastroll.bullet2' => 'Timer de 8 segundos por turno',
+    'home.lastroll.bullet3' => 'Revancha con aceptación',
+    'home.lastroll.play_now' => 'Jugar Ahora',
+    'home.lastroll.how' => 'Cómo funciona',
+    'home.lastroll.step1' => 'Crea o únete a una sala — pública o por código privado.',
+    'home.lastroll.step2' => 'Turna para tirar de 1 al máximo actual.',
+    'home.lastroll.step3' => 'Saca un 1 y pierdes. El último en pie gana.',
+    'home.lastroll.disclaimer' => 'BETA: las funciones y el balance pueden cambiar.',
+
     // Navigation - KND LastRoll
     'nav.deathroll' => 'KND LastRoll',
     'nav.login' => 'Iniciar Sesión',

@@ -69,6 +69,81 @@ setCacheHeaders('html');
     </div>
 </section>
 
+<!-- KND LastRoll BETA Promo -->
+<section class="py-5" id="lastroll-promo">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="glass-card-neon p-4 p-md-5 lastroll-promo-card position-relative overflow-hidden">
+                    <span class="badge lastroll-beta-badge">BETA</span>
+
+                    <div class="row align-items-center g-4">
+                        <div class="col-md-7">
+                            <h2 class="glow-text mb-2" style="font-size:2.2rem;">
+                                <i class="fas fa-dice-d20 me-2"></i><?php echo t('home.lastroll.title'); ?>
+                            </h2>
+                            <p class="text-white-50 mb-3" style="font-size:1.05rem;">
+                                <?php echo t('home.lastroll.subtitle'); ?>
+                            </p>
+                            <ul class="lastroll-bullets mb-4">
+                                <li><i class="fas fa-users me-2"></i><?php echo t('home.lastroll.bullet1'); ?></li>
+                                <li><i class="fas fa-stopwatch me-2"></i><?php echo t('home.lastroll.bullet2'); ?></li>
+                                <li><i class="fas fa-handshake me-2"></i><?php echo t('home.lastroll.bullet3'); ?></li>
+                            </ul>
+                            <div class="d-flex flex-wrap gap-3">
+                                <a href="/lastroll" class="btn btn-neon-primary btn-lg">
+                                    <i class="fas fa-play me-2"></i><?php echo t('home.lastroll.play_now'); ?>
+                                </a>
+                                <a href="#lastroll-how" class="btn btn-outline-light">
+                                    <i class="fas fa-info-circle me-2"></i><?php echo t('home.lastroll.how'); ?>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-5 text-center">
+                            <div class="lastroll-dice-hero">
+                                <svg width="140" height="140" viewBox="0 0 120 120" aria-hidden="true">
+                                    <rect x="10" y="10" width="100" height="100" rx="20" fill="rgba(10,15,30,0.6)" stroke="rgba(37,156,174,0.35)" stroke-width="2"/>
+                                    <rect x="16" y="16" width="88" height="88" rx="16" fill="rgba(37,156,174,0.04)"/>
+                                    <text x="60" y="72" text-anchor="middle" font-family="Orbitron, monospace" font-size="42" font-weight="900" fill="rgba(37,156,174,0.8)">1v1</text>
+                                    <circle cx="35" cy="35" r="3" fill="rgba(37,156,174,0.12)"/>
+                                    <circle cx="85" cy="55" r="3" fill="rgba(37,156,174,0.12)"/>
+                                    <circle cx="35" cy="85" r="3" fill="rgba(37,156,174,0.12)"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- How it works mini-block -->
+                    <div id="lastroll-how" class="mt-4 pt-4" style="border-top: 1px solid rgba(37,156,174,0.12);">
+                        <h5 class="mb-3" style="color: var(--knd-neon-blue);"><i class="fas fa-scroll me-2"></i><?php echo t('home.lastroll.how'); ?></h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="lastroll-step">
+                                    <span class="lastroll-step-num">1</span>
+                                    <p class="mb-0 small text-white-50"><?php echo t('home.lastroll.step1'); ?></p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="lastroll-step">
+                                    <span class="lastroll-step-num">2</span>
+                                    <p class="mb-0 small text-white-50"><?php echo t('home.lastroll.step2'); ?></p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="lastroll-step">
+                                    <span class="lastroll-step-num">3</span>
+                                    <p class="mb-0 small text-white-50"><?php echo t('home.lastroll.step3'); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-3 mb-0 small" style="color: rgba(255,255,255,0.3); font-style: italic;"><?php echo t('home.lastroll.disclaimer'); ?></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Services Pillar -->
 <section class="knd-pillar-section py-5 bg-dark-epic" id="services">
     <div class="container">

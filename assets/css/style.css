@@ -6285,3 +6285,79 @@ body {
     border-color: rgba(255, 68, 68, 0.4) !important;
     color: #ff6666 !important;
 }
+
+/* ── KND LastRoll Home Promo Section ── */
+.lastroll-promo-card {
+    position: relative;
+}
+
+.lastroll-beta-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: linear-gradient(135deg, #259cae 0%, #1a7a8a 100%);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    z-index: 2;
+    box-shadow: 0 0 10px rgba(37, 156, 174, 0.3);
+}
+
+.lastroll-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.lastroll-bullets li {
+    color: rgba(255, 255, 255, 0.7);
+    padding: 4px 0;
+    font-size: 0.95rem;
+}
+
+.lastroll-bullets li i {
+    color: var(--knd-neon-blue);
+    width: 20px;
+    text-align: center;
+}
+
+.lastroll-dice-hero {
+    animation: lastroll-float 4s ease-in-out infinite;
+}
+
+.lastroll-dice-hero svg {
+    filter: drop-shadow(0 0 12px rgba(37, 156, 174, 0.2));
+}
+
+@keyframes lastroll-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+}
+
+.lastroll-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.lastroll-step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(37, 156, 174, 0.12);
+    border: 1px solid rgba(37, 156, 174, 0.3);
+    color: var(--knd-neon-blue);
+    font-weight: 700;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .lastroll-dice-hero svg { width: 100px; height: 100px; }
+}
