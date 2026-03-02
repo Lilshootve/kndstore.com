@@ -374,4 +374,18 @@ return [
     'arena.comingsoon_desc' => 'Nuevos modos de juego y eventos de temporada están en desarrollo. Mantente atento.',
     'arena.disclaimer' => 'BETA: las mecánicas y balances pueden cambiar mientras estabilizamos el ecosistema.',
     'arena.inspired' => 'Inspirado en el formato clásico de Death Roll. KND Arena es una experiencia next-gen de death roll.',
+
+    // Above/Under
+    'au.page_title' => 'Above / Under',
+    'au.page_desc' => 'Above/Under — predice el número y gana KND Points. Un minijuego next-gen death roll en KND Arena.',
+    'au.title' => 'Above / Under',
+    'au.subtitle' => 'Elige un lado. Rola el número. 1–5 = Under, 6–10 = Above.',
+    'au.your_balance' => 'Tus KND Points',
+    'au.cost' => 'Costo',
+    'au.win_payout' => 'Ganas',
+    'au.history' => 'Rolls Recientes',
+    'au.choice_col' => 'Elección',
+    'au.rolled_col' => 'Resultado',
+    'au.result_col' => 'Estado',
+    'au.no_history' => '¡Aún no hay rolls. Haz tu primera predicción!',
 ];

@@ -6445,3 +6445,41 @@ body {
     font-size: 1.2rem;
     color: var(--cyan, #00d4ff);
 }
+
+/* ── Above/Under Buttons ── */
+.au-btn-choice {
+    min-width: 140px;
+    padding: 16px 24px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: .03em;
+    border-radius: 14px;
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.au-btn-under {
+    background: rgba(0, 212, 255, .12);
+    border: 2px solid rgba(0, 212, 255, .4);
+    color: #00d4ff;
+}
+.au-btn-under:hover:not(:disabled) {
+    background: rgba(0, 212, 255, .25);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(0, 212, 255, .25);
+    color: #fff;
+}
+.au-btn-above {
+    background: rgba(255, 170, 0, .12);
+    border: 2px solid rgba(255, 170, 0, .4);
+    color: #ffaa00;
+}
+.au-btn-above:hover:not(:disabled) {
+    background: rgba(255, 170, 0, .25);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(255, 170, 0, .25);
+    color: #fff;
+}
+.au-btn-choice:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+    transform: none;
+}

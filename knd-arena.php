@@ -64,12 +64,12 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
         <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card">
           <div class="d-flex align-items-start justify-content-between mb-3">
             <div class="arena-card-icon"><i class="fas fa-arrows-alt-v"></i></div>
-            <span class="badge px-2 py-1" style="font-size:.7rem; background:rgba(0,212,255,.15); color:var(--cyan, #00d4ff); border:1px solid rgba(0,212,255,.3);"><?php echo t('arena.coming', 'COMING SOON'); ?></span>
+            <span class="badge bg-success px-2 py-1" style="font-size:.7rem;"><?php echo t('arena.live', 'LIVE'); ?></span>
           </div>
           <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('arena.card_aboveunder', 'Above / Under'); ?></h3>
           <p class="text-white-50 small flex-grow-1"><?php echo t('arena.card_aboveunder_desc', 'Predict if the next number will be above or under the threshold. Fast rounds, pure probability.'); ?></p>
-          <a href="/above-under.php" class="btn btn-outline-neon w-100 mt-auto">
-            <i class="fas fa-eye me-2"></i><?php echo t('arena.preview', 'Preview'); ?>
+          <a href="/above-under.php" class="btn btn-neon-primary w-100 mt-auto">
+            <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>
           </a>
         </div>
       </div>
