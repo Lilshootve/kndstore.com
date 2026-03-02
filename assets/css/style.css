@@ -6129,7 +6129,10 @@ body {
 
 /* ── KND LastRoll SVG HUD Dice ── */
 .dr-hud-card {
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     margin: 0 auto 1rem;
     padding: 1rem 1rem 0.5rem;
     border-radius: 16px;
@@ -6140,6 +6143,11 @@ body {
     -webkit-backdrop-filter: blur(6px);
     box-shadow: 0 0 6px rgba(37, 156, 174, 0.08);
     transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.dr-hud-card svg {
+    display: block;
+    margin: 0 auto;
 }
 
 .dr-dice-plate {

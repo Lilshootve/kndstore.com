@@ -85,15 +85,14 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                         </div>
                     </div>
 
-                    <!-- Current Max Display -->
-                    <div class="text-center mb-4">
+                    <!-- Current Max + Dice (flex centered column) -->
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;" class="mb-4">
                         <div class="small text-white-50 mb-1"><?php echo t('dr.game.current_max', 'Current Max'); ?></div>
                         <div id="current-max-display" style="font-size: 4rem; font-weight: 900; line-height: 1; font-family: 'Orbitron', monospace; color: var(--knd-neon-blue);">1000</div>
-                        <div id="initial-max-display" class="small text-white-50 mt-1" style="font-size:0.75rem; opacity:0.6;">Initial: <span id="initial-max-value">1000</span></div>
-                    </div>
+                        <div id="initial-max-display" class="small text-white-50 mt-1 mb-3" style="font-size:0.75rem; opacity:0.6;">Initial: <span id="initial-max-value">1000</span></div>
 
-                    <!-- SVG HUD Dice (persistent, never re-rendered by polling) -->
-                    <div id="dr-dice-wrap" class="dr-hud-card">
+                        <!-- SVG HUD Dice (persistent, never re-rendered by polling) -->
+                        <div id="dr-dice-wrap" class="dr-hud-card">
                         <svg id="dr-dice-svg" width="120" height="120" viewBox="0 0 120 120" aria-label="dice">
                             <rect x="14" y="14" width="92" height="92" rx="18" class="dr-dice-plate"/>
                             <rect x="20" y="20" width="80" height="80" rx="14" class="dr-dice-glow"/>
@@ -103,13 +102,14 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                             <circle cx="40" cy="80" r="3" class="dr-dice-pip"/>
                         </svg>
                         <div id="dr-dice-status" class="dr-dice-status">Ready</div>
+                        </div>
                     </div>
 
                     <!-- Turn Timer -->
                     <div id="turn-timer-bar" class="text-center mb-3" style="display:none;">
                         <div class="small text-white-50 mb-1"><?php echo t('dr.game.turn_timer', 'Time left'); ?></div>
                         <div class="d-flex justify-content-center align-items-center gap-3">
-                            <div id="turn-timer-value" style="font-size: 2rem; font-weight: 900; font-family: 'Orbitron', monospace; color: var(--knd-neon-blue); min-width: 60px;">13</div>
+                            <div id="turn-timer-value" style="font-size: 2rem; font-weight: 900; font-family: 'Orbitron', monospace; color: var(--knd-neon-blue); min-width: 60px;">8</div>
                             <div style="flex: 1; max-width: 200px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
                                 <div id="turn-timer-progress" style="height: 100%; width: 100%; background: var(--knd-neon-blue); transition: width 0.3s linear, background 0.3s;"></div>
                             </div>

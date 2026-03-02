@@ -339,8 +339,10 @@
             if (diceStatus) diceStatus.textContent = (TEXTS.rolled || 'rolled') + ' ' + value;
         }
 
+        var TURN_DURATION = 8;
+
         function startLocalCountdown(secondsLeft) {
-            serverSecondsLeft = secondsLeft;
+            serverSecondsLeft = Math.min(TURN_DURATION, Math.max(0, secondsLeft));
             localCountdownStart = Date.now();
             if (countdownInterval) clearInterval(countdownInterval);
             updateTimerDisplay();
@@ -356,19 +358,19 @@
         function updateTimerDisplay() {
             if (serverSecondsLeft === null || !timerBar) return;
             var elapsed = (Date.now() - localCountdownStart) / 1000;
-            var left = Math.max(0, serverSecondsLeft - elapsed);
+            var left = Math.max(0, Math.min(TURN_DURATION, serverSecondsLeft - elapsed));
             var secs = Math.ceil(left);
 
             timerBar.style.display = 'block';
             timerValue.textContent = secs;
 
-            var pct = (left / 13) * 100;
+            var pct = (left / TURN_DURATION) * 100;
             timerProgress.style.width = pct + '%';
 
-            if (left <= 3) {
+            if (left <= 2) {
                 timerValue.style.color = '#ff4444';
                 timerProgress.style.background = '#ff4444';
-            } else if (left <= 6) {
+            } else if (left <= 4) {
                 timerValue.style.color = '#ffaa00';
                 timerProgress.style.background = '#ffaa00';
             } else {
@@ -431,7 +433,7 @@
                 }
             }
 
-            if (s.game.status === 'playing' && s.game.turn_seconds_left !== null && s.game.turn_seconds_left !== undefined) {
+            if (s.game.status === 'playing' && s.game.turn_started_at && s.game.turn_seconds_left !== null && s.game.turn_seconds_left !== undefined) {
                 startLocalCountdown(s.game.turn_seconds_left);
             } else {
                 stopCountdown();

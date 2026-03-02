@@ -98,7 +98,7 @@ function check_turn_timeout(PDO $pdo, array $game): array {
     $serverNow = time();
     $elapsed = $serverNow - $turnStart;
 
-    if ($elapsed < 13) {
+    if ($elapsed < 8) {
         return $game;
     }
 
@@ -166,7 +166,7 @@ function build_game_state(PDO $pdo, array $game, int $currentUserId): array {
     $serverTime = gmdate('Y-m-d H:i:s');
     if ($game['status'] === 'playing' && !empty($game['turn_started_at'])) {
         $elapsed = time() - strtotime($game['turn_started_at']);
-        $turnSecondsLeft = max(0, 13 - $elapsed);
+        $turnSecondsLeft = max(0, min(8, 8 - $elapsed));
     }
 
     return [
