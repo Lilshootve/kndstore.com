@@ -85,16 +85,20 @@ function generateNavigation() {
         if ($scCache && isset($scCache['ts']) && (time() - $scCache['ts']) < $scCacheTTL) {
             $scAvailable = (int) $scCache['available'];
         } else {
-            $scIncPath = __DIR__ . '/support_credits.php';
-            if (file_exists($scIncPath)) {
-                require_once $scIncPath;
-                $scPdo = getDBConnection();
-                if ($scPdo) {
-                    $scUid = (int) $_SESSION['dr_user_id'];
-                    release_available_points_if_due($scPdo, $scUid);
-                    expire_points_if_due($scPdo, $scUid);
-                    $scAvailable = get_available_points($scPdo, $scUid);
+            try {
+                $scIncPath = __DIR__ . '/support_credits.php';
+                if (file_exists($scIncPath)) {
+                    require_once $scIncPath;
+                    $scPdo = getDBConnection();
+                    if ($scPdo) {
+                        $scUid = (int) $_SESSION['dr_user_id'];
+                        release_available_points_if_due($scPdo, $scUid);
+                        expire_points_if_due($scPdo, $scUid);
+                        $scAvailable = get_available_points($scPdo, $scUid);
+                    }
                 }
+            } catch (\Throwable $e) {
+                $scAvailable = 0;
             }
             $_SESSION['sc_badge_cache'] = ['ts' => time(), 'available' => $scAvailable];
         }

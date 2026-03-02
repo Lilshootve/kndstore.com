@@ -19,11 +19,15 @@ $userId = current_user_id();
 $username = htmlspecialchars(current_username());
 
 $pdo = getDBConnection();
-$balance = $pdo ? get_points_balance($pdo, $userId) : ['pending' => 0, 'available' => 0, 'locked' => 0, 'spent_total' => 0, 'expiring_soon' => []];
-if ($pdo) {
-    release_available_points_if_due($pdo, $userId);
-    expire_points_if_due($pdo, $userId);
-    $balance = get_points_balance($pdo, $userId);
+$balance = ['pending' => 0, 'available' => 0, 'locked' => 0, 'spent_total' => 0, 'expiring_soon' => []];
+try {
+    if ($pdo) {
+        release_available_points_if_due($pdo, $userId);
+        expire_points_if_due($pdo, $userId);
+        $balance = get_points_balance($pdo, $userId);
+    }
+} catch (\Throwable $e) {
+    error_log('support-credits page balance error: ' . $e->getMessage());
 }
 
 $seoTitle = t('sc.page_title', 'KND Support Credits') . ' | KND Store';
@@ -166,6 +170,8 @@ echo generateHeader($seoTitle, $seoDesc);
                         <thead><tr><th>#</th><th><?php echo t('sc.method', 'Method'); ?></th><th><?php echo t('sc.amount', 'Amount'); ?></th><th><?php echo t('sc.credits_label', 'Credits'); ?></th><th><?php echo t('sc.status', 'Status'); ?></th><th><?php echo t('sc.date', 'Date'); ?></th></tr></thead>
                         <tbody id="sc-payments-list">
                         <?php
+                        $payments = [];
+                        try {
                         if ($pdo) {
                             $stmt = $pdo->prepare(
                                 "SELECT sp.*, COALESCE(pl.points, 0) AS points FROM support_payments sp
@@ -174,6 +180,8 @@ echo generateHeader($seoTitle, $seoDesc);
                             );
                             $stmt->execute([$userId]);
                             $payments = $stmt->fetchAll();
+                        }
+                        } catch (\Throwable $e) { $payments = []; }
                             foreach ($payments as $p):
                         ?>
                             <tr>
@@ -190,7 +198,7 @@ echo generateHeader($seoTitle, $seoDesc);
                                 </td>
                                 <td class="small"><?php echo date('M d, Y H:i', strtotime($p['created_at'])); ?></td>
                             </tr>
-                        <?php endforeach; } ?>
+                        <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
@@ -202,6 +210,7 @@ echo generateHeader($seoTitle, $seoDesc);
 
 <?php echo generateFooter(); ?>
 
+<script src="/assets/js/navigation-extend.js"></script>
 <script>
 (function() {
     const CSRF = '<?php echo $csrfToken; ?>';
@@ -280,5 +289,4 @@ echo generateHeader($seoTitle, $seoDesc);
 })();
 </script>
 
-<script src="/assets/js/navigation-extend.js"></script>
 <?php echo generateScripts(); ?>
