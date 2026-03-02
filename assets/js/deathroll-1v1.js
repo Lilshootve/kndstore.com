@@ -256,13 +256,18 @@
         var diceRollingSafety = null;
         var isDiceRolling = false;
         var diceState = 'idle'; // 'idle' | 'rolling' | 'result' | 'opponent'
+        var rollStartTime = 0;
+        var MIN_ROLL_MS = 800;
+        var pendingResult = null;
+        var pendingResultCb = null;
 
         function setDiceIdle(label) {
             if (!diceEl) return;
             diceState = 'idle';
             diceEl.className = 'dr-dice idle';
-            diceFace.style.display = '';
-            diceValue.style.display = 'none';
+            diceFace.className = 'dr-dice-face';
+            diceValue.className = 'dr-dice-value';
+            diceValue.textContent = '';
             diceLabel.textContent = label || '';
         }
 
@@ -270,44 +275,69 @@
             if (!diceEl) return;
             isDiceRolling = true;
             diceState = 'rolling';
+            rollStartTime = Date.now();
+            pendingResult = null;
+            if (pendingResultCb) { clearTimeout(pendingResultCb); pendingResultCb = null; }
             diceEl.className = 'dr-dice rolling';
-            diceFace.style.display = '';
-            diceValue.style.display = 'none';
+            diceFace.className = 'dr-dice-face';
+            diceValue.className = 'dr-dice-value';
             diceValue.textContent = '';
             diceLabel.textContent = 'Rolling\u2026';
             if (diceRollingSafety) clearTimeout(diceRollingSafety);
             diceRollingSafety = setTimeout(function () { forceStopDice(); }, 10000);
         }
 
+        function applyResult(result) {
+            diceState = 'result';
+            isDiceRolling = false;
+            diceEl.className = 'dr-dice result';
+            diceFace.className = 'dr-dice-face dr-face-shrink';
+            diceValue.className = 'dr-dice-value dr-value-pop';
+            diceValue.textContent = result;
+            diceValue.style.color = parseInt(result) === 1 ? '#ff4444' : 'var(--knd-neon-blue)';
+            diceLabel.textContent = '';
+        }
+
         function stopDiceRoll(result) {
             if (!diceEl) return;
-            isDiceRolling = false;
             if (diceRollingSafety) { clearTimeout(diceRollingSafety); diceRollingSafety = null; }
+            if (pendingResultCb) { clearTimeout(pendingResultCb); pendingResultCb = null; }
+
             if (result !== '' && result !== undefined && result !== null) {
-                diceState = 'result';
-                diceEl.className = 'dr-dice result';
-                diceFace.style.display = 'none';
-                diceValue.style.display = 'block';
-                diceValue.textContent = result;
-                diceValue.style.color = parseInt(result) === 1 ? '#ff4444' : 'var(--knd-neon-blue)';
-                diceLabel.textContent = '';
+                var elapsed = Date.now() - rollStartTime;
+                var delay = Math.max(0, MIN_ROLL_MS - elapsed);
+                if (delay > 0) {
+                    pendingResult = result;
+                    pendingResultCb = setTimeout(function () {
+                        pendingResult = null;
+                        pendingResultCb = null;
+                        applyResult(result);
+                    }, delay);
+                } else {
+                    applyResult(result);
+                }
             } else {
+                isDiceRolling = false;
                 setDiceIdle('');
             }
         }
 
         function forceStopDice() {
             isDiceRolling = false;
+            pendingResult = null;
+            if (pendingResultCb) { clearTimeout(pendingResultCb); pendingResultCb = null; }
             if (diceRollingSafety) { clearTimeout(diceRollingSafety); diceRollingSafety = null; }
             setDiceIdle('');
         }
 
         function opponentDicePop(value) {
-            if (!diceEl || isDiceRolling) return;
+            if (!diceEl || isDiceRolling || pendingResultCb) return;
             diceState = 'opponent';
             diceEl.className = 'dr-dice opponent-pop';
-            diceFace.style.display = '';
-            diceValue.style.display = 'none';
+            diceFace.className = 'dr-dice-face';
+            diceValue.className = 'dr-dice-value dr-value-pop';
+            diceValue.textContent = value || '';
+            diceValue.style.color = 'var(--knd-neon-blue)';
             diceLabel.textContent = value ? (TEXTS.rolled || 'rolled') + ' ' + value : '';
         }
 
@@ -441,8 +471,8 @@
             }
             lastRollCount = s.rolls.length;
 
-            // Dice state from polling (NEVER touch if rolling)
-            if (!isDiceRolling && diceEl) {
+            // Dice state from polling (NEVER touch if rolling or pending result)
+            if (!isDiceRolling && !pendingResultCb && diceEl) {
                 if (s.game.status === 'finished') {
                     if (diceState !== 'idle') setDiceIdle('');
                 } else if (s.game.status === 'playing' && s.me.can_roll) {
@@ -673,17 +703,23 @@
                 csrf_token: CSRF,
                 code: GAME_CODE
             }).then(function (d) {
-                isRolling = false;
-                btnRoll.innerHTML = '<i class="fas fa-dice me-2"></i>ROLL!';
                 if (d.ok) {
                     var myLastRoll = '';
                     if (d.data.rolls && d.data.rolls.length > 0) {
                         var last = d.data.rolls[d.data.rolls.length - 1];
                         if (last.username === MY_USERNAME) myLastRoll = last.roll_value;
                     }
+                    var elapsed = Date.now() - rollStartTime;
+                    var delay = Math.max(0, MIN_ROLL_MS - elapsed);
+                    setTimeout(function () {
+                        isRolling = false;
+                        btnRoll.innerHTML = '<i class="fas fa-dice me-2"></i>ROLL!';
+                        renderState(d.data);
+                    }, delay);
                     stopDiceRoll(myLastRoll);
-                    renderState(d.data);
                 } else {
+                    isRolling = false;
+                    btnRoll.innerHTML = '<i class="fas fa-dice me-2"></i>ROLL!';
                     stopDiceRoll('');
                     alert(d.error.message);
                     pollState();
@@ -716,19 +752,20 @@
         // Inject CSS animations
         var style = document.createElement('style');
         style.textContent = [
-            '@keyframes dr-pop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.3); } 100% { transform: scale(1); opacity: 1; } }',
             '@keyframes dr-shake { 0%,100% { transform: rotate(0deg) scale(1); } 10% { transform: rotate(12deg) scale(1.05); } 20% { transform: rotate(-10deg) scale(1.03); } 30% { transform: rotate(14deg) scale(1.06); } 40% { transform: rotate(-12deg) scale(1.04); } 50% { transform: rotate(10deg) scale(1.05); } 60% { transform: rotate(-14deg) scale(1.03); } 70% { transform: rotate(8deg) scale(1.06); } 80% { transform: rotate(-6deg) scale(1.03); } 90% { transform: rotate(4deg) scale(1.01); } }',
-            '@keyframes dr-glow-pulse { 0%,100% { box-shadow: 0 0 8px rgba(37,156,174,0.15); } 50% { box-shadow: 0 0 18px rgba(37,156,174,0.35); } }',
-            '@keyframes dr-result-pop { 0% { transform: scale(0.3); opacity: 0; } 60% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }',
+            '@keyframes dr-glow-pulse { 0%,100% { box-shadow: 0 0 8px rgba(37,156,174,0.15); } 50% { box-shadow: 0 0 22px rgba(37,156,174,0.4); } }',
+            '@keyframes dr-result-pop { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.25); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }',
+            '@keyframes dr-face-shrink { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.45); opacity: 0.35; } }',
             '@keyframes dr-opponent-pop { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }',
-            '.dr-dice { text-align: center; margin: 0 auto 1rem; padding: 1rem; border-radius: 16px; background: rgba(37,156,174,0.04); border: 1px solid rgba(37,156,174,0.12); width: 120px; transition: border-color 0.3s, background 0.3s, box-shadow 0.3s; box-shadow: 0 0 6px rgba(37,156,174,0.08); }',
-            '.dr-dice-face { font-size: 56px; line-height: 1; }',
-            '.dr-dice-value { font-size: 2.5rem; font-weight: 900; font-family: "Orbitron", monospace; color: var(--knd-neon-blue); }',
+            '.dr-dice { text-align: center; margin: 0 auto 1rem; padding: 1rem; border-radius: 16px; background: rgba(37,156,174,0.04); border: 1px solid rgba(37,156,174,0.12); width: 120px; transition: border-color 0.3s, background 0.3s, box-shadow 0.3s; box-shadow: 0 0 6px rgba(37,156,174,0.08); position: relative; }',
+            '.dr-dice-face { font-size: 56px; line-height: 1; transition: transform 0.35s ease, opacity 0.35s ease; }',
+            '.dr-dice-value { font-size: 2.5rem; font-weight: 900; font-family: "Orbitron", monospace; color: var(--knd-neon-blue); min-height: 1em; }',
             '.dr-dice-label { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-top: 4px; min-height: 1.1em; letter-spacing: 0.5px; }',
-            '.dr-dice.rolling { border-color: rgba(37,156,174,0.4); background: rgba(37,156,174,0.08); animation: dr-glow-pulse 1s ease-in-out infinite; }',
-            '.dr-dice.rolling .dr-dice-face { animation: dr-shake 0.6s ease-in-out infinite; }',
-            '.dr-dice.result .dr-dice-value { animation: dr-result-pop 0.4s ease-out; }',
-            '.dr-dice.result { box-shadow: 0 0 12px rgba(37,156,174,0.2); }',
+            '.dr-dice.rolling { border-color: rgba(37,156,174,0.4); background: rgba(37,156,174,0.08); animation: dr-glow-pulse 0.8s ease-in-out infinite; }',
+            '.dr-dice.rolling .dr-dice-face { animation: dr-shake 0.5s ease-in-out infinite; }',
+            '.dr-face-shrink { animation: dr-face-shrink 0.35s ease forwards !important; }',
+            '.dr-value-pop { animation: dr-result-pop 0.45s ease-out forwards; }',
+            '.dr-dice.result { box-shadow: 0 0 14px rgba(37,156,174,0.25); border-color: rgba(37,156,174,0.3); }',
             '.dr-dice.opponent-pop .dr-dice-face { animation: dr-opponent-pop 0.5s ease-out; }',
             '@media (max-width: 576px) { .dr-dice { width: 100px; padding: 0.75rem; } .dr-dice-face { font-size: 44px; } .dr-dice-value { font-size: 2rem; } }'
         ].join('\n');
