@@ -360,6 +360,7 @@
                 anchorAt = Date.now();
                 anchorTurnStartedAt = s.game.turn_started_at;
                 anchorTurnUserId = s.game.turn_user_id;
+                timeoutPollSent = false;
             } else if (srvLeft < anchorSecondsLeft - ((Date.now() - anchorAt) / 1000)) {
                 anchorSecondsLeft = srvLeft;
                 anchorAt = Date.now();
@@ -378,6 +379,8 @@
             anchorAt = null;
             if (timerBar) timerBar.style.display = 'none';
         }
+
+        var timeoutPollSent = false;
 
         function updateTimerDisplay() {
             if (anchorSecondsLeft === null || anchorAt === null || !timerBar) return;
@@ -400,6 +403,11 @@
             } else {
                 timerValue.style.color = 'var(--knd-neon-blue)';
                 timerProgress.style.background = 'var(--knd-neon-blue)';
+            }
+
+            if (left <= 0 && !timeoutPollSent && !gameFinished) {
+                timeoutPollSent = true;
+                pollState();
             }
         }
 
