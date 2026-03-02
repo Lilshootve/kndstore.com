@@ -89,12 +89,15 @@
         if (entrySelect) entrySelect.disabled = false;
     }
 
+    var _rawBalance = parseInt(balanceEl.textContent.replace(/\D/g, ''), 10) || 0;
+
     function updateBalance(val) {
-        balanceEl.textContent = Number(val).toLocaleString();
+        _rawBalance = parseInt(val, 10) || 0;
+        balanceEl.textContent = _rawBalance.toLocaleString();
         var navBadge = document.querySelector('.sc-nav-badge');
         if (navBadge) {
-            if (val > 0) {
-                navBadge.innerHTML = '<i class="fas fa-coins"></i> ' + Number(val).toLocaleString();
+            if (_rawBalance > 0) {
+                navBadge.innerHTML = '<i class="fas fa-coins"></i> ' + _rawBalance.toLocaleString();
                 navBadge.style.display = '';
             } else {
                 navBadge.style.display = 'none';
@@ -124,8 +127,7 @@
         if (rolling) return;
 
         var entry = getEntry();
-        var currentBalance = parseInt(balanceEl.textContent.replace(/,/g, ''), 10) || 0;
-        if (currentBalance < entry) {
+        if (_rawBalance < entry) {
             resultBanner.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Not enough KP. You need ' + entry.toLocaleString() + ' KP.</div>';
             resultBanner.style.display = 'block';
             return;
