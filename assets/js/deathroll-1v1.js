@@ -251,17 +251,28 @@
         var diceLabel = document.getElementById('dr-dice-label');
         var diceRollingSafety = null;
         var isDiceRolling = false;
+        var diceState = 'idle'; // 'idle' | 'rolling' | 'result' | 'opponent'
+
+        function setDiceIdle(label) {
+            if (!diceEl) return;
+            diceState = 'idle';
+            diceEl.className = 'dr-dice idle';
+            diceFace.style.display = '';
+            diceValue.style.display = 'none';
+            diceLabel.textContent = label || '';
+        }
 
         function startDiceRoll() {
             if (!diceEl) return;
             isDiceRolling = true;
+            diceState = 'rolling';
             diceEl.className = 'dr-dice rolling';
+            diceFace.style.display = '';
             diceValue.style.display = 'none';
             diceValue.textContent = '';
-            diceFace.style.display = '';
             diceLabel.textContent = 'Rolling\u2026';
             if (diceRollingSafety) clearTimeout(diceRollingSafety);
-            diceRollingSafety = setTimeout(function () { stopDiceRoll(''); }, 10000);
+            diceRollingSafety = setTimeout(function () { forceStopDice(); }, 10000);
         }
 
         function stopDiceRoll(result) {
@@ -269,34 +280,31 @@
             isDiceRolling = false;
             if (diceRollingSafety) { clearTimeout(diceRollingSafety); diceRollingSafety = null; }
             if (result !== '' && result !== undefined && result !== null) {
+                diceState = 'result';
                 diceEl.className = 'dr-dice result';
+                diceFace.style.display = 'none';
+                diceValue.style.display = 'block';
                 diceValue.textContent = result;
                 diceValue.style.color = parseInt(result) === 1 ? '#ff4444' : 'var(--knd-neon-blue)';
                 diceLabel.textContent = '';
-                setTimeout(function () {
-                    if (!isDiceRolling) {
-                        diceEl.className = 'dr-dice idle';
-                        diceFace.style.display = '';
-                        diceValue.style.display = 'none';
-                        diceLabel.textContent = '';
-                    }
-                }, 3000);
             } else {
-                diceEl.className = 'dr-dice idle';
-                diceLabel.textContent = '';
+                setDiceIdle('');
             }
+        }
+
+        function forceStopDice() {
+            isDiceRolling = false;
+            if (diceRollingSafety) { clearTimeout(diceRollingSafety); diceRollingSafety = null; }
+            setDiceIdle('');
         }
 
         function opponentDicePop(value) {
             if (!diceEl || isDiceRolling) return;
+            diceState = 'opponent';
             diceEl.className = 'dr-dice opponent-pop';
-            diceLabel.textContent = value ? String(value) : '';
-            setTimeout(function () {
-                if (!isDiceRolling) {
-                    diceEl.className = 'dr-dice idle';
-                    diceLabel.textContent = '';
-                }
-            }, 800);
+            diceFace.style.display = '';
+            diceValue.style.display = 'none';
+            diceLabel.textContent = value ? (TEXTS.rolled || 'rolled') + ' ' + value : '';
         }
 
         function startLocalCountdown(secondsLeft) {
@@ -425,9 +433,22 @@
             }
             lastRollCount = s.rolls.length;
 
+            // Dice state from polling (NEVER touch if rolling)
+            if (!isDiceRolling && diceEl) {
+                if (s.game.status === 'finished') {
+                    if (diceState !== 'idle') setDiceIdle('');
+                } else if (s.game.status === 'playing' && s.me.can_roll) {
+                    if (diceState !== 'rolling' && diceState !== 'result') {
+                        setDiceIdle('Ready');
+                    }
+                } else if (s.game.status === 'playing' && !s.me.can_roll) {
+                    if (diceState === 'idle') diceLabel.textContent = '';
+                }
+            }
+
             if (s.game.status === 'finished' && !gameFinished) {
                 gameFinished = true;
-                stopDiceRoll('');
+                forceStopDice();
                 showGameOver(s);
                 startRematchPolling();
             }
@@ -688,20 +709,19 @@
         var style = document.createElement('style');
         style.textContent = [
             '@keyframes dr-pop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.3); } 100% { transform: scale(1); opacity: 1; } }',
-            '@keyframes dr-shake { 0%,100% { transform: rotate(0deg) scale(1); } 10% { transform: rotate(15deg) scale(1.1); } 20% { transform: rotate(-12deg) scale(1.05); } 30% { transform: rotate(18deg) scale(1.12); } 40% { transform: rotate(-15deg) scale(1.08); } 50% { transform: rotate(12deg) scale(1.1); } 60% { transform: rotate(-18deg) scale(1.05); } 70% { transform: rotate(10deg) scale(1.12); } 80% { transform: rotate(-8deg) scale(1.06); } 90% { transform: rotate(5deg) scale(1.02); } }',
-            '@keyframes dr-glow-pulse { 0%,100% { box-shadow: 0 0 15px rgba(37,156,174,0.2); } 50% { box-shadow: 0 0 30px rgba(37,156,174,0.5), 0 0 60px rgba(37,156,174,0.15); } }',
-            '@keyframes dr-result-pop { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.4); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }',
-            '@keyframes dr-opponent-pop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }',
-            '.dr-dice { text-align: center; margin: 0 auto 1rem; padding: 1rem; border-radius: 16px; background: rgba(37,156,174,0.06); border: 1px solid rgba(37,156,174,0.15); width: 120px; position: relative; transition: border-color 0.3s, background 0.3s; }',
-            '.dr-dice-face { font-size: 56px; line-height: 1; transition: opacity 0.2s; }',
-            '.dr-dice-value { font-size: 2.5rem; font-weight: 900; font-family: "Orbitron", monospace; color: var(--knd-neon-blue); display: none; }',
-            '.dr-dice-label { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 4px; min-height: 1.1em; }',
-            '.dr-dice.rolling { border-color: rgba(37,156,174,0.5); background: rgba(37,156,174,0.1); animation: dr-glow-pulse 0.8s ease-in-out infinite; }',
+            '@keyframes dr-shake { 0%,100% { transform: rotate(0deg) scale(1); } 10% { transform: rotate(12deg) scale(1.05); } 20% { transform: rotate(-10deg) scale(1.03); } 30% { transform: rotate(14deg) scale(1.06); } 40% { transform: rotate(-12deg) scale(1.04); } 50% { transform: rotate(10deg) scale(1.05); } 60% { transform: rotate(-14deg) scale(1.03); } 70% { transform: rotate(8deg) scale(1.06); } 80% { transform: rotate(-6deg) scale(1.03); } 90% { transform: rotate(4deg) scale(1.01); } }',
+            '@keyframes dr-glow-pulse { 0%,100% { box-shadow: 0 0 8px rgba(37,156,174,0.15); } 50% { box-shadow: 0 0 18px rgba(37,156,174,0.35); } }',
+            '@keyframes dr-result-pop { 0% { transform: scale(0.3); opacity: 0; } 60% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }',
+            '@keyframes dr-opponent-pop { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }',
+            '.dr-dice { text-align: center; margin: 0 auto 1rem; padding: 1rem; border-radius: 16px; background: rgba(37,156,174,0.04); border: 1px solid rgba(37,156,174,0.12); width: 120px; transition: border-color 0.3s, background 0.3s, box-shadow 0.3s; box-shadow: 0 0 6px rgba(37,156,174,0.08); }',
+            '.dr-dice-face { font-size: 56px; line-height: 1; }',
+            '.dr-dice-value { font-size: 2.5rem; font-weight: 900; font-family: "Orbitron", monospace; color: var(--knd-neon-blue); }',
+            '.dr-dice-label { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-top: 4px; min-height: 1.1em; letter-spacing: 0.5px; }',
+            '.dr-dice.rolling { border-color: rgba(37,156,174,0.4); background: rgba(37,156,174,0.08); animation: dr-glow-pulse 1s ease-in-out infinite; }',
             '.dr-dice.rolling .dr-dice-face { animation: dr-shake 0.6s ease-in-out infinite; }',
-            '.dr-dice.rolling .dr-dice-value { display: none; }',
-            '.dr-dice.result .dr-dice-face { display: none; }',
-            '.dr-dice.result .dr-dice-value { display: block; animation: dr-result-pop 0.5s ease-out; }',
-            '.dr-dice.opponent-pop .dr-dice-face { animation: dr-opponent-pop 0.6s ease-out; }',
+            '.dr-dice.result .dr-dice-value { animation: dr-result-pop 0.4s ease-out; }',
+            '.dr-dice.result { box-shadow: 0 0 12px rgba(37,156,174,0.2); }',
+            '.dr-dice.opponent-pop .dr-dice-face { animation: dr-opponent-pop 0.5s ease-out; }',
             '@media (max-width: 576px) { .dr-dice { width: 100px; padding: 0.75rem; } .dr-dice-face { font-size: 44px; } .dr-dice-value { font-size: 2rem; } }'
         ].join('\n');
         document.head.appendChild(style);
