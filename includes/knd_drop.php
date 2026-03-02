@@ -4,7 +4,7 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/support_credits.php';
 
-if (!defined('DROP_ENTRY_KP')) define('DROP_ENTRY_KP', 420);
+if (!defined('DROP_ENTRY_KP')) define('DROP_ENTRY_KP', 100);
 if (!defined('DROP_COOLDOWN_SEC')) define('DROP_COOLDOWN_SEC', 3);
 
 $DROP_XP_MAP = [

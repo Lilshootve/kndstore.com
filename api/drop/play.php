@@ -28,8 +28,8 @@ try {
     $userId = current_user_id();
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
-    rate_limit_guard($pdo, "drop_user:{$userId}", 20, 60);
-    rate_limit_guard($pdo, "drop_ip:{$ip}", 60, 60);
+    rate_limit_guard($pdo, "drop_user:{$userId}", 10, 3600);
+    rate_limit_guard($pdo, "drop_ip:{$ip}", 30, 3600);
 
     if (has_risk_flag($pdo, $userId)) {
         json_error('ACCOUNT_FLAGGED', 'Your account has been flagged.', 403);
