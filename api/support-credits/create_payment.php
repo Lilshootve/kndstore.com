@@ -51,6 +51,7 @@ try {
 
     $result = create_support_payment($pdo, $userId, $method, $amount, $currency, $notes);
 
+    unset($_SESSION['sc_badge_cache']);
     json_success($result);
 } catch (\Throwable $e) {
     error_log('support-credits/create_payment error: ' . $e->getMessage());

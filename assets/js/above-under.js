@@ -69,6 +69,15 @@
 
     function updateBalance(val) {
         balanceEl.textContent = Number(val).toLocaleString();
+        var navBadge = document.querySelector('.sc-nav-badge');
+        if (navBadge) {
+            if (val > 0) {
+                navBadge.innerHTML = '<i class="fas fa-coins"></i> ' + Number(val).toLocaleString();
+                navBadge.style.display = '';
+            } else {
+                navBadge.style.display = 'none';
+            }
+        }
     }
 
     function addHistoryRow(r) {
