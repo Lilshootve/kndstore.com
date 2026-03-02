@@ -19,9 +19,19 @@ try {
     if (!$pdo) json_error('DB_FAIL', 'Database error.', 500);
 
     $userId = isLoggedIn() ? current_user_id() : null;
+    $season = null;
+    $seasonInfo = null;
+    $topSeason = [];
+    $topAllTime = [];
+    $myRankSeason = null;
+    $myRankAllTime = null;
 
-    // Season info
-    $season = ensure_active_season($pdo);
+    // Season info (tables may not exist yet)
+    try {
+        $season = ensure_active_season($pdo);
+    } catch (\Throwable $e) {
+        error_log('leaderboard ensure_season: ' . $e->getMessage());
+    }
     $seasonInfo = null;
     if ($season) {
         $seasonInfo = [
@@ -49,9 +59,8 @@ try {
         }
     }
 
-    $topSeason = [];
-    $topAllTime = [];
     if (!$useCache) {
+        try {
         if ($season) {
             $stmt = $pdo->prepare(
                 "SELECT s.user_id, s.xp_earned, s.matches_played, s.wins, s.losses,
@@ -121,11 +130,13 @@ try {
         if ($cacheDir && is_writable($cacheDir)) {
             @file_put_contents($cacheFile, json_encode(['topSeason' => $topSeason, 'topAllTime' => $topAllTime]));
         }
+        } catch (\Throwable $e) {
+            error_log('leaderboard top lists: ' . $e->getMessage());
+        }
     }
 
-    $myRankSeason = null;
-    $myRankAllTime = null;
     if ($userId && $season) {
+        try {
         $stmt = $pdo->prepare(
             "SELECT xp_earned, wins, losses FROM knd_season_stats WHERE season_id = ? AND user_id = ?"
         );
@@ -170,6 +181,9 @@ try {
                         ? round(100 * $s['wins'] / ($s['wins'] + $s['losses']), 1) : null;
                 }
             }
+        }
+        } catch (\Throwable $e) {
+            error_log('leaderboard my rank: ' . $e->getMessage());
         }
     }
 
