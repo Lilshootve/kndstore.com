@@ -340,25 +340,49 @@
         }
 
         var TURN_DURATION = 8;
+        var anchorSecondsLeft = null;
+        var anchorAt = null;
+        var anchorTurnStartedAt = null;
+        var anchorTurnUserId = null;
 
-        function startLocalCountdown(secondsLeft) {
-            serverSecondsLeft = Math.min(TURN_DURATION, Math.max(0, secondsLeft));
-            localCountdownStart = Date.now();
-            if (countdownInterval) clearInterval(countdownInterval);
-            updateTimerDisplay();
-            countdownInterval = setInterval(updateTimerDisplay, 200);
+        function syncCountdown(s) {
+            if (s.game.status !== 'playing' || !s.game.turn_started_at || s.game.turn_seconds_left === null || s.game.turn_seconds_left === undefined) {
+                stopCountdown();
+                return;
+            }
+
+            var dur = s.game.turn_duration || TURN_DURATION;
+            var srvLeft = Math.max(0, Math.min(dur, s.game.turn_seconds_left));
+            var turnChanged = (s.game.turn_started_at !== anchorTurnStartedAt) || (s.game.turn_user_id !== anchorTurnUserId);
+
+            if (turnChanged) {
+                anchorSecondsLeft = srvLeft;
+                anchorAt = Date.now();
+                anchorTurnStartedAt = s.game.turn_started_at;
+                anchorTurnUserId = s.game.turn_user_id;
+            } else if (srvLeft < anchorSecondsLeft - ((Date.now() - anchorAt) / 1000)) {
+                anchorSecondsLeft = srvLeft;
+                anchorAt = Date.now();
+            }
+
+            if (!countdownInterval) {
+                updateTimerDisplay();
+                countdownInterval = setInterval(updateTimerDisplay, 200);
+            }
         }
 
         function stopCountdown() {
             if (countdownInterval) clearInterval(countdownInterval);
             countdownInterval = null;
+            anchorSecondsLeft = null;
+            anchorAt = null;
             if (timerBar) timerBar.style.display = 'none';
         }
 
         function updateTimerDisplay() {
-            if (serverSecondsLeft === null || !timerBar) return;
-            var elapsed = (Date.now() - localCountdownStart) / 1000;
-            var left = Math.max(0, Math.min(TURN_DURATION, serverSecondsLeft - elapsed));
+            if (anchorSecondsLeft === null || anchorAt === null || !timerBar) return;
+            var elapsed = (Date.now() - anchorAt) / 1000;
+            var left = Math.max(0, Math.min(TURN_DURATION, anchorSecondsLeft - elapsed));
             var secs = Math.ceil(left);
 
             timerBar.style.display = 'block';
@@ -433,11 +457,7 @@
                 }
             }
 
-            if (s.game.status === 'playing' && s.game.turn_started_at && s.game.turn_seconds_left !== null && s.game.turn_seconds_left !== undefined) {
-                startLocalCountdown(s.game.turn_seconds_left);
-            } else {
-                stopCountdown();
-            }
+            syncCountdown(s);
 
             var turnInfo = document.getElementById('turn-info');
             if (s.game.status === 'waiting') {
@@ -466,7 +486,6 @@
 
             if (s.rolls.length > lastRollCount && lastRollCount > 0) {
                 var latestRoll = s.rolls[s.rolls.length - 1];
-                showLastRoll(latestRoll);
                 if (!diceRolling && latestRoll.username !== MY_USERNAME) {
                     opponentDicePop(latestRoll.roll_value);
                 }
@@ -518,18 +537,7 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        function showLastRoll(roll) {
-            var el = document.getElementById('last-roll-display');
-            var whoEl = document.getElementById('last-roll-who');
-            var valEl = document.getElementById('last-roll-value');
-            whoEl.textContent = roll.username + ' ' + (TEXTS.rolled || 'rolled');
-            valEl.textContent = roll.roll_value;
-            valEl.style.color = parseInt(roll.roll_value) === 1 ? '#ff4444' : 'var(--knd-neon-blue)';
-            el.style.display = 'block';
-            valEl.style.animation = 'none';
-            void valEl.offsetHeight;
-            valEl.style.animation = 'dr-pop 0.5s ease-out';
-        }
+        // showLastRoll removed — dice HUD + roll history are sufficient
 
         function showGameOver(s) {
             stopCountdown();

@@ -162,11 +162,12 @@ function build_game_state(PDO $pdo, array $game, int $currentUserId): array {
     $stmt->execute([$game['id']]);
     $rolls = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    $turnDuration = 8;
     $turnSecondsLeft = null;
     $serverTime = gmdate('Y-m-d H:i:s');
     if ($game['status'] === 'playing' && !empty($game['turn_started_at'])) {
         $elapsed = time() - strtotime($game['turn_started_at']);
-        $turnSecondsLeft = max(0, min(8, 8 - $elapsed));
+        $turnSecondsLeft = max(0, min($turnDuration, $turnDuration - $elapsed));
     }
 
     return [
@@ -180,6 +181,7 @@ function build_game_state(PDO $pdo, array $game, int $currentUserId): array {
             'winner_user_id'    => $game['winner_user_id'] ? (int) $game['winner_user_id'] : null,
             'loser_user_id'     => $game['loser_user_id'] ? (int) $game['loser_user_id'] : null,
             'finished_reason'   => $game['finished_reason'] ?? null,
+            'turn_duration'     => $turnDuration,
             'turn_seconds_left' => $turnSecondsLeft,
             'turn_started_at'   => $game['turn_started_at'] ?? null,
             'server_time'       => $serverTime,

@@ -124,12 +124,6 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                         </button>
                     </div>
 
-                    <!-- Last Roll Animation -->
-                    <div id="last-roll-display" class="text-center mb-3" style="display:none;">
-                        <div class="small text-white-50" id="last-roll-who"></div>
-                        <div id="last-roll-value" style="font-size: 3rem; font-weight: 900; font-family: 'Orbitron', monospace;"></div>
-                    </div>
-
                     <!-- Game Over -->
                     <div id="game-over-panel" style="display:none;" class="text-center p-4 rounded" >
                         <div id="game-over-icon" style="font-size: 4rem;"></div>
