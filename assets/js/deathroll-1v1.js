@@ -245,6 +245,60 @@
         var timerValue = document.getElementById('turn-timer-value');
         var timerProgress = document.getElementById('turn-timer-progress');
 
+        var diceEl = document.getElementById('dr-dice');
+        var diceFace = document.getElementById('dr-dice-face');
+        var diceValue = document.getElementById('dr-dice-value');
+        var diceLabel = document.getElementById('dr-dice-label');
+        var diceRollingSafety = null;
+        var isDiceRolling = false;
+
+        function startDiceRoll() {
+            if (!diceEl) return;
+            isDiceRolling = true;
+            diceEl.className = 'dr-dice rolling';
+            diceValue.style.display = 'none';
+            diceValue.textContent = '';
+            diceFace.style.display = '';
+            diceLabel.textContent = 'Rolling\u2026';
+            if (diceRollingSafety) clearTimeout(diceRollingSafety);
+            diceRollingSafety = setTimeout(function () { stopDiceRoll(''); }, 10000);
+        }
+
+        function stopDiceRoll(result) {
+            if (!diceEl) return;
+            isDiceRolling = false;
+            if (diceRollingSafety) { clearTimeout(diceRollingSafety); diceRollingSafety = null; }
+            if (result !== '' && result !== undefined && result !== null) {
+                diceEl.className = 'dr-dice result';
+                diceValue.textContent = result;
+                diceValue.style.color = parseInt(result) === 1 ? '#ff4444' : 'var(--knd-neon-blue)';
+                diceLabel.textContent = '';
+                setTimeout(function () {
+                    if (!isDiceRolling) {
+                        diceEl.className = 'dr-dice idle';
+                        diceFace.style.display = '';
+                        diceValue.style.display = 'none';
+                        diceLabel.textContent = '';
+                    }
+                }, 3000);
+            } else {
+                diceEl.className = 'dr-dice idle';
+                diceLabel.textContent = '';
+            }
+        }
+
+        function opponentDicePop(value) {
+            if (!diceEl || isDiceRolling) return;
+            diceEl.className = 'dr-dice opponent-pop';
+            diceLabel.textContent = value ? String(value) : '';
+            setTimeout(function () {
+                if (!isDiceRolling) {
+                    diceEl.className = 'dr-dice idle';
+                    diceLabel.textContent = '';
+                }
+            }, 800);
+        }
+
         function startLocalCountdown(secondsLeft) {
             serverSecondsLeft = secondsLeft;
             localCountdownStart = Date.now();
@@ -363,12 +417,17 @@
             renderRolls(s.rolls);
 
             if (s.rolls.length > lastRollCount && lastRollCount > 0) {
-                showLastRoll(s.rolls[s.rolls.length - 1]);
+                var latestRoll = s.rolls[s.rolls.length - 1];
+                showLastRoll(latestRoll);
+                if (!isDiceRolling && latestRoll.username !== MY_USERNAME) {
+                    opponentDicePop(latestRoll.roll_value);
+                }
             }
             lastRollCount = s.rolls.length;
 
             if (s.game.status === 'finished' && !gameFinished) {
                 gameFinished = true;
+                stopDiceRoll('');
                 showGameOver(s);
                 startRematchPolling();
             }
@@ -579,6 +638,7 @@
             isRolling = true;
             btnRoll.disabled = true;
             btnRoll.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Rolling...';
+            startDiceRoll();
 
             post('/api/deathroll-1v1/roll.php', {
                 csrf_token: CSRF,
@@ -587,13 +647,21 @@
                 isRolling = false;
                 btnRoll.innerHTML = '<i class="fas fa-dice me-2"></i>ROLL!';
                 if (d.ok) {
+                    var myLastRoll = '';
+                    if (d.data.rolls && d.data.rolls.length > 0) {
+                        var last = d.data.rolls[d.data.rolls.length - 1];
+                        if (last.username === MY_USERNAME) myLastRoll = last.roll_value;
+                    }
+                    stopDiceRoll(myLastRoll);
                     renderState(d.data);
                 } else {
+                    stopDiceRoll('');
                     alert(d.error.message);
                     pollState();
                 }
             }).catch(function () {
                 isRolling = false;
+                stopDiceRoll('');
                 btnRoll.innerHTML = '<i class="fas fa-dice me-2"></i>ROLL!';
                 pollState();
             });
@@ -616,9 +684,26 @@
             post('/api/presence/ping.php', { csrf_token: CSRF }).catch(function () {});
         }
 
-        // Inject CSS animation
+        // Inject CSS animations
         var style = document.createElement('style');
-        style.textContent = '@keyframes dr-pop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.3); } 100% { transform: scale(1); opacity: 1; } }';
+        style.textContent = [
+            '@keyframes dr-pop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.3); } 100% { transform: scale(1); opacity: 1; } }',
+            '@keyframes dr-shake { 0%,100% { transform: rotate(0deg) scale(1); } 10% { transform: rotate(15deg) scale(1.1); } 20% { transform: rotate(-12deg) scale(1.05); } 30% { transform: rotate(18deg) scale(1.12); } 40% { transform: rotate(-15deg) scale(1.08); } 50% { transform: rotate(12deg) scale(1.1); } 60% { transform: rotate(-18deg) scale(1.05); } 70% { transform: rotate(10deg) scale(1.12); } 80% { transform: rotate(-8deg) scale(1.06); } 90% { transform: rotate(5deg) scale(1.02); } }',
+            '@keyframes dr-glow-pulse { 0%,100% { box-shadow: 0 0 15px rgba(37,156,174,0.2); } 50% { box-shadow: 0 0 30px rgba(37,156,174,0.5), 0 0 60px rgba(37,156,174,0.15); } }',
+            '@keyframes dr-result-pop { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.4); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }',
+            '@keyframes dr-opponent-pop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }',
+            '.dr-dice { text-align: center; margin: 0 auto 1rem; padding: 1rem; border-radius: 16px; background: rgba(37,156,174,0.06); border: 1px solid rgba(37,156,174,0.15); width: 120px; position: relative; transition: border-color 0.3s, background 0.3s; }',
+            '.dr-dice-face { font-size: 56px; line-height: 1; transition: opacity 0.2s; }',
+            '.dr-dice-value { font-size: 2.5rem; font-weight: 900; font-family: "Orbitron", monospace; color: var(--knd-neon-blue); display: none; }',
+            '.dr-dice-label { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 4px; min-height: 1.1em; }',
+            '.dr-dice.rolling { border-color: rgba(37,156,174,0.5); background: rgba(37,156,174,0.1); animation: dr-glow-pulse 0.8s ease-in-out infinite; }',
+            '.dr-dice.rolling .dr-dice-face { animation: dr-shake 0.6s ease-in-out infinite; }',
+            '.dr-dice.rolling .dr-dice-value { display: none; }',
+            '.dr-dice.result .dr-dice-face { display: none; }',
+            '.dr-dice.result .dr-dice-value { display: block; animation: dr-result-pop 0.5s ease-out; }',
+            '.dr-dice.opponent-pop .dr-dice-face { animation: dr-opponent-pop 0.6s ease-out; }',
+            '@media (max-width: 576px) { .dr-dice { width: 100px; padding: 0.75rem; } .dr-dice-face { font-size: 44px; } .dr-dice-value { font-size: 2rem; } }'
+        ].join('\n');
         document.head.appendChild(style);
 
         // Start

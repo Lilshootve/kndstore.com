@@ -79,6 +79,13 @@ $csrfToken = csrf_token();
                         <div id="current-max-display" style="font-size: 4rem; font-weight: 900; line-height: 1; font-family: 'Orbitron', monospace; color: var(--knd-neon-blue);">1000</div>
                     </div>
 
+                    <!-- Dice Visual -->
+                    <div id="dr-dice" class="dr-dice idle">
+                        <div class="dr-dice-face" id="dr-dice-face">🎲</div>
+                        <div class="dr-dice-value" id="dr-dice-value"></div>
+                        <div class="dr-dice-label" id="dr-dice-label"></div>
+                    </div>
+
                     <!-- Turn Timer -->
                     <div id="turn-timer-bar" class="text-center mb-3" style="display:none;">
                         <div class="small text-white-50 mb-1"><?php echo t('dr.game.turn_timer', 'Time left'); ?></div>
