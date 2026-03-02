@@ -1,4 +1,4 @@
-// KND Store - Death Roll 1v1 Client Logic
+// KND Store - KND LastRoll (next-gen Death Roll 1v1) Client Logic
 (function () {
     'use strict';
 

@@ -104,6 +104,10 @@
     # Redirigir www a no-www
     RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
     RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+    # KND LastRoll friendly URLs
+    RewriteRule ^lastroll/?$ /death-roll-lobby.php [L]
+    RewriteRule ^lastroll/game/?$ /death-roll-game.php [QSA,L]
 </IfModule>
 
 # Configuración de compresión adicional

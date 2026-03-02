@@ -16,7 +16,19 @@ $csrfToken = csrf_token();
 $username = htmlspecialchars(current_username());
 ?>
 
-<?php echo generateHeader(t('dr.lobby.title', 'Death Roll 1v1 - Lobby'), t('meta.default_description')); ?>
+<?php
+$seoTitle = 'KND LastRoll | Next-Gen Death Roll 1v1 — Lobby';
+$seoDesc  = 'KND LastRoll is a next-gen Death Roll 1v1 game. Create public or private rooms, challenge opponents in real time, and roll down to 1.';
+$seoUrl   = 'https://kndstore.com/death-roll-lobby.php';
+$ogHead   = '    <meta property="og:title" content="' . htmlspecialchars($seoTitle) . '">' . "\n";
+$ogHead  .= '    <meta property="og:description" content="' . htmlspecialchars($seoDesc) . '">' . "\n";
+$ogHead  .= '    <meta property="og:type" content="website">' . "\n";
+$ogHead  .= '    <meta property="og:url" content="' . $seoUrl . '">' . "\n";
+$ogHead  .= '    <meta name="twitter:card" content="summary_large_image">' . "\n";
+$ogHead  .= '    <meta name="twitter:title" content="' . htmlspecialchars($seoTitle) . '">' . "\n";
+$ogHead  .= '    <meta name="twitter:description" content="' . htmlspecialchars($seoDesc) . '">' . "\n";
+echo generateHeader($seoTitle, $seoDesc, $ogHead);
+?>
 
 <div id="particles-bg"></div>
 
@@ -29,9 +41,10 @@ $username = htmlspecialchars(current_username());
             <div class="col">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
-                        <h1 class="glow-text mb-1"><i class="fas fa-dice-d20 me-2"></i>Death Roll 1v1</h1>
+                        <h1 class="glow-text mb-1"><i class="fas fa-dice-d20 me-2"></i>KND LastRoll</h1>
                         <p class="text-white-50 mb-0">
-                            <?php echo t('dr.lobby.welcome', 'Welcome'); ?>, <strong><?php echo $username; ?></strong>
+                            <?php echo t('dr.lobby.subtitle_seo', 'A next-gen Death Roll 1v1 experience'); ?>
+                            &mdash; <?php echo t('dr.lobby.welcome', 'Welcome'); ?>, <strong><?php echo $username; ?></strong>
                             &mdash; <span id="lobby-active-games">0</span> <?php echo t('dr.lobby.active_games', 'active games'); ?>
                         </p>
                     </div>
@@ -92,6 +105,7 @@ $username = htmlspecialchars(current_username());
                         <li class="mb-1"><?php echo t('dr.lobby.rule3', 'Players alternate rolling 1 to last result'); ?></li>
                         <li class="mb-1"><?php echo t('dr.lobby.rule4', 'Whoever rolls 1 loses!'); ?></li>
                     </ol>
+                    <p class="small text-white-50 mt-3 mb-0" style="opacity:0.5; font-style:italic;"><?php echo t('dr.lobby.inspired', 'Inspired by the classic Death Roll format.'); ?></p>
                 </div>
             </div>
         </div>

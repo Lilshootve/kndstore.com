@@ -19,7 +19,17 @@ $redirect = htmlspecialchars($_GET['redirect'] ?? '/death-roll-lobby.php', ENT_Q
 $csrfToken = csrf_token();
 ?>
 
-<?php echo generateHeader(t('dr.auth.title', 'Death Roll - Account'), t('meta.default_description')); ?>
+<?php
+$seoTitle = 'KND LastRoll — Account';
+$seoDesc  = 'Login or register to play KND LastRoll, a next-gen Death Roll 1v1 game.';
+$ogHead   = '    <meta property="og:title" content="' . htmlspecialchars($seoTitle) . '">' . "\n";
+$ogHead  .= '    <meta property="og:description" content="' . htmlspecialchars($seoDesc) . '">' . "\n";
+$ogHead  .= '    <meta property="og:type" content="website">' . "\n";
+$ogHead  .= '    <meta name="twitter:card" content="summary_large_image">' . "\n";
+$ogHead  .= '    <meta name="twitter:title" content="' . htmlspecialchars($seoTitle) . '">' . "\n";
+$ogHead  .= '    <meta name="twitter:description" content="' . htmlspecialchars($seoDesc) . '">' . "\n";
+echo generateHeader($seoTitle, $seoDesc, $ogHead);
+?>
 
 <div id="particles-bg"></div>
 
@@ -31,8 +41,9 @@ $csrfToken = csrf_token();
             <div class="col-md-5">
                 <div class="glass-card-neon p-4 p-md-5">
                     <div class="text-center mb-4">
-                        <h2 class="glow-text mb-2"><i class="fas fa-dice-d20 me-2"></i>Death Roll 1v1</h2>
+                        <h2 class="glow-text mb-2"><i class="fas fa-dice-d20 me-2"></i>KND LastRoll</h2>
                         <p class="text-white-50"><?php echo t('dr.auth.subtitle', 'Login or register to play'); ?></p>
+                        <p class="text-white-50 small mb-0" style="opacity:0.5; font-style:italic;">Next-gen Death Roll 1v1</p>
                     </div>
 
                     <!-- Tabs -->

@@ -21,7 +21,19 @@ if (!preg_match('/^[A-Z0-9]{8}$/', $code)) {
 $csrfToken = csrf_token();
 ?>
 
-<?php echo generateHeader(t('dr.game.title', 'Death Roll 1v1') . ' — ' . $code, t('meta.default_description')); ?>
+<?php
+$seoTitle = 'KND LastRoll Match — ' . $code . ' | Next-Gen Death Roll 1v1';
+$seoDesc  = 'KND LastRoll is a next-gen Death Roll 1v1 game. Create public or private rooms, challenge opponents in real time, and roll down to 1.';
+$seoUrl   = 'https://kndstore.com/death-roll-game.php?code=' . urlencode($code);
+$ogHead   = '    <meta property="og:title" content="' . htmlspecialchars($seoTitle) . '">' . "\n";
+$ogHead  .= '    <meta property="og:description" content="' . htmlspecialchars($seoDesc) . '">' . "\n";
+$ogHead  .= '    <meta property="og:type" content="website">' . "\n";
+$ogHead  .= '    <meta property="og:url" content="' . htmlspecialchars($seoUrl) . '">' . "\n";
+$ogHead  .= '    <meta name="twitter:card" content="summary_large_image">' . "\n";
+$ogHead  .= '    <meta name="twitter:title" content="' . htmlspecialchars($seoTitle) . '">' . "\n";
+$ogHead  .= '    <meta name="twitter:description" content="' . htmlspecialchars($seoDesc) . '">' . "\n";
+echo generateHeader($seoTitle, $seoDesc, $ogHead);
+?>
 
 <div id="particles-bg"></div>
 
@@ -35,10 +47,10 @@ $csrfToken = csrf_token();
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div>
                         <h2 class="glow-text mb-1">
-                            <i class="fas fa-dice-d20 me-2"></i>
-                            <?php echo t('dr.game.room', 'Room'); ?>
-                            <span class="ms-2" style="letter-spacing:3px; font-family: monospace;"><?php echo $code; ?></span>
+                            <i class="fas fa-dice-d20 me-2"></i>KND LastRoll
+                            <span class="ms-2 small" style="letter-spacing:3px; font-family: monospace; opacity:0.7;"><?php echo $code; ?></span>
                         </h2>
+                        <p class="text-white-50 mb-0 small" style="opacity:0.6;"><?php echo t('dr.game.subtitle_seo', 'Next-gen Death Roll rules — roll until someone hits 1'); ?></p>
                         <p class="text-white-50 mb-0" id="game-status-text"><?php echo t('dr.game.loading', 'Loading game...'); ?></p>
                     </div>
                     <div class="d-flex gap-2">

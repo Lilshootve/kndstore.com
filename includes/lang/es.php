@@ -172,8 +172,8 @@ return [
     'contact.cta.discord_immediate' => 'Discord inmediato',
     'contact.cta.emergency_email' => 'Email urgente',
 
-    // Navigation - Death Roll 1v1
-    'nav.deathroll' => 'Death Roll',
+    // Navigation - KND LastRoll
+    'nav.deathroll' => 'KND LastRoll',
     'nav.login' => 'Iniciar Sesión',
     'nav.logout' => 'Cerrar Sesión',
     'nav.my_account' => 'Mi Cuenta',
@@ -184,8 +184,8 @@ return [
     'nav.register' => 'Registro',
 
     // Auth
-    'dr.auth.title' => 'Death Roll - Cuenta',
-    'dr.auth.subtitle' => 'Inicia sesión o regístrate para jugar',
+    'dr.auth.title' => 'KND LastRoll — Cuenta',
+    'dr.auth.subtitle' => 'Inicia sesión o regístrate para jugar KND LastRoll',
     'dr.auth.login' => 'Iniciar Sesión',
     'dr.auth.register' => 'Registrarse',
     'dr.auth.username' => 'Usuario',
@@ -196,7 +196,9 @@ return [
     'dr.auth.password_mismatch' => 'Las contraseñas no coinciden.',
 
     // Lobby
-    'dr.lobby.title' => 'Death Roll 1v1 - Lobby',
+    'dr.lobby.title' => 'KND LastRoll — Lobby',
+    'dr.lobby.subtitle_seo' => 'Experiencia next-gen de Death Roll 1v1',
+    'dr.lobby.inspired' => 'Inspirado en el formato clásico de Death Roll.',
     'dr.lobby.welcome' => 'Bienvenido',
     'dr.lobby.active_games' => 'partidas activas',
     'dr.lobby.create_room' => 'Crear Sala',
@@ -220,12 +222,13 @@ return [
     'dr.lobby.room_limit' => 'Ya tienes 5 salas activas. Termina o deja una primero.',
     'dr.lobby.rules_title' => 'Cómo Jugar',
     'dr.lobby.rule1' => 'Crea o únete a una sala',
-    'dr.lobby.rule2' => 'El Jugador 1 tira 1-1000',
-    'dr.lobby.rule3' => 'Los jugadores alternan tirando 1 al último resultado',
+    'dr.lobby.rule2' => 'El Jugador 1 tira de 1 al máximo inicial',
+    'dr.lobby.rule3' => 'Los jugadores alternan tirando de 1 al último resultado',
     'dr.lobby.rule4' => '¡Quien saque 1 pierde!',
 
     // Game
-    'dr.game.title' => 'Death Roll 1v1',
+    'dr.game.title' => 'KND LastRoll Match',
+    'dr.game.subtitle_seo' => 'Reglas next-gen de Death Roll — tira hasta que alguien saque 1',
     'dr.game.room' => 'Sala',
     'dr.game.loading' => 'Cargando partida...',
     'dr.game.copy_link' => 'Copiar enlace de invitación',

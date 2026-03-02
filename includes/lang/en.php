@@ -251,8 +251,8 @@ return [
     'order.form.submit' => 'Send via WhatsApp',
     'order.form.whatsapp_other_helper' => 'Alternative payment options available via WhatsApp. Cryptocurrency payments supported: USDT, USDC, BTC, ETH, BNB (selected networks confirmed before payment). Binance Pay, Pipol Pay, Zinli and other regional and international methods. Availability and applicable fees confirmed via WhatsApp.',
 
-    // Navigation - Death Roll 1v1
-    'nav.deathroll' => 'Death Roll',
+    // Navigation - KND LastRoll
+    'nav.deathroll' => 'KND LastRoll',
     'nav.login' => 'Login',
     'nav.logout' => 'Logout',
     'nav.my_account' => 'My Account',
@@ -263,8 +263,8 @@ return [
     'nav.register' => 'Register',
 
     // Auth
-    'dr.auth.title' => 'Death Roll - Account',
-    'dr.auth.subtitle' => 'Login or register to play',
+    'dr.auth.title' => 'KND LastRoll — Account',
+    'dr.auth.subtitle' => 'Login or register to play KND LastRoll',
     'dr.auth.login' => 'Login',
     'dr.auth.register' => 'Register',
     'dr.auth.username' => 'Username',
@@ -275,7 +275,9 @@ return [
     'dr.auth.password_mismatch' => 'Passwords do not match.',
 
     // Lobby
-    'dr.lobby.title' => 'Death Roll 1v1 - Lobby',
+    'dr.lobby.title' => 'KND LastRoll — Lobby',
+    'dr.lobby.subtitle_seo' => 'A next-gen Death Roll 1v1 experience',
+    'dr.lobby.inspired' => 'Inspired by the classic Death Roll format.',
     'dr.lobby.welcome' => 'Welcome',
     'dr.lobby.active_games' => 'active games',
     'dr.lobby.create_room' => 'Create Room',
@@ -299,12 +301,13 @@ return [
     'dr.lobby.room_limit' => 'You already have 5 active rooms. Finish or leave one first.',
     'dr.lobby.rules_title' => 'How to Play',
     'dr.lobby.rule1' => 'Create or join a room',
-    'dr.lobby.rule2' => 'Player 1 rolls 1-1000',
-    'dr.lobby.rule3' => 'Players alternate rolling 1 to last result',
-    'dr.lobby.rule4' => 'Whoever rolls 1 loses!',
+    'dr.lobby.rule2' => 'Player 1 rolls 1 to the initial max',
+    'dr.lobby.rule3' => 'Players alternate rolling 1 to the last result',
+    'dr.lobby.rule4' => 'Whoever rolls a 1 loses!',
 
     // Game
-    'dr.game.title' => 'Death Roll 1v1',
+    'dr.game.title' => 'KND LastRoll Match',
+    'dr.game.subtitle_seo' => 'Next-gen Death Roll rules — roll until someone hits 1',
     'dr.game.room' => 'Room',
     'dr.game.loading' => 'Loading game...',
     'dr.game.copy_link' => 'Copy invite link',
