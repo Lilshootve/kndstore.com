@@ -25,12 +25,14 @@ try {
     $topAllTime = [];
     $myRankSeason = null;
     $myRankAllTime = null;
+    $lastError = null;
 
     // Season info (tables may not exist yet)
     try {
         $season = ensure_active_season($pdo);
     } catch (\Throwable $e) {
         error_log('leaderboard ensure_season: ' . $e->getMessage());
+        $lastError = $e->getMessage();
     }
     $seasonInfo = null;
     if ($season) {
@@ -51,9 +53,11 @@ try {
         $age = time() - filemtime($cacheFile);
         if ($age < LB_CACHE_SEC) {
             $cached = @json_decode(file_get_contents($cacheFile), true);
-            if ($cached) {
-                $topSeason = $cached['topSeason'] ?? [];
-                $topAllTime = $cached['topAllTime'] ?? [];
+            $cachedSeason = $cached['topSeason'] ?? [];
+            $cachedHof = $cached['topAllTime'] ?? [];
+            if ($cached && (count($cachedSeason) > 0 || count($cachedHof) > 0)) {
+                $topSeason = $cachedSeason;
+                $topAllTime = $cachedHof;
                 $useCache = true;
             }
         }
@@ -91,10 +95,11 @@ try {
                 }
             } catch (\Throwable $e) {
                 error_log('leaderboard season: ' . $e->getMessage());
+                $lastError = $e->getMessage();
             }
         }
 
-        // Hall of Fame: use user_xp only (always exists, has all XP)
+        // Hall of Fame: use user_xp (fallback: simple query + fetch usernames)
         try {
             $stmt = $pdo->prepare(
                 "SELECT ux.user_id, ux.xp, u.username
@@ -106,6 +111,19 @@ try {
             );
             $stmt->execute([LB_TOP_LIMIT]);
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (empty($rows)) {
+                $stmt = $pdo->prepare(
+                    "SELECT user_id, xp FROM user_xp WHERE xp > 0 ORDER BY xp DESC LIMIT ?"
+                );
+                $stmt->execute([LB_TOP_LIMIT]);
+                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                foreach ($rows as &$r) {
+                    $us = $pdo->prepare("SELECT username FROM users WHERE id = ?");
+                    $us->execute([$r['user_id']]);
+                    $r['username'] = $us->fetchColumn() ?: '?';
+                }
+                unset($r);
+            }
             $allTimeStats = [];
             if ($season) {
                 try {
@@ -134,9 +152,10 @@ try {
             }
         } catch (\Throwable $e) {
             error_log('leaderboard hall of fame: ' . $e->getMessage());
+            $lastError = $e->getMessage();
         }
 
-        if ($cacheDir && is_writable($cacheDir)) {
+        if ($cacheDir && is_writable($cacheDir) && (count($topSeason) > 0 || count($topAllTime) > 0)) {
             @file_put_contents($cacheFile, json_encode(['topSeason' => $topSeason, 'topAllTime' => $topAllTime]));
         }
     }
@@ -202,13 +221,24 @@ try {
         }
     }
 
-    json_success([
+    $data = [
         'season'       => $seasonInfo,
         'topSeason'    => $topSeason ?? [],
         'topAllTime'   => $topAllTime ?? [],
         'myRankSeason' => $myRankSeason,
         'myRankAllTime'=> $myRankAllTime,
-    ]);
+    ];
+    if (!empty($_GET['debug'])) {
+        $uxCount = null;
+        if ($pdo) {
+            try { $uxCount = (int) $pdo->query("SELECT COUNT(*) FROM user_xp")->fetchColumn(); } catch (\Throwable $e) { $uxCount = 'err: ' . $e->getMessage(); }
+        }
+        $data['_debug'] = array_filter([
+            'last_error' => $lastError,
+            'user_xp_rows' => $uxCount,
+        ]);
+    }
+    json_success($data);
 } catch (\Throwable $e) {
     error_log('leaderboard state error: ' . $e->getMessage());
     json_error('INTERNAL_ERROR', 'An error occurred.', 500);
