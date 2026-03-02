@@ -141,7 +141,7 @@ $pendingRedemptions = $pdo->query(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Support Credits</title>
+    <title>Admin - KND Points</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
@@ -158,7 +158,7 @@ $pendingRedemptions = $pdo->query(
 <body>
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="fas fa-coins me-2"></i>Support Credits Admin</h1>
+        <h1><i class="fas fa-coins me-2"></i>KND Points Admin</h1>
         <div>
             <a href="/admin/" class="btn btn-outline-secondary btn-sm me-2"><i class="fas fa-arrow-left me-1"></i>Dashboard</a>
             <a href="/admin/rewards.php" class="btn btn-outline-info btn-sm me-2"><i class="fas fa-gift me-1"></i>Rewards</a>

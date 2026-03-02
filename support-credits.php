@@ -271,7 +271,7 @@ echo generateHeader($seoTitle, $seoDesc);
             .then(function(data) {
                 if (data.ok) {
                     resultDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>'
-                        + 'Payment submitted! <strong>' + data.data.pending_points + ' credits</strong> pending.'
+                        + 'Submitted! <strong>' + data.data.pending_points + ' KP</strong> pending.'
                         + ' Available after: <strong>' + data.data.available_at + '</strong>'
                         + ' (hold: ' + data.data.hold_days + ' business days)</div>';
                     resultDiv.style.display = 'block';
@@ -288,7 +288,7 @@ echo generateHeader($seoTitle, $seoDesc);
             })
             .finally(function() {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit Support';
+                btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit';
             });
     });
 })();

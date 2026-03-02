@@ -139,7 +139,7 @@ if ($editId > 0) {
         <h1><i class="fas fa-gift me-2"></i>Rewards Catalog</h1>
         <div>
             <a href="/admin/" class="btn btn-outline-secondary btn-sm me-2"><i class="fas fa-arrow-left me-1"></i>Dashboard</a>
-            <a href="/admin/support-credits.php" class="btn btn-outline-info btn-sm me-2"><i class="fas fa-coins me-1"></i>Credits</a>
+            <a href="/admin/support-credits.php" class="btn btn-outline-info btn-sm me-2"><i class="fas fa-coins me-1"></i>Points</a>
             <a href="?logout" class="btn btn-outline-danger btn-sm"><i class="fas fa-sign-out-alt me-1"></i>Logout</a>
         </div>
     </div>

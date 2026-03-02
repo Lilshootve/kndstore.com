@@ -167,7 +167,7 @@ echo generateHeader($seoTitle, $seoDesc);
 
             Swal.fire({
                 title: 'Redeem "' + title + '"?',
-                html: 'This will spend <strong>' + parseInt(cost).toLocaleString() + ' credits</strong>.<br>This action cannot be undone.',
+                html: 'This will spend <strong>' + parseInt(cost).toLocaleString() + ' KP</strong>.<br>This action cannot be undone.',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Redeem',
@@ -188,8 +188,8 @@ echo generateHeader($seoTitle, $seoDesc);
                         if (data.ok) {
                             Swal.fire({
                                 title: 'Redeemed!',
-                                html: 'You spent <strong>' + data.data.points_spent + ' credits</strong> on "' + data.data.reward_title + '".'
-                                    + '<br>Available credits: <strong>' + data.data.available_after + '</strong>',
+                                html: 'You spent <strong>' + data.data.points_spent + ' KP</strong> on "' + data.data.reward_title + '".'
+                                    + '<br>Available KP: <strong>' + data.data.available_after + '</strong>',
                                 icon: 'success',
                                 background: '#0a0f1e',
                                 color: '#e0e0e0',
