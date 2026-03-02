@@ -95,11 +95,26 @@ if (file_exists($logFile) && filesize($logFile) > 0) {
     }
 }
 
+// Support Credits counters
+$scPendingPayments = 0;
+$scRequestedRedemptions = 0;
+try {
+    $pdo = getDBConnection();
+    if ($pdo) {
+        $scPendingPayments = (int) $pdo->query("SELECT COUNT(*) FROM support_payments WHERE status='pending'")->fetchColumn();
+        $scRequestedRedemptions = (int) $pdo->query("SELECT COUNT(*) FROM reward_redemptions WHERE status='requested'")->fetchColumn();
+    }
+} catch (\Throwable $e) {
+    error_log('admin dashboard SC counters: ' . $e->getMessage());
+}
+
 $navCards = [
-    ['title' => 'Order Management', 'desc' => 'View, filter and update all orders', 'href' => '/admin/orders.php', 'icon' => 'fa-clipboard-list', 'show' => true],
-    ['title' => 'Create Test Order', 'desc' => 'Generate a synthetic order for testing', 'href' => '/admin/test_order.php', 'icon' => 'fa-flask', 'show' => true],
-    ['title' => 'Storage Diagnostics', 'desc' => 'Inspect JSON files, permissions and sizes', 'href' => '/admin/debug_storage.php', 'icon' => 'fa-database', 'show' => file_exists(__DIR__ . '/debug_storage.php')],
-    ['title' => 'Email Test', 'desc' => 'Send a test confirmation email', 'href' => '/admin/email-test.php', 'icon' => 'fa-envelope', 'show' => file_exists(__DIR__ . '/email-test.php')],
+    ['title' => 'Order Management', 'desc' => 'View, filter and update all orders', 'href' => '/admin/orders.php', 'icon' => 'fa-clipboard-list', 'badge' => null, 'show' => true],
+    ['title' => 'Support Credits', 'desc' => 'Review pending support payments + redemptions', 'href' => '/admin/support-credits.php', 'icon' => 'fa-coins', 'badge' => $scPendingPayments, 'show' => true],
+    ['title' => 'Rewards Catalog', 'desc' => 'Manage rewards catalog and stock', 'href' => '/admin/rewards.php', 'icon' => 'fa-gift', 'badge' => $scRequestedRedemptions, 'show' => true],
+    ['title' => 'Create Test Order', 'desc' => 'Generate a synthetic order for testing', 'href' => '/admin/test_order.php', 'icon' => 'fa-flask', 'badge' => null, 'show' => true],
+    ['title' => 'Storage Diagnostics', 'desc' => 'Inspect JSON files, permissions and sizes', 'href' => '/admin/debug_storage.php', 'icon' => 'fa-database', 'badge' => null, 'show' => file_exists(__DIR__ . '/debug_storage.php')],
+    ['title' => 'Email Test', 'desc' => 'Send a test confirmation email', 'href' => '/admin/email-test.php', 'icon' => 'fa-envelope', 'badge' => null, 'show' => file_exists(__DIR__ . '/email-test.php')],
 ];
 
 require_once __DIR__ . '/../includes/header.php';
@@ -154,7 +169,12 @@ echo generateHeader('KND Admin', 'Admin dashboard');
     <div class="nav-cards">
         <?php foreach ($navCards as $card): if (!$card['show']) continue; ?>
         <a href="<?php echo $card['href']; ?>" class="nav-card">
-            <div class="card-icon"><i class="fas <?php echo $card['icon']; ?>"></i></div>
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="card-icon"><i class="fas <?php echo $card['icon']; ?>"></i></div>
+                <?php if (!empty($card['badge'])): ?>
+                <span style="background:rgba(0,212,255,.15);color:var(--cyan);border:1px solid rgba(0,212,255,.3);border-radius:20px;padding:2px 10px;font-size:.75rem;font-weight:700;"><?php echo $card['badge']; ?></span>
+                <?php endif; ?>
+            </div>
             <h3><?php echo htmlspecialchars($card['title']); ?></h3>
             <p><?php echo htmlspecialchars($card['desc']); ?></p>
         </a>
