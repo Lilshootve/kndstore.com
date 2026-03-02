@@ -249,96 +249,94 @@
         var timerValue = document.getElementById('turn-timer-value');
         var timerProgress = document.getElementById('turn-timer-progress');
 
-        var diceEl = document.getElementById('dr-dice');
-        var diceFace = document.getElementById('dr-dice-face');
-        var diceValue = document.getElementById('dr-dice-value');
-        var diceLabel = document.getElementById('dr-dice-label');
-        var diceRollingSafety = null;
-        var isDiceRolling = false;
-        var diceState = 'idle'; // 'idle' | 'rolling' | 'result' | 'opponent'
+        // ── SVG HUD Dice state machine ──
+        var diceWrap   = document.getElementById('dr-dice-wrap');
+        var diceNum    = document.getElementById('dr-dice-num');
+        var diceStatus = document.getElementById('dr-dice-status');
+        var diceRolling = false;
+        var diceTickTimer = null;
+        var diceSafetyTimer = null;
+        var diceState = 'idle';
         var rollStartTime = 0;
         var MIN_ROLL_MS = 800;
-        var pendingResult = null;
-        var pendingResultCb = null;
+        var localCurrentMax = 1000;
 
-        function setDiceIdle(label) {
-            if (!diceEl) return;
-            diceState = 'idle';
-            diceEl.className = 'dr-dice idle';
-            diceFace.className = 'dr-dice-face';
-            diceValue.className = 'dr-dice-value';
-            diceValue.textContent = '';
-            diceLabel.textContent = label || '';
+        function setDiceValue(text) {
+            if (!diceNum) return;
+            diceNum.textContent = text;
+            diceNum.classList.toggle('dr-critical', parseInt(text) === 1);
         }
 
         function startDiceRoll() {
-            if (!diceEl) return;
-            isDiceRolling = true;
+            if (!diceWrap) return;
+            diceRolling = true;
             diceState = 'rolling';
             rollStartTime = Date.now();
-            pendingResult = null;
-            if (pendingResultCb) { clearTimeout(pendingResultCb); pendingResultCb = null; }
-            diceEl.className = 'dr-dice rolling';
-            diceFace.className = 'dr-dice-face';
-            diceValue.className = 'dr-dice-value';
-            diceValue.textContent = '';
-            diceLabel.textContent = 'Rolling\u2026';
-            if (diceRollingSafety) clearTimeout(diceRollingSafety);
-            diceRollingSafety = setTimeout(function () { forceStopDice(); }, 10000);
+            diceWrap.className = 'dr-hud-card dr-rolling';
+            if (diceStatus) diceStatus.textContent = 'Rolling\u2026';
+            diceNum.classList.remove('dr-critical');
+
+            var tickCount = 0;
+            var maxTicks = 12;
+            if (diceTickTimer) clearInterval(diceTickTimer);
+            diceTickTimer = setInterval(function () {
+                var m = localCurrentMax > 1 ? localCurrentMax : 1000;
+                setDiceValue(Math.floor(Math.random() * m) + 1);
+                tickCount++;
+                if (tickCount >= maxTicks) { clearInterval(diceTickTimer); diceTickTimer = null; }
+            }, 60);
+
+            if (diceSafetyTimer) clearTimeout(diceSafetyTimer);
+            diceSafetyTimer = setTimeout(function () { forceStopDice(); }, 10000);
         }
 
-        function applyResult(result) {
+        function applyDiceResult(finalValue) {
+            diceRolling = false;
             diceState = 'result';
-            isDiceRolling = false;
-            diceEl.className = 'dr-dice result';
-            diceFace.className = 'dr-dice-face dr-face-shrink';
-            diceValue.className = 'dr-dice-value dr-value-pop';
-            diceValue.textContent = result;
-            diceValue.style.color = parseInt(result) === 1 ? '#ff4444' : 'var(--knd-neon-blue)';
-            diceLabel.textContent = '';
+            if (diceTickTimer) { clearInterval(diceTickTimer); diceTickTimer = null; }
+            if (diceSafetyTimer) { clearTimeout(diceSafetyTimer); diceSafetyTimer = null; }
+            diceWrap.className = 'dr-hud-card dr-result';
+            setDiceValue(finalValue);
+            if (diceStatus) diceStatus.textContent = 'Ready';
         }
 
-        function stopDiceRoll(result) {
-            if (!diceEl) return;
-            if (diceRollingSafety) { clearTimeout(diceRollingSafety); diceRollingSafety = null; }
-            if (pendingResultCb) { clearTimeout(pendingResultCb); pendingResultCb = null; }
-
-            if (result !== '' && result !== undefined && result !== null) {
+        function stopDiceRoll(finalValue) {
+            if (!diceWrap) return;
+            if (finalValue !== '' && finalValue !== undefined && finalValue !== null) {
                 var elapsed = Date.now() - rollStartTime;
                 var delay = Math.max(0, MIN_ROLL_MS - elapsed);
                 if (delay > 0) {
-                    pendingResult = result;
-                    pendingResultCb = setTimeout(function () {
-                        pendingResult = null;
-                        pendingResultCb = null;
-                        applyResult(result);
-                    }, delay);
+                    setTimeout(function () { applyDiceResult(finalValue); }, delay);
                 } else {
-                    applyResult(result);
+                    applyDiceResult(finalValue);
                 }
             } else {
-                isDiceRolling = false;
-                setDiceIdle('');
+                diceRolling = false;
+                diceState = 'idle';
+                if (diceTickTimer) { clearInterval(diceTickTimer); diceTickTimer = null; }
+                if (diceSafetyTimer) { clearTimeout(diceSafetyTimer); diceSafetyTimer = null; }
+                diceWrap.className = 'dr-hud-card';
+                setDiceValue('\u2014');
+                if (diceStatus) diceStatus.textContent = '';
             }
         }
 
         function forceStopDice() {
-            isDiceRolling = false;
-            pendingResult = null;
-            if (pendingResultCb) { clearTimeout(pendingResultCb); pendingResultCb = null; }
-            if (diceRollingSafety) { clearTimeout(diceRollingSafety); diceRollingSafety = null; }
-            setDiceIdle('');
+            diceRolling = false;
+            diceState = 'idle';
+            if (diceTickTimer) { clearInterval(diceTickTimer); diceTickTimer = null; }
+            if (diceSafetyTimer) { clearTimeout(diceSafetyTimer); diceSafetyTimer = null; }
+            if (diceWrap) diceWrap.className = 'dr-hud-card';
+            setDiceValue('\u2014');
+            if (diceStatus) diceStatus.textContent = '';
         }
 
         function opponentDicePop(value) {
-            if (!diceEl || isDiceRolling || pendingResultCb) return;
+            if (!diceWrap || diceRolling) return;
             diceState = 'opponent';
-            diceEl.className = 'dr-dice opponent-pop';
-            diceFace.className = 'dr-dice-face';
-            diceValue.className = 'dr-dice-value dr-value-pop';
-            diceValue.textContent = value || '';
-            diceValue.style.color = 'var(--knd-neon-blue)';
-            diceLabel.textContent = value ? (TEXTS.rolled || 'rolled') + ' ' + value : '';
+            diceWrap.className = 'dr-hud-card dr-opp-pop';
+            setDiceValue(value || '\u2014');
+            if (diceStatus) diceStatus.textContent = (TEXTS.rolled || 'rolled') + ' ' + value;
         }
 
         function startLocalCountdown(secondsLeft) {
@@ -462,25 +460,27 @@
 
             renderRolls(s.rolls);
 
+            if (s.game.current_max) localCurrentMax = s.game.current_max;
+
             if (s.rolls.length > lastRollCount && lastRollCount > 0) {
                 var latestRoll = s.rolls[s.rolls.length - 1];
                 showLastRoll(latestRoll);
-                if (!isDiceRolling && latestRoll.username !== MY_USERNAME) {
+                if (!diceRolling && latestRoll.username !== MY_USERNAME) {
                     opponentDicePop(latestRoll.roll_value);
                 }
             }
             lastRollCount = s.rolls.length;
 
-            // Dice state from polling (NEVER touch if rolling or pending result)
-            if (!isDiceRolling && !pendingResultCb && diceEl) {
+            // Dice state from polling (NEVER touch if rolling)
+            if (!diceRolling && diceWrap) {
                 if (s.game.status === 'finished') {
-                    if (diceState !== 'idle') setDiceIdle('');
+                    if (diceState === 'rolling') forceStopDice();
                 } else if (s.game.status === 'playing' && s.me.can_roll) {
                     if (diceState !== 'rolling' && diceState !== 'result') {
-                        setDiceIdle('Ready');
+                        if (diceStatus) diceStatus.textContent = 'Ready';
                     }
                 } else if (s.game.status === 'playing' && !s.me.can_roll) {
-                    if (diceState === 'idle') diceLabel.textContent = '';
+                    if (diceState === 'idle' && diceStatus) diceStatus.textContent = '';
                 }
             }
 
@@ -748,28 +748,6 @@
         function pingPresence() {
             post('/api/presence/ping.php', { csrf_token: CSRF }).catch(function () {});
         }
-
-        // Inject CSS animations
-        var style = document.createElement('style');
-        style.textContent = [
-            '@keyframes dr-shake { 0%,100% { transform: rotate(0deg) scale(1); } 10% { transform: rotate(12deg) scale(1.05); } 20% { transform: rotate(-10deg) scale(1.03); } 30% { transform: rotate(14deg) scale(1.06); } 40% { transform: rotate(-12deg) scale(1.04); } 50% { transform: rotate(10deg) scale(1.05); } 60% { transform: rotate(-14deg) scale(1.03); } 70% { transform: rotate(8deg) scale(1.06); } 80% { transform: rotate(-6deg) scale(1.03); } 90% { transform: rotate(4deg) scale(1.01); } }',
-            '@keyframes dr-glow-pulse { 0%,100% { box-shadow: 0 0 8px rgba(37,156,174,0.15); } 50% { box-shadow: 0 0 22px rgba(37,156,174,0.4); } }',
-            '@keyframes dr-result-pop { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.25); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }',
-            '@keyframes dr-face-shrink { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.45); opacity: 0.35; } }',
-            '@keyframes dr-opponent-pop { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }',
-            '.dr-dice { text-align: center; margin: 0 auto 1rem; padding: 1rem; border-radius: 16px; background: rgba(37,156,174,0.04); border: 1px solid rgba(37,156,174,0.12); width: 120px; transition: border-color 0.3s, background 0.3s, box-shadow 0.3s; box-shadow: 0 0 6px rgba(37,156,174,0.08); position: relative; }',
-            '.dr-dice-face { font-size: 56px; line-height: 1; transition: transform 0.35s ease, opacity 0.35s ease; }',
-            '.dr-dice-value { font-size: 2.5rem; font-weight: 900; font-family: "Orbitron", monospace; color: var(--knd-neon-blue); min-height: 1em; }',
-            '.dr-dice-label { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-top: 4px; min-height: 1.1em; letter-spacing: 0.5px; }',
-            '.dr-dice.rolling { border-color: rgba(37,156,174,0.4); background: rgba(37,156,174,0.08); animation: dr-glow-pulse 0.8s ease-in-out infinite; }',
-            '.dr-dice.rolling .dr-dice-face { animation: dr-shake 0.5s ease-in-out infinite; }',
-            '.dr-face-shrink { animation: dr-face-shrink 0.35s ease forwards !important; }',
-            '.dr-value-pop { animation: dr-result-pop 0.45s ease-out forwards; }',
-            '.dr-dice.result { box-shadow: 0 0 14px rgba(37,156,174,0.25); border-color: rgba(37,156,174,0.3); }',
-            '.dr-dice.opponent-pop .dr-dice-face { animation: dr-opponent-pop 0.5s ease-out; }',
-            '@media (max-width: 576px) { .dr-dice { width: 100px; padding: 0.75rem; } .dr-dice-face { font-size: 44px; } .dr-dice-value { font-size: 2rem; } }'
-        ].join('\n');
-        document.head.appendChild(style);
 
         // Start
         pollState();

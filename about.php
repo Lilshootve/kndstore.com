@@ -228,8 +228,8 @@ require_once __DIR__ . '/includes/footer.php';
                             <i class="fas fa-dice"></i>
                         </div>
                         <div>
-                            <h4 class="text-white mb-1">Death Roll Chain</h4>
-                            <p class="text-white mb-0">A minigame built on controlled risk and digital rewards.</p>
+                            <h4 class="text-white mb-1">KND LastRoll Chain</h4>
+                            <p class="text-white mb-0">A next-gen death roll minigame built on controlled risk and real-time 1v1 challenge.</p>
                         </div>
                     </div>
                 </div>

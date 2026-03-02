@@ -6126,3 +6126,110 @@ body {
 .creative-card .product-image img {
     filter: saturate(1.1);
 }
+
+/* ── KND LastRoll SVG HUD Dice ── */
+.dr-hud-card {
+    text-align: center;
+    margin: 0 auto 1rem;
+    padding: 1rem 1rem 0.5rem;
+    border-radius: 16px;
+    width: 140px;
+    background: rgba(37, 156, 174, 0.03);
+    border: 1px solid rgba(37, 156, 174, 0.12);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 0 6px rgba(37, 156, 174, 0.08);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.dr-dice-plate {
+    fill: rgba(10, 15, 30, 0.7);
+    stroke: rgba(37, 156, 174, 0.3);
+    stroke-width: 2;
+    transition: stroke 0.3s, filter 0.3s;
+}
+
+.dr-dice-glow {
+    fill: rgba(37, 156, 174, 0.04);
+    transition: fill 0.3s;
+}
+
+.dr-dice-text {
+    font-family: 'Orbitron', 'Courier New', monospace;
+    font-size: 40px;
+    font-weight: 900;
+    fill: rgba(37, 156, 174, 0.85);
+    transition: fill 0.25s;
+}
+
+.dr-dice-text.dr-critical {
+    fill: #ff4444;
+}
+
+.dr-dice-pip {
+    fill: rgba(37, 156, 174, 0.08);
+}
+
+.dr-dice-status {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+    min-height: 1.2em;
+}
+
+/* Rolling state */
+.dr-hud-card.dr-rolling {
+    border-color: rgba(37, 156, 174, 0.4);
+    box-shadow: 0 0 14px rgba(37, 156, 174, 0.2);
+    animation: dr-hud-pulse 0.9s ease-in-out infinite;
+}
+
+.dr-hud-card.dr-rolling .dr-dice-plate {
+    stroke: rgba(37, 156, 174, 0.5);
+}
+
+.dr-hud-card.dr-rolling .dr-dice-glow {
+    fill: rgba(37, 156, 174, 0.08);
+}
+
+.dr-hud-card.dr-rolling #dr-dice-svg {
+    animation: dr-hud-tilt 0.4s ease-in-out infinite alternate;
+}
+
+/* Result pop */
+.dr-hud-card.dr-result {
+    border-color: rgba(37, 156, 174, 0.3);
+    box-shadow: 0 0 12px rgba(37, 156, 174, 0.18);
+}
+
+.dr-hud-card.dr-result .dr-dice-text {
+    animation: dr-hud-pop 0.4s ease-out;
+}
+
+/* Opponent pop */
+.dr-hud-card.dr-opp-pop .dr-dice-text {
+    animation: dr-hud-pop 0.45s ease-out;
+}
+
+/* Keyframes */
+@keyframes dr-hud-pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(37, 156, 174, 0.12); }
+    50%      { box-shadow: 0 0 20px rgba(37, 156, 174, 0.35); }
+}
+
+@keyframes dr-hud-tilt {
+    0%   { transform: rotate(-2deg) scale(1); }
+    100% { transform: rotate(2deg) scale(1.02); }
+}
+
+@keyframes dr-hud-pop {
+    0%   { transform: scale(0.6); opacity: 0; }
+    50%  { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 576px) {
+    .dr-hud-card { width: 110px; padding: 0.75rem 0.75rem 0.4rem; }
+    .dr-dice-text { font-size: 34px; }
+}

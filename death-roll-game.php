@@ -92,11 +92,17 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                         <div id="initial-max-display" class="small text-white-50 mt-1" style="font-size:0.75rem; opacity:0.6;">Initial: <span id="initial-max-value">1000</span></div>
                     </div>
 
-                    <!-- Dice Visual -->
-                    <div id="dr-dice" class="dr-dice idle">
-                        <div class="dr-dice-face" id="dr-dice-face">🎲</div>
-                        <div class="dr-dice-value" id="dr-dice-value"></div>
-                        <div class="dr-dice-label" id="dr-dice-label"></div>
+                    <!-- SVG HUD Dice (persistent, never re-rendered by polling) -->
+                    <div id="dr-dice-wrap" class="dr-hud-card">
+                        <svg id="dr-dice-svg" width="120" height="120" viewBox="0 0 120 120" aria-label="dice">
+                            <rect x="14" y="14" width="92" height="92" rx="18" class="dr-dice-plate"/>
+                            <rect x="20" y="20" width="80" height="80" rx="14" class="dr-dice-glow"/>
+                            <text id="dr-dice-num" x="60" y="72" text-anchor="middle" class="dr-dice-text">&mdash;</text>
+                            <circle cx="40" cy="40" r="3" class="dr-dice-pip"/>
+                            <circle cx="80" cy="60" r="3" class="dr-dice-pip"/>
+                            <circle cx="40" cy="80" r="3" class="dr-dice-pip"/>
+                        </svg>
+                        <div id="dr-dice-status" class="dr-dice-status">Ready</div>
                     </div>
 
                     <!-- Turn Timer -->
