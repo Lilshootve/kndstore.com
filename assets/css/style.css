@@ -1683,6 +1683,11 @@ body.about-page,
     transform: translateY(-2px);
 }
 
+/* My Rooms button: force black text on hover for readability */
+.btn-myrooms:hover {
+    color: #000 !important;
+}
+
 /* Features Section */
 .features-section {
     background: rgba(44, 44, 44, 0.8);

@@ -71,7 +71,7 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                         <button class="btn btn-outline-neon" data-bs-toggle="modal" data-bs-target="#modal-join">
                             <i class="fas fa-door-open me-1"></i><?php echo t('dr.lobby.join_code', 'Join by Code'); ?>
                         </button>
-                        <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#modal-myrooms" id="btn-myrooms">
+                        <button class="btn btn-outline-light btn-myrooms" data-bs-toggle="modal" data-bs-target="#modal-myrooms" id="btn-myrooms">
                             <i class="fas fa-th-list me-1"></i><?php echo t('dr.lobby.my_rooms', 'My Rooms'); ?>
                         </button>
                     </div>
