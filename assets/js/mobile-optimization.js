@@ -87,8 +87,7 @@ function optimizeParticlesForMobile() {
 // Mejorar experiencia táctil
 function enhanceTouchExperience() {
     if (isMobile()) {
-        // Agregar feedback táctil a botones
-        const touchElements = document.querySelectorAll('.btn, .product-card, .category-card, .nav-link');
+        const touchElements = document.querySelectorAll('.btn, .product-card, .category-card, .nav-link:not(.knd-dropdown-toggle)');
         
         touchElements.forEach(element => {
             element.addEventListener('touchstart', function() {
@@ -114,13 +113,14 @@ function enhanceTouchExperience() {
 // Mejorar navegación móvil
 function enhanceMobileNavigation() {
     if (isMobile()) {
-        // Cerrar menú al hacer clic en un enlace
         const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
         const navbarCollapse = document.querySelector('.navbar-collapse');
         const navbarToggler = document.querySelector('.navbar-toggler');
         
         navLinks.forEach(link => {
             link.addEventListener('click', () => {
+                // Don't collapse if this is the dropdown toggle — it needs to stay open
+                if (link.classList.contains('knd-dropdown-toggle')) return;
                 if (navbarCollapse.classList.contains('show')) {
                     navbarToggler.click();
                 }
