@@ -54,9 +54,6 @@ function generateNavigation() {
     $nav .= '                    <a class="nav-link' . ($current_page == 'products.php' ? ' active' : '') . '" href="/products.php">' . t('nav.services') . '</a>' . "\n";
     $nav .= '                </li>' . "\n";
     $nav .= '                <li class="nav-item">' . "\n";
-    $nav .= '                    <a class="nav-link' . ($current_page == 'creative.php' ? ' active' : '') . '" href="/creative.php">' . t('nav.creative') . '</a>' . "\n";
-    $nav .= '                </li>' . "\n";
-    $nav .= '                <li class="nav-item">' . "\n";
     $nav .= '                    <a class="nav-link' . ($current_page == 'apparel.php' ? ' active' : '') . '" href="/apparel.php">' . t('nav.apparel') . '</a>' . "\n";
     $nav .= '                </li>' . "\n";
     $nav .= '                <li class="nav-item">' . "\n";
