@@ -93,6 +93,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     throw $e;
                 }
                 break;
+
+            case 'reactivate_season':
+                $sid = (int) ($_POST['season_id'] ?? 0);
+                if ($sid <= 0) throw new \Exception('Invalid season ID.');
+                $pdo->prepare("UPDATE knd_seasons SET is_active = 0")->execute();
+                $chk = $pdo->prepare("SELECT ends_at FROM knd_seasons WHERE id = ?");
+                $chk->execute([$sid]);
+                $row = $chk->fetch(PDO::FETCH_ASSOC);
+                if ($row && strtotime($row['ends_at']) <= time()) {
+                    $pdo->prepare("UPDATE knd_seasons SET is_active = 1, ends_at = DATE_ADD(NOW(), INTERVAL 30 DAY) WHERE id = ?")->execute([$sid]);
+                    $flashMsg = 'Season reactivated and extended by 30 days (it had already ended).';
+                } else {
+                    $pdo->prepare("UPDATE knd_seasons SET is_active = 1 WHERE id = ?")->execute([$sid]);
+                    $flashMsg = 'Season reactivated.';
+                }
+                @unlink(sys_get_temp_dir() . '/knd_lb/state_v2.json');
+                $flashType = 'success';
+                break;
+
             default:
                 throw new \Exception('Unknown action.');
         }
@@ -105,6 +124,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 $season = get_active_season($pdo);
 $seasonName = $season ? $season['name'] : '—';
 $seasonEnds = $season ? $season['ends_at'] : '—';
+
+$allSeasons = [];
+try {
+    $stmt = $pdo->query("SELECT id, code, name, starts_at, ends_at, is_active FROM knd_seasons ORDER BY id DESC");
+    $allSeasons = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (\Throwable $e) { /* ignore */ }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -175,6 +200,52 @@ $seasonEnds = $season ? $season['ends_at'] : '—';
                         <input type="hidden" name="action" value="reset_all_xp">
                         <button type="submit" class="btn btn-danger btn-sm">Reset All XP</button>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card bg-secondary bg-opacity-25 border border-secondary">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-history me-2 text-info"></i>All Seasons</h5>
+                    <p class="card-text small text-white-50 mb-3">Reactivate a previous season to use it again.</p>
+                    <?php if (empty($allSeasons)): ?>
+                    <p class="mb-0 text-white-50">No seasons found.</p>
+                    <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-sm mb-0">
+                            <thead><tr><th>ID</th><th>Name</th><th>Code</th><th>Starts</th><th>Ends</th><th>Status</th><th></th></tr></thead>
+                            <tbody>
+                            <?php foreach ($allSeasons as $s): ?>
+                            <tr>
+                                <td><?php echo (int)$s['id']; ?></td>
+                                <td><?php echo htmlspecialchars($s['name']); ?></td>
+                                <td><code><?php echo htmlspecialchars($s['code']); ?></code></td>
+                                <td class="small"><?php echo htmlspecialchars($s['starts_at'] ?? '—'); ?></td>
+                                <td class="small"><?php echo htmlspecialchars($s['ends_at'] ?? '—'); ?></td>
+                                <td>
+                                    <?php if (!empty($s['is_active'])): ?>
+                                    <span class="badge bg-success">Active</span>
+                                    <?php else: ?>
+                                    <span class="badge bg-secondary">Inactive</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if (empty($s['is_active'])): ?>
+                                    <form method="post" class="d-inline" onsubmit="return confirm('Reactivate <?php echo htmlspecialchars(addslashes($s['name'])); ?>?');">
+                                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                                        <input type="hidden" name="action" value="reactivate_season">
+                                        <input type="hidden" name="season_id" value="<?php echo (int)$s['id']; ?>">
+                                        <button type="submit" class="btn btn-outline-success btn-sm">Reactivate</button>
+                                    </form>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
