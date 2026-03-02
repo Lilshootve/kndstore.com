@@ -17,7 +17,7 @@ try {
         json_error('METHOD_NOT_ALLOWED', 'POST required.', 405);
     }
 
-    api_require_login();
+    api_require_verified_email();
     csrf_guard();
 
     $pdo = getDBConnection();

@@ -20,7 +20,7 @@ try {
     }
 
     csrf_guard();
-    api_require_login();
+    api_require_verified_email();
 
     $code = strtoupper(trim($_POST['code'] ?? ''));
     if (!validate_room_code($code)) {

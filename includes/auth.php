@@ -35,10 +35,41 @@ function auth_logout(): void {
 }
 
 /**
+ * Check if the logged-in user has a verified email.
+ * Users without an email on file (legacy accounts) are treated as verified.
+ */
+function is_email_verified(): bool {
+    if (!is_logged_in()) return false;
+    try {
+        require_once __DIR__ . '/config.php';
+        $pdo = getDBConnection();
+        if (!$pdo) return false;
+        $stmt = $pdo->prepare('SELECT email, email_verified FROM users WHERE id = ? LIMIT 1');
+        $stmt->execute([current_user_id()]);
+        $row = $stmt->fetch();
+        if (!$row) return false;
+        if (empty($row['email'])) return true;
+        return (int) $row['email_verified'] === 1;
+    } catch (\Throwable $e) {
+        return true;
+    }
+}
+
+/**
  * Redirect to login if not authenticated. Use at top of protected pages.
  */
 function require_login(): void {
     if (!is_logged_in()) {
+        header('Location: /auth.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+        exit;
+    }
+}
+
+/**
+ * Redirect to auth page if email not verified. Call after require_login().
+ */
+function require_verified_email(): void {
+    if (!is_email_verified()) {
         header('Location: /auth.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
         exit;
     }
@@ -54,6 +85,22 @@ function api_require_login(): void {
         echo json_encode([
             'ok' => false,
             'error' => ['code' => 'AUTH_REQUIRED', 'message' => 'You must be logged in.']
+        ]);
+        exit;
+    }
+}
+
+/**
+ * API guard: return JSON error if email not verified.
+ */
+function api_require_verified_email(): void {
+    api_require_login();
+    if (!is_email_verified()) {
+        http_response_code(403);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'ok' => false,
+            'error' => ['code' => 'EMAIL_NOT_VERIFIED', 'message' => 'Please verify your email first.']
         ]);
         exit;
     }

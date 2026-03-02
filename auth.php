@@ -11,9 +11,24 @@ require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 
 if (is_logged_in()) {
-    header('Location: /death-roll-lobby.php');
-    exit;
+    $pdo = getDBConnection();
+    if ($pdo) {
+        $uid = current_user_id();
+        $evStmt = $pdo->prepare('SELECT email, email_verified FROM users WHERE id = ? LIMIT 1');
+        $evStmt->execute([$uid]);
+        $evRow = $evStmt->fetch();
+        if ($evRow && !empty($evRow['email']) && (int) $evRow['email_verified'] === 0) {
+            $showVerify = true;
+        } else {
+            header('Location: /death-roll-lobby.php');
+            exit;
+        }
+    } else {
+        header('Location: /death-roll-lobby.php');
+        exit;
+    }
 }
+$showVerify = $showVerify ?? false;
 
 $redirect = htmlspecialchars($_GET['redirect'] ?? '/death-roll-lobby.php', ENT_QUOTES);
 $csrfToken = csrf_token();
@@ -85,6 +100,11 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                                     <div class="form-text text-white-50"><?php echo t('dr.auth.username_hint', '3-24 chars: letters, numbers, underscore'); ?></div>
                                 </div>
                                 <div class="mb-3">
+                                    <label class="form-label"><?php echo t('dr.auth.email', 'Email'); ?></label>
+                                    <input type="email" name="email" class="form-control" required maxlength="255" autocomplete="email">
+                                    <div class="form-text text-white-50"><?php echo t('dr.auth.email_hint', 'We\'ll send a verification code'); ?></div>
+                                </div>
+                                <div class="mb-3">
                                     <label class="form-label"><?php echo t('dr.auth.password', 'Password'); ?></label>
                                     <input type="password" name="password" class="form-control" required minlength="8" autocomplete="new-password">
                                     <div class="form-text text-white-50"><?php echo t('dr.auth.password_hint', 'Minimum 8 characters'); ?></div>
@@ -102,6 +122,34 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 
                     <div id="auth-alert" class="mt-3" style="display:none;"></div>
                 </div>
+
+                <!-- Email Verification Panel (hidden by default) -->
+                <div id="verify-panel" class="glass-card-neon p-4 p-md-5 mt-4" style="display:<?php echo $showVerify ? 'block' : 'none'; ?>;">
+                    <div class="text-center mb-4">
+                        <h3 class="glow-text mb-2"><i class="fas fa-envelope-open-text me-2"></i><?php echo t('dr.auth.verify_title', 'Verify Your Email'); ?></h3>
+                        <p class="text-white-50"><?php echo t('dr.auth.verify_subtitle', 'Enter the 6-digit code we sent to your email'); ?></p>
+                    </div>
+                    <form id="form-verify" autocomplete="off">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <div class="mb-3">
+                            <label class="form-label"><?php echo t('dr.auth.verify_code', 'Verification Code'); ?></label>
+                            <input type="text" name="code" id="verify-code-input" class="form-control text-center"
+                                   required pattern="\d{6}" maxlength="6" inputmode="numeric"
+                                   placeholder="000000"
+                                   style="font-size:1.8rem; letter-spacing:0.5em; font-family:'Orbitron',monospace;">
+                        </div>
+                        <button type="submit" class="btn btn-neon-primary w-100 mb-2">
+                            <i class="fas fa-check-circle me-2"></i><?php echo t('dr.auth.verify_btn', 'Verify'); ?>
+                        </button>
+                    </form>
+                    <div class="text-center mt-2">
+                        <button id="btn-resend" class="btn btn-sm btn-link text-white-50" style="text-decoration:underline;">
+                            <i class="fas fa-redo me-1"></i><?php echo t('dr.auth.resend_code', 'Resend code'); ?>
+                        </button>
+                        <div id="resend-cooldown" class="text-white-50 small mt-1" style="display:none;"></div>
+                    </div>
+                    <div id="verify-alert" class="mt-3" style="display:none;"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -113,6 +161,7 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 
 <script>
 const REDIRECT = <?php echo json_encode($redirect); ?>;
+const SHOW_VERIFY = <?php echo $showVerify ? 'true' : 'false'; ?>;
 
 function showAlert(msg, type) {
     const el = document.getElementById('auth-alert');
@@ -120,6 +169,25 @@ function showAlert(msg, type) {
     el.style.display = 'block';
 }
 
+function showVerifyAlert(msg, type) {
+    const el = document.getElementById('verify-alert');
+    el.innerHTML = '<div class="alert alert-' + type + ' mb-0">' + msg + '</div>';
+    el.style.display = 'block';
+}
+
+function switchToVerify() {
+    document.querySelector('.tab-content').parentElement.style.display = 'none';
+    document.querySelector('.nav-pills').style.display = 'none';
+    document.getElementById('auth-alert').style.display = 'none';
+    document.getElementById('verify-panel').style.display = 'block';
+    document.getElementById('verify-code-input').focus();
+}
+
+if (SHOW_VERIFY) {
+    switchToVerify();
+}
+
+/* ---- Login ---- */
 document.getElementById('form-login').addEventListener('submit', function(e) {
     e.preventDefault();
     const fd = new FormData(this);
@@ -127,7 +195,12 @@ document.getElementById('form-login').addEventListener('submit', function(e) {
         .then(r => r.json())
         .then(d => {
             if (d.ok) {
-                window.location.href = REDIRECT;
+                if (d.data && d.data.email_pending) {
+                    showAlert('<?php echo t("dr.auth.email_not_verified", "Please verify your email to continue."); ?>', 'warning');
+                    setTimeout(switchToVerify, 800);
+                } else {
+                    window.location.href = REDIRECT;
+                }
             } else {
                 showAlert(d.error.message, 'danger');
             }
@@ -135,6 +208,7 @@ document.getElementById('form-login').addEventListener('submit', function(e) {
         .catch(() => showAlert('Connection error.', 'danger'));
 });
 
+/* ---- Register ---- */
 document.getElementById('form-register').addEventListener('submit', function(e) {
     e.preventDefault();
     const fd = new FormData(this);
@@ -142,16 +216,86 @@ document.getElementById('form-register').addEventListener('submit', function(e) 
         showAlert('<?php echo t("dr.auth.password_mismatch", "Passwords do not match."); ?>', 'warning');
         return;
     }
+    const btn = this.querySelector('button[type="submit"]');
+    btn.disabled = true;
     fetch('/api/auth/register.php', { method: 'POST', body: fd, credentials: 'same-origin' })
         .then(r => r.json())
         .then(d => {
+            btn.disabled = false;
             if (d.ok) {
-                window.location.href = REDIRECT;
+                if (d.data && d.data.email_pending) {
+                    showAlert('<?php echo t("dr.auth.check_email", "Account created! Check your email for the verification code."); ?>', 'success');
+                    setTimeout(switchToVerify, 1200);
+                } else {
+                    window.location.href = REDIRECT;
+                }
             } else {
                 showAlert(d.error.message, 'danger');
             }
         })
-        .catch(() => showAlert('Connection error.', 'danger'));
+        .catch(() => { btn.disabled = false; showAlert('Connection error.', 'danger'); });
+});
+
+/* ---- Verify Email ---- */
+document.getElementById('form-verify').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const fd = new FormData(this);
+    const btn = this.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    fetch('/api/auth/verify_email.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(d => {
+            btn.disabled = false;
+            if (d.ok) {
+                showVerifyAlert('<?php echo t("dr.auth.email_verified", "Email verified! Redirecting…"); ?>', 'success');
+                setTimeout(() => { window.location.href = REDIRECT; }, 1000);
+            } else {
+                showVerifyAlert(d.error.message, 'danger');
+            }
+        })
+        .catch(() => { btn.disabled = false; showVerifyAlert('Connection error.', 'danger'); });
+});
+
+/* ---- Resend Code ---- */
+let resendCooldown = 0;
+let resendTimer = null;
+
+function startResendCooldown(sec) {
+    resendCooldown = sec;
+    const btn = document.getElementById('btn-resend');
+    const cd = document.getElementById('resend-cooldown');
+    btn.style.display = 'none';
+    cd.style.display = 'block';
+    function tick() {
+        if (resendCooldown <= 0) {
+            cd.style.display = 'none';
+            btn.style.display = 'inline-block';
+            clearInterval(resendTimer);
+            return;
+        }
+        cd.textContent = '<?php echo t("dr.auth.resend_wait", "Resend available in"); ?> ' + resendCooldown + 's';
+        resendCooldown--;
+    }
+    tick();
+    resendTimer = setInterval(tick, 1000);
+}
+
+document.getElementById('btn-resend').addEventListener('click', function() {
+    const fd = new FormData();
+    fd.append('csrf_token', '<?php echo $csrfToken; ?>');
+    this.disabled = true;
+    fetch('/api/auth/resend_code.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(d => {
+            document.getElementById('btn-resend').disabled = false;
+            if (d.ok) {
+                showVerifyAlert('<?php echo t("dr.auth.code_resent", "New code sent! Check your inbox."); ?>', 'success');
+                startResendCooldown(60);
+            } else {
+                showVerifyAlert(d.error.message, 'danger');
+            }
+        })
+        .catch(() => { document.getElementById('btn-resend').disabled = false; showVerifyAlert('Connection error.', 'danger'); });
 });
 </script>
 

@@ -19,7 +19,7 @@ try {
     }
 
     csrf_guard();
-    api_require_login();
+    api_require_verified_email();
 
     $pdo = getDBConnection();
     if (!$pdo) { json_error('DB_CONNECTION_FAILED', 'Database connection failed.', 500); }

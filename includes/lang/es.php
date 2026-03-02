@@ -207,6 +207,18 @@ return [
     'dr.auth.username_hint' => '3-24 caracteres: letras, números, guión bajo',
     'dr.auth.password_hint' => 'Mínimo 8 caracteres',
     'dr.auth.password_mismatch' => 'Las contraseñas no coinciden.',
+    'dr.auth.email' => 'Correo electrónico',
+    'dr.auth.email_hint' => 'Enviaremos un código de verificación',
+    'dr.auth.verify_title' => 'Verifica tu correo',
+    'dr.auth.verify_subtitle' => 'Ingresa el código de 6 dígitos que enviamos a tu correo',
+    'dr.auth.verify_code' => 'Código de verificación',
+    'dr.auth.verify_btn' => 'Verificar',
+    'dr.auth.resend_code' => 'Reenviar código',
+    'dr.auth.resend_wait' => 'Reenvío disponible en',
+    'dr.auth.check_email' => '¡Cuenta creada! Revisa tu correo para el código de verificación.',
+    'dr.auth.email_verified' => '¡Correo verificado! Redirigiendo…',
+    'dr.auth.code_resent' => '¡Nuevo código enviado! Revisa tu bandeja de entrada.',
+    'dr.auth.email_not_verified' => 'Por favor verifica tu correo para continuar.',
 
     // Lobby
     'dr.lobby.title' => 'KND LastRoll — Lobby',

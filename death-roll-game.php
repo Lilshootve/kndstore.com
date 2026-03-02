@@ -11,6 +11,7 @@ require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 
 require_login();
+require_verified_email();
 
 $code = strtoupper(trim($_GET['code'] ?? ''));
 if (!preg_match('/^[A-Z0-9]{8}$/', $code)) {

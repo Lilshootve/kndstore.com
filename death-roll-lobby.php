@@ -11,6 +11,7 @@ require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 
 require_login();
+require_verified_email();
 
 $csrfToken = csrf_token();
 $username = htmlspecialchars(current_username());

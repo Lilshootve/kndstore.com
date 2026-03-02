@@ -13,6 +13,7 @@ require_once __DIR__ . '/includes/footer.php';
 require_once __DIR__ . '/includes/support_credits.php';
 
 require_login();
+require_verified_email();
 
 $csrfToken = csrf_token();
 $userId = current_user_id();

@@ -31,7 +31,7 @@ if ($username === '' || $password === '') {
     json_error('MISSING_FIELDS', 'Username and password are required.');
 }
 
-$stmt = $pdo->prepare('SELECT id, username, password_hash FROM users WHERE username = ? LIMIT 1');
+$stmt = $pdo->prepare('SELECT id, username, password_hash, email, email_verified FROM users WHERE username = ? LIMIT 1');
 $stmt->execute([$username]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -41,4 +41,10 @@ if (!$user || !password_verify($password, $user['password_hash'])) {
 
 auth_login((int) $user['id'], $user['username']);
 
-json_success(['user_id' => (int) $user['id'], 'username' => $user['username']]);
+$emailPending = !empty($user['email']) && isset($user['email_verified']) && (int) $user['email_verified'] === 0;
+
+json_success([
+    'user_id'       => (int) $user['id'],
+    'username'      => $user['username'],
+    'email_pending' => $emailPending,
+]);
