@@ -288,6 +288,8 @@ return [
     'dr.lobby.create_go' => 'Create & Wait',
     'dr.lobby.enter_code' => 'Room Code',
     'dr.lobby.join_btn' => 'Join Room',
+    'dr.lobby.my_rooms' => 'My Rooms',
+    'dr.lobby.room_limit' => 'You already have 5 active rooms. Finish or leave one first.',
     'dr.lobby.rules_title' => 'How to Play',
     'dr.lobby.rule1' => 'Create or join a room',
     'dr.lobby.rule2' => 'Player 1 rolls 1-1000',

@@ -141,6 +141,80 @@
             }).catch(function () {});
         }
 
+        // ── My Rooms ──────────────────────────────────────────
+        var btnMyRooms = document.getElementById('btn-myrooms');
+        if (btnMyRooms) {
+            btnMyRooms.addEventListener('click', loadMyRooms);
+        }
+
+        function loadMyRooms() {
+            var container = document.getElementById('myrooms-list');
+            var countEl = document.getElementById('myrooms-count');
+            container.innerHTML = '<p class="text-white-50 text-center"><i class="fas fa-spinner fa-spin me-2"></i>Loading...</p>';
+
+            get('/api/deathroll-1v1/my_rooms.php')
+                .then(function (d) {
+                    if (!d.ok) {
+                        container.innerHTML = '<p class="text-danger text-center">' + (d.error ? d.error.message : 'Error') + '</p>';
+                        return;
+                    }
+                    if (countEl) countEl.textContent = d.data.active_count + ' / ' + d.data.max_rooms;
+                    renderMyRooms(d.data.rooms, container);
+                })
+                .catch(function () {
+                    container.innerHTML = '<p class="text-danger text-center">Connection error</p>';
+                });
+        }
+
+        function renderMyRooms(rooms, container) {
+            if (!rooms || rooms.length === 0) {
+                container.innerHTML = '<p class="text-white-50 text-center">No rooms yet. Create one!</p>';
+                return;
+            }
+            var html = '<div class="list-group list-group-flush">';
+            rooms.forEach(function (r) {
+                var statusBadge = '';
+                var actionBtn = '';
+                if (r.status === 'waiting') {
+                    statusBadge = '<span class="badge bg-warning text-dark">Waiting</span>';
+                    actionBtn = '<a href="/death-roll-game.php?code=' + r.code + '" class="btn btn-sm btn-outline-neon">Enter</a>';
+                } else if (r.status === 'playing') {
+                    statusBadge = '<span class="badge bg-success">Playing</span>';
+                    actionBtn = '<a href="/death-roll-game.php?code=' + r.code + '" class="btn btn-sm btn-neon-primary">Enter</a>';
+                } else {
+                    var reasonTag = '';
+                    if (r.finished_reason === 'timeout') reasonTag = ' <small class="text-white-50">(timeout)</small>';
+                    else if (r.finished_reason === 'abandoned') reasonTag = ' <small class="text-white-50">(abandoned)</small>';
+
+                    if (r.result === 'won') {
+                        statusBadge = '<span class="badge bg-info">Won</span>' + reasonTag;
+                    } else if (r.result === 'lost') {
+                        statusBadge = '<span class="badge bg-danger">Lost</span>' + reasonTag;
+                    } else {
+                        statusBadge = '<span class="badge bg-secondary">Finished</span>' + reasonTag;
+                    }
+                    actionBtn = '<a href="/death-roll-game.php?code=' + r.code + '" class="btn btn-sm btn-outline-light">View</a>';
+                }
+
+                var oppText = r.opponent ? 'vs ' + escHtml(r.opponent) : '<span class="text-white-50">no opponent</span>';
+                var visIcon = r.visibility === 'private' ? '<i class="fas fa-lock text-white-50 me-1" title="Private"></i>' : '';
+
+                html += '<div class="list-group-item bg-transparent border-secondary d-flex justify-content-between align-items-center py-3">';
+                html += '  <div>';
+                html += '    <div class="d-flex align-items-center gap-2 mb-1">';
+                html += '      ' + visIcon;
+                html += '      <code style="font-size:1.05em; letter-spacing:2px;">' + r.code + '</code>';
+                html += '      ' + statusBadge;
+                html += '    </div>';
+                html += '    <div class="small text-white-50">' + oppText + ' &middot; ' + timeAgo(r.last_activity) + ' ago</div>';
+                html += '  </div>';
+                html += '  <div>' + actionBtn + '</div>';
+                html += '</div>';
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
         refreshLobby();
         setInterval(refreshLobby, 5000);
         pingPresence();

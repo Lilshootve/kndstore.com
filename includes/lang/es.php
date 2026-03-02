@@ -209,6 +209,8 @@ return [
     'dr.lobby.create_go' => 'Crear y Esperar',
     'dr.lobby.enter_code' => 'Código de Sala',
     'dr.lobby.join_btn' => 'Unirse',
+    'dr.lobby.my_rooms' => 'Mis Salas',
+    'dr.lobby.room_limit' => 'Ya tienes 5 salas activas. Termina o deja una primero.',
     'dr.lobby.rules_title' => 'Cómo Jugar',
     'dr.lobby.rule1' => 'Crea o únete a una sala',
     'dr.lobby.rule2' => 'El Jugador 1 tira 1-1000',

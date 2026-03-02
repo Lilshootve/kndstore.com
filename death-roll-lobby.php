@@ -42,6 +42,9 @@ $username = htmlspecialchars(current_username());
                         <button class="btn btn-outline-neon" data-bs-toggle="modal" data-bs-target="#modal-join">
                             <i class="fas fa-door-open me-1"></i><?php echo t('dr.lobby.join_code', 'Join by Code'); ?>
                         </button>
+                        <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#modal-myrooms" id="btn-myrooms">
+                            <i class="fas fa-th-list me-1"></i><?php echo t('dr.lobby.my_rooms', 'My Rooms'); ?>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -142,6 +145,23 @@ $username = htmlspecialchars(current_username());
                     </button>
                 </form>
                 <div id="join-alert" class="mt-3" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- My Rooms Modal -->
+<div class="modal fade" id="modal-myrooms" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-dark border border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title"><i class="fas fa-th-list me-2"></i><?php echo t('dr.lobby.my_rooms', 'My Rooms'); ?> <span id="myrooms-count" class="badge bg-secondary ms-1"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                <div id="myrooms-list">
+                    <p class="text-white-50 text-center"><?php echo t('dr.lobby.loading', 'Loading...'); ?></p>
+                </div>
             </div>
         </div>
     </div>

@@ -36,14 +36,13 @@ try {
     }
 
     $stmt = $pdo->prepare(
-        'SELECT code FROM deathroll_games_1v1
-         WHERE created_by_user_id = ? AND status = "waiting"
-         LIMIT 1'
+        'SELECT COUNT(*) as cnt FROM deathroll_games_1v1
+         WHERE created_by_user_id = ? AND status IN ("waiting", "playing")'
     );
     $stmt->execute([$userId]);
-    $existing = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($existing) {
-        json_error('ALREADY_WAITING', 'You already have a waiting room: ' . $existing['code']);
+    $activeCount = (int) $stmt->fetch(PDO::FETCH_ASSOC)['cnt'];
+    if ($activeCount >= 5) {
+        json_error('ROOM_LIMIT', 'You already have 5 active rooms. Finish or leave one first.');
     }
 
     $code = generate_room_code($pdo);
