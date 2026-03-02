@@ -22,11 +22,13 @@ $ptsRate = defined('SUPPORT_POINTS_PER_USD') ? SUPPORT_POINTS_PER_USD : 100;
 
 $pdo = getDBConnection();
 $balance = ['pending' => 0, 'available' => 0, 'locked' => 0, 'spent_total' => 0, 'expiring_soon' => []];
+$availableNet = 0;
 try {
     if ($pdo) {
         release_available_points_if_due($pdo, $userId);
         expire_points_if_due($pdo, $userId);
         $balance = get_points_balance($pdo, $userId);
+        $availableNet = get_available_points($pdo, $userId);
     }
 } catch (\Throwable $e) {
     error_log('support-credits page balance error: ' . $e->getMessage());
@@ -60,7 +62,7 @@ echo generateHeader($seoTitle, $seoDesc);
         <div class="col-md-3">
             <div class="glass-card-neon p-3 text-center">
                 <div class="text-white-50 small mb-1"><?php echo t('sc.available', 'Available'); ?></div>
-                <div class="fs-3 fw-bold" style="color: var(--knd-neon-blue);" id="bal-available"><?php echo number_format($balance['available']); ?></div>
+                <div class="fs-3 fw-bold" style="color: var(--knd-neon-blue);" id="bal-available"><?php echo number_format($availableNet); ?></div>
             </div>
         </div>
         <div class="col-md-3">
