@@ -56,7 +56,7 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
             <div class="col-md-5">
                 <div class="glass-card-neon p-4 p-md-5">
                     <div class="text-center mb-4">
-                        <h2 class="glow-text mb-2"><i class="fas fa-shield-alt me-2"></i>KND Access</h2>
+                        <h2 class="glow-text mb-2"><i class="fas fa-dice-d20 me-2"></i>KND Access</h2>
                         <p class="text-white-50"><?php echo t('dr.auth.subtitle', 'Sign in to your KND ecosystem'); ?></p>
                     </div>
 
