@@ -53,7 +53,7 @@ try {
 
     // Check turn timeout inside transaction
     if (!empty($game['turn_started_at'])) {
-        $elapsed = time() - strtotime($game['turn_started_at']);
+        $elapsed = time() - strtotime($game['turn_started_at'] . ' UTC');
         if ($elapsed >= 8) {
             $pdo->rollBack();
             json_error('TURN_TIMEOUT', 'Turn has timed out.');

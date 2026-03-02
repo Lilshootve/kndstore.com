@@ -86,7 +86,7 @@ function deathroll_gc(PDO $pdo): void {
 }
 
 /**
- * Check and apply turn timeout (13s). Returns updated $game array.
+ * Check and apply turn timeout (8s). Returns updated $game array.
  * Uses optimistic locking on turn_started_at to prevent double-finish.
  */
 function check_turn_timeout(PDO $pdo, array $game): array {
@@ -94,9 +94,9 @@ function check_turn_timeout(PDO $pdo, array $game): array {
         return $game;
     }
 
-    $turnStart = strtotime($game['turn_started_at']);
+    $turnStartUtc = strtotime($game['turn_started_at'] . ' UTC');
     $serverNow = time();
-    $elapsed = $serverNow - $turnStart;
+    $elapsed = $serverNow - $turnStartUtc;
 
     if ($elapsed < 8) {
         return $game;
@@ -166,7 +166,7 @@ function build_game_state(PDO $pdo, array $game, int $currentUserId): array {
     $turnSecondsLeft = null;
     $serverTime = gmdate('Y-m-d H:i:s');
     if ($game['status'] === 'playing' && !empty($game['turn_started_at'])) {
-        $elapsed = time() - strtotime($game['turn_started_at']);
+        $elapsed = time() - strtotime($game['turn_started_at'] . ' UTC');
         $turnSecondsLeft = max(0, min($turnDuration, $turnDuration - $elapsed));
     }
 
