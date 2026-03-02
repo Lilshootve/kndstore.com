@@ -62,42 +62,39 @@ function generateNavigation() {
     $nav .= '                <li class="nav-item">' . "\n";
     $nav .= '                    <a class="nav-link' . ($current_page == 'contact.php' ? ' active' : '') . '" href="/contact.php">' . t('nav.contact') . '</a>' . "\n";
     $nav .= '                </li>' . "\n";
-    $ordersActive = in_array($current_page, ['order.php', 'track-order.php']);
-    $nav .= '                <li class="nav-item knd-dropdown">' . "\n";
-    $nav .= '                    <a id="ordersDropdownToggle" class="nav-link knd-dropdown-toggle' . ($ordersActive ? ' active' : '') . '" href="javascript:void(0)" role="button" aria-expanded="false">' . "\n";
-    $nav .= '                        <i class="fas fa-shopping-cart me-1"></i>' . "\n";
-    $nav .= '                        ' . t('nav.orders') . "\n";
-    $nav .= '                        <span id="order-count" class="badge rounded-pill bg-primary ms-1" style="display:none; min-width: 20px; justify-content: center; align-items: center;"></span>' . "\n";
-    $nav .= '                        <i class="fas fa-chevron-down knd-dropdown-arrow ms-1"></i>' . "\n";
-    $nav .= '                    </a>' . "\n";
-    $nav .= '                    <div id="ordersDropdownMenu" class="knd-dropdown-menu">' . "\n";
-    $nav .= '                        <span class="knd-dropdown-hint">View &amp; track purchases</span>' . "\n";
-    $nav .= '                        <a class="knd-dropdown-item' . ($current_page == 'order.php' ? ' active' : '') . '" href="/order.php"><i class="fas fa-cart-shopping me-2"></i>My Orders</a>' . "\n";
-    $nav .= '                        <a class="knd-dropdown-item' . ($current_page == 'track-order.php' ? ' active' : '') . '" href="/track-order.php"><i class="fas fa-magnifying-glass me-2"></i>Track Order</a>' . "\n";
-    $nav .= '                        <a class="knd-dropdown-item" href="/contact.php"><i class="fas fa-headset me-2"></i>Support</a>' . "\n";
-    $nav .= '                    </div>' . "\n";
-    $nav .= '                </li>' . "\n";
     // Death Roll 1v1 link
     $drActive = in_array($current_page, ['death-roll-lobby.php', 'death-roll-game.php']);
     $nav .= '                <li class="nav-item">' . "\n";
     $nav .= '                    <a class="nav-link' . ($drActive ? ' active' : '') . '" href="/death-roll-lobby.php"><i class="fas fa-dice-d20 me-1"></i>' . t('nav.deathroll', 'Death Roll') . '</a>' . "\n";
     $nav .= '                </li>' . "\n";
-    // Auth: show username+logout if logged in, or Login link
+    // My Account dropdown
     $drLoggedIn = !empty($_SESSION['dr_user_id']);
+    $drUsername = $drLoggedIn ? htmlspecialchars($_SESSION['dr_username'] ?? '') : '';
+    $accountActive = in_array($current_page, ['order.php', 'track-order.php', 'auth.php']);
+    $nav .= '                <li class="nav-item knd-dropdown">' . "\n";
+    $nav .= '                    <a id="ordersDropdownToggle" class="nav-link knd-dropdown-toggle' . ($accountActive ? ' active' : '') . '" href="javascript:void(0)" role="button" aria-expanded="false">' . "\n";
+    $nav .= '                        <i class="fas fa-user-circle me-1"></i>' . "\n";
     if ($drLoggedIn) {
-        $drUsername = htmlspecialchars($_SESSION['dr_username'] ?? '');
-        $nav .= '                <li class="nav-item">' . "\n";
-        $nav .= '                    <span class="nav-link text-white-50"><i class="fas fa-user me-1"></i>' . $drUsername . '</span>' . "\n";
-        $nav .= '                </li>' . "\n";
-        $nav .= '                <li class="nav-item">' . "\n";
-        $nav .= '                    <a class="nav-link" href="/logout.php"><i class="fas fa-sign-out-alt me-1"></i>' . t('nav.logout', 'Logout') . '</a>' . "\n";
-        $nav .= '                </li>' . "\n";
+        $nav .= '                        ' . $drUsername . "\n";
     } else {
-        $authActive = ($current_page === 'auth.php');
-        $nav .= '                <li class="nav-item">' . "\n";
-        $nav .= '                    <a class="nav-link' . ($authActive ? ' active' : '') . '" href="/auth.php"><i class="fas fa-sign-in-alt me-1"></i>' . t('nav.login', 'Login') . '</a>' . "\n";
-        $nav .= '                </li>' . "\n";
+        $nav .= '                        ' . t('nav.my_account', 'My Account') . "\n";
     }
+    $nav .= '                        <span id="order-count" class="badge rounded-pill bg-primary ms-1" style="display:none; min-width: 20px; justify-content: center; align-items: center;"></span>' . "\n";
+    $nav .= '                        <i class="fas fa-chevron-down knd-dropdown-arrow ms-1"></i>' . "\n";
+    $nav .= '                    </a>' . "\n";
+    $nav .= '                    <div id="ordersDropdownMenu" class="knd-dropdown-menu">' . "\n";
+    $nav .= '                        <span class="knd-dropdown-hint">' . t('nav.orders_hint', 'Orders & account') . '</span>' . "\n";
+    $nav .= '                        <a class="knd-dropdown-item' . ($current_page == 'order.php' ? ' active' : '') . '" href="/order.php"><i class="fas fa-cart-shopping me-2"></i>' . t('nav.my_orders', 'My Orders') . '</a>' . "\n";
+    $nav .= '                        <a class="knd-dropdown-item' . ($current_page == 'track-order.php' ? ' active' : '') . '" href="/track-order.php"><i class="fas fa-magnifying-glass me-2"></i>' . t('nav.track_order', 'Track Order') . '</a>' . "\n";
+    $nav .= '                        <a class="knd-dropdown-item" href="/contact.php"><i class="fas fa-headset me-2"></i>' . t('nav.support', 'Support') . '</a>' . "\n";
+    $nav .= '                        <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 6px 0;"></div>' . "\n";
+    if ($drLoggedIn) {
+        $nav .= '                        <a class="knd-dropdown-item" href="/logout.php"><i class="fas fa-sign-out-alt me-2"></i>' . t('nav.logout', 'Logout') . '</a>' . "\n";
+    } else {
+        $nav .= '                        <a class="knd-dropdown-item' . ($current_page == 'auth.php' ? ' active' : '') . '" href="/auth.php"><i class="fas fa-sign-in-alt me-2"></i>' . t('nav.login', 'Login') . ' / ' . t('nav.register', 'Register') . '</a>' . "\n";
+    }
+    $nav .= '                    </div>' . "\n";
+    $nav .= '                </li>' . "\n";
     $nav .= '            </ul>' . "\n";
     $nav .= '        </div>' . "\n";
     $nav .= '    </div>' . "\n";

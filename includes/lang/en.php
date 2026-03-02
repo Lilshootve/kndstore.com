@@ -255,6 +255,12 @@ return [
     'nav.deathroll' => 'Death Roll',
     'nav.login' => 'Login',
     'nav.logout' => 'Logout',
+    'nav.my_account' => 'My Account',
+    'nav.my_orders' => 'My Orders',
+    'nav.track_order' => 'Track Order',
+    'nav.support' => 'Support',
+    'nav.orders_hint' => 'Orders & account',
+    'nav.register' => 'Register',
 
     // Auth
     'dr.auth.title' => 'Death Roll - Account',

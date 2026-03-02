@@ -176,6 +176,12 @@ return [
     'nav.deathroll' => 'Death Roll',
     'nav.login' => 'Iniciar Sesión',
     'nav.logout' => 'Cerrar Sesión',
+    'nav.my_account' => 'Mi Cuenta',
+    'nav.my_orders' => 'Mis Pedidos',
+    'nav.track_order' => 'Rastrear Pedido',
+    'nav.support' => 'Soporte',
+    'nav.orders_hint' => 'Pedidos y cuenta',
+    'nav.register' => 'Registro',
 
     // Auth
     'dr.auth.title' => 'Death Roll - Cuenta',
