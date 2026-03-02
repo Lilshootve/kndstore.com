@@ -74,9 +74,9 @@ try {
                      JOIN users u ON u.id = s.user_id
                      WHERE s.season_id = ?
                      ORDER BY s.xp_earned DESC
-                     LIMIT ?"
+                     LIMIT " . (int) LB_TOP_LIMIT
                 );
-                $stmt->execute([$season['id'], LB_TOP_LIMIT]);
+                $stmt->execute([$season['id']]);
                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 foreach ($rows as $i => $r) {
                     $w = (int) ($r['wins'] ?? 0);
@@ -107,15 +107,15 @@ try {
                  JOIN users u ON u.id = ux.user_id
                  WHERE ux.xp > 0
                  ORDER BY ux.xp DESC
-                 LIMIT ?"
+                 LIMIT " . (int) LB_TOP_LIMIT
             );
-            $stmt->execute([LB_TOP_LIMIT]);
+            $stmt->execute();
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
             if (empty($rows)) {
                 $stmt = $pdo->prepare(
-                    "SELECT user_id, xp FROM user_xp WHERE xp > 0 ORDER BY xp DESC LIMIT ?"
+                    "SELECT user_id, xp FROM user_xp WHERE xp > 0 ORDER BY xp DESC LIMIT " . (int) LB_TOP_LIMIT
                 );
-                $stmt->execute([LB_TOP_LIMIT]);
+                $stmt->execute();
                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 foreach ($rows as &$r) {
                     $us = $pdo->prepare("SELECT username FROM users WHERE id = ?");
