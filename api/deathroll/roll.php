@@ -43,8 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Verificar sesión
-if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
+if (empty($_SESSION['dr_user_id'])) {
     http_response_code(401);
     echo json_encode([
         'success' => false,
@@ -53,7 +52,7 @@ if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
     exit;
 }
 
-$userId = (int)$_SESSION['user_id'];
+$userId = (int)$_SESSION['dr_user_id'];
 $orderId = isset($_POST['order_id']) ? trim($_POST['order_id']) : '';
 
 // Validar order_id

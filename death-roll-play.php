@@ -6,11 +6,10 @@ require_once __DIR__ . '/includes/footer.php';
 
 // Obtener order_id desde GET o POST
 $orderId = isset($_GET['order_id']) ? trim($_GET['order_id']) : '';
-$userId = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
+$userId = !empty($_SESSION['dr_user_id']) ? (int)$_SESSION['dr_user_id'] : 0;
 
-// Verificar sesión
 if (!$userId) {
-    header('Location: /order.php');
+    header('Location: /auth.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }
 

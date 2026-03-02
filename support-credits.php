@@ -17,6 +17,7 @@ require_login();
 $csrfToken = csrf_token();
 $userId = current_user_id();
 $username = htmlspecialchars(current_username());
+$ptsRate = defined('SUPPORT_POINTS_PER_USD') ? SUPPORT_POINTS_PER_USD : 100;
 
 $pdo = getDBConnection();
 $balance = ['pending' => 0, 'available' => 0, 'locked' => 0, 'spent_total' => 0, 'expiring_soon' => []];
@@ -105,8 +106,8 @@ echo generateHeader($seoTitle, $seoDesc);
                         <input type="number" id="sc-amount" class="form-control bg-dark text-white border-secondary" value="25" min="1" max="500" step="0.01">
                     </div>
                     <div class="small text-white-50 mt-1">
-                        = <strong id="sc-points-preview"><?php echo 25 * SUPPORT_POINTS_PER_USD; ?></strong> <?php echo t('sc.credits_label', 'credits'); ?>
-                        (<?php echo SUPPORT_POINTS_PER_USD; ?> per $1)
+                        = <strong id="sc-points-preview"><?php echo 25 * $ptsRate; ?></strong> <?php echo t('sc.credits_label', 'credits'); ?>
+                        (<?php echo $ptsRate; ?> per $1)
                     </div>
                 </div>
 
@@ -172,17 +173,17 @@ echo generateHeader($seoTitle, $seoDesc);
                         <?php
                         $payments = [];
                         try {
-                        if ($pdo) {
-                            $stmt = $pdo->prepare(
-                                "SELECT sp.*, COALESCE(pl.points, 0) AS points FROM support_payments sp
-                                 LEFT JOIN points_ledger pl ON pl.source_type='support_payment' AND pl.source_id=sp.id AND pl.entry_type='earn'
-                                 WHERE sp.user_id = ? ORDER BY sp.created_at DESC LIMIT 20"
-                            );
-                            $stmt->execute([$userId]);
-                            $payments = $stmt->fetchAll();
-                        }
+                            if ($pdo) {
+                                $stmt = $pdo->prepare(
+                                    "SELECT sp.*, COALESCE(pl.points, 0) AS points FROM support_payments sp
+                                     LEFT JOIN points_ledger pl ON pl.source_type='support_payment' AND pl.source_id=sp.id AND pl.entry_type='earn'
+                                     WHERE sp.user_id = ? ORDER BY sp.created_at DESC LIMIT 20"
+                                );
+                                $stmt->execute([$userId]);
+                                $payments = $stmt->fetchAll();
+                            }
                         } catch (\Throwable $e) { $payments = []; }
-                            foreach ($payments as $p):
+                        foreach ($payments as $p):
                         ?>
                             <tr>
                                 <td><?php echo $p['id']; ?></td>
@@ -209,23 +210,25 @@ echo generateHeader($seoTitle, $seoDesc);
 </section>
 
 <?php echo generateFooter(); ?>
-
 <script src="/assets/js/navigation-extend.js"></script>
+<?php echo generateScripts(); ?>
+
 <script>
 (function() {
-    const CSRF = '<?php echo $csrfToken; ?>';
-    const PTS_RATE = <?php echo SUPPORT_POINTS_PER_USD; ?>;
+    var CSRF = '<?php echo $csrfToken; ?>';
+    var PTS_RATE = <?php echo $ptsRate; ?>;
+    var selectedAmount = 25;
+    var selectedMethod = 'paypal';
 
-    let selectedAmount = 25;
-    let selectedMethod = 'paypal';
+    var amountInput = document.getElementById('sc-amount');
+    var preview = document.getElementById('sc-points-preview');
+    var resultDiv = document.getElementById('sc-result');
 
-    const amountInput = document.getElementById('sc-amount');
-    const preview = document.getElementById('sc-points-preview');
-    const resultDiv = document.getElementById('sc-result');
+    if (!amountInput || !preview || !resultDiv) return;
 
-    document.querySelectorAll('.sc-pack-btn').forEach(btn => {
+    document.querySelectorAll('.sc-pack-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('.sc-pack-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.sc-pack-btn').forEach(function(b) { b.classList.remove('active'); });
             this.classList.add('active');
             selectedAmount = parseFloat(this.dataset.amount);
             amountInput.value = selectedAmount;
@@ -236,57 +239,56 @@ echo generateHeader($seoTitle, $seoDesc);
     amountInput.addEventListener('input', function() {
         selectedAmount = parseFloat(this.value) || 0;
         preview.textContent = Math.round(selectedAmount * PTS_RATE).toLocaleString();
-        document.querySelectorAll('.sc-pack-btn').forEach(b => {
+        document.querySelectorAll('.sc-pack-btn').forEach(function(b) {
             b.classList.toggle('active', parseFloat(b.dataset.amount) === selectedAmount);
         });
     });
 
-    document.querySelectorAll('.sc-method-btn').forEach(btn => {
+    document.querySelectorAll('.sc-method-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('.sc-method-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.sc-method-btn').forEach(function(b) { b.classList.remove('active'); });
             this.classList.add('active');
             selectedMethod = this.dataset.method;
         });
     });
 
-    document.getElementById('sc-submit').addEventListener('click', function() {
-        const btn = this;
+    var submitBtn = document.getElementById('sc-submit');
+    if (submitBtn) submitBtn.addEventListener('click', function() {
+        var btn = this;
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
         resultDiv.style.display = 'none';
 
-        const fd = new FormData();
+        var fd = new FormData();
         fd.append('method', selectedMethod);
         fd.append('amount_usd', selectedAmount);
         fd.append('notes', document.getElementById('sc-notes').value);
         fd.append('csrf_token', CSRF);
 
         fetch('/api/support-credits/create_payment.php', { method: 'POST', body: fd })
-            .then(r => r.json())
-            .then(data => {
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
                 if (data.ok) {
                     resultDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>'
                         + 'Payment submitted! <strong>' + data.data.pending_points + ' credits</strong> pending.'
                         + ' Available after: <strong>' + data.data.available_at + '</strong>'
                         + ' (hold: ' + data.data.hold_days + ' business days)</div>';
                     resultDiv.style.display = 'block';
-                    setTimeout(() => location.reload(), 3000);
+                    setTimeout(function() { location.reload(); }, 3000);
                 } else {
                     resultDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i>'
-                        + (data.error?.message || 'Error') + '</div>';
+                        + ((data.error && data.error.message) || 'Error') + '</div>';
                     resultDiv.style.display = 'block';
                 }
             })
-            .catch(() => {
+            .catch(function() {
                 resultDiv.innerHTML = '<div class="alert alert-danger">Network error. Try again.</div>';
                 resultDiv.style.display = 'block';
             })
-            .finally(() => {
+            .finally(function() {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit Support';
             });
     });
 })();
 </script>
-
-<?php echo generateScripts(); ?>

@@ -1,5 +1,5 @@
 <?php
-// KND Store - Auth helpers for Death Roll 1v1 user system
+// KND Store - Unified auth helpers (single user system: dr_user_id)
 
 require_once __DIR__ . '/session.php';
 
@@ -14,6 +14,10 @@ function current_user_id(): ?int {
 function current_username(): ?string {
     return $_SESSION['dr_username'] ?? null;
 }
+
+// Note: config.php (not in git) also defines isLoggedIn() and getCurrentUser().
+// Both must be updated to use $_SESSION['dr_user_id'] instead of $_SESSION['user_id'].
+// All new code should use is_logged_in(), current_user_id(), require_login() from this file.
 
 function auth_login(int $userId, string $username): void {
     session_regenerate_id(true);
