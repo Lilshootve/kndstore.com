@@ -145,6 +145,8 @@ try {
 
     $pdo->commit();
     unset($_SESSION['sc_badge_cache']);
+
+    $state['my_kp_balance'] = get_available_points($pdo, $userId);
     json_success($state);
 } catch (Throwable $e) {
     if (isset($pdo) && $pdo && $pdo->inTransaction()) {

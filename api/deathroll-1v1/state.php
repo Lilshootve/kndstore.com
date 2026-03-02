@@ -49,6 +49,11 @@ try {
     )->execute([$now, $game['id']]);
 
     $state = build_game_state($pdo, $game, $userId);
+
+    if ($game['status'] === 'finished') {
+        $state['my_kp_balance'] = get_available_points($pdo, $userId);
+    }
+
     json_success($state);
 } catch (Throwable $e) {
     error_log('DR1V1_FATAL ' . basename(__FILE__) . ': ' . $e->getMessage());

@@ -10,6 +10,17 @@
             .then(function (r) { return r.json(); });
     }
 
+    function updateNavBadge(val) {
+        var navBadge = document.querySelector('.sc-nav-badge');
+        if (!navBadge) return;
+        if (val > 0) {
+            navBadge.innerHTML = '<i class="fas fa-coins"></i> ' + Number(val).toLocaleString();
+            navBadge.style.display = '';
+        } else {
+            navBadge.style.display = 'none';
+        }
+    }
+
     function get(url) {
         return fetch(url, { credentials: 'same-origin' })
             .then(function (r) { return r.json(); });
@@ -133,6 +144,7 @@
                 code: code
             }).then(function (d) {
                 if (d.ok) {
+                    if (typeof d.data.my_kp_balance !== 'undefined') updateNavBadge(d.data.my_kp_balance);
                     window.location.href = '/death-roll-game.php?code=' + code;
                 } else {
                     var alertEl = document.getElementById('join-alert');
@@ -416,7 +428,10 @@
             if (isRolling) return;
             get('/api/deathroll-1v1/state.php?code=' + GAME_CODE)
                 .then(function (d) {
-                    if (d.ok) renderState(d.data);
+                    if (d.ok) {
+                        if (typeof d.data.my_kp_balance !== 'undefined') updateNavBadge(d.data.my_kp_balance);
+                        renderState(d.data);
+                    }
                 })
                 .catch(function () {});
         }
@@ -780,6 +795,7 @@
                 code: GAME_CODE
             }).then(function (d) {
                 if (d.ok) {
+                    if (typeof d.data.my_kp_balance !== 'undefined') updateNavBadge(d.data.my_kp_balance);
                     var myLastRoll = '';
                     if (d.data.rolls && d.data.rolls.length > 0) {
                         var last = d.data.rolls[d.data.rolls.length - 1];
