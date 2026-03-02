@@ -556,6 +556,11 @@
         }
 
         // ── Rematch flow ─────────────────────────────────────
+        var rematchPopupShown = false;
+        var rematchPopupInstance = null;
+        var rematchAutoDeclineTimer = null;
+        var REMATCH_COUNTDOWN = 10;
+
         function startRematchPolling() {
             if (rematchPolling) return;
             rematchPolling = true;
@@ -572,27 +577,106 @@
                 .catch(function () {});
         }
 
+        function respondRematch(action) {
+            return post('/api/deathroll-1v1/rematch_respond.php', {
+                csrf_token: CSRF,
+                code: GAME_CODE,
+                action: action
+            });
+        }
+
+        function closeRematchPopup() {
+            if (rematchAutoDeclineTimer) { clearInterval(rematchAutoDeclineTimer); rematchAutoDeclineTimer = null; }
+            if (rematchPopupInstance && typeof Swal !== 'undefined') {
+                try { Swal.close(); } catch (e) {}
+            }
+            rematchPopupInstance = null;
+            var offerPanel = document.getElementById('rematch-offer-panel');
+            if (offerPanel) offerPanel.style.display = 'none';
+        }
+
+        function showRematchPopup(opponentName) {
+            if (rematchPopupShown || typeof Swal === 'undefined') return;
+            rematchPopupShown = true;
+
+            var secondsLeft = REMATCH_COUNTDOWN;
+
+            rematchPopupInstance = Swal.fire({
+                title: '<span style="color:#259cae;">&#8635; Rematch Request</span>',
+                html: '<div style="font-size:1rem;color:rgba(255,255,255,0.85);">' +
+                      '<strong>' + escHtml(opponentName) + '</strong> wants a rematch!' +
+                      '</div>' +
+                      '<div id="swal-rematch-cd" style="margin-top:12px;font-family:Orbitron,monospace;font-size:1.6rem;font-weight:900;color:#259cae;">' + secondsLeft + '</div>' +
+                      '<div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:4px;">Auto-decline in <span id="swal-cd-label">' + secondsLeft + '</span>s</div>',
+                confirmButtonText: '<i class="fas fa-check me-1"></i> ACCEPT',
+                cancelButtonText: '<i class="fas fa-times me-1"></i> DECLINE',
+                showCancelButton: true,
+                allowOutsideClick: false,
+                allowEscapeKey: true,
+                background: 'rgba(12,16,30,0.95)',
+                color: '#e0e0e0',
+                backdrop: 'rgba(0,0,0,0.7)',
+                customClass: {
+                    popup: 'dr-swal-popup',
+                    confirmButton: 'dr-swal-accept',
+                    cancelButton: 'dr-swal-decline'
+                }
+            }).then(function (result) {
+                if (rematchAutoDeclineTimer) { clearInterval(rematchAutoDeclineTimer); rematchAutoDeclineTimer = null; }
+                if (result.isConfirmed) {
+                    respondRematch('accept').then(function (d) {
+                        if (d.ok && d.data.new_code) {
+                            window.location.href = d.data.join_url;
+                        }
+                    });
+                } else {
+                    respondRematch('decline');
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            toast: true,
+                            position: 'bottom-end',
+                            icon: 'info',
+                            title: 'Rematch declined',
+                            showConfirmButton: false,
+                            timer: 2500,
+                            background: 'rgba(12,16,30,0.9)',
+                            color: '#e0e0e0'
+                        });
+                    }
+                }
+            });
+
+            rematchAutoDeclineTimer = setInterval(function () {
+                secondsLeft--;
+                var cdEl = document.getElementById('swal-rematch-cd');
+                var cdLabel = document.getElementById('swal-cd-label');
+                if (cdEl) cdEl.textContent = Math.max(0, secondsLeft);
+                if (cdLabel) cdLabel.textContent = Math.max(0, secondsLeft);
+                if (secondsLeft <= 3 && cdEl) cdEl.style.color = '#ff4444';
+                if (secondsLeft <= 0) {
+                    clearInterval(rematchAutoDeclineTimer);
+                    rematchAutoDeclineTimer = null;
+                    if (typeof Swal !== 'undefined') Swal.close();
+                    respondRematch('decline');
+                }
+            }, 1000);
+        }
+
         function handleRematchState(rs) {
             if (!rs.has_offer) return;
 
-            var offerPanel = document.getElementById('rematch-offer-panel');
             var statusEl = document.getElementById('rematch-status');
 
             if (rs.offer_status === 'accepted' && rs.new_code) {
+                closeRematchPopup();
                 window.location.href = '/death-roll-game.php?code=' + rs.new_code;
                 return;
             }
 
             if (rs.offer_status === 'pending') {
                 if (rs.offered_to === MY_USER_ID) {
-                    // I'm the recipient — show accept/decline
-                    offerPanel.style.display = 'block';
-                    offerPanel.style.background = 'rgba(37,156,174,0.05)';
-                    offerPanel.style.border = '2px solid rgba(37,156,174,0.3)';
-                    document.getElementById('rematch-offer-who').textContent =
-                        escHtml(rs.offered_by_username) + ' ' + (TEXTS.rematchRequested || 'wants a rematch!');
+                    showRematchPopup(rs.offered_by_username || 'Opponent');
                 } else if (rs.offered_by === MY_USER_ID) {
-                    // I offered — show waiting status
                     rematchOffered = true;
                     if (btnRematchReq) {
                         btnRematchReq.disabled = true;
@@ -606,17 +690,16 @@
             }
 
             if (rs.offer_status === 'declined') {
+                closeRematchPopup();
                 if (statusEl) {
                     statusEl.innerHTML = '<span class="text-warning"><i class="fas fa-times-circle me-2"></i>' + (TEXTS.rematchDeclined || 'Opponent declined.') + '</span>';
                     statusEl.style.display = 'block';
                 }
                 if (btnRematchReq) {
                     btnRematchReq.disabled = false;
-                    btnRematchReq.innerHTML = '<i class="fas fa-redo me-2"></i>' + (TEXTS.youWin ? 'Rematch' : 'Rematch');
+                    btnRematchReq.innerHTML = '<i class="fas fa-redo me-2"></i>Rematch';
                 }
                 rematchOffered = false;
-                var offerP = document.getElementById('rematch-offer-panel');
-                if (offerP) offerP.style.display = 'none';
             }
         }
 
@@ -646,49 +729,6 @@
                 }).catch(function () {
                     btnRematchReq.disabled = false;
                     btnRematchReq.innerHTML = '<i class="fas fa-redo me-2"></i>Rematch';
-                });
-            });
-        }
-
-        // Accept rematch
-        if (btnRematchAccept) {
-            btnRematchAccept.addEventListener('click', function () {
-                btnRematchAccept.disabled = true;
-                btnRematchDecline.disabled = true;
-                post('/api/deathroll-1v1/rematch_respond.php', {
-                    csrf_token: CSRF,
-                    code: GAME_CODE,
-                    action: 'accept'
-                }).then(function (d) {
-                    if (d.ok && d.data.new_code) {
-                        window.location.href = d.data.join_url;
-                    } else {
-                        alert(d.error ? d.error.message : 'Error');
-                        btnRematchAccept.disabled = false;
-                        btnRematchDecline.disabled = false;
-                    }
-                }).catch(function () {
-                    btnRematchAccept.disabled = false;
-                    btnRematchDecline.disabled = false;
-                });
-            });
-        }
-
-        // Decline rematch
-        if (btnRematchDecline) {
-            btnRematchDecline.addEventListener('click', function () {
-                btnRematchDecline.disabled = true;
-                btnRematchAccept.disabled = true;
-                post('/api/deathroll-1v1/rematch_respond.php', {
-                    csrf_token: CSRF,
-                    code: GAME_CODE,
-                    action: 'decline'
-                }).then(function (d) {
-                    var panel = document.getElementById('rematch-offer-panel');
-                    if (panel) panel.style.display = 'none';
-                }).catch(function () {
-                    btnRematchDecline.disabled = false;
-                    btnRematchAccept.disabled = false;
                 });
             });
         }

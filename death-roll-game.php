@@ -175,6 +175,7 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 </section>
 
 <script src="/assets/js/navigation-extend.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <?php echo generateFooter(); ?>
 
