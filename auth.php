@@ -20,17 +20,21 @@ if (is_logged_in()) {
         if ($evRow && !empty($evRow['email']) && (int) $evRow['email_verified'] === 0) {
             $showVerify = true;
         } else {
-            header('Location: /death-roll-lobby.php');
+            header('Location: /arena');
             exit;
         }
     } else {
-        header('Location: /death-roll-lobby.php');
+        header('Location: /arena');
         exit;
     }
 }
 $showVerify = $showVerify ?? false;
 
-$redirect = htmlspecialchars($_GET['redirect'] ?? '/death-roll-lobby.php', ENT_QUOTES);
+$rawRedirect = $_GET['redirect'] ?? '';
+if ($rawRedirect === '' || !str_starts_with($rawRedirect, '/') || str_contains($rawRedirect, '://') || str_contains($rawRedirect, '\\')) {
+    $rawRedirect = '/arena';
+}
+$redirect = htmlspecialchars($rawRedirect, ENT_QUOTES);
 $csrfToken = csrf_token();
 ?>
 
