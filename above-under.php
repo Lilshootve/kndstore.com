@@ -67,15 +67,29 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 
         <!-- Balance Card -->
         <div class="glass-card-neon p-3 mb-4 text-center">
-          <div class="d-flex justify-content-center align-items-center gap-3">
+          <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
             <div>
               <span class="text-white-50 small"><?php echo t('au.your_balance', 'Your KND Points'); ?></span><br>
               <span id="au-balance" style="font-size:1.8rem; font-weight:900; font-family:'Orbitron',monospace; color:var(--knd-neon-blue, #00d4ff);"><?php echo number_format($balance); ?></span>
               <span class="text-white-50 small">KP</span>
             </div>
-            <div class="text-white-50 small" style="border-left:1px solid rgba(255,255,255,.1); padding-left:16px;">
-              <?php echo t('au.cost', 'Cost'); ?>: <strong>200 KP</strong><br>
-              <?php echo t('au.win_payout', 'Win'); ?>: <strong>340 KP</strong>
+            <div style="border-left:1px solid rgba(255,255,255,.1); padding-left:16px;">
+              <label class="text-white-50 small d-block mb-1"><?php echo t('au.entry_label', 'Entry'); ?></label>
+              <select id="au-entry-select" class="form-select form-select-sm" style="width:auto; display:inline-block; background:#111; color:#fff; border-color:rgba(0,212,255,.3); font-weight:700; min-width:110px;">
+                <option value="10">10 KP</option>
+                <option value="25">25 KP</option>
+                <option value="50">50 KP</option>
+                <option value="100">100 KP</option>
+                <option value="200" selected>200 KP</option>
+                <option value="500">500 KP</option>
+                <option value="1000">1,000 KP</option>
+                <option value="2500">2,500 KP</option>
+                <option value="5000">5,000 KP</option>
+              </select>
+              <div class="mt-1">
+                <span class="text-white-50 small"><?php echo t('au.win_payout', 'Win'); ?>: </span>
+                <strong id="au-payout-preview" style="color:#4ade80;">340 KP</strong>
+              </div>
             </div>
           </div>
         </div>

@@ -1,22 +1,42 @@
-// KND Store - Above/Under game client logic
 (function () {
     'use strict';
 
-    const CSRF   = window.AU_CSRF || '';
-    const TICK_MS = 60;
-    const ROLL_DURATION_MS = 2200;
+    var CSRF   = window.AU_CSRF || '';
+    var TICK_MS = 60;
+    var ROLL_DURATION_MS = 2200;
+    var PAYOUT_RATIO = 1.7;
 
-    const diceWrap   = document.getElementById('au-dice-wrap');
-    const diceNum    = document.getElementById('au-dice-num');
-    const diceStatus = document.getElementById('au-dice-status');
-    const btnUnder   = document.getElementById('btn-under');
-    const btnAbove   = document.getElementById('btn-above');
-    const balanceEl  = document.getElementById('au-balance');
-    const historyEl  = document.getElementById('au-history-body');
-    const resultBanner = document.getElementById('au-result-banner');
+    var diceWrap   = document.getElementById('au-dice-wrap');
+    var diceNum    = document.getElementById('au-dice-num');
+    var diceStatus = document.getElementById('au-dice-status');
+    var btnUnder   = document.getElementById('btn-under');
+    var btnAbove   = document.getElementById('btn-above');
+    var balanceEl  = document.getElementById('au-balance');
+    var historyEl  = document.getElementById('au-history-body');
+    var resultBanner = document.getElementById('au-result-banner');
+    var entrySelect  = document.getElementById('au-entry-select');
+    var payoutPreview = document.getElementById('au-payout-preview');
 
-    let rolling = false;
-    let tickTimer = null;
+    var rolling = false;
+    var tickTimer = null;
+
+    function getEntry() {
+        return parseInt(entrySelect.value, 10) || 200;
+    }
+
+    function getPayout(entry) {
+        return Math.floor(entry * PAYOUT_RATIO);
+    }
+
+    function updatePayoutPreview() {
+        var entry = getEntry();
+        payoutPreview.textContent = getPayout(entry).toLocaleString() + ' KP';
+    }
+
+    if (entrySelect) {
+        entrySelect.addEventListener('change', updatePayoutPreview);
+        updatePayoutPreview();
+    }
 
     function setButtons(enabled) {
         btnUnder.disabled = !enabled;
@@ -26,6 +46,7 @@
     function startRoll() {
         rolling = true;
         setButtons(false);
+        if (entrySelect) entrySelect.disabled = true;
         diceWrap.classList.add('dr-rolling');
         diceWrap.classList.remove('dr-result', 'dr-pop');
         diceNum.classList.remove('dr-critical');
@@ -37,7 +58,7 @@
         }, TICK_MS);
     }
 
-    function stopRoll(value, win, choice, payout, xp) {
+    function stopRoll(value, win, choice, entry, payout, xp) {
         clearInterval(tickTimer);
         tickTimer = null;
 
@@ -58,13 +79,14 @@
         var icon = win ? 'fa-trophy' : 'fa-times-circle';
         var label = choice.toUpperCase();
         var msg = win
-            ? 'You chose <strong>' + label + '</strong> — rolled <strong>' + value + '</strong>. +' + payout + ' KP (+' + xp + ' XP)'
-            : 'You chose <strong>' + label + '</strong> — rolled <strong>' + value + '</strong>. −200 KP (+' + xp + ' XP)';
+            ? 'You chose <strong>' + label + '</strong> — rolled <strong>' + value + '</strong>. +' + payout.toLocaleString() + ' KP (+' + xp + ' XP)'
+            : 'You chose <strong>' + label + '</strong> — rolled <strong>' + value + '</strong>. −' + entry.toLocaleString() + ' KP (+' + xp + ' XP)';
         resultBanner.innerHTML = '<div class="alert ' + bannerClass + ' mb-0"><i class="fas ' + icon + ' me-2"></i>' + msg + '</div>';
         resultBanner.style.display = 'block';
 
         rolling = false;
         setButtons(true);
+        if (entrySelect) entrySelect.disabled = false;
     }
 
     function updateBalance(val) {
@@ -89,7 +111,7 @@
         var winBadge = r.win
             ? '<span class="badge bg-success">WIN</span>'
             : '<span class="badge bg-danger">LOSE</span>';
-        var delta = r.win ? '+' + r.payout : '−' + r.entry;
+        var delta = r.win ? '+' + r.payout.toLocaleString() : '−' + r.entry.toLocaleString();
         tr.innerHTML = '<td>' + r.choice.toUpperCase() + '</td>'
             + '<td style="font-family:Orbitron,monospace;font-weight:700;">' + r.rolled + '</td>'
             + '<td>' + winBadge + '</td>'
@@ -100,10 +122,20 @@
 
     function doRoll(choice) {
         if (rolling) return;
+
+        var entry = getEntry();
+        var currentBalance = parseInt(balanceEl.textContent.replace(/,/g, ''), 10) || 0;
+        if (currentBalance < entry) {
+            resultBanner.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Not enough KP. You need ' + entry.toLocaleString() + ' KP.</div>';
+            resultBanner.style.display = 'block';
+            return;
+        }
+
         startRoll();
 
         var fd = new FormData();
         fd.append('choice', choice);
+        fd.append('entry_kp', entry);
         fd.append('csrf_token', CSRF);
 
         var rollStart = Date.now();
@@ -116,7 +148,7 @@
 
                 if (d.ok) {
                     setTimeout(function () {
-                        stopRoll(d.data.rolled, d.data.win, d.data.choice, d.data.payout, d.data.xp_awarded);
+                        stopRoll(d.data.rolled, d.data.win, d.data.choice, d.data.entry, d.data.payout, d.data.xp_awarded);
                         updateBalance(d.data.points_balance);
                         addHistoryRow({
                             choice: d.data.choice,
@@ -134,6 +166,7 @@
                     diceStatus.textContent = 'Ready';
                     rolling = false;
                     setButtons(true);
+                    if (entrySelect) entrySelect.disabled = false;
                     resultBanner.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>' + (d.error && d.error.message || 'Error') + '</div>';
                     resultBanner.style.display = 'block';
                 }
@@ -145,6 +178,7 @@
                 diceStatus.textContent = 'Ready';
                 rolling = false;
                 setButtons(true);
+                if (entrySelect) entrySelect.disabled = false;
                 resultBanner.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Network error. Try again.</div>';
                 resultBanner.style.display = 'block';
             });

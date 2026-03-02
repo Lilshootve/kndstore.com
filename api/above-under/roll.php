@@ -12,8 +12,9 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/json.php';
 require_once __DIR__ . '/../../includes/support_credits.php';
 
-define('AU_ENTRY_POINTS', 200);
-define('AU_PAYOUT_POINTS', 340);
+define('AU_ENTRY_MIN', 10);
+define('AU_ENTRY_MAX', 5000);
+define('AU_PAYOUT_RATIO', 1.7);
 define('AU_XP_WIN', 10);
 define('AU_XP_LOSE', 2);
 
@@ -43,21 +44,26 @@ try {
         json_error('INVALID_CHOICE', 'Choice must be "under" or "above".');
     }
 
+    $entryKp = isset($_POST['entry_kp']) ? (int) $_POST['entry_kp'] : 200;
+    if ($entryKp < AU_ENTRY_MIN || $entryKp > AU_ENTRY_MAX) {
+        json_error('INVALID_ENTRY', 'Entry must be between ' . AU_ENTRY_MIN . ' and ' . AU_ENTRY_MAX . ' KP.');
+    }
+    $payoutKp = (int) floor($entryKp * AU_PAYOUT_RATIO);
+
     $pdo->beginTransaction();
     try {
         $available = get_available_points($pdo, $userId);
-        if ($available < AU_ENTRY_POINTS) {
+        if ($available < $entryKp) {
             $pdo->rollBack();
-            json_error('INSUFFICIENT_POINTS', 'Not enough KND Points. Need ' . AU_ENTRY_POINTS . ' KP.', 400);
+            json_error('INSUFFICIENT_POINTS', 'Not enough KND Points. Need ' . $entryKp . ' KP.', 400);
         }
 
         $now = gmdate('Y-m-d H:i:s');
 
-        // Debit entry cost
         $pdo->prepare(
             "INSERT INTO points_ledger (user_id, source_type, source_id, entry_type, status, points, created_at)
              VALUES (?, 'adjustment', 0, 'spend', 'spent', ?, ?)"
-        )->execute([$userId, -AU_ENTRY_POINTS, $now]);
+        )->execute([$userId, -$entryKp, $now]);
 
         $rolled = random_int(1, 10);
         $win = ($choice === 'under' && $rolled <= 5) || ($choice === 'above' && $rolled >= 6);
@@ -65,7 +71,7 @@ try {
         $xp = $win ? AU_XP_WIN : AU_XP_LOSE;
 
         if ($win) {
-            $payout = AU_PAYOUT_POINTS;
+            $payout = $payoutKp;
             $expiresAt = gmdate('Y-m-d H:i:s', strtotime('+12 months'));
             $pdo->prepare(
                 "INSERT INTO points_ledger (user_id, source_type, source_id, entry_type, status, points, available_at, expires_at, created_at)
@@ -73,13 +79,11 @@ try {
             )->execute([$userId, $payout, $now, $expiresAt, $now]);
         }
 
-        // Record roll
         $pdo->prepare(
             "INSERT INTO above_under_rolls (user_id, choice, rolled_value, is_win, entry_points, payout_points, xp_awarded, created_at)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-        )->execute([$userId, $choice, $rolled, $win ? 1 : 0, AU_ENTRY_POINTS, $payout, $xp, $now]);
+        )->execute([$userId, $choice, $rolled, $win ? 1 : 0, $entryKp, $payout, $xp, $now]);
 
-        // XP upsert
         $pdo->prepare(
             "INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, ?, ?)
              ON DUPLICATE KEY UPDATE xp = xp + VALUES(xp), updated_at = VALUES(updated_at)"
@@ -94,7 +98,7 @@ try {
             'rolled'         => $rolled,
             'win'            => $win,
             'choice'         => $choice,
-            'entry'          => AU_ENTRY_POINTS,
+            'entry'          => $entryKp,
             'payout'         => $payout,
             'points_balance' => $newBalance,
             'xp_awarded'     => $xp,
