@@ -116,6 +116,7 @@ $navCards = [
     ['title' => 'KND Points', 'desc' => 'Review pending point purchases + redemptions', 'href' => '/admin/support-credits.php', 'icon' => 'fa-coins', 'badge' => $scPendingPayments, 'show' => true],
     ['title' => 'Wallet Inspector', 'desc' => 'Audit and manage user KND Points balances', 'href' => '/admin/knd-points.php', 'icon' => 'fa-wallet', 'badge' => null, 'show' => true],
     ['title' => 'Rewards Catalog', 'desc' => 'Manage rewards catalog and stock', 'href' => '/admin/rewards.php', 'icon' => 'fa-gift', 'badge' => $scRequestedRedemptions, 'show' => true],
+    ['title' => 'Leaderboard', 'desc' => 'Reset season, stats or all XP', 'href' => '/admin/leaderboard.php', 'icon' => 'fa-trophy', 'badge' => null, 'show' => true],
     ['title' => 'Create Test Order', 'desc' => 'Generate a synthetic order for testing', 'href' => '/admin/test_order.php', 'icon' => 'fa-flask', 'badge' => null, 'show' => true],
     ['title' => 'Storage Diagnostics', 'desc' => 'Inspect JSON files, permissions and sizes', 'href' => '/admin/debug_storage.php', 'icon' => 'fa-database', 'badge' => null, 'show' => file_exists(__DIR__ . '/debug_storage.php')],
     ['title' => 'Email Test', 'desc' => 'Send a test confirmation email', 'href' => '/admin/email-test.php', 'icon' => 'fa-envelope', 'badge' => null, 'show' => file_exists(__DIR__ . '/email-test.php')],
