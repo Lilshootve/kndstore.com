@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS `knd_daily_login` (
+  `user_id` BIGINT NOT NULL,
+  `streak` INT NOT NULL DEFAULT 0,
+  `last_claim_date` DATE NULL DEFAULT NULL,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `fk_daily_login_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

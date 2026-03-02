@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../includes/rate_limit.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/deathroll_1v1.php';
 require_once __DIR__ . '/../../includes/support_credits.php';
+require_once __DIR__ . '/../../includes/knd_daily.php';
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -145,6 +146,16 @@ try {
 
     $pdo->commit();
     unset($_SESSION['sc_badge_cache']);
+
+    if ($game['status'] === 'finished') {
+        try {
+            mission_increment($pdo, $userId, 'play_lastroll_3');
+            mission_increment($pdo, (int)$opponent, 'play_lastroll_3');
+            mission_increment($pdo, (int)$game['winner_user_id'], 'win_lastroll_1');
+        } catch (\Throwable $e) {
+            error_log('mission_increment LR error: ' . $e->getMessage());
+        }
+    }
 
     $state['my_kp_balance'] = get_available_points($pdo, $userId);
     json_success($state);

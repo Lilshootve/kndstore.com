@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../includes/rate_limit.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/json.php';
 require_once __DIR__ . '/../../includes/support_credits.php';
+require_once __DIR__ . '/../../includes/knd_daily.php';
 
 define('AU_ENTRY_MIN', 10);
 define('AU_ENTRY_MAX', 5000);
@@ -92,6 +93,13 @@ try {
         $pdo->commit();
 
         unset($_SESSION['sc_badge_cache']);
+
+        try {
+            mission_increment($pdo, $userId, 'play_insight_5');
+        } catch (\Throwable $e) {
+            error_log('mission_increment AU error: ' . $e->getMessage());
+        }
+
         $newBalance = get_available_points($pdo, $userId);
 
         json_success([

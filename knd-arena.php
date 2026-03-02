@@ -6,8 +6,12 @@ header('Expires: 0');
 require_once __DIR__ . '/includes/session.php';
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/csrf.php';
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
+
+$isLoggedIn = !empty($_SESSION['dr_user_id']);
+$csrfToken = $isLoggedIn ? csrf_token() : '';
 
 $seoTitle = 'KND Arena | KND Store';
 $seoDesc  = 'KND Arena — next-gen death roll duels, promo drops, and seasonal badges. Play KND LastRoll 1v1, KND Insight, and more.';
@@ -106,6 +110,51 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 
     </div>
 
+    <?php if ($isLoggedIn): ?>
+    <!-- Daily Rewards & Missions -->
+    <div class="row g-4 mb-5">
+
+      <!-- Daily Streak -->
+      <div class="col-12 col-lg-5">
+        <div class="glass-card-neon p-4 h-100">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h3 class="mb-0" style="font-size:1.15rem;"><i class="fas fa-calendar-check me-2" style="color:var(--knd-neon-blue,#00d4ff);"></i>Daily Streak</h3>
+            <span id="daily-streak-badge" class="badge" style="background:rgba(0,212,255,.15); color:#00d4ff; border:1px solid rgba(0,212,255,.3); font-size:.8rem;">Day —/7</span>
+          </div>
+
+          <div id="daily-dots" class="d-flex justify-content-between mb-3" style="gap:4px;">
+            <?php for ($d = 1; $d <= 7; $d++): ?>
+            <div class="text-center flex-fill">
+              <div class="daily-dot" id="daily-dot-<?php echo $d; ?>" style="width:32px; height:32px; border-radius:50%; margin:0 auto 4px; display:flex; align-items:center; justify-content:center; font-size:.7rem; font-weight:700; border:2px solid rgba(255,255,255,.15); color:rgba(255,255,255,.4); background:rgba(255,255,255,.03);">
+                <?php echo $d; ?>
+              </div>
+              <div class="text-white-50" style="font-size:.6rem;" id="daily-kp-<?php echo $d; ?>">—</div>
+            </div>
+            <?php endfor; ?>
+          </div>
+
+          <div class="text-center">
+            <button id="daily-claim-btn" class="btn btn-neon-primary px-4" disabled>
+              <i class="fas fa-gift me-2"></i><span id="daily-claim-text">Loading…</span>
+            </button>
+            <div id="daily-msg" class="mt-2 small" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Missions -->
+      <div class="col-12 col-lg-7">
+        <div class="glass-card-neon p-4 h-100">
+          <h3 class="mb-3" style="font-size:1.15rem;"><i class="fas fa-tasks me-2" style="color:var(--knd-neon-blue,#00d4ff);"></i>Daily Missions</h3>
+          <div id="missions-list">
+            <div class="text-center text-white-50 py-3"><i class="fas fa-spinner fa-spin me-2"></i>Loading missions…</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <?php endif; ?>
+
     <!-- Disclaimer -->
     <div class="text-center">
       <p class="text-white-50 small mb-1" style="opacity:.6;">
@@ -120,6 +169,13 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 </section>
 
 <script src="/assets/js/navigation-extend.js"></script>
+
+<?php if ($isLoggedIn): ?>
+<script>
+var ARENA_CSRF = <?php echo json_encode($csrfToken); ?>;
+</script>
+<script src="/assets/js/arena-daily.js?v=<?php echo @filemtime(__DIR__ . '/assets/js/arena-daily.js'); ?>"></script>
+<?php endif; ?>
 
 <?php echo generateFooter(); ?>
 <?php echo generateScripts(); ?>
