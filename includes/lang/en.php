@@ -363,6 +363,7 @@ return [
     'sc.expiring' => 'Expiring Soon',
     'sc.expiring_warning' => 'Some credits will expire soon:',
     'sc.support_knd' => 'Support KND',
+    'sc.obtain_credits' => 'Obtain Credits',
     'sc.select_amount' => 'Select Amount (USD)',
     'sc.credits_label' => 'credits',
     'sc.payment_method' => 'Payment Method',

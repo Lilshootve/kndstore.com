@@ -90,7 +90,7 @@ echo generateHeader($seoTitle, $seoDesc);
         <!-- Support KND -->
         <div class="col-lg-7">
             <div class="glass-card-neon p-4">
-                <h3 class="mb-3"><i class="fas fa-heart me-2" style="color: #e74c3c;"></i><?php echo t('sc.support_knd', 'Support KND'); ?></h3>
+                <h3 class="mb-3"><i class="fas fa-microchip me-2" style="color: var(--knd-neon-blue);"></i><?php echo t('sc.obtain_credits', 'Obtain Credits'); ?></h3>
 
                 <div class="mb-3">
                     <label class="form-label text-white-50"><?php echo t('sc.select_amount', 'Select Amount (USD)'); ?></label>

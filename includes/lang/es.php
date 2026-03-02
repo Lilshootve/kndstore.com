@@ -284,6 +284,7 @@ return [
     'sc.expiring' => 'Por expirar',
     'sc.expiring_warning' => 'Algunos créditos expirarán pronto:',
     'sc.support_knd' => 'Apoyar a KND',
+    'sc.obtain_credits' => 'Obtener créditos',
     'sc.select_amount' => 'Seleccionar monto (USD)',
     'sc.credits_label' => 'créditos',
     'sc.payment_method' => 'Método de pago',
