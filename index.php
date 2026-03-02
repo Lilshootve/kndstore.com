@@ -88,6 +88,7 @@ setCacheHeaders('html');
                             <ul class="lastroll-bullets mb-4">
                                 <li><i class="fas fa-dice-d20 me-2"></i><?php echo t('home.games.bullet1', 'KND LastRoll — 1v1 Death Roll with real-time rooms'); ?></li>
                                 <li><i class="fas fa-eye me-2"></i><?php echo t('home.games.bullet2', 'KND Insight — predict the number, win KND Points'); ?></li>
+                                <li><i class="fas fa-box-open me-2"></i><?php echo t('home.games.bullet_drop', 'KND Drop Chamber — open capsules, discover seasonal loot'); ?></li>
                                 <li><i class="fas fa-trophy me-2"></i><?php echo t('home.games.bullet3', 'Earn XP, climb the leaderboard, collect seasonal badges'); ?></li>
                             </ul>
                             <div class="d-flex flex-wrap gap-3">

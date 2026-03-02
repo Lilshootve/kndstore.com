@@ -78,6 +78,21 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
         </div>
       </div>
 
+      <!-- KND Drop Chamber -->
+      <div class="col-12 col-sm-6 col-lg-4">
+        <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card">
+          <div class="d-flex align-items-start justify-content-between mb-3">
+            <div class="arena-card-icon"><i class="fas fa-box-open"></i></div>
+            <span class="badge bg-success px-2 py-1" style="font-size:.7rem;"><?php echo t('arena.live', 'LIVE'); ?></span>
+          </div>
+          <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('arena.card_drop', 'KND Drop Chamber'); ?></h3>
+          <p class="text-white-50 small flex-grow-1"><?php echo t('arena.card_drop_desc', 'Open capsules and discover rewards. Seasonal loot pools with Common, Rare, Epic, and Legendary drops.'); ?></p>
+          <a href="/knd-drop.php" class="btn btn-neon-primary w-100 mt-auto">
+            <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>
+          </a>
+        </div>
+      </div>
+
       <!-- Leaderboard -->
       <div class="col-12 col-sm-6 col-lg-4">
         <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card">

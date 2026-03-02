@@ -108,6 +108,9 @@
     # KND Arena friendly URL
     RewriteRule ^arena/?$ /knd-arena.php [L]
 
+    # KND Drop Chamber friendly URL
+    RewriteRule ^drop/?$ /knd-drop.php [L]
+
     # KND LastRoll friendly URLs
     RewriteRule ^lastroll/?$ /death-roll-lobby.php [L]
     RewriteRule ^lastroll/game/?$ /death-roll-game.php [QSA,L]

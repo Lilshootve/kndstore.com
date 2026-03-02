@@ -15,4 +15,4 @@ INSERT IGNORE INTO `knd_daily_missions` (`code`, `title`, `description`, `target
 ('play_lastroll_3',   'LastRoll Warrior',    'Play 3 LastRoll matches',     3, 40, 5, 1),
 ('win_lastroll_1',    'LastRoll Champion',   'Win 1 LastRoll match',        1, 25, 5, 1),
 ('play_insight_5',    'Insight Addict',      'Play 5 KND Insight rounds',   5, 30, 5, 1),
-('make_drop_1',       'Drop Hunter',         'Make 1 Drop',                 1, 20, 5, 0);
+('make_drop_1',       'Drop Hunter',         'Make 1 Drop',                 1, 20, 5, 1);
