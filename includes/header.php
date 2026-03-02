@@ -73,7 +73,8 @@ function generateNavigation() {
     // My Account dropdown
     $drLoggedIn = !empty($_SESSION['dr_user_id']);
     $drUsername = $drLoggedIn ? htmlspecialchars($_SESSION['dr_username'] ?? '') : '';
-    $accountActive = in_array($current_page, ['order.php', 'track-order.php', 'auth.php']);
+    $scActive = in_array($current_page, ['support-credits.php', 'rewards.php']);
+    $accountActive = in_array($current_page, ['order.php', 'track-order.php', 'auth.php', 'support-credits.php', 'rewards.php']);
     $nav .= '                <li class="nav-item knd-dropdown">' . "\n";
     $nav .= '                    <a id="ordersDropdownToggle" class="nav-link knd-dropdown-toggle' . ($accountActive ? ' active' : '') . '" href="javascript:void(0)" role="button" aria-expanded="false">' . "\n";
     $nav .= '                        <i class="fas fa-user-circle me-1"></i>' . "\n";
@@ -91,6 +92,11 @@ function generateNavigation() {
     $nav .= '                        <a class="knd-dropdown-item' . ($current_page == 'track-order.php' ? ' active' : '') . '" href="/track-order.php"><i class="fas fa-magnifying-glass me-2"></i>' . t('nav.track_order', 'Track Order') . '</a>' . "\n";
     $nav .= '                        <a class="knd-dropdown-item" href="/contact.php"><i class="fas fa-headset me-2"></i>' . t('nav.support', 'Support') . '</a>' . "\n";
     $nav .= '                        <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 6px 0;"></div>' . "\n";
+    if ($drLoggedIn) {
+        $nav .= '                        <a class="knd-dropdown-item' . ($current_page == 'support-credits.php' ? ' active' : '') . '" href="/support-credits.php"><i class="fas fa-coins me-2"></i>' . t('nav.credits', 'Credits') . '</a>' . "\n";
+        $nav .= '                        <a class="knd-dropdown-item' . ($current_page == 'rewards.php' ? ' active' : '') . '" href="/rewards.php"><i class="fas fa-gift me-2"></i>' . t('nav.rewards', 'Rewards') . '</a>' . "\n";
+        $nav .= '                        <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 6px 0;"></div>' . "\n";
+    }
     if ($drLoggedIn) {
         $nav .= '                        <a class="knd-dropdown-item" href="/logout.php"><i class="fas fa-sign-out-alt me-2"></i>' . t('nav.logout', 'Logout') . '</a>' . "\n";
     } else {

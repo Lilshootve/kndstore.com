@@ -108,6 +108,10 @@
     # KND LastRoll friendly URLs
     RewriteRule ^lastroll/?$ /death-roll-lobby.php [L]
     RewriteRule ^lastroll/game/?$ /death-roll-game.php [QSA,L]
+
+    # Support Credits friendly URLs
+    RewriteRule ^credits/?$ /support-credits.php [L]
+    RewriteRule ^rewards/?$ /rewards.php [L]
 </IfModule>
 
 # Configuración de compresión adicional

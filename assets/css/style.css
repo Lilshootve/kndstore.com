@@ -6361,3 +6361,26 @@ body {
 @media (max-width: 768px) {
     .lastroll-dice-hero svg { width: 100px; height: 100px; }
 }
+
+/* ── KND Support Credits & Rewards ── */
+.sc-pack-btn.active {
+    background: var(--knd-neon-blue) !important;
+    border-color: var(--knd-neon-blue) !important;
+    color: #fff !important;
+    box-shadow: 0 0 12px rgba(37, 156, 174, 0.3);
+}
+
+.sc-method-btn.active {
+    background: rgba(37, 156, 174, 0.15) !important;
+    border-color: var(--knd-neon-blue) !important;
+    color: var(--knd-neon-blue) !important;
+}
+
+.sc-reward-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.sc-reward-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(37, 156, 174, 0.15);
+}
