@@ -175,6 +175,7 @@ function check_turn_timeout(PDO $pdo, array $game): array {
 
             xp_add($pdo, $opponent, 20, 'lastroll_win', 'lastroll_game', (int)$game['id']);
             xp_add($pdo, $turnUserId, 5, 'lastroll_lose', 'lastroll_game', (int)$game['id']);
+            unset($_SESSION['xp_badge_cache']);
 
             $game['payout_at'] = $now;
         }

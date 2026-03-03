@@ -91,7 +91,7 @@ try {
 
         $pdo->commit();
 
-        unset($_SESSION['sc_badge_cache']);
+        unset($_SESSION['sc_badge_cache'], $_SESSION['xp_badge_cache']);
 
         try {
             mission_increment($pdo, $userId, 'play_insight_5');

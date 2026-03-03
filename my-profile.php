@@ -84,6 +84,24 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
         </div>
       </div>
 
+      <!-- Your Rank -->
+      <div class="glass-card-neon p-4 mb-4">
+        <h5 class="mb-3" style="font-size:1rem;"><i class="fas fa-trophy me-2" style="color:#00d4ff;"></i><?php echo t('profile.rank', 'Your Rank'); ?></h5>
+        <div class="row g-3 align-items-center">
+          <div class="col-6 col-md-3">
+            <span class="text-white-50 small"><?php echo t('profile.rank_season', 'Season Rank'); ?></span>
+            <div class="fw-bold">#<?php echo !empty($data['season']) ? ($data['season']['rank'] ?? '—') : '—'; ?></div>
+          </div>
+          <div class="col-6 col-md-3">
+            <span class="text-white-50 small"><?php echo t('profile.rank_alltime', 'All-time Rank'); ?></span>
+            <div class="fw-bold">#<?php echo $data['all_time_rank'] ?? '—'; ?></div>
+          </div>
+          <div class="col-12 col-md-6 text-md-end">
+            <a href="/leaderboard.php" class="btn btn-sm btn-neon-primary"><i class="fas fa-external-link-alt me-1"></i><?php echo t('profile.view_leaderboard', 'View Leaderboard'); ?></a>
+          </div>
+        </div>
+      </div>
+
       <!-- Stats Cards -->
       <div class="row g-4 mb-4">
         <!-- LastRoll -->

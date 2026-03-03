@@ -73,8 +73,9 @@ function generateNavigation() {
     $scActive = in_array($current_page, ['support-credits.php', 'rewards.php']);
     $accountActive = in_array($current_page, ['order.php', 'track-order.php', 'auth.php', 'support-credits.php', 'rewards.php', 'my-profile.php']);
 
-    // Credits badge (cached 60s)
+    // Credits badge (cached 60s) + Level badge (cached 60s)
     $creditsBadgeHtml = '';
+    $levelBadgeHtml = '';
     if ($drLoggedIn) {
         $scCacheTTL = 60;
         $scCache = $_SESSION['sc_badge_cache'] ?? null;
@@ -103,6 +104,27 @@ function generateNavigation() {
         $creditsBadgeHtml = '<a href="/credits" class="sc-nav-badge"' . $badgeStyle . ' title="' . htmlspecialchars(t('nav.credits_badge_tooltip', 'Available KND Points')) . '">'
             . '<i class="fas fa-coins"></i> ' . ($scAvailable > 0 ? number_format($scAvailable) : '0')
             . '</a>';
+
+        // Level badge (cached 60s via get_xp_badge_data)
+        try {
+            $profilePath = __DIR__ . '/knd_profile.php';
+            if (file_exists($profilePath)) {
+                require_once $profilePath;
+                $xpPdo = getDBConnection();
+                if ($xpPdo) {
+                    $xb = get_xp_badge_data($xpPdo, (int) $_SESSION['dr_user_id']);
+                    $tip = t('nav.level', 'Level') . ': ' . $xb['level'] . '/30 · XP: ' . number_format($xb['xp']);
+                    if ($xb['is_max']) {
+                        $tip .= ' · ' . t('profile.max_level', 'MAX LEVEL');
+                    } else {
+                        $tip .= ' · ' . t('profile.next', 'XP to next level') . ': ' . number_format($xb['next_in']) . ' · ' . t('nav.xp_progress', 'Progress') . ': ' . $xb['pct'] . '%';
+                    }
+                    $levelBadgeHtml = '<a href="/my-profile.php" class="lvl-badge" title="' . htmlspecialchars($tip) . '">Lv ' . $xb['level'] . '</a>';
+                }
+            }
+        } catch (\Throwable $e) {
+            $levelBadgeHtml = '';
+        }
     }
 
     $nav .= '                <li class="nav-item knd-dropdown">' . "\n";
@@ -114,6 +136,9 @@ function generateNavigation() {
         $nav .= '                        ' . t('nav.my_account', 'My Account') . "\n";
     }
     $nav .= '                        <span id="order-count" class="badge rounded-pill bg-primary ms-1" style="display:none; min-width: 20px; justify-content: center; align-items: center;"></span>' . "\n";
+    if ($levelBadgeHtml) {
+        $nav .= '                        ' . $levelBadgeHtml . "\n";
+    }
     if ($creditsBadgeHtml) {
         $nav .= '                        ' . $creditsBadgeHtml . "\n";
     }

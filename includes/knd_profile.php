@@ -7,6 +7,50 @@ require_once __DIR__ . '/knd_xp.php';
 define('XP_MAX_LEVEL', 30);
 
 /**
+ * Get XP badge data for navbar (level, xp, next_in, pct). Uses $_SESSION['xp_badge_cache'] for 60s.
+ */
+function get_xp_badge_data(PDO $pdo, int $userId): array {
+    $ttl = 60;
+    $cache = $_SESSION['xp_badge_cache'] ?? null;
+    if ($cache && isset($cache['cached_at']) && (time() - $cache['cached_at']) < $ttl) {
+        return $cache;
+    }
+
+    $xp = 0;
+    $level = 1;
+    $stmt = $pdo->prepare('SELECT xp, level FROM knd_user_xp WHERE user_id = ? LIMIT 1');
+    $stmt->execute([$userId]);
+    $ux = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($ux) {
+        $xp = (int) $ux['xp'];
+        $level = min(XP_MAX_LEVEL, max(1, (int) $ux['level']));
+    } else {
+        $stmt = $pdo->prepare('SELECT xp FROM user_xp WHERE user_id = ? LIMIT 1');
+        $stmt->execute([$userId]);
+        $ux = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($ux) {
+            $xp = (int) $ux['xp'];
+            $level = xp_calc_level($xp);
+        }
+    }
+
+    $progress = profile_xp_progress($xp, $level);
+    $pct = (int) round($progress['progressPct'] * 100);
+    $nextIn = $progress['isMaxLevel'] ? 0 : $progress['xpToNext'];
+
+    $data = [
+        'level'     => $level,
+        'xp'        => $xp,
+        'next_in'   => $nextIn,
+        'pct'       => $pct,
+        'is_max'    => $progress['isMaxLevel'],
+        'cached_at' => time(),
+    ];
+    $_SESSION['xp_badge_cache'] = $data;
+    return $data;
+}
+
+/**
  * Compute XP progress toward next level.
  * Curve: required_xp_to_reach_level(L) = 100 * L^2
  */
@@ -145,6 +189,22 @@ function profile_get_data(PDO $pdo, int $userId): array {
         }
     } catch (\Throwable $e) { /* ignore */ }
 
+    // All-time rank
+    $allTimeRank = null;
+    try {
+        if ($xp > 0) {
+            $stmt = $pdo->prepare("SELECT 1 + COUNT(*) AS r FROM knd_user_xp WHERE xp > ?");
+            $stmt->execute([$xp]);
+            $allTimeRank = (int) $stmt->fetchColumn();
+        }
+    } catch (\Throwable $e) {
+        try {
+            $stmt = $pdo->prepare("SELECT 1 + COUNT(*) AS r FROM user_xp WHERE xp > ?");
+            $stmt->execute([$xp]);
+            $allTimeRank = (int) $stmt->fetchColumn();
+        } catch (\Throwable $e2) { /* ignore */ }
+    }
+
     return [
         'username'    => $username,
         'xp'          => $xp,
@@ -153,11 +213,12 @@ function profile_get_data(PDO $pdo, int $userId): array {
         'lastroll'    => $lastroll,
         'above_under' => $aboveUnder,
         'drops'       => $drops,
-        'season'      => $season ? [
+        'season'       => $season ? [
             'name'     => $season['name'],
             'ends_at'  => $season['ends_at'],
             'xp_earned'=> $seasonXp,
             'rank'     => $seasonRank,
         ] : null,
+        'all_time_rank'=> $allTimeRank,
     ];
 }

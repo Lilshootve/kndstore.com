@@ -361,6 +361,8 @@ return [
 
     // Nav
     'nav.profile' => 'Mi Perfil',
+    'nav.level' => 'Nivel',
+    'nav.xp_progress' => 'Progreso',
     'nav.credits' => 'Points',
     'nav.rewards' => 'Recompensas',
     'nav.credits_badge_tooltip' => 'KND Points disponibles',
@@ -420,6 +422,11 @@ return [
     'profile.seasonal' => 'Resumen de Temporada',
     'profile.season_ends' => 'Termina',
     'profile.season_xp' => 'XP esta temporada',
+    'profile.rank' => 'Tu Rango',
+    'profile.rank_season' => 'Rango Temporada',
+    'profile.rank_alltime' => 'Rango Total',
+    'profile.view_leaderboard' => 'Ver Leaderboard',
+    'profile.max_level' => 'NIVEL MÁX',
     'profile.season_rank' => 'Rango',
     'profile.inventory' => 'Inventario',
     'profile.badges' => 'Badges',

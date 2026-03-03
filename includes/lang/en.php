@@ -440,6 +440,8 @@ return [
 
     // Nav
     'nav.profile' => 'My Profile',
+    'nav.level' => 'Level',
+    'nav.xp_progress' => 'Progress',
     'nav.credits' => 'Points',
     'nav.rewards' => 'Rewards',
     'nav.credits_badge_tooltip' => 'Available KND Points',
@@ -499,6 +501,11 @@ return [
     'profile.seasonal' => 'Seasonal Snapshot',
     'profile.season_ends' => 'Ends',
     'profile.season_xp' => 'XP this season',
+    'profile.rank' => 'Your Rank',
+    'profile.rank_season' => 'Season Rank',
+    'profile.rank_alltime' => 'All-time Rank',
+    'profile.view_leaderboard' => 'View Leaderboard',
+    'profile.max_level' => 'MAX LEVEL',
     'profile.season_rank' => 'Rank',
     'profile.inventory' => 'Inventory',
     'profile.badges' => 'Badges',
