@@ -118,7 +118,7 @@ function generateNavigation() {
                     } else {
                         $tip .= ' · ' . t('profile.next', 'XP to next level') . ': ' . number_format($xb['next_in']) . ' · ' . t('nav.xp_progress', 'Progress') . ': ' . $xb['pct'] . '%';
                     }
-                    $levelBadgeHtml = '<a href="/my-profile.php" class="lvl-badge" title="' . htmlspecialchars($tip) . '">Lv ' . $xb['level'] . '</a>';
+                    $levelBadgeHtml = '<a href="/my-profile.php" class="lvl-badge" data-level="' . (int)$xb['level'] . '" title="' . htmlspecialchars($tip) . '">Lvl ' . $xb['level'] . '</a>';
                 }
             }
         } catch (\Throwable $e) {

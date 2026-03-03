@@ -1,6 +1,5 @@
 /**
- * KND Arena - XP gain floating pop (+N XP)
- * Anchors to Lv badge or navbar
+ * KND Arena - XP gain floating pop (+N XP) + Level badge update
  */
 (function () {
     'use strict';
@@ -12,5 +11,19 @@
         el.setAttribute('aria-live', 'polite');
         document.body.appendChild(el);
         setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 1600);
+    };
+
+    window.updateNavLevelBadge = function (level) {
+        if (!level || level < 1) return;
+        var badge = document.querySelector('.lvl-badge');
+        if (!badge) return;
+        var current = parseInt(badge.getAttribute('data-level'), 10);
+        if (current === level) return;
+        badge.setAttribute('data-level', level);
+        badge.textContent = 'Lvl ' + level;
+        badge.classList.remove('lvl-badge-flash');
+        badge.offsetHeight;
+        badge.classList.add('lvl-badge-flash');
+        setTimeout(function () { badge.classList.remove('lvl-badge-flash'); }, 600);
     };
 })();

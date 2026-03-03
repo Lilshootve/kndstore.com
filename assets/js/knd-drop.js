@@ -119,12 +119,17 @@
                             setTimeout(function () { showXpGain(dd.xp_delta); }, remaining + 100);
                         }
                         if (dd.level_up && dd.old_level != null && dd.new_level != null) {
+                            if (typeof updateNavLevelBadge === 'function') {
+                                setTimeout(function () { updateNavLevelBadge(dd.new_level); }, remaining + 400);
+                            }
                             if (typeof showLevelUp === 'function') {
                                 setTimeout(function () { showLevelUp(dd.old_level, dd.new_level); }, 1200);
                             }
                             if (typeof kndToast === 'function') {
                                 setTimeout(function () { kndToast('success', 'Level Up: ' + dd.old_level + ' → ' + dd.new_level); }, 1300);
                             }
+                        } else if (dd.level && typeof updateNavLevelBadge === 'function') {
+                            setTimeout(function () { updateNavLevelBadge(dd.level); }, remaining + 300);
                         }
                         var rarity = dd.rarity;
                         capsuleEl.classList.add('drop-rarity-' + rarity);

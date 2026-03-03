@@ -154,12 +154,17 @@
                         setTimeout(function () { showXpGain(dx.xp_delta); }, remaining + 150);
                     }
                     if (dx.level_up && dx.old_level != null && dx.new_level != null) {
+                        if (typeof updateNavLevelBadge === 'function') {
+                            setTimeout(function () { updateNavLevelBadge(dx.new_level); }, remaining + 200);
+                        }
                         if (typeof showLevelUp === 'function') {
                             setTimeout(function () { showLevelUp(dx.old_level, dx.new_level); }, remaining + 400);
                         }
                         if (typeof kndToast === 'function') {
                             setTimeout(function () { kndToast('success', 'Level Up: ' + dx.old_level + ' → ' + dx.new_level); }, remaining + 500);
                         }
+                    } else if (dx.level && typeof updateNavLevelBadge === 'function') {
+                        setTimeout(function () { updateNavLevelBadge(dx.level); }, remaining + 200);
                     }
                     setTimeout(function () {
                         stopRoll(dx.rolled, dx.win, dx.choice, dx.entry, dx.payout, dx.xp_awarded);

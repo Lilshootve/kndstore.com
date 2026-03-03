@@ -99,12 +99,17 @@
                             setTimeout(function () { showXpGain(dd.xp_delta); }, 200);
                         }
                         if (dd.level_up && dd.old_level != null && dd.new_level != null) {
+                            if (typeof updateNavLevelBadge === 'function') {
+                                setTimeout(function () { updateNavLevelBadge(dd.new_level); }, 300);
+                            }
                             if (typeof showLevelUp === 'function') {
                                 setTimeout(function () { showLevelUp(dd.old_level, dd.new_level); }, 400);
                             }
                             if (typeof kndToast === 'function') {
                                 setTimeout(function () { kndToast('success', 'Level Up: ' + dd.old_level + ' → ' + dd.new_level); }, 500);
                             }
+                        } else if (dd.level && typeof updateNavLevelBadge === 'function') {
+                            setTimeout(function () { updateNavLevelBadge(dd.level); }, 200);
                         }
                         var msg = '+' + dd.reward_kp + ' KP';
                         if (dd.bonus_xp > 0) msg += ' + ' + dd.bonus_xp + ' XP';
@@ -190,12 +195,17 @@
                                 setTimeout(function () { showXpGain(dd.xp_delta); }, 200);
                             }
                             if (dd.level_up && dd.old_level != null && dd.new_level != null) {
+                                if (typeof updateNavLevelBadge === 'function') {
+                                    setTimeout(function () { updateNavLevelBadge(dd.new_level); }, 300);
+                                }
                                 if (typeof showLevelUp === 'function') {
                                     setTimeout(function () { showLevelUp(dd.old_level, dd.new_level); }, 400);
                                 }
                                 if (typeof kndToast === 'function') {
                                     setTimeout(function () { kndToast('success', 'Level Up: ' + dd.old_level + ' → ' + dd.new_level); }, 500);
                                 }
+                            } else if (dd.level && typeof updateNavLevelBadge === 'function') {
+                                setTimeout(function () { updateNavLevelBadge(dd.level); }, 200);
                             }
                             updateNavBadge(dd.balance);
                             loadMissions();
