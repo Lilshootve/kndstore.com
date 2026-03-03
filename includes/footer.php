@@ -38,6 +38,7 @@ function generateFooter() {
     $footer .= '                                <li class="mb-3"><a href="/faq.php" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.faq') . '</a></li>' . "\n";
     $footer .= '                                <li class="mb-3"><a href="/contact.php" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.contact') . '</a></li>' . "\n";
     $footer .= '                                <li class="mb-3"><a href="/privacy.php" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.privacy') . '</a></li>' . "\n";
+    $footer .= '                                <li class="mb-3"><a href="/game-fairness" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.game_fairness', 'Game Fairness') . '</a></li>' . "\n";
     $footer .= '                                <li class="mb-3"><a href="/privacy.php#cookies-policy" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.cookies') . '</a></li>' . "\n";
     $footer .= '                                <li class="mb-3"><a href="/track-order.php" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.track_order') . '</a></li>' . "\n";
     $footer .= '                                <li class="mb-3"><a href="#" class="text-decoration-none knd-cookie-settings-link" style="opacity: 0.8;">' . t('footer.navigation.cookie_settings') . '</a></li>' . "\n";
@@ -194,9 +195,7 @@ function generateScripts() {
     // Scroll suave por bloques
     $scripts .= '<script src="assets/js/scroll-smooth.js" defer></script>' . "\n";
 
-    // Feedback visual global: Toast, XP pop, Confetti (Legendary)
-    $scripts .= '<script src="assets/js/knd-toast.js" defer></script>' . "\n";
-    $scripts .= '<script src="assets/js/knd-xp-fx.js" defer></script>' . "\n";
+    // Confetti (Legendary) - toast/xp-fx/level-up loaded in header for early availability
     $scripts .= '<script src="assets/js/knd-confetti.js" defer></script>' . "\n";
     
     // Configuración de partículas para el footer
@@ -358,7 +357,6 @@ function generateScripts() {
     $scripts .= '  </div>' . "\n";
     $scripts .= '</div>' . "\n";
     $scripts .= '<script src="/assets/js/support-chat.js" defer></script>' . "\n";
-    $scripts .= '<script src="/assets/js/level-up.js" defer></script>' . "\n";
 
     
     $scripts .= '</body>' . "\n";

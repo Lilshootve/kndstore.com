@@ -92,6 +92,7 @@ return [
     'footer.navigation.faq' => 'Preguntas Frecuentes',
     'footer.navigation.contact' => 'Contacto',
     'footer.navigation.privacy' => 'Privacidad',
+    'footer.navigation.game_fairness' => 'Juego Justo',
     'footer.navigation.cookies' => 'Cookies',
     'footer.navigation.cookie_settings' => 'Configuración de Cookies',
     'footer.contact.title' => 'Contacto',

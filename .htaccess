@@ -118,6 +118,9 @@
     # Support Credits friendly URLs
     RewriteRule ^credits/?$ /support-credits.php [L]
     RewriteRule ^rewards/?$ /rewards.php [L]
+
+    # Game Fairness
+    RewriteRule ^game-fairness/?$ /game-fairness.php [L]
 </IfModule>
 
 # Configuración de compresión adicional

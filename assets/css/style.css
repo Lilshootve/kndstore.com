@@ -6511,6 +6511,7 @@ body {
 }
 .lvl-badge-flash {
     animation: lvl-badge-pulse 0.6s ease;
+    transition: none;
 }
 @keyframes lvl-badge-pulse {
     0% { transform: scale(1); box-shadow: 0 0 12px rgba(167, 139, 250, 0.3); }
@@ -6652,6 +6653,17 @@ body {
     border: 1px solid rgba(0, 212, 255, .25);
     font-size: 1.2rem;
     color: var(--cyan, #00d4ff);
+}
+.arena-fair-badge {
+    background: rgba(74, 222, 128, .12);
+    border: 1px solid rgba(74, 222, 128, .4);
+    color: rgba(74, 222, 128, .95);
+    transition: opacity .2s, border-color .2s;
+}
+.arena-fair-badge:hover {
+    opacity: 1;
+    border-color: rgba(74, 222, 128, .6);
+    color: #4ade80;
 }
 
 /* ── Above/Under Buttons ── */

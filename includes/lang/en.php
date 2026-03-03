@@ -108,6 +108,7 @@ return [
     'footer.navigation.faq' => 'FAQ',
     'footer.navigation.contact' => 'Contact',
     'footer.navigation.privacy' => 'Privacy',
+    'footer.navigation.game_fairness' => 'Game Fairness',
     'footer.navigation.cookies' => 'Cookies',
     'footer.navigation.cookie_settings' => 'Cookie Settings',
     'footer.navigation.track_order' => 'Track Order',

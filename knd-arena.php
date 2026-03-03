@@ -34,9 +34,14 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 
     <!-- Hero -->
     <div class="text-center mb-5">
-      <span class="badge bg-warning text-dark fw-bold px-3 py-2 mb-3" style="font-size:.85rem; letter-spacing:.05em;">
-        <i class="fas fa-flask me-1"></i>BETA
-      </span>
+      <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+        <span class="badge bg-warning text-dark fw-bold px-3 py-2" style="font-size:.85rem; letter-spacing:.05em;">
+          <i class="fas fa-flask me-1"></i>BETA
+        </span>
+        <a href="/game-fairness" class="badge arena-fair-badge px-3 py-2 text-decoration-none" style="font-size:.75rem; letter-spacing:.04em;">
+          <i class="fas fa-shield-alt me-1"></i>Fair &amp; Transparent System
+        </a>
+      </div>
       <h1 class="glow-text mb-3" style="font-size:2.8rem;">
         <i class="fas fa-gamepad me-2"></i><?php echo t('arena.title', 'KND Arena'); ?>
       </h1>
