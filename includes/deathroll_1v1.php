@@ -1,6 +1,8 @@
 <?php
 // KND Store - Death Roll 1v1 helper functions (isolated from single-player)
 
+require_once __DIR__ . '/knd_xp.php';
+
 // Fallback constants if config.php hasn't been updated yet
 if (!defined('LASTROLL_ENTRY_KP'))  define('LASTROLL_ENTRY_KP', 100);
 if (!defined('LASTROLL_PAYOUT_KP')) define('LASTROLL_PAYOUT_KP', 150);
@@ -171,14 +173,8 @@ function check_turn_timeout(PDO $pdo, array $game): array {
             $pdo->prepare('UPDATE deathroll_games_1v1 SET payout_at = ? WHERE id = ?')
                 ->execute([$now, $game['id']]);
 
-            $pdo->prepare(
-                "INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, 20, ?)
-                 ON DUPLICATE KEY UPDATE xp = xp + 20, updated_at = VALUES(updated_at)"
-            )->execute([$opponent, $now]);
-            $pdo->prepare(
-                "INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, 5, ?)
-                 ON DUPLICATE KEY UPDATE xp = xp + 5, updated_at = VALUES(updated_at)"
-            )->execute([$turnUserId, $now]);
+            xp_add($pdo, $opponent, 20, 'lastroll_win', 'lastroll_game', (int)$game['id']);
+            xp_add($pdo, $turnUserId, 5, 'lastroll_lose', 'lastroll_game', (int)$game['id']);
 
             $game['payout_at'] = $now;
         }

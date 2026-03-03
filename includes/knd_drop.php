@@ -118,16 +118,17 @@ function drop_play(PDO $pdo, int $userId): array {
             )->execute([$userId, $rewardKp]);
         }
 
-        // XP (season + all-time)
-        if ($xp > 0) {
-            xp_add($pdo, $userId, $xp, null, null, false);
-        }
-
-        // Record drop
+        // Record drop first to get ID for audit
         $pdo->prepare(
             "INSERT INTO knd_drops (user_id, season_id, entry_kp, rarity, reward_kp, config_id, xp_awarded, created_at)
              VALUES (?, ?, ?, ?, ?, ?, ?, NOW())"
         )->execute([$userId, (int)$season['id'], $entryKp, $rarity, $rewardKp, (int)$config['id'], $xp]);
+        $dropId = (int) $pdo->lastInsertId();
+
+        // XP (season + all-time)
+        if ($xp > 0) {
+            xp_add($pdo, $userId, $xp, 'drop_reward', 'knd_drop', $dropId);
+        }
 
         $pdo->commit();
         unset($_SESSION['sc_badge_cache']);

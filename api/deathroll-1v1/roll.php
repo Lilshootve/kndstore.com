@@ -112,8 +112,8 @@ try {
             )->execute([$now, $game['id']]);
 
             // XP: winner +20, loser +5 (season + all-time)
-            xp_add($pdo, $opponent, 20, null, true);
-            xp_add($pdo, $userId, 5, null, false);
+            xp_add($pdo, $opponent, 20, 'lastroll_win', 'lastroll_game', (int)$game['id']);
+            xp_add($pdo, $userId, 5, 'lastroll_lose', 'lastroll_game', (int)$game['id']);
         }
 
         $game['status'] = 'finished';

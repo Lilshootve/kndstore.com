@@ -6,5 +6,5 @@ SELECT ux.user_id, ux.xp,
 FROM user_xp ux
 ON DUPLICATE KEY UPDATE
   xp = GREATEST(knd_user_xp.xp, VALUES(xp)),
-  level = GREATEST(1, FLOOR(SQRT(GREATEST(knd_user_xp.xp, VALUES(xp))) / 100) + 1),
+  level = LEAST(30, GREATEST(1, FLOOR(SQRT(GREATEST(knd_user_xp.xp, VALUES(xp)) / 100)) + 1)),
   updated_at = GREATEST(knd_user_xp.updated_at, VALUES(updated_at));

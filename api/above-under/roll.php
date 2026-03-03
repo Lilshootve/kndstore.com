@@ -85,8 +85,9 @@ try {
             "INSERT INTO above_under_rolls (user_id, choice, rolled_value, is_win, entry_points, payout_points, xp_awarded, created_at)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         )->execute([$userId, $choice, $rolled, $win ? 1 : 0, $entryKp, $payout, $xp, $now]);
+        $rollId = (int) $pdo->lastInsertId();
 
-        xp_add($pdo, $userId, $xp, null, $win);
+        xp_add($pdo, $userId, $xp, $win ? 'insight_win' : 'insight_lose', 'above_under_roll', $rollId);
 
         $pdo->commit();
 

@@ -69,9 +69,10 @@ try {
             try {
                 $stmt = $pdo->prepare(
                     "SELECT s.user_id, s.xp_earned, s.matches_played, s.wins, s.losses,
-                            u.username, 1 AS level
+                            u.username, COALESCE(kux.xp, 0) AS total_xp
                      FROM knd_season_stats s
                      JOIN users u ON u.id = s.user_id
+                     LEFT JOIN knd_user_xp kux ON kux.user_id = s.user_id
                      WHERE s.season_id = ?
                      ORDER BY s.xp_earned DESC
                      LIMIT " . (int) LB_TOP_LIMIT
@@ -82,11 +83,12 @@ try {
                     $w = (int) ($r['wins'] ?? 0);
                     $l = (int) ($r['losses'] ?? 0);
                     $wr = ($w + $l) > 0 ? round(100 * $w / ($w + $l), 1) : null;
+                    $totalXp = (int) ($r['total_xp'] ?? 0);
                     $topSeason[] = [
                         'rank'   => $i + 1,
                         'user_id'=> (int) $r['user_id'],
                         'username'=> $r['username'],
-                        'level'  => max(1, (int) floor(sqrt((int)$r['xp_earned'] / 100)) + 1),
+                        'level'  => xp_calc_level($totalXp),
                         'xp'     => (int) $r['xp_earned'],
                         'wins'   => $w,
                         'losses' => $l,
@@ -143,7 +145,7 @@ try {
                     'rank'   => $i + 1,
                     'user_id'=> $uid,
                     'username'=> $r['username'],
-                    'level'  => max(1, (int) floor(sqrt($xp / 100)) + 1),
+                    'level'  => xp_calc_level($xp),
                     'xp'     => $xp,
                     'wins'   => $wl[0],
                     'losses' => $wl[1],
@@ -198,7 +200,7 @@ try {
                 $myRankAllTime = [
                     'rank'  => (int) $stmt->fetchColumn(),
                     'xp'    => $myXp,
-                    'level' => max(1, (int) floor(sqrt($myXp / 100)) + 1),
+                    'level' => xp_calc_level($myXp),
                 ];
                 if ($season) {
                     try {

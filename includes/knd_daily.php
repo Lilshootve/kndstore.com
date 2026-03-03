@@ -104,7 +104,7 @@ function daily_claim(PDO $pdo, int $userId): array {
         )->execute([$userId, $rewardKp, $now, $expiresAt, $now]);
 
         if ($bonusXp > 0) {
-            xp_add($pdo, $userId, $bonusXp, null, null, false);
+            xp_add($pdo, $userId, $bonusXp, 'daily_day7', null, null);
         }
 
         $pdo->commit();
@@ -256,10 +256,7 @@ function mission_claim(PDO $pdo, int $userId, string $missionCode): array {
         }
 
         if ($rewardXp > 0) {
-            $pdo->prepare(
-                "INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, ?, ?)
-                 ON DUPLICATE KEY UPDATE xp = xp + VALUES(xp), updated_at = VALUES(updated_at)"
-            )->execute([$userId, $rewardXp, $now]);
+            xp_add($pdo, $userId, $rewardXp, 'mission_reward', 'daily_mission', $mid);
         }
 
         $pdo->commit();

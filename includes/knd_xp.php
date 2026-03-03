@@ -1,10 +1,21 @@
 <?php
-// KND XP & Season system - leaderboard / level logic
+// KND XP & Level system - single source of truth
+// Level curve: required_xp_to_reach_level(L) = 100 * (L^2)
+// Max level: 30. XP keeps accumulating at 30 for leaderboard.
 
 require_once __DIR__ . '/config.php';
 
+define('XP_MAX_LEVEL', 30);
+
+/**
+ * Deterministic level from total XP. Level 1..30.
+ * required_xp_to_reach_level(L) = 100 * L^2
+ * Level L when 100*(L-1)^2 <= xp < 100*L^2 (L>=1); level 1 at 0-99 XP.
+ */
 function xp_calc_level(int $xp): int {
-    return max(1, (int) floor(sqrt($xp / 100)) + 1);
+    if ($xp < 0) return 1;
+    $l = (int) floor(sqrt($xp / 100)) + 1;
+    return min(XP_MAX_LEVEL, max(1, $l));
 }
 
 function get_active_season(PDO $pdo): ?array {
@@ -29,47 +40,79 @@ function ensure_active_season(PDO $pdo): ?array {
     return get_active_season($pdo);
 }
 
-function xp_add(PDO $pdo, int $userId, int $xpDelta, ?int $seasonId = null, ?bool $isWin = null, bool $countMatch = true): void {
+/**
+ * Add XP to user. Single source of truth.
+ * @param string $source e.g. 'lastroll_win', 'lastroll_lose', 'insight_win', 'insight_lose', 'daily_day7', 'drop_reward', 'mission_reward'
+ * @param string|null $refType e.g. 'lastroll_game', 'above_under_roll', 'knd_drop'
+ * @param int|null $refId
+ */
+function xp_add(PDO $pdo, int $userId, int $xpDelta, string $source, ?string $refType = null, ?int $refId = null): void {
     if ($xpDelta <= 0) return;
 
-    $season = $seasonId ? null : ensure_active_season($pdo);
-    $sid = $seasonId ?? ($season ? (int) $season['id'] : null);
-    if (!$sid) return;
+    $countMatch = in_array($source, ['lastroll_win', 'lastroll_lose', 'insight_win', 'insight_lose'], true);
+    $isWin = in_array($source, ['lastroll_win', 'insight_win'], true) ? true : (in_array($source, ['lastroll_lose', 'insight_lose'], true) ? false : null);
 
-    $stmt = $pdo->prepare("SELECT xp FROM knd_user_xp WHERE user_id = ?");
-    $stmt->execute([$userId]);
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    $newXp = ($row ? (int) $row['xp'] : 0) + $xpDelta;
-    $level = xp_calc_level($newXp);
-
-    $pdo->prepare(
-        "INSERT INTO knd_user_xp (user_id, xp, level, updated_at) VALUES (?, ?, ?, NOW())
-         ON DUPLICATE KEY UPDATE xp = xp + ?, level = ?, updated_at = NOW()"
-    )->execute([$userId, $newXp, $level, $xpDelta, $level]);
-
-    if ($countMatch) {
-        $w = $isWin === true ? 1 : 0;
-        $l = $isWin === false ? 1 : 0;
-        $pdo->prepare(
-            "INSERT INTO knd_season_stats (season_id, user_id, xp_earned, matches_played, wins, losses, updated_at)
-             VALUES (?, ?, ?, 1, ?, ?, NOW())
-             ON DUPLICATE KEY UPDATE
-               xp_earned = xp_earned + ?,
-               matches_played = matches_played + 1,
-               wins = wins + ?,
-               losses = losses + ?,
-               updated_at = NOW()"
-        )->execute([$sid, $userId, $xpDelta, $w, $l, $xpDelta, $w, $l]);
-    } else {
-        $pdo->prepare(
-            "INSERT INTO knd_season_stats (season_id, user_id, xp_earned, matches_played, wins, losses, updated_at)
-             VALUES (?, ?, ?, 0, 0, 0, NOW())
-             ON DUPLICATE KEY UPDATE xp_earned = xp_earned + ?, updated_at = NOW()"
-        )->execute([$sid, $userId, $xpDelta, $xpDelta]);
+    try {
+        $season = ensure_active_season($pdo);
+    } catch (\Throwable $e) {
+        $season = null;
     }
+    $sid = $season ? (int) $season['id'] : null;
 
-    $pdo->prepare(
-        "INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, ?, NOW())
-         ON DUPLICATE KEY UPDATE xp = xp + ?, updated_at = NOW()"
-    )->execute([$userId, $xpDelta, $xpDelta]);
+    $ownTx = !$pdo->inTransaction();
+    if ($ownTx) $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare("SELECT xp FROM knd_user_xp WHERE user_id = ? FOR UPDATE");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $newXp = ($row ? (int) $row['xp'] : 0) + $xpDelta;
+        $level = xp_calc_level($newXp);
+
+        $pdo->prepare(
+            "INSERT INTO knd_user_xp (user_id, xp, level, updated_at) VALUES (?, ?, ?, NOW())
+             ON DUPLICATE KEY UPDATE
+               xp = xp + ?,
+               level = LEAST(30, GREATEST(1, FLOOR(SQRT((xp + ?) / 100)) + 1)),
+               updated_at = NOW()"
+        )->execute([$userId, $newXp, $level, $xpDelta, $xpDelta]);
+
+        if ($sid && $countMatch) {
+            $w = $isWin ? 1 : 0;
+            $l = $isWin ? 0 : 1;
+            $pdo->prepare(
+                "INSERT INTO knd_season_stats (season_id, user_id, xp_earned, matches_played, wins, losses, updated_at)
+                 VALUES (?, ?, ?, 1, ?, ?, NOW())
+                 ON DUPLICATE KEY UPDATE
+                   xp_earned = xp_earned + ?,
+                   matches_played = matches_played + 1,
+                   wins = wins + ?,
+                   losses = losses + ?,
+                   updated_at = NOW()"
+            )->execute([$sid, $userId, $xpDelta, $w, $l, $xpDelta, $w, $l]);
+        } elseif ($sid) {
+            $pdo->prepare(
+                "INSERT INTO knd_season_stats (season_id, user_id, xp_earned, matches_played, wins, losses, updated_at)
+                 VALUES (?, ?, ?, 0, 0, 0, NOW())
+                 ON DUPLICATE KEY UPDATE xp_earned = xp_earned + ?, updated_at = NOW()"
+            )->execute([$sid, $userId, $xpDelta, $xpDelta]);
+        }
+
+        // Sync user_xp for leaderboard / legacy readers
+        $pdo->prepare(
+            "INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, ?, NOW())
+             ON DUPLICATE KEY UPDATE xp = xp + ?, updated_at = NOW()"
+        )->execute([$userId, $xpDelta, $xpDelta]);
+
+        // Optional audit log (table may not exist)
+        try {
+            $pdo->prepare(
+                "INSERT INTO knd_xp_ledger (user_id, xp_delta, source, ref_type, ref_id) VALUES (?, ?, ?, ?, ?)"
+            )->execute([$userId, $xpDelta, $source, $refType, $refId]);
+        } catch (\Throwable $e) { /* ignore if table missing */ }
+
+        if ($ownTx) $pdo->commit();
+    } catch (\Throwable $e) {
+        if ($ownTx && $pdo->inTransaction()) $pdo->rollBack();
+        throw $e;
+    }
 }
