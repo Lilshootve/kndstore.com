@@ -73,10 +73,8 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
               </div>
               <p class="text-white-50 small mb-0"><?php echo t('profile.max_hint', 'XP continues for leaderboard'); ?></p>
             <?php else: ?>
-              <div class="profile-progress-wrap mb-2">
-                <div class="profile-progress-bar" role="progressbar" style="width: <?php echo (int)($data['progress']['progressPct'] * 100); ?>%;">
-                  <span class="profile-progress-fill"></span>
-                </div>
+              <div class="profile-progress-wrap mb-2" role="progressbar" aria-valuenow="<?php echo (int)($data['progress']['progressPct'] * 100); ?>" aria-valuemin="0" aria-valuemax="100">
+                <div class="profile-progress-fill" style="width: <?php echo round($data['progress']['progressPct'] * 100, 1); ?>%;"></div>
               </div>
               <p class="text-white-50 small mb-0">
                 <?php echo t('profile.next', 'XP to next level'); ?>: <strong style="color:#00d4ff;"><?php echo number_format($data['progress']['xpToNext']); ?></strong>
@@ -197,8 +195,8 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 }
 .profile-level-num { font-family: 'Orbitron', monospace; font-size: 2.2rem; font-weight: 700; color: #00d4ff; line-height: 1; }
 .profile-level-label { font-size: .65rem; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.6); }
-.profile-progress-wrap { height: 8px; background: rgba(255,255,255,.08); border-radius: 4px; overflow: hidden; }
-.profile-progress-bar { height: 100%; background: linear-gradient(90deg, #00d4ff, #259cae); border-radius: 4px; transition: width .5s ease; }
+.profile-progress-wrap { position: relative; height: 10px; background: rgba(255,255,255,.12); border-radius: 5px; overflow: hidden; }
+.profile-progress-fill { position: absolute; left: 0; top: 0; bottom: 0; min-width: 4px; background: linear-gradient(90deg, #00d4ff, #259cae); border-radius: 5px; transition: width .5s ease; }
 .profile-stat-card { border: 1px solid rgba(255,255,255,.06); transition: transform .2s, box-shadow .2s; }
 .profile-stat-card:hover { transform: translateY(-2px); box-shadow: 0 0 16px rgba(0,212,255,.12); }
 .profile-stat-icon { width: 36px; height: 36px; border-radius: 8px; background: rgba(0,212,255,.15); display: flex; align-items: center; justify-content: center; color: #00d4ff; font-size: 1rem; }
