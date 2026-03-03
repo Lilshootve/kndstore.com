@@ -100,8 +100,7 @@ function generateNavigation() {
             }
             $_SESSION['sc_badge_cache'] = ['ts' => time(), 'available' => $scAvailable];
         }
-        $badgeStyle = $scAvailable > 0 ? '' : ' style="display:none"';
-        $creditsBadgeHtml = '<a href="/credits" class="sc-nav-badge"' . $badgeStyle . ' title="' . htmlspecialchars(t('nav.credits_badge_tooltip', 'Available KND Points')) . '">'
+        $creditsBadgeHtml = '<a href="/support-credits.php" class="sc-nav-badge" title="' . htmlspecialchars(t('nav.credits_badge_tooltip', 'Available KND Points')) . '">'
             . '<i class="fas fa-coins"></i> ' . ($scAvailable > 0 ? number_format($scAvailable) : '0')
             . '</a>';
 

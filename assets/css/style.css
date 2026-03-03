@@ -6394,72 +6394,80 @@ body {
 .sc-nav-badge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    margin-left: 6px;
-    padding: 2px 8px;
-    font-size: 0.7rem;
+    gap: 5px;
+    margin-left: 8px;
+    padding: 4px 10px;
+    font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.5px;
-    color: var(--knd-neon-blue);
-    background: rgba(10, 15, 30, 0.7);
-    border: 1px solid rgba(37, 156, 174, 0.35);
+    color: #fff;
+    background: linear-gradient(135deg, rgba(37, 156, 174, 0.35), rgba(0, 212, 255, 0.25));
+    border: 1px solid rgba(0, 212, 255, 0.6);
     border-radius: 12px;
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px);
     text-decoration: none;
     white-space: nowrap;
-    transition: box-shadow 0.2s, border-color 0.2s;
+    transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
     vertical-align: middle;
+    text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.2), inset 0 1px 0 rgba(255,255,255,0.15);
 }
 
 .sc-nav-badge:hover {
-    border-color: var(--knd-neon-blue);
-    box-shadow: 0 0 8px rgba(37, 156, 174, 0.3);
+    border-color: #00d4ff;
+    box-shadow: 0 0 16px rgba(0, 212, 255, 0.4);
     color: #fff;
     text-decoration: none;
+    transform: scale(1.03);
 }
 
 .sc-nav-badge .fas {
-    font-size: 0.6rem;
+    font-size: 0.75rem;
+    color: #00d4ff;
 }
 
 @media (max-width: 991px) {
     .sc-nav-badge {
-        font-size: 0.62rem;
-        padding: 1px 6px;
-        margin-left: 4px;
+        font-size: 0.72rem;
+        padding: 3px 8px;
+        margin-left: 6px;
     }
+    .sc-nav-badge .fas { font-size: 0.7rem; }
 }
 
 /* Level badge (navbar) */
 .lvl-badge {
     display: inline-flex;
     align-items: center;
-    margin-left: 6px;
-    padding: 2px 8px;
-    font-size: 0.7rem;
+    margin-left: 8px;
+    padding: 4px 10px;
+    font-size: 0.8rem;
     font-weight: 700;
     font-family: 'Orbitron', sans-serif;
     letter-spacing: 0.5px;
-    color: var(--knd-neon-blue, #00d4ff);
-    background: rgba(10, 15, 30, 0.7);
-    border: 1px solid rgba(0, 212, 255, 0.35);
+    color: #fff;
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.4), rgba(0, 212, 255, 0.25));
+    border: 1px solid rgba(167, 139, 250, 0.65);
     border-radius: 10px;
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px);
     text-decoration: none;
     white-space: nowrap;
-    box-shadow: 0 0 6px rgba(0, 212, 255, 0.15);
+    box-shadow: 0 0 12px rgba(167, 139, 250, 0.3), inset 0 1px 0 rgba(255,255,255,0.12);
+    text-shadow: 0 0 10px rgba(167, 139, 250, 0.6);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 .lvl-badge:hover {
-    border-color: var(--knd-neon-blue, #00d4ff);
-    box-shadow: 0 0 10px rgba(0, 212, 255, 0.35);
+    border-color: #a78bfa;
+    box-shadow: 0 0 18px rgba(167, 139, 250, 0.5);
     color: #fff;
     text-decoration: none;
+    transform: scale(1.03);
 }
 @media (max-width: 991px) {
     .lvl-badge {
-        font-size: 0.62rem;
-        padding: 1px 6px;
-        margin-left: 4px;
+        font-size: 0.72rem;
+        padding: 3px 8px;
+        margin-left: 6px;
     }
 }
 
@@ -6542,11 +6550,33 @@ body {
     .knd-toast.visible { transform: translateY(0); }
 }
 
-/* KND XP pop animation */
+/* KND XP pop - visible below navbar, top-center */
+.knd-xp-pop {
+    position: fixed;
+    left: 50%;
+    top: 100px;
+    transform: translateX(-50%);
+    z-index: 9997;
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+    color: #fff;
+    text-shadow: 0 0 12px rgba(0, 212, 255, 0.9), 0 0 24px rgba(0, 212, 255, 0.6);
+    pointer-events: none;
+    padding: 6px 16px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.35), rgba(167, 139, 250, 0.3));
+    border: 1px solid rgba(0, 212, 255, 0.6);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+    opacity: 0;
+    animation: knd-xp-pop-anim 1.6s ease-out forwards;
+}
 @keyframes knd-xp-pop-anim {
-    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-    20% { opacity: 1; transform: translate(-50%, -80%) scale(1.1); }
-    100% { opacity: 0; transform: translate(-50%, -120%) scale(1); }
+    0% { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.85); }
+    15% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.08); }
+    25% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    80% { opacity: 1; transform: translateX(-50%) translateY(-20px) scale(1); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-40px) scale(0.95); }
 }
 
 /* ── KND Arena Cards ── */
