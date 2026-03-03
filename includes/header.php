@@ -71,7 +71,7 @@ function generateNavigation() {
     $drLoggedIn = !empty($_SESSION['dr_user_id']);
     $drUsername = $drLoggedIn ? htmlspecialchars($_SESSION['dr_username'] ?? '') : '';
     $scActive = in_array($current_page, ['support-credits.php', 'rewards.php']);
-    $accountActive = in_array($current_page, ['order.php', 'track-order.php', 'auth.php', 'support-credits.php', 'rewards.php']);
+    $accountActive = in_array($current_page, ['order.php', 'track-order.php', 'auth.php', 'support-credits.php', 'rewards.php', 'my-profile.php']);
 
     // Credits badge (cached 60s)
     $creditsBadgeHtml = '';
@@ -126,6 +126,7 @@ function generateNavigation() {
     $nav .= '                        <a class="knd-dropdown-item" href="/contact.php"><i class="fas fa-headset me-2"></i>' . t('nav.support', 'Support') . '</a>' . "\n";
     $nav .= '                        <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 6px 0;"></div>' . "\n";
     if ($drLoggedIn) {
+        $nav .= '                        <a class="knd-dropdown-item' . ($current_page == 'my-profile.php' ? ' active' : '') . '" href="/my-profile.php"><i class="fas fa-user-shield me-2"></i>' . t('nav.profile', 'My Profile') . '</a>' . "\n";
         $nav .= '                        <a class="knd-dropdown-item' . ($current_page == 'support-credits.php' ? ' active' : '') . '" href="/support-credits.php"><i class="fas fa-coins me-2"></i>' . t('nav.credits', 'Credits') . '</a>' . "\n";
         $nav .= '                        <a class="knd-dropdown-item' . ($current_page == 'rewards.php' ? ' active' : '') . '" href="/rewards.php"><i class="fas fa-gift me-2"></i>' . t('nav.rewards', 'Rewards') . '</a>' . "\n";
         $nav .= '                        <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 6px 0;"></div>' . "\n";
