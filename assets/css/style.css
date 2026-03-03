@@ -3589,7 +3589,49 @@ body.about-page,
         background-position: 0px 0px, 0px 0px, 0px 0px, 0px 0px;
         opacity: 1;
     }
-} 
+}
+
+/* Transparency pages: Game Fairness & How KND Arena Works - mejor legibilidad */
+/* Reduce grid overlay intensity so text doesn't compete with background */
+.transparency-page.bg-dark-epic::before {
+    opacity: 0.35 !important;
+}
+.transparency-page.bg-dark-epic::after {
+    opacity: 0.25 !important;
+}
+/* Dark curtain behind content area only */
+.transparency-content {
+    position: relative;
+    isolation: isolate;
+}
+.transparency-content::before {
+    content: '';
+    position: absolute;
+    inset: -2rem;
+    background: radial-gradient(ellipse 80% 100% at 50% 50%, rgba(5, 10, 20, 0.75) 0%, rgba(2, 5, 15, 0.6) 50%, transparent 100%);
+    pointer-events: none;
+    z-index: -1;
+}
+/* Card for each section - semi-transparent, blur, subtle cyan/violet border */
+.transparency-card {
+    background: rgba(8, 12, 24, 0.72);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 212, 255, 0.18);
+    border-radius: 16px;
+    padding: 22px 24px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 rgba(138, 43, 226, 0.06);
+}
+@media (max-width: 576px) {
+    .transparency-card {
+        padding: 18px 20px;
+        border-radius: 14px;
+    }
+    .transparency-content::before { inset: -1rem; }
+    .transparency-page.bg-dark-epic::before { opacity: 0.25 !important; }
+    .transparency-page.bg-dark-epic::after { opacity: 0.18 !important; }
+}
 
 /* Estilos para enlaces activos del navegador */
 .navbar-nav .nav-link.active {
