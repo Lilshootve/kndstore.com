@@ -353,6 +353,7 @@ function generateScripts() {
     $scripts .= '  </div>' . "\n";
     $scripts .= '</div>' . "\n";
     $scripts .= '<script src="/assets/js/support-chat.js" defer></script>' . "\n";
+    $scripts .= '<script src="/assets/js/level-up.js" defer></script>' . "\n";
 
     
     $scripts .= '</body>' . "\n";

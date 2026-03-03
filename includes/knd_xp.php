@@ -45,9 +45,11 @@ function ensure_active_season(PDO $pdo): ?array {
  * @param string $source e.g. 'lastroll_win', 'lastroll_lose', 'insight_win', 'insight_lose', 'daily_day7', 'drop_reward', 'mission_reward'
  * @param string|null $refType e.g. 'lastroll_game', 'above_under_roll', 'knd_drop'
  * @param int|null $refId
+ * @return array{level_up:bool,old_level:int,new_level:int}
  */
-function xp_add(PDO $pdo, int $userId, int $xpDelta, string $source, ?string $refType = null, ?int $refId = null): void {
-    if ($xpDelta <= 0) return;
+function xp_add(PDO $pdo, int $userId, int $xpDelta, string $source, ?string $refType = null, ?int $refId = null): array {
+    $noLevelUp = ['level_up' => false, 'old_level' => 0, 'new_level' => 0];
+    if ($xpDelta <= 0) return $noLevelUp;
 
     $countMatch = in_array($source, ['lastroll_win', 'lastroll_lose', 'insight_win', 'insight_lose'], true);
     $isWin = in_array($source, ['lastroll_win', 'insight_win'], true) ? true : (in_array($source, ['lastroll_lose', 'insight_lose'], true) ? false : null);
@@ -65,7 +67,9 @@ function xp_add(PDO $pdo, int $userId, int $xpDelta, string $source, ?string $re
         $stmt = $pdo->prepare("SELECT xp FROM knd_user_xp WHERE user_id = ? FOR UPDATE");
         $stmt->execute([$userId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        $newXp = ($row ? (int) $row['xp'] : 0) + $xpDelta;
+        $oldXp = $row ? (int) $row['xp'] : 0;
+        $oldLevel = xp_calc_level($oldXp);
+        $newXp = $oldXp + $xpDelta;
         $level = xp_calc_level($newXp);
 
         $pdo->prepare(
@@ -111,6 +115,13 @@ function xp_add(PDO $pdo, int $userId, int $xpDelta, string $source, ?string $re
         } catch (\Throwable $e) { /* ignore if table missing */ }
 
         if ($ownTx) $pdo->commit();
+
+        $levelUp = $level > $oldLevel;
+        return [
+            'level_up'   => $levelUp,
+            'old_level'  => $oldLevel,
+            'new_level'  => $level,
+        ];
     } catch (\Throwable $e) {
         if ($ownTx && $pdo->inTransaction()) $pdo->rollBack();
         throw $e;

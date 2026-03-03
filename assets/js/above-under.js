@@ -149,6 +149,9 @@
                 var remaining = Math.max(0, ROLL_DURATION_MS - elapsed);
 
                 if (d.ok) {
+                    if (d.data.level_up && d.data.old_level != null && d.data.new_level != null && typeof showLevelUp === 'function') {
+                        setTimeout(function () { showLevelUp(d.data.old_level, d.data.new_level); }, remaining + 400);
+                    }
                     setTimeout(function () {
                         stopRoll(d.data.rolled, d.data.win, d.data.choice, d.data.entry, d.data.payout, d.data.xp_awarded);
                         updateBalance(d.data.points_balance);

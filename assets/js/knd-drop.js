@@ -114,6 +114,9 @@
                     capsuleEl.classList.remove('scanning');
 
                     if (d.ok) {
+                        if (d.data.level_up && d.data.old_level != null && d.data.new_level != null && typeof showLevelUp === 'function') {
+                            setTimeout(function () { showLevelUp(d.data.old_level, d.data.new_level); }, 1200);
+                        }
                         var rarity = d.data.rarity;
                         capsuleEl.classList.add('drop-rarity-' + rarity);
                         var rc = rarityStyles[rarity] || rarityStyles.common;

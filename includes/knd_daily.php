@@ -103,20 +103,32 @@ function daily_claim(PDO $pdo, int $userId): array {
              VALUES (?, 'daily_login', 0, 'earn', 'available', ?, ?, ?, ?)"
         )->execute([$userId, $rewardKp, $now, $expiresAt, $now]);
 
+        $levelUp = null;
         if ($bonusXp > 0) {
-            xp_add($pdo, $userId, $bonusXp, 'daily_day7', null, null);
+            $xpRes = xp_add($pdo, $userId, $bonusXp, 'daily_day7', null, null);
+            if ($xpRes['level_up']) {
+                $levelUp = ['level_up' => true, 'old_level' => $xpRes['old_level'], 'new_level' => $xpRes['new_level']];
+            }
         }
 
         $pdo->commit();
         unset($_SESSION['sc_badge_cache']);
 
-        return [
+        $out = [
             'ok'        => true,
             'streak'    => $streak,
             'reward_kp' => $rewardKp,
             'bonus_xp'  => $bonusXp,
             'balance'   => get_available_points($pdo, $userId),
         ];
+        if ($levelUp) {
+            $out['level_up'] = true;
+            $out['old_level'] = $levelUp['old_level'];
+            $out['new_level'] = $levelUp['new_level'];
+        } else {
+            $out['level_up'] = false;
+        }
+        return $out;
     } catch (\Throwable $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();
         throw $e;
@@ -255,20 +267,32 @@ function mission_claim(PDO $pdo, int $userId, string $missionCode): array {
             )->execute([$userId, $mid, $rewardKp, $now, $expiresAt, $now]);
         }
 
+        $levelUp = null;
         if ($rewardXp > 0) {
-            xp_add($pdo, $userId, $rewardXp, 'mission_reward', 'daily_mission', $mid);
+            $xpRes = xp_add($pdo, $userId, $rewardXp, 'mission_reward', 'daily_mission', $mid);
+            if ($xpRes['level_up']) {
+                $levelUp = ['level_up' => true, 'old_level' => $xpRes['old_level'], 'new_level' => $xpRes['new_level']];
+            }
         }
 
         $pdo->commit();
         unset($_SESSION['sc_badge_cache']);
 
-        return [
+        $out = [
             'ok'        => true,
             'code'      => $missionCode,
             'reward_kp' => $rewardKp,
             'reward_xp' => $rewardXp,
             'balance'   => get_available_points($pdo, $userId),
         ];
+        if ($levelUp) {
+            $out['level_up'] = true;
+            $out['old_level'] = $levelUp['old_level'];
+            $out['new_level'] = $levelUp['new_level'];
+        } else {
+            $out['level_up'] = false;
+        }
+        return $out;
     } catch (\Throwable $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();
         throw $e;

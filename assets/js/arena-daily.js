@@ -94,6 +94,9 @@
                 .then(function (r) { return r.json(); })
                 .then(function (d) {
                     if (d.ok) {
+                        if (d.data.level_up && d.data.old_level != null && d.data.new_level != null && typeof showLevelUp === 'function') {
+                            setTimeout(function () { showLevelUp(d.data.old_level, d.data.new_level); }, 400);
+                        }
                         var msg = '+' + d.data.reward_kp + ' KP';
                         if (d.data.bonus_xp > 0) msg += ' + ' + d.data.bonus_xp + ' XP';
                         dailyMsg.innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-1"></i>' + msg + '</span>';
@@ -170,6 +173,9 @@
                     .then(function (r) { return r.json(); })
                     .then(function (d) {
                         if (d.ok) {
+                            if (d.data.level_up && d.data.old_level != null && d.data.new_level != null && typeof showLevelUp === 'function') {
+                                setTimeout(function () { showLevelUp(d.data.old_level, d.data.new_level); }, 400);
+                            }
                             updateNavBadge(d.data.balance);
                             loadMissions();
                         } else {

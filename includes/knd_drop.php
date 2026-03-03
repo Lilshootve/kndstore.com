@@ -125,15 +125,18 @@ function drop_play(PDO $pdo, int $userId): array {
         )->execute([$userId, (int)$season['id'], $entryKp, $rarity, $rewardKp, (int)$config['id'], $xp]);
         $dropId = (int) $pdo->lastInsertId();
 
-        // XP (season + all-time)
+        $levelUp = null;
         if ($xp > 0) {
-            xp_add($pdo, $userId, $xp, 'drop_reward', 'knd_drop', $dropId);
+            $xpRes = xp_add($pdo, $userId, $xp, 'drop_reward', 'knd_drop', $dropId);
+            if ($xpRes['level_up']) {
+                $levelUp = ['level_up' => true, 'old_level' => $xpRes['old_level'], 'new_level' => $xpRes['new_level']];
+            }
         }
 
         $pdo->commit();
         unset($_SESSION['sc_badge_cache']);
 
-        return [
+        $out = [
             'ok'       => true,
             'season'   => ['name' => $season['name'], 'ends_at' => $season['ends_at']],
             'entry'    => $entryKp,
@@ -142,6 +145,14 @@ function drop_play(PDO $pdo, int $userId): array {
             'xp_awarded'=> $xp,
             'balance'  => get_available_points($pdo, $userId),
         ];
+        if ($levelUp) {
+            $out['level_up'] = true;
+            $out['old_level'] = $levelUp['old_level'];
+            $out['new_level'] = $levelUp['new_level'];
+        } else {
+            $out['level_up'] = false;
+        }
+        return $out;
     } catch (\Throwable $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();
         throw $e;

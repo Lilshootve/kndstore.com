@@ -87,7 +87,7 @@ try {
         )->execute([$userId, $choice, $rolled, $win ? 1 : 0, $entryKp, $payout, $xp, $now]);
         $rollId = (int) $pdo->lastInsertId();
 
-        xp_add($pdo, $userId, $xp, $win ? 'insight_win' : 'insight_lose', 'above_under_roll', $rollId);
+        $xpResult = xp_add($pdo, $userId, $xp, $win ? 'insight_win' : 'insight_lose', 'above_under_roll', $rollId);
 
         $pdo->commit();
 
@@ -101,7 +101,7 @@ try {
 
         $newBalance = get_available_points($pdo, $userId);
 
-        json_success([
+        $resp = [
             'rolled'         => $rolled,
             'win'            => $win,
             'choice'         => $choice,
@@ -109,7 +109,15 @@ try {
             'payout'         => $payout,
             'points_balance' => $newBalance,
             'xp_awarded'     => $xp,
-        ]);
+        ];
+        if ($xpResult['level_up']) {
+            $resp['level_up'] = true;
+            $resp['old_level'] = $xpResult['old_level'];
+            $resp['new_level'] = $xpResult['new_level'];
+        } else {
+            $resp['level_up'] = false;
+        }
+        json_success($resp);
     } catch (\Throwable $e) {
         $pdo->rollBack();
         throw $e;

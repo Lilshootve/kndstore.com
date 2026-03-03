@@ -809,6 +809,10 @@
             }).then(function (d) {
                 if (d.ok) {
                     if (typeof d.data.my_kp_balance !== 'undefined') updateNavBadge(d.data.my_kp_balance);
+                    if (d.data.level_up && d.data.old_level != null && d.data.new_level != null && typeof showLevelUp === 'function') {
+                        var delay = Math.max(0, MIN_ROLL_MS - (Date.now() - rollStartTime)) + 300;
+                        setTimeout(function () { showLevelUp(d.data.old_level, d.data.new_level); }, delay);
+                    }
                     var myLastRoll = '';
                     if (d.data.rolls && d.data.rolls.length > 0) {
                         var last = d.data.rolls[d.data.rolls.length - 1];

@@ -80,6 +80,7 @@ try {
     $maxBefore = (int) $game['current_max'];
     $rolled = random_int(1, $maxBefore);
     $now = gmdate('Y-m-d H:i:s');
+    $xpResult = [];
 
     $stmt = $pdo->prepare(
         'INSERT INTO deathroll_game_rolls_1v1 (game_id, user_id, max_value, roll_value, created_at)
@@ -113,7 +114,7 @@ try {
 
             // XP: winner +20, loser +5 (season + all-time)
             xp_add($pdo, $opponent, 20, 'lastroll_win', 'lastroll_game', (int)$game['id']);
-            xp_add($pdo, $userId, 5, 'lastroll_lose', 'lastroll_game', (int)$game['id']);
+            $xpResult = xp_add($pdo, $userId, 5, 'lastroll_lose', 'lastroll_game', (int)$game['id']);
         }
 
         $game['status'] = 'finished';
@@ -138,6 +139,11 @@ try {
     }
 
     $state = build_game_state($pdo, $game, $userId);
+    if (!empty($xpResult)) {
+        $state['level_up'] = $xpResult['level_up'];
+        $state['old_level'] = $xpResult['old_level'];
+        $state['new_level'] = $xpResult['new_level'];
+    }
 
     $pdo->commit();
     unset($_SESSION['sc_badge_cache']);
