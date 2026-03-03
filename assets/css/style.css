@@ -3675,10 +3675,17 @@ body.about-page,
     flex-wrap: wrap;
     gap: 6px;
     justify-content: flex-end;
+    margin-right: 4px;
+    margin-top: 2px;
 }
 .knd-user-badges .sc-nav-badge,
 .knd-user-badges .lvl-badge {
     margin-left: 0;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+}
+.knd-user-badges .sc-nav-badge .fas {
+    font-size: 0.65rem;
 }
 .knd-dropdown-arrow { font-size: 0.55em; transition: transform .25s; vertical-align: middle; }
 .knd-dropdown-toggle[aria-expanded="true"] .knd-dropdown-arrow { transform: rotate(180deg); }
@@ -6433,10 +6440,10 @@ body {
 .sc-nav-badge {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    margin-left: 8px;
-    padding: 4px 10px;
-    font-size: 0.8rem;
+    gap: 4px;
+    margin-left: 6px;
+    padding: 3px 8px;
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.5px;
     color: #fff;
@@ -6478,9 +6485,9 @@ body {
 .lvl-badge {
     display: inline-flex;
     align-items: center;
-    margin-left: 8px;
-    padding: 4px 10px;
-    font-size: 0.8rem;
+    margin-left: 6px;
+    padding: 3px 8px;
+    font-size: 0.75rem;
     font-weight: 700;
     font-family: 'Orbitron', sans-serif;
     letter-spacing: 0.5px;

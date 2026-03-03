@@ -52,22 +52,36 @@ function get_xp_badge_data(PDO $pdo, int $userId): array {
 
 /**
  * Compute XP progress toward next level.
- * Curve: required_xp_to_reach_level(L) = 100 * L^2
+ * Curve: xp_calc_level uses 100*L^2 → level L when 100*(L-1)^2 <= xp < 100*L^2
+ * xpAtLevelStart = 100 * (level-1)^2, xpToReachNext = 100 * level^2
  */
 function profile_xp_progress(int $xp, int $level): array {
-    $nextLevel = min($level + 1, XP_MAX_LEVEL);
-    $nextThreshold = 100 * ($nextLevel ** 2);
-    $prevThreshold = $level > 1 ? (100 * ($level ** 2)) : 0;
-    $span = $nextThreshold - $prevThreshold;
-    $inSpan = $xp - $prevThreshold;
-    $progressPct = $span > 0 ? max(0, min(1, $inSpan / $span)) : 1;
-    $xpToNext = $level < XP_MAX_LEVEL ? ($nextThreshold - $xp) : 0;
+    if ($level >= XP_MAX_LEVEL) {
+        return [
+            'prevThreshold'  => 100 * (($level - 1) ** 2),
+            'nextThreshold'  => 100 * ($level ** 2),
+            'progressPct'    => 1.0,
+            'xpToNext'       => 0,
+            'isMaxLevel'     => true,
+        ];
+    }
+    $xpAtLevelStart = 100 * (($level - 1) ** 2);
+    $xpToReachNextLevel = 100 * ($level ** 2);
+    $xpRequiredForLevel = $xpToReachNextLevel - $xpAtLevelStart;
+    $xpIntoLevel = $xp - $xpAtLevelStart;
+
+    $progressPct = 0.0;
+    if ($xpRequiredForLevel > 0) {
+        $progressPct = $xpIntoLevel / $xpRequiredForLevel;
+        $progressPct = max(0.0, min(1.0, $progressPct));
+    }
+    $xpToNext = max(0, $xpToReachNextLevel - $xp);
     return [
-        'prevThreshold'  => $prevThreshold,
-        'nextThreshold'  => $nextThreshold,
+        'prevThreshold'  => $xpAtLevelStart,
+        'nextThreshold'  => $xpToReachNextLevel,
         'progressPct'    => $progressPct,
-        'xpToNext'       => max(0, $xpToNext),
-        'isMaxLevel'     => $level >= XP_MAX_LEVEL,
+        'xpToNext'       => $xpToNext,
+        'isMaxLevel'     => false,
     ];
 }
 

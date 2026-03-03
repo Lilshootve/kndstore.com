@@ -73,8 +73,12 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
               </div>
               <p class="text-white-50 small mb-0"><?php echo t('profile.max_hint', 'XP continues for leaderboard'); ?></p>
             <?php else: ?>
-              <div class="profile-progress-wrap mb-2" role="progressbar" aria-valuenow="<?php echo (int)($data['progress']['progressPct'] * 100); ?>" aria-valuemin="0" aria-valuemax="100">
-                <div class="profile-progress-fill" style="width: <?php echo round($data['progress']['progressPct'] * 100, 1); ?>%;"></div>
+              <?php
+                $pct = $data['progress']['progressPct'];
+                $pctClamped = min(100, max(0, (float) $pct * 100));
+              ?>
+              <div class="profile-progress-wrap mb-2" role="progressbar" aria-valuenow="<?php echo (int) round($pctClamped); ?>" aria-valuemin="0" aria-valuemax="100">
+                <div class="profile-progress-fill" style="width: <?php echo round($pctClamped, 1); ?>%;"></div>
               </div>
               <p class="text-white-50 small mb-0">
                 <?php echo t('profile.next', 'XP to next level'); ?>: <strong style="color:#00d4ff;"><?php echo number_format($data['progress']['xpToNext']); ?></strong>
