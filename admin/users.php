@@ -1,41 +1,7 @@
 <?php
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-header('Pragma: no-cache');
-header('Expires: 0');
-header('X-Robots-Tag: noindex, nofollow');
 ini_set('display_errors', '0');
-
-require_once __DIR__ . '/../includes/session.php';
-require_once __DIR__ . '/../includes/config.php';
-
-$secretsPath = __DIR__ . '/../config/admin_secrets.local.php';
-if (!file_exists($secretsPath)) { http_response_code(500); echo 'Admin secrets not found.'; exit; }
-$adminSecrets = require $secretsPath;
-$adminUser = trim($adminSecrets['admin_user'] ?? $adminSecrets['username'] ?? '');
-$adminPass = trim($adminSecrets['admin_pass'] ?? $adminSecrets['password'] ?? '');
-
-if (isset($_GET['logout'])) { $_SESSION = []; session_destroy(); header('Location: /'); exit; }
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_user'], $_POST['admin_pass'])) {
-    if (hash_equals($adminUser, $_POST['admin_user']) && hash_equals($adminPass, $_POST['admin_pass'])) {
-        $_SESSION['admin_logged_in'] = true;
-        header('Location: /admin/users.php');
-        exit;
-    }
-    $loginError = 'Invalid credentials.';
-}
-
-if (empty($_SESSION['admin_logged_in'])) {
-    echo '<!DOCTYPE html><html><head><title>Admin Login</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"></head>';
-    echo '<body class="bg-dark text-white d-flex align-items-center justify-content-center" style="min-height:100vh">';
-    echo '<form method="post" class="p-4 rounded" style="background:#111;width:340px">';
-    echo '<h4 class="mb-3">Admin Login</h4>';
-    if (!empty($loginError)) echo '<div class="alert alert-danger py-1">' . $loginError . '</div>';
-    echo '<input name="admin_user" class="form-control mb-2" placeholder="User" required>';
-    echo '<input name="admin_pass" type="password" class="form-control mb-3" placeholder="Password" required>';
-    echo '<button class="btn btn-primary w-100">Login</button></form></body></html>';
-    exit;
-}
+require_once __DIR__ . '/_guard.php';
+admin_require_login();
 
 $pdo = getDBConnection();
 if (!$pdo) { echo 'DB connection failed.'; exit; }

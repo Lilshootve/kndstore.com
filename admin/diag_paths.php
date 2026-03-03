@@ -1,46 +1,12 @@
 <?php
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-header('Pragma: no-cache');
-header('Expires: 0');
-header('X-Robots-Tag: noindex, nofollow');
+require_once __DIR__ . '/_guard.php';
+admin_require_login();
 
-require_once __DIR__ . '/../includes/session.php';
+header('Content-Type: text/html; charset=utf-8');
 
 $secretsPath = __DIR__ . '/../config/admin_secrets.local.php';
 $secretsExists = file_exists($secretsPath);
 $secretsReadable = $secretsExists && is_readable($secretsPath);
-
-$adminSecrets = null;
-$credsValid = false;
-$adminUser = '';
-$adminPass = '';
-
-if ($secretsExists) {
-    $adminSecrets = require $secretsPath;
-    if (is_array($adminSecrets)) {
-        $adminUser = trim($adminSecrets['admin_user'] ?? $adminSecrets['username'] ?? '');
-        $adminPass = trim($adminSecrets['admin_pass'] ?? $adminSecrets['password'] ?? '');
-        $credsValid = ($adminUser !== '' && $adminPass !== '');
-    }
-}
-
-if (!$secretsExists) {
-    http_response_code(500);
-    echo 'Admin secrets file not found at: ' . htmlspecialchars($secretsPath);
-    exit;
-}
-if (!$credsValid) {
-    http_response_code(500);
-    echo 'Username or password empty in: ' . htmlspecialchars($secretsPath) . ' (accepts admin_user/admin_pass or username/password)';
-    exit;
-}
-if (empty($_SESSION['admin_logged_in'])) {
-    http_response_code(403);
-    echo 'Not authenticated. Log in at /admin/orders.php first.';
-    exit;
-}
-
-header('Content-Type: text/html; charset=utf-8');
 
 $projectRoot = dirname(__DIR__);
 

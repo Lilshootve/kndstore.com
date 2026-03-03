@@ -1,19 +1,9 @@
 <?php
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-header('Pragma: no-cache');
-header('Expires: 0');
-header('X-Robots-Tag: noindex, nofollow');
+require_once __DIR__ . '/_guard.php';
+admin_require_login();
 
-require_once __DIR__ . '/../includes/session.php';
-require_once __DIR__ . '/../includes/config.php';
-
-$secretsPath = __DIR__ . '/../config/admin_secrets.local.php';
-if (!file_exists($secretsPath)) { http_response_code(403); echo 'Auth config missing'; exit; }
-$adminSecrets = require $secretsPath;
-if (!is_array($adminSecrets)) { http_response_code(403); echo 'Bad auth config'; exit; }
-$adminUser = trim($adminSecrets['admin_user'] ?? $adminSecrets['username'] ?? '');
-$adminPass = trim($adminSecrets['admin_pass'] ?? $adminSecrets['password'] ?? '');
-if (empty($_SESSION['admin_logged_in'])) { header('Location: /admin/orders.php'); exit; }
+require_once __DIR__ . '/_audit.php';
+admin_log_action('purge_cache');
 
 $results = [];
 

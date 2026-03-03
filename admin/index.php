@@ -1,11 +1,11 @@
 <?php
+require_once __DIR__ . '/../includes/session.php';
+require_once __DIR__ . '/../includes/config.php';
+
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 header('Expires: 0');
 header('X-Robots-Tag: noindex, nofollow');
-
-require_once __DIR__ . '/../includes/session.php';
-require_once __DIR__ . '/../includes/config.php';
 
 $secretsPath = __DIR__ . '/../config/admin_secrets.local.php';
 if (!file_exists($secretsPath)) {
@@ -34,9 +34,14 @@ if (isset($_GET['logout'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_user'], $_POST['admin_pass'])) {
     if (hash_equals($adminUser, $_POST['admin_user']) && hash_equals($adminPass, $_POST['admin_pass'])) {
         $_SESSION['admin_logged_in'] = true;
+        $_SESSION['admin_user'] = $adminUser;
+        require_once __DIR__ . '/_audit.php';
+        admin_log_action('admin_login_success');
         header('Location: /admin/');
         exit;
     }
+    require_once __DIR__ . '/_audit.php';
+    admin_log_action('admin_login_failed');
     $loginError = 'Invalid credentials.';
 }
 
@@ -111,6 +116,7 @@ try {
 }
 
 $navCards = [
+    ['title' => 'Dashboard', 'desc' => 'Analytics, KP metrics, Top XP and alerts', 'href' => '/admin/dashboard.php', 'icon' => 'fa-chart-line', 'badge' => null, 'show' => true],
     ['title' => 'User Management', 'desc' => 'List, search, filter and inspect all users', 'href' => '/admin/users.php', 'icon' => 'fa-users', 'badge' => $totalRegisteredUsers, 'show' => true],
     ['title' => 'Order Management', 'desc' => 'View, filter and update all orders', 'href' => '/admin/orders.php', 'icon' => 'fa-clipboard-list', 'badge' => null, 'show' => true],
     ['title' => 'KND Points', 'desc' => 'Review pending point purchases + redemptions', 'href' => '/admin/support-credits.php', 'icon' => 'fa-coins', 'badge' => $scPendingPayments, 'show' => true],

@@ -1,49 +1,7 @@
 <?php
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-header('Pragma: no-cache');
-header('Expires: 0');
-header('X-Robots-Tag: noindex, nofollow');
 ini_set('display_errors', '0');
-
-require_once __DIR__ . '/../includes/session.php';
-require_once __DIR__ . '/../includes/config.php';
-
-$secretsPath = __DIR__ . '/../config/admin_secrets.local.php';
-if (!file_exists($secretsPath)) {
-    http_response_code(500);
-    echo 'Admin secrets not found.';
-    exit;
-}
-$adminSecrets = require $secretsPath;
-$adminUser = trim($adminSecrets['admin_user'] ?? $adminSecrets['username'] ?? '');
-$adminPass = trim($adminSecrets['admin_pass'] ?? $adminSecrets['password'] ?? '');
-
-if (isset($_GET['logout'])) {
-    $_SESSION = [];
-    session_destroy();
-    header('Location: /');
-    exit;
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_user'], $_POST['admin_pass'])) {
-    if (hash_equals($adminUser, $_POST['admin_user']) && hash_equals($adminPass, $_POST['admin_pass'])) {
-        $_SESSION['admin_logged_in'] = true;
-        header('Location: /admin/rewards.php');
-        exit;
-    }
-    $loginError = 'Invalid credentials.';
-}
-
-if (empty($_SESSION['admin_logged_in'])) {
-    echo '<!DOCTYPE html><html><head><title>Admin Login</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"></head>';
-    echo '<body class="bg-dark text-light min-vh-100 d-flex align-items-center"><div class="container" style="max-width:400px;">';
-    echo '<h2 class="mb-4">KND Admin</h2>';
-    if (!empty($loginError)) echo '<div class="alert alert-danger">' . htmlspecialchars($loginError) . '</div>';
-    echo '<form method="post"><div class="mb-3"><label class="form-label">User</label><input type="text" name="admin_user" class="form-control bg-dark text-light border-secondary" required></div>';
-    echo '<div class="mb-3"><label class="form-label">Password</label><input type="password" name="admin_pass" class="form-control bg-dark text-light border-secondary" required></div>';
-    echo '<button type="submit" class="btn btn-primary w-100">Login</button></form></div></body></html>';
-    exit;
-}
+require_once __DIR__ . '/_guard.php';
+admin_require_login();
 
 $pdo = getDBConnection();
 if (!$pdo) {
@@ -75,6 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reward_action'])) {
                     "INSERT INTO rewards_catalog (title, description, category, points_cost, is_active, stock, created_at, updated_at)
                      VALUES (?, ?, ?, ?, 1, ?, ?, ?)"
                 )->execute([$title, $description, $category, $pointsCost, $stockVal, $now, $now]);
+                require_once __DIR__ . '/_audit.php';
+                admin_log_action('reward_create', ['title' => $title, 'points_cost' => $pointsCost]);
                 $flashMsg = "Reward '$title' created.";
                 $flashType = 'success';
             }
@@ -91,6 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reward_action'])) {
             $pdo->prepare(
                 "UPDATE rewards_catalog SET title=?, description=?, category=?, points_cost=?, is_active=?, stock=?, updated_at=? WHERE id=?"
             )->execute([$title, $description, $category, $pointsCost, $isActive, $stockVal, $now, $id]);
+            require_once __DIR__ . '/_audit.php';
+            admin_log_action('reward_update', ['reward_id' => $id, 'title' => $title]);
             $flashMsg = "Reward #$id updated.";
             $flashType = 'success';
         } elseif ($rewardAction === 'toggle') {
@@ -98,6 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reward_action'])) {
             $pdo->prepare(
                 "UPDATE rewards_catalog SET is_active = IF(is_active=1,0,1), updated_at=? WHERE id=?"
             )->execute([$now, $id]);
+            require_once __DIR__ . '/_audit.php';
+            admin_log_action('reward_toggle', ['reward_id' => $id]);
             $flashMsg = "Reward #$id toggled.";
             $flashType = 'success';
         }
