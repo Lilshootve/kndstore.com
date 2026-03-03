@@ -437,14 +437,14 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Navigation - Tech Futurista */
 .navbar {
-    background: linear-gradient(135deg, 
-        rgba(0, 0, 0, 0.95) 0%, 
-        rgba(20, 20, 40, 0.9) 50%, 
+    background: linear-gradient(135deg,
+        rgba(0, 0, 0, 0.95) 0%,
+        rgba(20, 20, 40, 0.9) 50%,
         rgba(0, 0, 0, 0.95) 100%) !important;
     backdrop-filter: blur(25px);
     border-bottom: 2px solid var(--knd-electric-purple);
     transition: all 0.3s ease;
-    box-shadow: 
+    box-shadow:
         0 6px 30px rgba(0, 0, 0, 0.9),
         0 0 50px rgba(138, 43, 226, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
@@ -454,7 +454,10 @@ h1, h2, h3, h4, h5, h6 {
     top: 0;
     width: 100%;
     z-index: 1000;
-    height: 120px;
+    min-height: 120px;
+    overflow: visible;
+    display: flex;
+    align-items: center;
 }
 
 /* Efecto de escaneo tech */
@@ -3649,13 +3652,44 @@ body.about-page,
     transition: all 0.3s ease;
 }
 
-/* ── KND Orders Dropdown ── */
-.navbar-nav .knd-dropdown { position: relative; }
+/* ── KND User block + Dropdown ── */
+.navbar-nav .knd-dropdown {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+}
+.knd-user-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+.knd-dropdown-toggle {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    padding: 6px 10px;
+}
+.knd-user-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+}
+.knd-user-badges .sc-nav-badge,
+.knd-user-badges .lvl-badge {
+    margin-left: 0;
+}
 .knd-dropdown-arrow { font-size: 0.55em; transition: transform .25s; vertical-align: middle; }
 .knd-dropdown-toggle[aria-expanded="true"] .knd-dropdown-arrow { transform: rotate(180deg); }
 .knd-dropdown-menu {
     display: none;
-    position: absolute; top: calc(100% + 6px); right: 0; left: auto; z-index: 1050;
+    position: absolute;
+    top: 100%;
+    margin-top: 6px;
+    right: 0;
+    left: auto;
+    z-index: 1050;
     min-width: 210px; padding: 10px 0 8px;
     background: rgba(10,12,18,.95); backdrop-filter: blur(18px) saturate(1.4);
     border: 1px solid rgba(0,212,255,.12); border-radius: 12px;
@@ -3690,7 +3724,9 @@ body.about-page,
 .knd-dropdown-item i { width: 18px; text-align: center; font-size: 12px; opacity: .7; }
 .knd-dropdown-toggle::after { display: none !important; }
 @media (max-width: 991.98px) {
-    .navbar-nav .knd-dropdown { position: static; }
+    .navbar-nav .knd-dropdown { position: static; align-items: stretch; }
+    .knd-user-block { align-items: flex-start; }
+    .knd-dropdown-toggle { padding: 10px 12px; }
     .knd-dropdown-menu {
         position: static !important;
         top: auto !important; right: auto !important; left: auto !important;
@@ -3707,6 +3743,9 @@ body.about-page,
         white-space: normal !important;
     }
     .knd-dropdown-arrow { font-size: 0.5em; }
+}
+@media (max-width: 899.98px) {
+    .knd-user-badges { display: none; }
 }
 
 /* Botones con especificidad para evitar conflictos con Bootstrap */

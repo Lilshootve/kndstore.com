@@ -127,22 +127,28 @@ function generateNavigation() {
     }
 
     $nav .= '                <li class="nav-item knd-dropdown">' . "\n";
-    $nav .= '                    <a id="ordersDropdownToggle" class="nav-link knd-dropdown-toggle' . ($accountActive ? ' active' : '') . '" href="javascript:void(0)" role="button" aria-expanded="false">' . "\n";
-    $nav .= '                        <i class="fas fa-user-circle me-1"></i>' . "\n";
+    $nav .= '                    <div class="knd-user-block">' . "\n";
+    $nav .= '                        <a id="ordersDropdownToggle" class="nav-link knd-dropdown-toggle' . ($accountActive ? ' active' : '') . '" href="javascript:void(0)" role="button" aria-expanded="false">' . "\n";
+    $nav .= '                            <i class="fas fa-user-circle me-1"></i>' . "\n";
     if ($drLoggedIn) {
-        $nav .= '                        ' . $drUsername . "\n";
+        $nav .= '                            ' . $drUsername . "\n";
     } else {
-        $nav .= '                        ' . t('nav.my_account', 'My Account') . "\n";
+        $nav .= '                            ' . t('nav.my_account', 'My Account') . "\n";
     }
-    $nav .= '                        <span id="order-count" class="badge rounded-pill bg-primary ms-1" style="display:none; min-width: 20px; justify-content: center; align-items: center;"></span>' . "\n";
-    if ($levelBadgeHtml) {
-        $nav .= '                        ' . $levelBadgeHtml . "\n";
+    $nav .= '                            <span id="order-count" class="badge rounded-pill bg-primary ms-1" style="display:none; min-width: 20px; justify-content: center; align-items: center;"></span>' . "\n";
+    $nav .= '                            <i class="fas fa-chevron-down knd-dropdown-arrow ms-1"></i>' . "\n";
+    $nav .= '                        </a>' . "\n";
+    if ($levelBadgeHtml || $creditsBadgeHtml) {
+        $nav .= '                        <div class="knd-user-badges">' . "\n";
+        if ($levelBadgeHtml) {
+            $nav .= '                            ' . $levelBadgeHtml . "\n";
+        }
+        if ($creditsBadgeHtml) {
+            $nav .= '                            ' . $creditsBadgeHtml . "\n";
+        }
+        $nav .= '                        </div>' . "\n";
     }
-    if ($creditsBadgeHtml) {
-        $nav .= '                        ' . $creditsBadgeHtml . "\n";
-    }
-    $nav .= '                        <i class="fas fa-chevron-down knd-dropdown-arrow ms-1"></i>' . "\n";
-    $nav .= '                    </a>' . "\n";
+    $nav .= '                    </div>' . "\n";
     $nav .= '                    <div id="ordersDropdownMenu" class="knd-dropdown-menu">' . "\n";
     $nav .= '                        <span class="knd-dropdown-hint">' . t('nav.orders_hint', 'Orders & account') . '</span>' . "\n";
     $nav .= '                        <a class="knd-dropdown-item' . ($current_page == 'order.php' ? ' active' : '') . '" href="/order.php"><i class="fas fa-cart-shopping me-2"></i>' . t('nav.my_orders', 'My Orders') . '</a>' . "\n";
