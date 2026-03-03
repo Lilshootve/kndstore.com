@@ -2,6 +2,7 @@
 ini_set('display_errors', '0');
 require_once __DIR__ . '/_guard.php';
 admin_require_login();
+admin_require_perm('users.view');
 require_once __DIR__ . '/../includes/csrf.php';
 require_once __DIR__ . '/../includes/rate_limit.php';
 require_once __DIR__ . '/../includes/support_credits.php';

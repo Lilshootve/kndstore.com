@@ -1,9 +1,10 @@
 <?php
 require_once __DIR__ . '/_guard.php';
 admin_require_login();
+admin_require_perm('system.purge_cache');
 
 require_once __DIR__ . '/_audit.php';
-admin_log_action('purge_cache');
+admin_log_action('purge_cache', ['reason' => 'Manual purge']);
 
 $results = [];
 

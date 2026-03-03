@@ -2,6 +2,7 @@
 ini_set('display_errors', '0');
 require_once __DIR__ . '/_guard.php';
 admin_require_login();
+admin_require_perm('payments.view');
 require_once __DIR__ . '/../includes/csrf.php';
 require_once __DIR__ . '/../includes/rate_limit.php';
 require_once __DIR__ . '/../includes/support_credits.php';
@@ -28,8 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
         switch ($_POST['action']) {
             case 'grant_available':
+                admin_require_perm('economy.adjust_kp');
                 $amount = (int) ($_POST['amount'] ?? 0);
                 if ($amount <= 0 || $amount > 1000000) throw new \Exception('Amount must be 1–1,000,000.');
+                admin_check_economy_limits($pdo, $amount);
                 $expiresAt = gmdate('Y-m-d H:i:s', strtotime('+12 months'));
                 $pdo->beginTransaction();
                 $pdo->prepare(
@@ -38,14 +41,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 )->execute([$targetUserId, $amount, $now, $expiresAt, $now]);
                 $pdo->commit();
                 require_once __DIR__ . '/_audit.php';
-                admin_log_action('kp_grant_available', ['user_id' => $targetUserId, 'amount' => $amount]);
+                $reason = trim($_POST['reason'] ?? '') ?: null;
+                admin_log_action('kp_grant_available', ['user_id' => $targetUserId, 'amount' => $amount, 'reason' => $reason]);
                 $flashMsg = "Granted {$amount} KP (available now) to user #{$targetUserId}.";
                 $flashType = 'success';
                 break;
 
             case 'grant_pending':
+                admin_require_perm('economy.adjust_kp');
                 $amount = (int) ($_POST['amount'] ?? 0);
                 if ($amount <= 0 || $amount > 1000000) throw new \Exception('Amount must be 1–1,000,000.');
+                admin_check_economy_limits($pdo, $amount);
                 $holdDays = compute_hold_business_days($pdo, $targetUserId);
                 $availableAt = add_business_days(new DateTime('now', new DateTimeZone('UTC')), $holdDays);
                 $expiresAt = (clone $availableAt)->modify('+12 months');
@@ -56,14 +62,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 )->execute([$targetUserId, $amount, $availableAt->format('Y-m-d H:i:s'), $expiresAt->format('Y-m-d H:i:s'), $now]);
                 $pdo->commit();
                 require_once __DIR__ . '/_audit.php';
-                admin_log_action('kp_grant_pending', ['user_id' => $targetUserId, 'amount' => $amount]);
+                $reason = trim($_POST['reason'] ?? '') ?: null;
+                admin_log_action('kp_grant_pending', ['user_id' => $targetUserId, 'amount' => $amount, 'reason' => $reason]);
                 $flashMsg = "Granted {$amount} KP (pending, available after {$holdDays} business days) to user #{$targetUserId}.";
                 $flashType = 'success';
                 break;
 
             case 'remove_points':
+                admin_require_perm('economy.adjust_kp');
                 $amount = (int) ($_POST['amount'] ?? 0);
                 if ($amount <= 0 || $amount > 1000000) throw new \Exception('Amount must be 1–1,000,000.');
+                admin_check_economy_limits($pdo, -$amount);
                 $pdo->beginTransaction();
                 $avail = get_available_points($pdo, $targetUserId);
                 if ($avail < $amount) {
@@ -76,12 +85,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 )->execute([$targetUserId, -$amount, $now]);
                 $pdo->commit();
                 require_once __DIR__ . '/_audit.php';
-                admin_log_action('kp_remove_points', ['user_id' => $targetUserId, 'amount' => $amount]);
+                $reason = trim($_POST['reason'] ?? '') ?: null;
+                admin_log_action('kp_remove_points', ['user_id' => $targetUserId, 'amount' => $amount, 'reason' => $reason]);
                 $flashMsg = "Removed {$amount} KP from user #{$targetUserId}.";
                 $flashType = 'success';
                 break;
 
             case 'force_release':
+                admin_require_perm('economy.adjust_kp');
+                admin_check_economy_limits($pdo, 1);
                 $mode = $_POST['release_mode'] ?? 'safe';
                 $pdo->beginTransaction();
                 if ($mode === 'override') {
@@ -96,7 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 }
                 $pdo->commit();
                 require_once __DIR__ . '/_audit.php';
-                admin_log_action('kp_force_release', ['user_id' => $targetUserId, 'mode' => $mode, 'count' => $count]);
+                $reason = trim($_POST['reason'] ?? '') ?: null;
+                admin_log_action('kp_force_release', ['user_id' => $targetUserId, 'mode' => $mode, 'count' => $count, 'reason' => $reason]);
                 $flashMsg = "Force release ({$mode}): {$count} entries moved to available for user #{$targetUserId}.";
                 $flashType = 'success';
                 break;

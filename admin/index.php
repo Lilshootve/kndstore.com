@@ -7,19 +7,6 @@ header('Pragma: no-cache');
 header('Expires: 0');
 header('X-Robots-Tag: noindex, nofollow');
 
-$secretsPath = __DIR__ . '/../config/admin_secrets.local.php';
-if (!file_exists($secretsPath)) {
-    http_response_code(500);
-    echo '<!DOCTYPE html><html><head><title>Admin - Configuration Error</title></head><body style="font-family:sans-serif;padding:2rem;background:#0a0a0a;color:#fff;">';
-    echo '<h1>Configuration Error</h1><p>Admin secrets file not found at:<br><code>' . htmlspecialchars($secretsPath) . '</code></p></body></html>';
-    exit;
-}
-$adminSecrets = require $secretsPath;
-if (!is_array($adminSecrets)) { http_response_code(500); echo 'Bad auth config'; exit; }
-$adminUser = trim($adminSecrets['admin_user'] ?? $adminSecrets['username'] ?? '');
-$adminPass = trim($adminSecrets['admin_pass'] ?? $adminSecrets['password'] ?? '');
-if ($adminUser === '' || $adminPass === '') { http_response_code(500); echo 'Admin credentials not configured.'; exit; }
-
 if (isset($_GET['logout'])) {
     $_SESSION = [];
     if (ini_get('session.use_cookies')) {
@@ -31,21 +18,43 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
+$loginError = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_user'], $_POST['admin_pass'])) {
-    if (hash_equals($adminUser, $_POST['admin_user']) && hash_equals($adminPass, $_POST['admin_pass'])) {
-        $_SESSION['admin_logged_in'] = true;
-        $_SESSION['admin_user'] = $adminUser;
-        require_once __DIR__ . '/_audit.php';
-        admin_log_action('admin_login_success');
-        header('Location: /admin/');
-        exit;
-    }
+    $userInput = trim($_POST['admin_user']);
+    $passInput = $_POST['admin_pass'];
     require_once __DIR__ . '/_audit.php';
-    admin_log_action('admin_login_failed');
-    $loginError = 'Invalid credentials.';
+
+    try {
+        $pdo = getDBConnection();
+        if (!$pdo) throw new \Exception('Database unavailable.');
+        $tables = $pdo->query("SHOW TABLES LIKE 'admin_users'")->rowCount();
+        if ($tables === 0) throw new \Exception('Admin users table not found. Run sql/admin_users.sql and seed an owner.');
+
+        $stmt = $pdo->prepare('SELECT id, username, password_hash, role FROM admin_users WHERE username = ? AND active = 1 LIMIT 1');
+        $stmt->execute([$userInput]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row && password_verify($passInput, $row['password_hash'])) {
+            $_SESSION['admin_logged_in'] = true;
+            $_SESSION['admin_id'] = (int) $row['id'];
+            $_SESSION['admin_role'] = $row['role'];
+            $_SESSION['admin_username'] = $row['username'];
+
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+            $pdo->prepare('UPDATE admin_users SET last_login_at = NOW(), last_login_ip = ? WHERE id = ?')->execute([$ip, $row['id']]);
+            admin_log_action('admin_login_success', ['admin_id' => (int) $row['id'], 'role' => $row['role']]);
+            header('Location: /admin/');
+            exit;
+        }
+    } catch (\Throwable $e) {
+        $loginError = $e->getMessage();
+    }
+    admin_log_action('admin_login_failed', ['username' => $userInput]);
+    if ($loginError === '') $loginError = 'Invalid credentials.';
 }
 
 if (empty($_SESSION['admin_logged_in'])) {
+    header('Content-Type: text/html; charset=utf-8');
     echo '<!DOCTYPE html><html><head><title>KND Admin</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"></head>';
     echo '<body class="bg-dark text-light min-vh-100 d-flex align-items-center"><div class="container" style="max-width:400px;">';
     echo '<h2 class="mb-4">KND Admin</h2>';
@@ -55,6 +64,9 @@ if (empty($_SESSION['admin_logged_in'])) {
     echo '<button type="submit" class="btn btn-primary w-100">Login</button></form></div></body></html>';
     exit;
 }
+
+require_once __DIR__ . '/_guard.php';
+admin_require_login();
 
 require_once __DIR__ . '/../includes/storage.php';
 ensure_storage_ready();
@@ -116,16 +128,19 @@ try {
 }
 
 $navCards = [
-    ['title' => 'Dashboard', 'desc' => 'Analytics, KP metrics, Top XP and alerts', 'href' => '/admin/dashboard.php', 'icon' => 'fa-chart-line', 'badge' => null, 'show' => true],
-    ['title' => 'User Management', 'desc' => 'List, search, filter and inspect all users', 'href' => '/admin/users.php', 'icon' => 'fa-users', 'badge' => $totalRegisteredUsers, 'show' => true],
-    ['title' => 'Order Management', 'desc' => 'View, filter and update all orders', 'href' => '/admin/orders.php', 'icon' => 'fa-clipboard-list', 'badge' => null, 'show' => true],
-    ['title' => 'KND Points', 'desc' => 'Review pending point purchases + redemptions', 'href' => '/admin/support-credits.php', 'icon' => 'fa-coins', 'badge' => $scPendingPayments, 'show' => true],
-    ['title' => 'Wallet Inspector', 'desc' => 'Audit and manage user KND Points balances', 'href' => '/admin/knd-points.php', 'icon' => 'fa-wallet', 'badge' => null, 'show' => true],
-    ['title' => 'Rewards Catalog', 'desc' => 'Manage rewards catalog and stock', 'href' => '/admin/rewards.php', 'icon' => 'fa-gift', 'badge' => $scRequestedRedemptions, 'show' => true],
-    ['title' => 'Leaderboard', 'desc' => 'Reset season, stats or all XP', 'href' => '/admin/leaderboard.php', 'icon' => 'fa-trophy', 'badge' => null, 'show' => true],
-    ['title' => 'Create Test Order', 'desc' => 'Generate a synthetic order for testing', 'href' => '/admin/test_order.php', 'icon' => 'fa-flask', 'badge' => null, 'show' => true],
-    ['title' => 'Storage Diagnostics', 'desc' => 'Inspect JSON files, permissions and sizes', 'href' => '/admin/debug_storage.php', 'icon' => 'fa-database', 'badge' => null, 'show' => file_exists(__DIR__ . '/debug_storage.php')],
-    ['title' => 'Email Test', 'desc' => 'Send a test confirmation email', 'href' => '/admin/email-test.php', 'icon' => 'fa-envelope', 'badge' => null, 'show' => file_exists(__DIR__ . '/email-test.php')],
+    ['title' => 'Dashboard', 'desc' => 'Analytics, KP metrics, Top XP and alerts', 'href' => '/admin/dashboard.php', 'icon' => 'fa-chart-line', 'perm' => 'dashboard.view', 'badge' => null],
+    ['title' => 'User Management', 'desc' => 'List, search, filter and inspect all users', 'href' => '/admin/users.php', 'icon' => 'fa-users', 'perm' => 'users.view', 'badge' => $totalRegisteredUsers],
+    ['title' => 'Order Management', 'desc' => 'View, filter and update all orders', 'href' => '/admin/orders.php', 'icon' => 'fa-clipboard-list', 'perm' => 'orders.view', 'badge' => null],
+    ['title' => 'KND Points', 'desc' => 'Review pending point purchases + redemptions', 'href' => '/admin/support-credits.php', 'icon' => 'fa-coins', 'perm' => 'payments.view', 'badge' => $scPendingPayments],
+    ['title' => 'Wallet Inspector', 'desc' => 'Audit and manage user KND Points balances', 'href' => '/admin/knd-points.php', 'icon' => 'fa-wallet', 'perm' => 'payments.view', 'badge' => null],
+    ['title' => 'Rewards Catalog', 'desc' => 'Manage rewards catalog and stock', 'href' => '/admin/rewards.php', 'icon' => 'fa-gift', 'perm' => 'rewards.edit', 'badge' => $scRequestedRedemptions],
+    ['title' => 'Leaderboard', 'desc' => 'Reset season, stats or all XP', 'href' => '/admin/leaderboard.php', 'icon' => 'fa-trophy', 'perm' => 'leaderboard.view', 'badge' => null],
+    ['title' => 'Audit Logs', 'desc' => 'View admin audit logs with filters', 'href' => '/admin/logs.php', 'icon' => 'fa-list-alt', 'perm' => 'logs.view', 'badge' => null],
+    ['title' => 'Create Test Order', 'desc' => 'Generate a synthetic order for testing', 'href' => '/admin/test_order.php', 'icon' => 'fa-flask', 'perm' => 'system.create_test_order', 'badge' => null],
+    ['title' => 'Storage Diagnostics', 'desc' => 'Inspect JSON files, permissions and sizes', 'href' => '/admin/debug_storage.php', 'icon' => 'fa-database', 'perm' => 'system.storage_diag', 'badge' => null, 'show' => file_exists(__DIR__ . '/debug_storage.php')],
+    ['title' => 'Path Diagnostics', 'desc' => 'Verify file paths and config', 'href' => '/admin/diag_paths.php', 'icon' => 'fa-folder-open', 'perm' => 'system.storage_diag', 'badge' => null],
+    ['title' => 'Purge Cache', 'desc' => 'Clear OPcache and LiteSpeed cache', 'href' => '/admin/purge_cache.php', 'icon' => 'fa-sync-alt', 'perm' => 'system.purge_cache', 'badge' => null],
+    ['title' => 'Email Test', 'desc' => 'Send a test confirmation email', 'href' => '/admin/email-test.php', 'icon' => 'fa-envelope', 'perm' => 'system.storage_diag', 'badge' => null, 'show' => file_exists(__DIR__ . '/email-test.php')],
 ];
 
 require_once __DIR__ . '/../includes/header.php';
@@ -140,6 +155,7 @@ echo generateHeader('KND Admin', 'Admin dashboard');
 .nav-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
 .nav-card { display: block; background: rgba(12,15,22,.85); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 1.75rem; text-decoration: none !important; color: #e8ecf0 !important; transition: border-color .2s, box-shadow .2s, transform .2s; }
 .nav-card:hover { border-color: rgba(0,212,255,.35); box-shadow: 0 0 24px rgba(0,212,255,.12); transform: translateY(-3px); }
+.nav-card-locked { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
 .nav-card .card-icon { font-size: 1.6rem; color: var(--cyan); margin-bottom: .75rem; }
 .nav-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: .4rem; }
 .nav-card p { font-size: .85rem; color: rgba(255,255,255,.5); margin: 0; }
@@ -178,7 +194,21 @@ echo generateHeader('KND Admin', 'Admin dashboard');
     </div>
 
     <div class="nav-cards">
-        <?php foreach ($navCards as $card): if (!$card['show']) continue; ?>
+        <?php foreach ($navCards as $card):
+            if (isset($card['show']) && !$card['show']) continue;
+            $canAccess = admin_has_perm($card['perm']);
+            if (!$canAccess) {
+                ?><div class="nav-card nav-card-locked" title="Insufficient permissions">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="card-icon"><i class="fas <?php echo $card['icon']; ?>"></i></div>
+                        <span class="badge bg-secondary">Locked</span>
+                    </div>
+                    <h3><?php echo htmlspecialchars($card['title']); ?></h3>
+                    <p class="text-muted">Insufficient permissions</p>
+                </div><?php
+                continue;
+            }
+        ?>
         <a href="<?php echo $card['href']; ?>" class="nav-card">
             <div class="d-flex justify-content-between align-items-start">
                 <div class="card-icon"><i class="fas <?php echo $card['icon']; ?>"></i></div>

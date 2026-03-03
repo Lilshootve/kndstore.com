@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/_guard.php';
 admin_require_login();
+admin_require_perm('system.storage_diag');
 
 header('Content-Type: text/html; charset=utf-8');
 

@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/_guard.php';
 admin_require_login();
+admin_require_perm('orders.view');
 
 require_once __DIR__ . '/../includes/storage.php';
 

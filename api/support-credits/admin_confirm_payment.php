@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/json.php';
 require_once __DIR__ . '/../../includes/support_credits.php';
+require_once __DIR__ . '/../../admin/_rbac.php';
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -16,6 +17,9 @@ try {
 
     if (empty($_SESSION['admin_logged_in'])) {
         json_error('ADMIN_REQUIRED', 'Admin access required.', 403);
+    }
+    if (!admin_has_perm('payments.confirm')) {
+        json_error('FORBIDDEN', 'Insufficient permissions.', 403);
     }
 
     $pdo = getDBConnection();

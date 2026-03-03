@@ -2,6 +2,7 @@
 ini_set('display_errors', '0');
 require_once __DIR__ . '/_guard.php';
 admin_require_login();
+admin_require_perm('leaderboard.view');
 require_once __DIR__ . '/../includes/csrf.php';
 require_once __DIR__ . '/../includes/rate_limit.php';
 require_once __DIR__ . '/../includes/knd_xp.php';
@@ -22,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
         switch ($_POST['action']) {
             case 'new_season':
+                admin_require_perm('leaderboard.reset_season');
                 $pdo->prepare("UPDATE knd_seasons SET is_active = 0 WHERE is_active = 1")->execute();
                 $stmt = $pdo->query("SELECT COALESCE(MAX(id), 0) + 1 AS n FROM knd_seasons");
                 $n = (int) $stmt->fetchColumn();
@@ -36,15 +38,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 break;
 
             case 'reset_season_stats':
+                admin_require_perm('leaderboard.reset_season');
                 $pdo->prepare("DELETE FROM knd_season_stats")->execute();
                 @unlink(sys_get_temp_dir() . '/knd_lb/state_v2.json');
                 require_once __DIR__ . '/_audit.php';
-                admin_log_action('leaderboard_reset_season_stats');
+                $reason = trim($_POST['reason'] ?? '') ?: null;
+                admin_log_action('leaderboard_reset_season_stats', ['reason' => $reason]);
                 $flashMsg = 'Season stats cleared. Tab "Season" will show no data until users play again.';
                 $flashType = 'success';
                 break;
 
             case 'reset_all_xp':
+                admin_require_perm('leaderboard.reset_season');
                 $pdo->beginTransaction();
                 try {
                     $pdo->exec("DELETE FROM knd_season_stats");
@@ -55,7 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     $pdo->commit();
                     @unlink(sys_get_temp_dir() . '/knd_lb/state_v2.json');
                     require_once __DIR__ . '/_audit.php';
-                    admin_log_action('leaderboard_reset_all_xp');
+                    $reason = trim($_POST['reason'] ?? '') ?: null;
+                    admin_log_action('leaderboard_reset_all_xp', ['reason' => $reason]);
                     $flashMsg = 'All XP cleared. Hall of Fame and Season both start from zero.';
                     $flashType = 'success';
                 } catch (\Throwable $e) {
@@ -65,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 break;
 
             case 'reactivate_season':
+                admin_require_perm('leaderboard.reset_season');
                 $sid = (int) ($_POST['season_id'] ?? 0);
                 if ($sid <= 0) throw new \Exception('Invalid season ID.');
                 $pdo->prepare("UPDATE knd_seasons SET is_active = 0")->execute();
@@ -80,7 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 }
                 @unlink(sys_get_temp_dir() . '/knd_lb/state_v2.json');
                 require_once __DIR__ . '/_audit.php';
-                admin_log_action('leaderboard_reactivate_season', ['season_id' => $sid]);
+                $reason = trim($_POST['reason'] ?? '') ?: null;
+                admin_log_action('leaderboard_reactivate_season', ['season_id' => $sid, 'reason' => $reason]);
                 $flashType = 'success';
                 break;
 

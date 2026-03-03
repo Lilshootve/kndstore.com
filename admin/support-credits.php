@@ -2,6 +2,7 @@
 ini_set('display_errors', '0');
 require_once __DIR__ . '/_guard.php';
 admin_require_login();
+admin_require_perm('payments.view');
 require_once __DIR__ . '/../includes/support_credits.php';
 
 $pdo = getDBConnection();
@@ -19,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type'])) {
     $notes = trim($_POST['admin_notes'] ?? '') ?: null;
 
     if ($paymentId > 0 && in_array($action, ['confirm', 'reject', 'dispute', 'refund'])) {
+        admin_require_perm('payments.confirm');
         try {
             $result = admin_update_payment($pdo, $paymentId, $action, $notes);
             if (isset($result['error'])) {
@@ -33,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type'])) {
                     'payment_id' => $paymentId,
                     'user_id' => $pmRow ? (int) $pmRow['user_id'] : null,
                     'amount_usd' => $pmRow ? $pmRow['amount_usd'] : null,
+                    'reason' => $notes,
                 ]);
                 $flashMsg = "Payment #$paymentId: $action successful.";
                 $flashType = 'success';
@@ -50,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type'])) {
         $validRedeemActions = ['approved', 'fulfilled', 'rejected', 'cancelled'];
 
         if ($redeemId > 0 && in_array($redeemAction, $validRedeemActions)) {
+            admin_require_perm('payments.confirm');
             try {
                 $now = gmdate('Y-m-d H:i:s');
                 $pdo->prepare(
@@ -70,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type'])) {
                     'redemption_id' => $redeemId,
                     'user_id' => $rd ? (int) $rd['user_id'] : null,
                     'points_spent' => $rd ? (int) $rd['points_spent'] : null,
+                    'reason' => $redeemNotes,
                 ]);
                 $flashMsg = "Redemption #$redeemId: $redeemAction.";
                 $flashType = 'success';

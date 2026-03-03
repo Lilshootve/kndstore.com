@@ -1,10 +1,11 @@
 <?php
 /**
  * Admin guard - middleware común para páginas protegidas.
- * Proporciona: session, config, headers no-cache y helper admin_require_login().
+ * Proporciona: session, config, headers no-cache, admin_require_login(), _rbac.
  */
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/_rbac.php';
 
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
