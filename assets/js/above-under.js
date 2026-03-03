@@ -149,19 +149,28 @@
                 var remaining = Math.max(0, ROLL_DURATION_MS - elapsed);
 
                 if (d.ok) {
-                    if (d.data.level_up && d.data.old_level != null && d.data.new_level != null && typeof showLevelUp === 'function') {
-                        setTimeout(function () { showLevelUp(d.data.old_level, d.data.new_level); }, remaining + 400);
+                    var dx = d.data;
+                    if (dx.xp_delta > 0 && typeof showXpGain === 'function') {
+                        setTimeout(function () { showXpGain(dx.xp_delta); }, remaining + 150);
+                    }
+                    if (dx.level_up && dx.old_level != null && dx.new_level != null) {
+                        if (typeof showLevelUp === 'function') {
+                            setTimeout(function () { showLevelUp(dx.old_level, dx.new_level); }, remaining + 400);
+                        }
+                        if (typeof kndToast === 'function') {
+                            setTimeout(function () { kndToast('success', 'Level Up: ' + dx.old_level + ' → ' + dx.new_level); }, remaining + 500);
+                        }
                     }
                     setTimeout(function () {
-                        stopRoll(d.data.rolled, d.data.win, d.data.choice, d.data.entry, d.data.payout, d.data.xp_awarded);
-                        updateBalance(d.data.points_balance);
+                        stopRoll(dx.rolled, dx.win, dx.choice, dx.entry, dx.payout, dx.xp_awarded);
+                        updateBalance(dx.points_balance);
                         addHistoryRow({
-                            choice: d.data.choice,
-                            rolled: d.data.rolled,
-                            win: d.data.win,
-                            payout: d.data.payout,
-                            entry: d.data.entry,
-                            xp: d.data.xp_awarded
+                            choice: dx.choice,
+                            rolled: dx.rolled,
+                            win: dx.win,
+                            payout: dx.payout,
+                            entry: dx.entry,
+                            xp: dx.xp_awarded
                         });
                     }, remaining);
                 } else {
@@ -172,8 +181,10 @@
                     rolling = false;
                     setButtons(true);
                     if (entrySelect) entrySelect.disabled = false;
-                    resultBanner.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>' + (d.error && d.error.message || 'Error') + '</div>';
+                    var errMsg = d.error && d.error.message || 'Error';
+                    resultBanner.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>' + errMsg + '</div>';
                     resultBanner.style.display = 'block';
+                    if (typeof kndToast === 'function') kndToast('error', errMsg);
                 }
             })
             .catch(function () {
@@ -186,6 +197,7 @@
                 if (entrySelect) entrySelect.disabled = false;
                 resultBanner.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Network error. Try again.</div>';
                 resultBanner.style.display = 'block';
+                if (typeof kndToast === 'function') kndToast('error', 'Network error. Try again.');
             });
     }
 

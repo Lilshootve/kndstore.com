@@ -193,6 +193,11 @@ function generateScripts() {
     
     // Scroll suave por bloques
     $scripts .= '<script src="assets/js/scroll-smooth.js" defer></script>' . "\n";
+
+    // Feedback visual global: Toast, XP pop, Confetti (Legendary)
+    $scripts .= '<script src="assets/js/knd-toast.js" defer></script>' . "\n";
+    $scripts .= '<script src="assets/js/knd-xp-fx.js" defer></script>' . "\n";
+    $scripts .= '<script src="assets/js/knd-confetti.js" defer></script>' . "\n";
     
     // Configuración de partículas para el footer
     $scripts .= '<script>' . "\n";

@@ -143,6 +143,9 @@ try {
         $state['level_up'] = $xpResult['level_up'];
         $state['old_level'] = $xpResult['old_level'];
         $state['new_level'] = $xpResult['new_level'];
+        $state['xp_delta'] = 5;
+        $state['xp_total'] = $xpResult['new_xp'] ?? 0;
+        $state['level'] = $xpResult['new_level'];
     }
 
     $pdo->commit();

@@ -104,6 +104,7 @@ function daily_claim(PDO $pdo, int $userId): array {
         )->execute([$userId, $rewardKp, $now, $expiresAt, $now]);
 
         $levelUp = null;
+        $xpRes = null;
         if ($bonusXp > 0) {
             $xpRes = xp_add($pdo, $userId, $bonusXp, 'daily_day7', null, null);
             if ($xpRes['level_up']) {
@@ -121,6 +122,11 @@ function daily_claim(PDO $pdo, int $userId): array {
             'bonus_xp'  => $bonusXp,
             'balance'   => get_available_points($pdo, $userId),
         ];
+        if ($bonusXp > 0 && $xpRes) {
+            $out['xp_delta'] = $bonusXp;
+            $out['xp_total'] = $xpRes['new_xp'] ?? 0;
+            $out['level'] = $xpRes['new_level'];
+        }
         if ($levelUp) {
             $out['level_up'] = true;
             $out['old_level'] = $levelUp['old_level'];
@@ -268,6 +274,7 @@ function mission_claim(PDO $pdo, int $userId, string $missionCode): array {
         }
 
         $levelUp = null;
+        $xpRes = null;
         if ($rewardXp > 0) {
             $xpRes = xp_add($pdo, $userId, $rewardXp, 'mission_reward', 'daily_mission', $mid);
             if ($xpRes['level_up']) {
@@ -285,6 +292,11 @@ function mission_claim(PDO $pdo, int $userId, string $missionCode): array {
             'reward_xp' => $rewardXp,
             'balance'   => get_available_points($pdo, $userId),
         ];
+        if ($rewardXp > 0 && $xpRes) {
+            $out['xp_delta'] = $rewardXp;
+            $out['xp_total'] = $xpRes['new_xp'] ?? 0;
+            $out['level'] = $xpRes['new_level'];
+        }
         if ($levelUp) {
             $out['level_up'] = true;
             $out['old_level'] = $levelUp['old_level'];

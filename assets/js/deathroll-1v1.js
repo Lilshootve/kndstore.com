@@ -809,9 +809,19 @@
             }).then(function (d) {
                 if (d.ok) {
                     if (typeof d.data.my_kp_balance !== 'undefined') updateNavBadge(d.data.my_kp_balance);
-                    if (d.data.level_up && d.data.old_level != null && d.data.new_level != null && typeof showLevelUp === 'function') {
+                    var ddata = d.data;
+                    if (ddata.xp_delta > 0 && typeof showXpGain === 'function') {
+                        var xpDelay = Math.max(0, MIN_ROLL_MS - (Date.now() - rollStartTime)) + 200;
+                        setTimeout(function () { showXpGain(ddata.xp_delta); }, xpDelay);
+                    }
+                    if (ddata.level_up && ddata.old_level != null && ddata.new_level != null) {
                         var delay = Math.max(0, MIN_ROLL_MS - (Date.now() - rollStartTime)) + 300;
-                        setTimeout(function () { showLevelUp(d.data.old_level, d.data.new_level); }, delay);
+                        if (typeof showLevelUp === 'function') {
+                            setTimeout(function () { showLevelUp(ddata.old_level, ddata.new_level); }, delay);
+                        }
+                        if (typeof kndToast === 'function') {
+                            setTimeout(function () { kndToast('success', 'Level Up: ' + ddata.old_level + ' → ' + ddata.new_level); }, delay + 400);
+                        }
                     }
                     var myLastRoll = '';
                     if (d.data.rolls && d.data.rolls.length > 0) {
@@ -830,7 +840,8 @@
                     isRolling = false;
                     btnRoll.innerHTML = '<i class="fas fa-dice me-2"></i>ROLL!';
                     stopDiceRoll('');
-                    alert(d.error.message);
+                    if (typeof kndToast === 'function') kndToast('error', d.error.message);
+                    else alert(d.error.message);
                     pollState();
                 }
             }).catch(function () {

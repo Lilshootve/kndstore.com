@@ -94,18 +94,29 @@
                 .then(function (r) { return r.json(); })
                 .then(function (d) {
                     if (d.ok) {
-                        if (d.data.level_up && d.data.old_level != null && d.data.new_level != null && typeof showLevelUp === 'function') {
-                            setTimeout(function () { showLevelUp(d.data.old_level, d.data.new_level); }, 400);
+                        var dd = d.data;
+                        if (dd.xp_delta > 0 && typeof showXpGain === 'function') {
+                            setTimeout(function () { showXpGain(dd.xp_delta); }, 200);
                         }
-                        var msg = '+' + d.data.reward_kp + ' KP';
-                        if (d.data.bonus_xp > 0) msg += ' + ' + d.data.bonus_xp + ' XP';
+                        if (dd.level_up && dd.old_level != null && dd.new_level != null) {
+                            if (typeof showLevelUp === 'function') {
+                                setTimeout(function () { showLevelUp(dd.old_level, dd.new_level); }, 400);
+                            }
+                            if (typeof kndToast === 'function') {
+                                setTimeout(function () { kndToast('success', 'Level Up: ' + dd.old_level + ' → ' + dd.new_level); }, 500);
+                            }
+                        }
+                        var msg = '+' + dd.reward_kp + ' KP';
+                        if (dd.bonus_xp > 0) msg += ' + ' + dd.bonus_xp + ' XP';
                         dailyMsg.innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-1"></i>' + msg + '</span>';
                         dailyMsg.style.display = 'block';
-                        updateNavBadge(d.data.balance);
+                        updateNavBadge(dd.balance);
                         loadDaily();
                     } else {
-                        dailyMsg.innerHTML = '<span class="text-danger">' + (d.error && d.error.message || 'Error') + '</span>';
+                        var errMsg = d.error && d.error.message || 'Error';
+                        dailyMsg.innerHTML = '<span class="text-danger">' + errMsg + '</span>';
                         dailyMsg.style.display = 'block';
+                        if (typeof kndToast === 'function') kndToast('error', errMsg);
                         claimBtn.disabled = false;
                         claimText.textContent = 'Claim';
                     }
@@ -113,6 +124,7 @@
                 .catch(function () {
                     dailyMsg.innerHTML = '<span class="text-danger">Network error</span>';
                     dailyMsg.style.display = 'block';
+                    if (typeof kndToast === 'function') kndToast('error', 'Network error');
                     claimBtn.disabled = false;
                     claimText.textContent = 'Claim';
                 });
@@ -173,19 +185,31 @@
                     .then(function (r) { return r.json(); })
                     .then(function (d) {
                         if (d.ok) {
-                            if (d.data.level_up && d.data.old_level != null && d.data.new_level != null && typeof showLevelUp === 'function') {
-                                setTimeout(function () { showLevelUp(d.data.old_level, d.data.new_level); }, 400);
+                            var dd = d.data;
+                            if (dd.xp_delta > 0 && typeof showXpGain === 'function') {
+                                setTimeout(function () { showXpGain(dd.xp_delta); }, 200);
                             }
-                            updateNavBadge(d.data.balance);
+                            if (dd.level_up && dd.old_level != null && dd.new_level != null) {
+                                if (typeof showLevelUp === 'function') {
+                                    setTimeout(function () { showLevelUp(dd.old_level, dd.new_level); }, 400);
+                                }
+                                if (typeof kndToast === 'function') {
+                                    setTimeout(function () { kndToast('success', 'Level Up: ' + dd.old_level + ' → ' + dd.new_level); }, 500);
+                                }
+                            }
+                            updateNavBadge(dd.balance);
                             loadMissions();
                         } else {
+                            var errMsg = d.error && d.error.message || 'Error';
+                            if (typeof kndToast === 'function') kndToast('error', errMsg);
                             btnEl.disabled = false;
-                            btnEl.textContent = 'Error';
+                            btnEl.textContent = 'Claim';
                         }
                     })
                     .catch(function () {
+                        if (typeof kndToast === 'function') kndToast('error', 'Network error');
                         btnEl.disabled = false;
-                        btnEl.textContent = 'Error';
+                        btnEl.textContent = 'Claim';
                     });
             });
         });

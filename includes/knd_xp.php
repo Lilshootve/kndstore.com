@@ -121,6 +121,7 @@ function xp_add(PDO $pdo, int $userId, int $xpDelta, string $source, ?string $re
             'level_up'   => $levelUp,
             'old_level'  => $oldLevel,
             'new_level'  => $level,
+            'new_xp'     => $newXp,
         ];
     } catch (\Throwable $e) {
         if ($ownTx && $pdo->inTransaction()) $pdo->rollBack();

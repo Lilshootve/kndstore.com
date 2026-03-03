@@ -114,20 +114,34 @@
                     capsuleEl.classList.remove('scanning');
 
                     if (d.ok) {
-                        if (d.data.level_up && d.data.old_level != null && d.data.new_level != null && typeof showLevelUp === 'function') {
-                            setTimeout(function () { showLevelUp(d.data.old_level, d.data.new_level); }, 1200);
+                        var dd = d.data;
+                        if (dd.xp_delta > 0 && typeof showXpGain === 'function') {
+                            setTimeout(function () { showXpGain(dd.xp_delta); }, remaining + 100);
                         }
-                        var rarity = d.data.rarity;
+                        if (dd.level_up && dd.old_level != null && dd.new_level != null) {
+                            if (typeof showLevelUp === 'function') {
+                                setTimeout(function () { showLevelUp(dd.old_level, dd.new_level); }, 1200);
+                            }
+                            if (typeof kndToast === 'function') {
+                                setTimeout(function () { kndToast('success', 'Level Up: ' + dd.old_level + ' → ' + dd.new_level); }, 1300);
+                            }
+                        }
+                        var rarity = dd.rarity;
                         capsuleEl.classList.add('drop-rarity-' + rarity);
                         var rc = rarityStyles[rarity] || rarityStyles.common;
-                        var rewardLabel = d.data.reward_kp > 0 ? '+' + d.data.reward_kp : '0';
+                        var rewardLabel = dd.reward_kp > 0 ? '+' + dd.reward_kp : '0';
                         capsuleEl.querySelector('.drop-capsule-inner').innerHTML =
                             '<div style="font-size:.55rem; text-transform:uppercase; color:' + rc.text + '; font-weight:700;">' + rarity + '</div>'
                             + '<div style="font-size:.85rem; font-weight:900; color:#fff;">' + rewardLabel + '</div>';
 
-                        showResult(d.data);
-                        updateBalance(d.data.balance);
-                        addHistoryRow(d.data);
+                        if (rarity === 'legendary') {
+                            if (typeof kndConfetti === 'function') kndConfetti();
+                            if (typeof kndToast === 'function') kndToast('success', 'LEGENDARY DROP!');
+                        }
+
+                        showResult(dd);
+                        updateBalance(dd.balance);
+                        addHistoryRow(dd);
 
                         setTimeout(function () {
                             resetCapsule(capsuleEl);
@@ -136,8 +150,10 @@
                         }, 2000);
                     } else {
                         resetCapsule(capsuleEl);
-                        resultEl.innerHTML = '<div class="alert alert-danger text-center mb-0"><i class="fas fa-exclamation-triangle me-2"></i>' + (d.error && d.error.message || 'Error') + '</div>';
+                        var errMsg = d.error && d.error.message || 'Error';
+                        resultEl.innerHTML = '<div class="alert alert-danger text-center mb-0"><i class="fas fa-exclamation-triangle me-2"></i>' + errMsg + '</div>';
                         resultEl.style.display = 'block';
+                        if (typeof kndToast === 'function') kndToast('error', errMsg);
                         playing = false;
                         setCapsules(true);
                     }
@@ -147,6 +163,7 @@
                 resetCapsule(capsuleEl);
                 resultEl.innerHTML = '<div class="alert alert-danger text-center mb-0">Network error. Try again.</div>';
                 resultEl.style.display = 'block';
+                if (typeof kndToast === 'function') kndToast('error', 'Network error. Try again.');
                 playing = false;
                 setCapsules(true);
             });

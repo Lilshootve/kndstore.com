@@ -109,6 +109,9 @@ try {
             'payout'         => $payout,
             'points_balance' => $newBalance,
             'xp_awarded'     => $xp,
+            'xp_delta'       => $xp,
+            'xp_total'       => $xpResult['new_xp'] ?? 0,
+            'level'          => $xpResult['new_level'],
         ];
         if ($xpResult['level_up']) {
             $resp['level_up'] = true;

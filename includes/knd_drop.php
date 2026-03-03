@@ -145,6 +145,11 @@ function drop_play(PDO $pdo, int $userId): array {
             'xp_awarded'=> $xp,
             'balance'  => get_available_points($pdo, $userId),
         ];
+        if ($xp > 0 && $xpRes) {
+            $out['xp_delta'] = $xp;
+            $out['xp_total'] = $xpRes['new_xp'] ?? 0;
+            $out['level'] = $xpRes['new_level'];
+        }
         if ($levelUp) {
             $out['level_up'] = true;
             $out['old_level'] = $levelUp['old_level'];
