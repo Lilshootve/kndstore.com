@@ -121,6 +121,9 @@
 
     # Game Fairness
     RewriteRule ^game-fairness/?$ /game-fairness.php [L]
+
+    # How KND Arena Works
+    RewriteRule ^how-knd-arena-works/?$ /how-knd-arena-works.php [L]
 </IfModule>
 
 # Configuración de compresión adicional
