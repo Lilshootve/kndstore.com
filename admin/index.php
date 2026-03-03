@@ -136,6 +136,7 @@ $navCards = [
     ['title' => 'Rewards Catalog', 'desc' => 'Manage rewards catalog and stock', 'href' => '/admin/rewards.php', 'icon' => 'fa-gift', 'perm' => 'rewards.edit', 'badge' => $scRequestedRedemptions],
     ['title' => 'Leaderboard', 'desc' => 'Reset season, stats or all XP', 'href' => '/admin/leaderboard.php', 'icon' => 'fa-trophy', 'perm' => 'leaderboard.view', 'badge' => null],
     ['title' => 'Audit Logs', 'desc' => 'View admin audit logs with filters', 'href' => '/admin/logs.php', 'icon' => 'fa-list-alt', 'perm' => 'logs.view', 'badge' => null],
+    ['title' => 'Admin Users', 'desc' => 'Manage admin accounts, roles and permissions (owner only)', 'href' => '/admin/admin-users.php', 'icon' => 'fa-user-shield', 'perm' => 'admin_users.view', 'badge' => null],
     ['title' => 'Create Test Order', 'desc' => 'Generate a synthetic order for testing', 'href' => '/admin/test_order.php', 'icon' => 'fa-flask', 'perm' => 'system.create_test_order', 'badge' => null],
     ['title' => 'Storage Diagnostics', 'desc' => 'Inspect JSON files, permissions and sizes', 'href' => '/admin/debug_storage.php', 'icon' => 'fa-database', 'perm' => 'system.storage_diag', 'badge' => null, 'show' => file_exists(__DIR__ . '/debug_storage.php')],
     ['title' => 'Path Diagnostics', 'desc' => 'Verify file paths and config', 'href' => '/admin/diag_paths.php', 'icon' => 'fa-folder-open', 'perm' => 'system.storage_diag', 'badge' => null],

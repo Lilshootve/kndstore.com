@@ -8,7 +8,7 @@ require_once __DIR__ . '/../includes/config.php';
 
 // Role -> permissions map. Owner gets all (checked via role name).
 $GLOBALS['_admin_role_permissions'] = [
-    'owner'   => ['*'], // all
+    'owner'   => ['*'], // all (incl. admin_users.view, .create, .edit, .reset_password)
     'manager' => [
         'dashboard.view', 'users.view', 'orders.view', 'payments.view', 'payments.confirm',
         'rewards.edit', 'leaderboard.view', 'leaderboard.reset_season', 'logs.view',
