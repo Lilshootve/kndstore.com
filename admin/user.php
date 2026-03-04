@@ -6,6 +6,7 @@ admin_require_perm('users.view');
 require_once __DIR__ . '/../includes/csrf.php';
 require_once __DIR__ . '/../includes/rate_limit.php';
 require_once __DIR__ . '/../includes/support_credits.php';
+require_once __DIR__ . '/../includes/knd_xp.php';
 
 $pdo = getDBConnection();
 if (!$pdo) { echo 'DB connection failed.'; exit; }
@@ -96,6 +97,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $flashType = 'success';
                 break;
 
+            case 'level_up':
+                admin_require_perm('leaderboard.view');
+                $stmt = $pdo->prepare('SELECT xp FROM knd_user_xp WHERE user_id = ?');
+                $stmt->execute([$userId]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                $curXp = $row ? (int) $row['xp'] : 0;
+                $curLvl = xp_calc_level($curXp);
+                if ($curLvl >= 30) throw new \Exception('User already at max level.');
+                $xpNeeded = 100 * ($curLvl ** 2) - $curXp;
+                if ($xpNeeded < 1) $xpNeeded = 1;
+                $res = xp_admin_adjust($pdo, $userId, $xpNeeded);
+                require_once __DIR__ . '/_audit.php';
+                admin_log_action('xp_admin_level_up', ['user_id' => $userId, 'old_level' => $curLvl, 'new_level' => $res['level']]);
+                $flashMsg = "Level up: {$curLvl} → {$res['level']} (+{$xpNeeded} XP).";
+                $flashType = 'success';
+                break;
+
+            case 'level_down':
+                admin_require_perm('leaderboard.view');
+                $stmt = $pdo->prepare('SELECT xp FROM knd_user_xp WHERE user_id = ?');
+                $stmt->execute([$userId]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                $curXp = $row ? (int) $row['xp'] : 0;
+                $curLvl = xp_calc_level($curXp);
+                if ($curLvl <= 1) throw new \Exception('User already at level 1.');
+                $targetXp = 100 * (max(0, $curLvl - 2) ** 2);
+                $delta = $targetXp - $curXp;
+                $res = xp_admin_adjust($pdo, $userId, $delta);
+                require_once __DIR__ . '/_audit.php';
+                admin_log_action('xp_admin_level_down', ['user_id' => $userId, 'old_level' => $curLvl, 'new_level' => $res['level']]);
+                $flashMsg = "Level down: {$curLvl} → {$res['level']}.";
+                $flashType = 'success';
+                break;
+
             default:
                 throw new \Exception('Unknown action.');
         }
@@ -141,13 +176,23 @@ try {
     $lastSeen = $row['last_seen'] ?? null;
 } catch (\Throwable $e) {}
 
-// XP
+// XP & Level (knd_user_xp preferred)
 $xpTotal = 0;
+$userLevel = 1;
 try {
-    $stmt = $pdo->prepare('SELECT xp FROM user_xp WHERE user_id = ?');
+    $stmt = $pdo->prepare('SELECT xp, level FROM knd_user_xp WHERE user_id = ?');
     $stmt->execute([$userId]);
-    $xpRow = $stmt->fetch();
-    $xpTotal = (int) ($xpRow['xp'] ?? 0);
+    $xpRow = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($xpRow) {
+        $xpTotal = (int) ($xpRow['xp'] ?? 0);
+        $userLevel = min(30, max(1, (int) ($xpRow['level'] ?? 1)));
+    } else {
+        $stmt = $pdo->prepare('SELECT xp FROM user_xp WHERE user_id = ?');
+        $stmt->execute([$userId]);
+        $xpRow = $stmt->fetch(PDO::FETCH_ASSOC);
+        $xpTotal = (int) ($xpRow['xp'] ?? 0);
+        $userLevel = xp_calc_level($xpTotal);
+    }
 } catch (\Throwable $e) {}
 
 // LastRoll stats
@@ -316,6 +361,7 @@ echo generateHeader('User #' . $userId, 'Admin user detail');
             <div class="ud-card ud-stat-card">
                 <div class="ud-kpi"><?php echo number_format($xpTotal); ?></div>
                 <div class="ud-kpi-sm">Total XP</div>
+                <div style="font-size:.7rem; margin-top:.3rem;">Level <?php echo $userLevel; ?></div>
             </div>
         </div>
         <div class="col-6 col-lg-3">
@@ -395,6 +441,23 @@ echo generateHeader('User #' . $userId, 'Admin user detail');
         </div>
         <div class="row g-3 mt-1">
             <div class="col-md-4">
+                <?php if (admin_has_perm('leaderboard.view')): ?>
+                <div class="p-2 rounded mb-2" style="border:1px solid rgba(255,255,255,.06);">
+                    <label class="form-label small text-white-50">Level (<?php echo $userLevel; ?>/30)</label>
+                    <div class="d-flex gap-1">
+                        <form method="post" class="flex-grow-1" onsubmit="return confirm('Subir de nivel a este usuario?');">
+                            <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                            <input type="hidden" name="action" value="level_up">
+                            <button class="btn btn-success btn-sm w-100" <?php echo $userLevel >= 30 ? 'disabled' : ''; ?>><i class="fas fa-arrow-up me-1"></i>+1</button>
+                        </form>
+                        <form method="post" class="flex-grow-1" onsubmit="return confirm('Bajar de nivel a este usuario?');">
+                            <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                            <input type="hidden" name="action" value="level_down">
+                            <button class="btn btn-danger btn-sm w-100" <?php echo $userLevel <= 1 ? 'disabled' : ''; ?>><i class="fas fa-arrow-down me-1"></i>-1</button>
+                        </form>
+                    </div>
+                </div>
+                <?php endif; ?>
                 <form method="post" class="p-2 rounded" style="border:1px solid rgba(255,255,255,.06);">
                     <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                     <input type="hidden" name="action" value="toggle_risk">

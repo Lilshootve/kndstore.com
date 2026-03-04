@@ -128,3 +128,38 @@ function xp_add(PDO $pdo, int $userId, int $xpDelta, string $source, ?string $re
         throw $e;
     }
 }
+
+/**
+ * Admin-only: adjust user XP by delta (positive or negative). Updates knd_user_xp and user_xp.
+ * @return array{level:int,xp:int}
+ */
+function xp_admin_adjust(PDO $pdo, int $userId, int $delta): array {
+    $ownTx = !$pdo->inTransaction();
+    if ($ownTx) $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare('SELECT xp FROM knd_user_xp WHERE user_id = ? FOR UPDATE');
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $oldXp = $row ? (int) $row['xp'] : 0;
+        $newXp = max(0, $oldXp + $delta);
+        $level = xp_calc_level($newXp);
+
+        $pdo->prepare(
+            'INSERT INTO knd_user_xp (user_id, xp, level, updated_at) VALUES (?, ?, ?, NOW())
+             ON DUPLICATE KEY UPDATE xp = ?, level = ?, updated_at = NOW()'
+        )->execute([$userId, $newXp, $level, $newXp, $level]);
+
+        $diff = $newXp - $oldXp;
+        $pdo->prepare(
+            'INSERT INTO user_xp (user_id, xp, updated_at) VALUES (?, ?, NOW())
+             ON DUPLICATE KEY UPDATE xp = xp + ?, updated_at = NOW()'
+        )->execute([$userId, $newXp, $diff]);
+
+        if ($ownTx) $pdo->commit();
+        if (isset($_SESSION['xp_badge_cache'])) unset($_SESSION['xp_badge_cache']);
+        return ['level' => $level, 'xp' => $newXp];
+    } catch (\Throwable $e) {
+        if ($ownTx && $pdo->inTransaction()) $pdo->rollBack();
+        throw $e;
+    }
+}
