@@ -1,14 +1,31 @@
 <?php
 /**
- * KND Store - TripoSR 3D model generation helpers
+ * KND Store - InstantMesh 3D model generation helpers
  * Manages jobs for image-to-3D conversion via external GPU server.
  */
+
+if (!function_exists('triposr_count_active_jobs')) {
+    function triposr_count_active_jobs(PDO $pdo, int $userId): int {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM triposr_jobs WHERE user_id = ? AND status IN ('pending','processing')");
+        if (!$stmt || !$stmt->execute([$userId])) return 0;
+        return (int) $stmt->fetchColumn();
+    }
+}
+
+if (!function_exists('triposr_count_jobs_last_hour')) {
+    function triposr_count_jobs_last_hour(PDO $pdo, int $userId): int {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM triposr_jobs WHERE user_id = ? AND created_at > NOW() - INTERVAL 1 HOUR");
+        if (!$stmt || !$stmt->execute([$userId])) return 0;
+        return (int) $stmt->fetchColumn();
+    }
+}
 
 if (!function_exists('create_triposr_job')) {
     /**
      * @param string|null $jobUuid Optional UUID; if null, one is generated.
+     * @param string $quality fast|balanced|high
      */
-    function create_triposr_job(PDO $pdo, int $userId, string $inputPath, ?string $jobUuid = null): ?array {
+    function create_triposr_job(PDO $pdo, int $userId, string $inputPath, ?string $jobUuid = null, string $quality = 'balanced'): ?array {
         if ($jobUuid === null) {
             $jobUuid = sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
@@ -19,24 +36,34 @@ if (!function_exists('create_triposr_job')) {
         );
         }
 
-        $sql = 'INSERT INTO triposr_jobs (user_id, job_uuid, input_path, status) VALUES (?, ?, ?, ?)';
+        $sql = 'INSERT INTO triposr_jobs (user_id, job_uuid, input_path, quality, status) VALUES (?, ?, ?, ?, ?)';
         $stmt = $pdo->prepare($sql);
-        if (!$stmt || !$stmt->execute([$userId, $jobUuid, $inputPath, 'pending'])) {
-            return null;
+        $ok = $stmt && $stmt->execute([$userId, $jobUuid, $inputPath, $quality, 'pending']);
+        if (!$ok) {
+            $err = $pdo->errorInfo()[1] ?? 0;
+            if ($err === 1054) {
+                $sql = 'INSERT INTO triposr_jobs (user_id, job_uuid, input_path, status) VALUES (?, ?, ?, ?)';
+                $stmt = $pdo->prepare($sql);
+                $ok = $stmt && $stmt->execute([$userId, $jobUuid, $inputPath, 'pending']);
+            }
+            if (!$ok) return null;
         }
 
         $id = (int) $pdo->lastInsertId();
-        return ['id' => $id, 'job_uuid' => $jobUuid, 'input_path' => $inputPath, 'status' => 'pending'];
+        return ['id' => $id, 'job_uuid' => $jobUuid, 'input_path' => $inputPath, 'quality' => $quality, 'status' => 'pending'];
     }
 }
 
 if (!function_exists('get_triposr_job')) {
     function get_triposr_job(PDO $pdo, string $jobId): ?array {
-        $stmt = $pdo->prepare('SELECT id, user_id, job_uuid, input_path, output_path, status, error_message, created_at, completed_at FROM triposr_jobs WHERE job_uuid = ? LIMIT 1');
+        $stmt = $pdo->prepare('SELECT id, user_id, job_uuid, input_path, output_path, quality, status, error_message, created_at, completed_at FROM triposr_jobs WHERE job_uuid = ? LIMIT 1');
         if (!$stmt || !$stmt->execute([$jobId])) {
             return null;
         }
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row && !isset($row['quality'])) {
+            $row['quality'] = 'balanced';
+        }
         return $row ?: null;
     }
 }

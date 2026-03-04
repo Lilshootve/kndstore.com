@@ -10,8 +10,8 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/triposr.php';
 
 try {
-    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-        json_error('METHOD_NOT_ALLOWED', 'GET only.', 405);
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        json_error('METHOD_NOT_ALLOWED', 'POST only.', 405);
     }
 
     api_require_login();
@@ -21,7 +21,7 @@ try {
         json_error('DB_CONNECTION_FAILED', 'Database connection failed.', 500);
     }
 
-    $jobId = trim($_GET['job_id'] ?? '');
+    $jobId = trim($_POST['job_id'] ?? $_GET['job_id'] ?? '');
     if ($jobId === '') {
         json_error('INVALID_INPUT', 'job_id is required.');
     }
@@ -35,17 +35,22 @@ try {
         json_error('FORBIDDEN', 'You do not have access to this job.', 403);
     }
 
-    $data = [
-        'status' => $job['status'],
-        'output_path' => $job['output_path'],
-        'quality' => $job['quality'] ?? 'balanced',
-        'error_message' => $job['error_message'],
-        'created_at' => $job['created_at'],
-        'completed_at' => $job['completed_at'],
-    ];
+    if ($job['status'] !== 'pending') {
+        json_error('CANNOT_CANCEL', 'Only queued jobs can be cancelled.', 400);
+    }
 
-    json_success($data);
+    $ok = update_triposr_job($pdo, $jobId, [
+        'status' => 'failed',
+        'error_message' => 'Cancelled by user',
+        'completed_at' => date('Y-m-d H:i:s'),
+    ]);
+
+    if (!$ok) {
+        json_error('UPDATE_FAILED', 'Could not cancel job.', 500);
+    }
+
+    json_success(['cancelled' => true, 'status' => 'failed']);
 } catch (\Throwable $e) {
-    error_log('triposr/status: ' . $e->getMessage());
+    error_log('triposr/cancel: ' . $e->getMessage());
     json_error('INTERNAL_ERROR', 'An unexpected error occurred.', 500);
 }

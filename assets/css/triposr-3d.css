@@ -83,6 +83,42 @@
     display: block;
 }
 
+.triposr-quality-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.triposr-quality-option {
+    flex: 1;
+    min-width: 100px;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(37, 156, 174, 0.3);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.triposr-quality-option:hover {
+    border-color: rgba(37, 156, 174, 0.5);
+    background: rgba(37, 156, 174, 0.05);
+}
+
+.triposr-quality-option input {
+    margin-right: 0.5rem;
+}
+
+.triposr-quality-option input:checked + .option-label {
+    color: var(--knd-neon-blue);
+}
+
+.triposr-quality-default input:checked ~ * {
+    color: inherit;
+}
+
 .triposr-preview-remove {
     position: absolute;
     top: 8px;

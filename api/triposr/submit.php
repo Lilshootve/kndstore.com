@@ -11,6 +11,10 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/storage.php';
 require_once __DIR__ . '/../../includes/triposr.php';
 
+define('TRIPOSR_MAX_ACTIVE_JOBS', 1);
+define('TRIPOSR_MAX_SUBMITS_PER_HOUR', 10);
+define('TRIPOSR_MAX_IMAGE_DIMENSION', 4096);
+
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         json_error('METHOD_NOT_ALLOWED', 'POST only.', 405);
@@ -26,6 +30,25 @@ try {
     $userId = current_user_id();
     if (!$userId) {
         json_error('AUTH_REQUIRED', 'You must be logged in.', 401);
+    }
+
+    // Validate quality
+    $quality = trim($_POST['quality'] ?? 'balanced');
+    $allowedQuality = ['fast', 'balanced', 'high'];
+    if (!in_array($quality, $allowedQuality, true)) {
+        $quality = 'balanced';
+    }
+
+    // Limit: active jobs per user
+    $activeCount = triposr_count_active_jobs($pdo, $userId);
+    if ($activeCount >= TRIPOSR_MAX_ACTIVE_JOBS) {
+        json_error('ACTIVE_LIMIT', 'You have too many jobs in progress. Please wait for one to complete.', 429);
+    }
+
+    // Rate limit: submits per hour
+    $hourCount = triposr_count_jobs_last_hour($pdo, $userId);
+    if ($hourCount >= TRIPOSR_MAX_SUBMITS_PER_HOUR) {
+        json_error('RATE_LIMIT', 'You have reached the hourly limit. Please try again later.', 429);
     }
 
     // Validate uploaded image
@@ -58,7 +81,27 @@ try {
     finfo_close($finfo);
     $allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!in_array($mime, $allowedMimes, true)) {
-        json_error('INVALID_IMAGE', 'Only JPG, PNG and WebP images are allowed.');
+        json_error('INVALID_IMAGE', 'Only JPG, PNG and WebP images are allowed. SVG and other formats are not supported.');
+    }
+
+    // Reject SVG (sometimes misreported)
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if ($ext === 'svg') {
+        json_error('INVALID_IMAGE', 'SVG is not supported. Use JPG, PNG or WebP.');
+    }
+
+    // Validate dimensions (max 4096x4096)
+    $imageInfo = @getimagesize($file['tmp_name']);
+    if ($imageInfo === false) {
+        json_error('INVALID_IMAGE', 'Could not read image dimensions. File may be corrupted.');
+    }
+    $width = (int) ($imageInfo[0] ?? 0);
+    $height = (int) ($imageInfo[1] ?? 0);
+    if ($width < 1 || $height < 1) {
+        json_error('INVALID_IMAGE', 'Invalid image dimensions.');
+    }
+    if ($width > TRIPOSR_MAX_IMAGE_DIMENSION || $height > TRIPOSR_MAX_IMAGE_DIMENSION) {
+        json_error('IMAGE_TOO_LARGE', 'Image dimensions must not exceed ' . TRIPOSR_MAX_IMAGE_DIMENSION . 'x' . TRIPOSR_MAX_IMAGE_DIMENSION . '.');
     }
 
     // Ensure directories exist
@@ -90,7 +133,7 @@ try {
     }
 
     $inputRelPath = TRIPOSR_UPLOAD_DIR . '/' . $fileName;
-    $job = create_triposr_job($pdo, $userId, $inputRelPath, $jobUuid);
+    $job = create_triposr_job($pdo, $userId, $inputRelPath, $jobUuid, $quality);
     if (!$job) {
         @unlink($destPath);
         json_error('JOB_CREATE_FAILED', 'Could not create job.', 500);
@@ -106,6 +149,8 @@ try {
             'image_url' => $imageUrl,
             'callback_url' => $callbackUrl,
             'secret' => TRIPOSR_CALLBACK_SECRET,
+            'quality' => $quality,
+            'timestamp' => time(),
         ]);
         $ch = curl_init(TRIPOSR_API_URL);
         curl_setopt_array($ch, [
@@ -132,6 +177,7 @@ try {
     json_success([
         'job_id' => $job['job_uuid'],
         'status' => $job['status'],
+        'quality' => $quality,
     ]);
 } catch (\Throwable $e) {
     error_log('triposr/submit: ' . $e->getMessage());

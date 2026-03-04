@@ -37,13 +37,13 @@ echo generateHeader(t('triposr.meta.title'), t('triposr.meta.description'), $ext
             <div class="col-lg-8 mx-auto text-center">
                 <div class="triposr-hero-badge mb-3">
                     <i class="fas fa-cube"></i>
-                    <span><?php echo t('triposr.hero.subtitle', 'Turn any photo into a 3D model'); ?></span>
+                    <span><?php echo t('triposr.hero.subtitle', 'Imagen → 3D'); ?></span>
                 </div>
                 <h1 class="hero-title triposr-hero-title">
-                    <span class="text-gradient"><?php echo t('triposr.hero.title', '3D from Image'); ?></span>
+                    <span class="text-gradient"><?php echo t('triposr.hero.title', 'Imagen → 3D (InstantMesh)'); ?></span>
                 </h1>
                 <p class="hero-subtitle triposr-hero-desc">
-                    <?php echo t('triposr.hero.desc', 'Powered by InstantMesh AI. Upload a single image and we generate a full 3D mesh.'); ?>
+                    <?php echo t('triposr.hero.desc', 'Upload an image and generate a downloadable 3D model (GLB/OBJ).'); ?>
                 </p>
             </div>
         </div>
@@ -80,6 +80,28 @@ echo generateHeader(t('triposr.meta.title'), t('triposr.meta.description'), $ext
                                 </button>
                             </div>
                         </div>
+
+                        <div class="mt-4">
+                            <label class="form-label"><?php echo t('triposr.quality.label', 'Quality'); ?></label>
+                            <div class="triposr-quality-options">
+                                <label class="triposr-quality-option">
+                                    <input type="radio" name="quality" value="fast">
+                                    <span class="option-label"><?php echo t('triposr.quality.fast', 'Fast'); ?></span>
+                                    <span class="option-desc text-white-50 small"><?php echo t('triposr.quality.fast_desc', 'Faster, lower quality'); ?></span>
+                                </label>
+                                <label class="triposr-quality-option triposr-quality-default">
+                                    <input type="radio" name="quality" value="balanced" checked>
+                                    <span class="option-label"><?php echo t('triposr.quality.balanced', 'Balanced'); ?></span>
+                                    <span class="option-desc text-white-50 small"><?php echo t('triposr.quality.balanced_desc', 'Balanced'); ?></span>
+                                </label>
+                                <label class="triposr-quality-option">
+                                    <input type="radio" name="quality" value="high">
+                                    <span class="option-label"><?php echo t('triposr.quality.high', 'High'); ?></span>
+                                    <span class="option-desc text-white-50 small"><?php echo t('triposr.quality.high_desc', 'Best quality, takes longer'); ?></span>
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="d-grid gap-2 mt-4">
                             <button type="submit" class="btn btn-neon-primary btn-lg" id="triposr-submit" disabled>
                                 <i class="fas fa-magic me-2"></i><?php echo t('triposr.upload.btn', 'Generate 3D Model'); ?>
@@ -91,7 +113,7 @@ echo generateHeader(t('triposr.meta.title'), t('triposr.meta.description'), $ext
                 <!-- Status Panel -->
                 <div class="glass-card-neon triposr-status-card p-4 mt-4" id="triposr-status-panel" style="display:none;">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center flex-grow-1">
                             <div class="triposr-status-spinner me-3" id="triposr-spinner">
                                 <i class="fas fa-cog fa-spin"></i>
                             </div>
@@ -100,10 +122,15 @@ echo generateHeader(t('triposr.meta.title'), t('triposr.meta.description'), $ext
                                 <div class="small text-white-50" id="triposr-status-detail"></div>
                             </div>
                         </div>
-                        <div id="triposr-download-wrap" style="display:none;">
-                            <a href="#" class="btn btn-success" id="triposr-download-btn">
-                                <i class="fas fa-download me-2"></i><?php echo t('triposr.download.btn', 'Download Model'); ?>
-                            </a>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-warning btn-sm" id="triposr-cancel-btn" style="display:none;">
+                                <i class="fas fa-times me-1"></i><?php echo t('triposr.cancel.btn', 'Cancel'); ?>
+                            </button>
+                            <div id="triposr-download-wrap" style="display:none;">
+                                <a href="#" class="btn btn-success" id="triposr-download-btn">
+                                    <i class="fas fa-download me-2"></i><?php echo t('triposr.download.btn', 'Download Model'); ?>
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="alert alert-danger mt-3" id="triposr-error-msg" style="display:none;"></div>
@@ -163,6 +190,7 @@ echo generateHeader(t('triposr.meta.title'), t('triposr.meta.description'), $ext
     const downloadBtn = document.getElementById('triposr-download-btn');
     const errorMsg = document.getElementById('triposr-error-msg');
     const removeBtn = document.getElementById('triposr-remove');
+    const cancelBtn = document.getElementById('triposr-cancel-btn');
 
     const statusLabels = {
         pending: '<?php echo addslashes(t('triposr.status.pending')); ?>',
@@ -171,8 +199,16 @@ echo generateHeader(t('triposr.meta.title'), t('triposr.meta.description'), $ext
         failed: '<?php echo addslashes(t('triposr.status.failed')); ?>'
     };
 
+    const statusDetails = {
+        pending: '<?php echo addslashes(t('triposr.status.pending_detail')); ?>',
+        processing: '<?php echo addslashes(t('triposr.status.processing_detail')); ?>',
+        completed: '<?php echo addslashes(t('triposr.status.completed_detail')); ?>',
+        failed: '<?php echo addslashes(t('triposr.status.failed_detail')); ?>'
+    };
+
     let selectedFile = null;
     let pollInterval = null;
+    let currentJobId = null;
 
     function resetForm() {
         selectedFile = null;
@@ -182,13 +218,15 @@ echo generateHeader(t('triposr.meta.title'), t('triposr.meta.description'), $ext
         submitBtn.disabled = true;
     }
 
-    function showStatus(jobId, initialStatus) {
+    function showStatus(jobId, initialStatus, quality) {
+        currentJobId = jobId;
         statusPanel.style.display = 'block';
         statusText.textContent = statusLabels[initialStatus] || initialStatus;
-        statusDetail.textContent = '';
-        spinner.style.display = 'inline-block';
+        statusDetail.textContent = quality ? ('Quality: ' + quality) : '';
+        spinner.style.display = initialStatus === 'pending' || initialStatus === 'processing' ? 'inline-block' : 'none';
         downloadWrap.style.display = 'none';
         errorMsg.style.display = 'none';
+        cancelBtn.style.display = (initialStatus === 'pending') ? 'inline-block' : 'none';
 
         if (pollInterval) clearInterval(pollInterval);
         pollInterval = setInterval(function() {
@@ -197,27 +235,65 @@ echo generateHeader(t('triposr.meta.title'), t('triposr.meta.description'), $ext
                 .then(d => {
                     if (!d.ok) return;
                     const st = d.data.status;
+                    const qual = d.data.quality || '';
                     statusText.textContent = statusLabels[st] || st;
-                    if (d.data.error_message) {
+                    let detail = qual ? ('Quality: ' + qual) : '';
+                    if (st === 'failed' && d.data.error_message) {
+                        detail = d.data.error_message;
                         errorMsg.textContent = d.data.error_message;
                         errorMsg.style.display = 'block';
+                    } else {
+                        detail = detail || (statusDetails[st] || '');
+                        statusDetail.textContent = detail;
                     }
+                    cancelBtn.style.display = (st === 'pending') ? 'inline-block' : 'none';
                     if (st === 'completed') {
                         clearInterval(pollInterval);
                         pollInterval = null;
+                        currentJobId = null;
                         spinner.style.display = 'none';
                         downloadWrap.style.display = 'block';
+                        cancelBtn.style.display = 'none';
                         downloadBtn.href = '/api/triposr/download.php?job_id=' + encodeURIComponent(jobId);
                         downloadBtn.target = '_blank';
+                        statusDetail.textContent = statusDetails.completed || '';
                     } else if (st === 'failed') {
                         clearInterval(pollInterval);
                         pollInterval = null;
+                        currentJobId = null;
                         spinner.style.display = 'none';
+                        cancelBtn.style.display = 'none';
                     }
                 })
                 .catch(() => {});
         }, 3000);
     }
+
+    cancelBtn.addEventListener('click', function() {
+        if (!currentJobId) return;
+        if (!confirm('<?php echo addslashes(t('triposr.cancel.confirm', 'Cancel this job?')); ?>')) return;
+        const fd = new FormData();
+        fd.append('job_id', currentJobId);
+        fetch('/api/triposr/cancel.php', { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(d => {
+                if (d.ok) {
+                    if (pollInterval) clearInterval(pollInterval);
+                    pollInterval = null;
+                    statusText.textContent = statusLabels.failed;
+                    statusDetail.textContent = 'Cancelled by user';
+                    errorMsg.textContent = 'Cancelled by user';
+                    errorMsg.style.display = 'block';
+                    spinner.style.display = 'none';
+                    cancelBtn.style.display = 'none';
+                    currentJobId = null;
+                } else {
+                    const msg = (d.error && d.error.message) ? d.error.message : 'Cancel failed';
+                    if (typeof kndToast !== 'undefined') kndToast(msg, 'error');
+                    else alert(msg);
+                }
+            });
+    });
 
     dropzone.addEventListener('click', () => fileInput.click());
     dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
@@ -252,16 +328,20 @@ echo generateHeader(t('triposr.meta.title'), t('triposr.meta.description'), $ext
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         if (!selectedFile) return;
+        const qualityEl = form.querySelector('input[name="quality"]:checked');
+        const quality = qualityEl ? qualityEl.value : 'balanced';
+
         submitBtn.disabled = true;
         const fd = new FormData();
         fd.append('image', selectedFile);
+        fd.append('quality', quality);
 
         fetch('/api/triposr/submit.php', { method: 'POST', body: fd })
             .then(r => r.json())
             .then(d => {
                 if (d.ok && d.data.job_id) {
                     resetForm();
-                    showStatus(d.data.job_id, d.data.status || 'pending');
+                    showStatus(d.data.job_id, d.data.status || 'pending', d.data.quality || quality);
                     statusPanel.scrollIntoView({ behavior: 'smooth' });
                 } else {
                     submitBtn.disabled = false;
