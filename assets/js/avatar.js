@@ -186,14 +186,14 @@
 
     const invBySlot = {};
     state.inventory.forEach(i => {
-      const s = i.slot === 'accessory' ? 'accessory1' : i.slot;
+      const s = i.slot;
       if (!invBySlot[s]) invBySlot[s] = [];
       invBySlot[s].push(i);
     });
 
     const shopBySlot = {};
     shopItems.forEach(i => {
-      const s = i.slot === 'accessory' ? 'accessory1' : i.slot;
+      const s = i.slot;
       if (!shopBySlot[s]) shopBySlot[s] = [];
       shopBySlot[s].push(i);
     });

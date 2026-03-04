@@ -28,12 +28,25 @@ try {
 
     $invIds = array_column($inventory, 'id');
 
-    json_success([
+    $data = [
         'loadout' => $loadout,
         'inventory' => $inventory,
         'inventory_ids' => $invIds,
         'kp_balance' => $kpBalance,
-    ]);
+    ];
+    $isLocal = in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1']);
+    $isAdmin = !empty($_SESSION['admin_logged_in']);
+    if ((!empty($_GET['debug']) || !empty($_REQUEST['debug'])) && ($isLocal || $isAdmin)) {
+        $data['_debug'] = [
+            'slot_requested' => $_GET['slot'] ?? null,
+            'inventory_sql' => 'SELECT i.id, i.code, i.slot, i.name, i.rarity, i.asset_path, inv.acquired_at FROM knd_user_avatar_inventory inv JOIN knd_avatar_items i ON i.id = inv.item_id WHERE inv.user_id = ? ORDER BY i.slot, i.rarity, i.name',
+            'inventory_row_count' => count($inventory),
+            'sample' => array_slice(array_map(function ($r) {
+                return ['id' => $r['id'], 'slot' => $r['slot'], 'asset_path' => $r['asset_path']];
+            }, $inventory), 0, 3),
+        ];
+    }
+    json_success($data);
 } catch (\Throwable $e) {
     error_log('avatar/state error: ' . $e->getMessage());
     $msg = 'An unexpected error occurred.';
