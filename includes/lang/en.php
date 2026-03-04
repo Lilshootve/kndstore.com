@@ -199,6 +199,7 @@ return [
     'footer.arena.knd_arena' => 'KND Arena',
     'footer.arena.how_it_works' => 'How Arena Works',
     'footer.tools.title' => 'Tools',
+    'footer.tools.knd_labs' => 'KND Labs',
     'footer.tools.ai_creator' => 'AI Asset Creator',
     'footer.tools.triposr_3d' => 'Imagen → 3D',
     'footer.contact.title' => 'Contact',
@@ -360,6 +361,7 @@ return [
 
     // Navigation - KND Arena
     'nav.arena' => 'KND Arena',
+    'nav.labs' => 'KND Labs',
     'nav.deathroll' => 'KND LastRoll',
     'nav.login' => 'Login',
     'nav.logout' => 'Logout',
@@ -558,6 +560,20 @@ return [
     'arena.comingsoon_desc' => 'New game modes and seasonal events are in development. Stay tuned.',
     'arena.disclaimer' => 'BETA: mechanics and balances may change while we stabilize the ecosystem.',
     'arena.inspired' => 'Inspired by the classic Death Roll format. KND Arena is a next-gen death roll experience.',
+
+    // KND Labs
+    'labs.title' => 'KND Labs',
+    'labs.subtitle' => 'AI-powered asset creation. Text to Image, Upscale, Character Lab, Texture Lab, and more.',
+    'labs.meta.title' => 'KND Labs | KND Store',
+    'labs.meta.desc' => 'AI-powered asset creation: Text to Image, Upscale, Character Lab, Texture Lab, Image→3D.',
+    'labs.tools_heading' => 'Tools',
+    'labs.card_text2img_desc' => 'Generate images from text prompts. Standard (3 KP) or High quality (6 KP).',
+    'labs.card_upscale_desc' => 'Upscale images 2x or 4x. JPG, PNG, WebP. 5 KP.',
+    'labs.card_character_desc' => 'Create game/anime/realistic characters from prompts. 15 KP.',
+    'labs.card_texture_desc' => 'Generate seamless textures for 3D/games. 4 KP.',
+    'labs.card_img23d_desc' => 'Upload an image and generate a 3D model (GLB/OBJ) with InstantMesh.',
+    'labs.disclaimer' => 'BETA: AI tools may have rate limits. Uses KND Points (KP).',
+
     'lb.ends_in' => 'Ends in',
     'lb.xp_note' => 'Rankings are based on XP (not Points).',
     'lb.your_rank' => 'Your Rank',

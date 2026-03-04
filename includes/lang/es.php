@@ -182,6 +182,7 @@ return [
     'footer.arena.knd_arena' => 'KND Arena',
     'footer.arena.how_it_works' => 'Cómo Funciona Arena',
     'footer.tools.title' => 'Herramientas',
+    'footer.tools.knd_labs' => 'KND Labs',
     'footer.tools.ai_creator' => 'AI Asset Creator',
     'footer.tools.triposr_3d' => 'Imagen → 3D',
     'footer.contact.title' => 'Contacto',
@@ -281,6 +282,7 @@ return [
 
     // Navigation - KND Arena
     'nav.arena' => 'KND Arena',
+    'nav.labs' => 'KND Labs',
     'nav.deathroll' => 'KND LastRoll',
     'nav.login' => 'Iniciar Sesión',
     'nav.logout' => 'Cerrar Sesión',
@@ -479,6 +481,20 @@ return [
     'arena.comingsoon_desc' => 'Nuevos modos de juego y eventos de temporada están en desarrollo. Mantente atento.',
     'arena.disclaimer' => 'BETA: las mecánicas y balances pueden cambiar mientras estabilizamos el ecosistema.',
     'arena.inspired' => 'Inspirado en el formato clásico de Death Roll. KND Arena es una experiencia next-gen de death roll.',
+
+    // KND Labs
+    'labs.title' => 'KND Labs',
+    'labs.subtitle' => 'Creación de assets con IA. Text to Image, Upscale, Character Lab, Texture Lab y más.',
+    'labs.meta.title' => 'KND Labs | KND Store',
+    'labs.meta.desc' => 'Creación de assets con IA: Text to Image, Upscale, Character Lab, Texture Lab, Image→3D.',
+    'labs.tools_heading' => 'Herramientas',
+    'labs.card_text2img_desc' => 'Genera imágenes desde prompts. Standard (3 KP) o High (6 KP).',
+    'labs.card_upscale_desc' => 'Escala imágenes 2x o 4x. JPG, PNG, WebP. 5 KP.',
+    'labs.card_character_desc' => 'Crea personajes game/anime/realistas desde prompts. 15 KP.',
+    'labs.card_texture_desc' => 'Genera texturas sin costuras para 3D/juegos. 4 KP.',
+    'labs.card_img23d_desc' => 'Sube una imagen y genera un modelo 3D (GLB/OBJ) con InstantMesh.',
+    'labs.disclaimer' => 'BETA: herramientas IA con límites de uso. Usa KND Points (KP).',
+
     'lb.ends_in' => 'Termina en',
     'lb.xp_note' => 'Los rankings se basan en XP (no en Points).',
     'lb.your_rank' => 'Tu Rango',
