@@ -4,8 +4,8 @@
  * Include this file from includes/config.php if TripoSR is enabled.
  */
 
-// Base URL of your TripoSR GPU server (e.g. https://gpu.kndstore.com or http://192.168.1.100:8080)
-define('TRIPOSR_API_URL', 'https://your-triposr-server.com/api/submit');
+// Base URL of your GPU server /generate endpoint (InstantMesh: https://gpu.kndstore.com/generate)
+define('TRIPOSR_API_URL', 'https://your-gpu-server.com/generate');
 
 // Secret shared with the GPU server for callback validation
 define('TRIPOSR_CALLBACK_SECRET', 'generate-with-openssl-rand-hex-32');

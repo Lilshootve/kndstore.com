@@ -91,7 +91,7 @@ return [
     'triposr.meta.description' => 'Genera modelos 3D desde una sola imagen con IA. Sube una foto y obtén un modelo OBJ o GLB.',
     'triposr.hero.title' => '3D desde Imagen',
     'triposr.hero.subtitle' => 'Convierte cualquier foto en modelo 3D',
-    'triposr.hero.desc' => 'Con TripoSR IA. Sube una imagen y generamos una malla 3D que puedes descargar en formato OBJ o GLB.',
+    'triposr.hero.desc' => 'Con InstantMesh IA. Sube una imagen y generamos una malla 3D que puedes descargar en formato OBJ o GLB.',
     'triposr.upload.label' => 'Elige una imagen',
     'triposr.upload.hint' => 'JPG, PNG o WebP. Máx 10MB. Una sola pieza sobre fondo neutro da mejores resultados.',
     'triposr.upload.btn' => 'Generar Modelo 3D',

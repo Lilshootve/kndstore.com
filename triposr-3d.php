@@ -43,7 +43,7 @@ echo generateHeader(t('triposr.meta.title'), t('triposr.meta.description'), $ext
                     <span class="text-gradient"><?php echo t('triposr.hero.title', '3D from Image'); ?></span>
                 </h1>
                 <p class="hero-subtitle triposr-hero-desc">
-                    <?php echo t('triposr.hero.desc', 'Powered by TripoSR AI. Upload a single image and we generate a full 3D mesh.'); ?>
+                    <?php echo t('triposr.hero.desc', 'Powered by InstantMesh AI. Upload a single image and we generate a full 3D mesh.'); ?>
                 </p>
             </div>
         </div>

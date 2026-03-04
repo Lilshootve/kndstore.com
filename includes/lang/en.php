@@ -102,12 +102,12 @@ return [
     'custom_design.brief.title' => 'Design Brief',
     'custom_design.how_it_works.title' => 'How It Works',
     
-    // TripoSR 3D
+    // TripoSR/InstantMesh 3D (API compatible, backend uses InstantMesh)
     'triposr.meta.title' => '3D from Image - KND Store',
     'triposr.meta.description' => 'Generate 3D models from a single image using AI. Upload a photo and get an OBJ or GLB model.',
     'triposr.hero.title' => '3D from Image',
     'triposr.hero.subtitle' => 'Turn any photo into a 3D model',
-    'triposr.hero.desc' => 'Powered by TripoSR AI. Upload a single image and we generate a full 3D mesh you can download in OBJ or GLB format.',
+    'triposr.hero.desc' => 'Powered by InstantMesh AI. Upload a single image and we generate a full 3D mesh you can download in OBJ or GLB format.',
     'triposr.upload.label' => 'Choose an image',
     'triposr.upload.hint' => 'JPG, PNG or WebP. Max 10MB. Single object on neutral background works best.',
     'triposr.upload.btn' => 'Generate 3D Model',
