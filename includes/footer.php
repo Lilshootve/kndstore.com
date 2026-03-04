@@ -179,6 +179,10 @@ function generateFooter() {
 function generateScripts() {
     $scripts = '';
     
+    // Level-up y badge (sin defer para disponibilidad temprana)
+    $scripts .= '<script src="/assets/js/knd-xp-fx.js"></script>' . "\n";
+    $scripts .= '<script src="/assets/js/level-up.js"></script>' . "\n";
+    
     // jQuery con preload
     $scripts .= '<script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>' . "\n";
     

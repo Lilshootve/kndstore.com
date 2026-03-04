@@ -28,6 +28,7 @@ function generateHeader($title = 'KND Store - Tienda Galáctica', $description =
     $header .= '    <link rel="stylesheet" href="/assets/css/style.css?v=' . @filemtime(__DIR__ . '/../assets/css/style.css') . '">' . "\n";
     $header .= '    <link rel="stylesheet" href="/assets/css/mobile-optimization.css">' . "\n";
     $header .= '    <link rel="manifest" href="/assets/images/site.webmanifest">' . "\n";
+    $header .= '    <script src="/assets/js/knd-toast.js" defer></script>' . "\n";
     $header .= '</head>' . "\n";
     $header .= '<body>' . "\n";
 
