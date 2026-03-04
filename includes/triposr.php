@@ -4,6 +4,13 @@
  * Manages jobs for image-to-3D conversion via external GPU server.
  */
 
+if (!function_exists('triposr_quality_cost')) {
+    function triposr_quality_cost(string $quality): int {
+        $costs = ['fast' => 8, 'balanced' => 15, 'high' => 30];
+        return $costs[$quality] ?? 15;
+    }
+}
+
 if (!function_exists('triposr_count_active_jobs')) {
     function triposr_count_active_jobs(PDO $pdo, int $userId): int {
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM triposr_jobs WHERE user_id = ? AND status IN ('pending','processing')");
@@ -17,6 +24,26 @@ if (!function_exists('triposr_count_jobs_last_hour')) {
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM triposr_jobs WHERE user_id = ? AND created_at > NOW() - INTERVAL 1 HOUR");
         if (!$stmt || !$stmt->execute([$userId])) return 0;
         return (int) $stmt->fetchColumn();
+    }
+}
+
+if (!function_exists('triposr_count_jobs_today')) {
+    function triposr_count_jobs_today(PDO $pdo, int $userId): int {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM triposr_jobs WHERE user_id = ? AND created_at >= CURDATE()");
+        if (!$stmt || !$stmt->execute([$userId])) return 0;
+        return (int) $stmt->fetchColumn();
+    }
+}
+
+if (!function_exists('triposr_refund_points')) {
+    function triposr_refund_points(PDO $pdo, int $jobId, int $userId, int $amount): bool {
+        if ($amount <= 0) return false;
+        $now = gmdate('Y-m-d H:i:s');
+        $stmt = $pdo->prepare(
+            "INSERT INTO points_ledger (user_id, source_type, source_id, entry_type, status, points, created_at)
+             VALUES (?, '3d_generation_refund', ?, 'reversal', 'available', ?, ?)"
+        );
+        return $stmt && $stmt->execute([$userId, $jobId, $amount, $now]);
     }
 }
 

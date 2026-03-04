@@ -49,6 +49,13 @@ try {
         json_error('UPDATE_FAILED', 'Could not cancel job.', 500);
     }
 
+    $cost = triposr_quality_cost($job['quality'] ?? 'balanced');
+    triposr_refund_points($pdo, (int) $job['id'], (int) $job['user_id'], $cost);
+
+    if (isset($_SESSION['sc_badge_cache'])) {
+        unset($_SESSION['sc_badge_cache']);
+    }
+
     json_success(['cancelled' => true, 'status' => 'failed']);
 } catch (\Throwable $e) {
     error_log('triposr/cancel: ' . $e->getMessage());

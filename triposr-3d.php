@@ -86,17 +86,17 @@ echo generateHeader(t('triposr.meta.title'), t('triposr.meta.description'), $ext
                             <div class="triposr-quality-options">
                                 <label class="triposr-quality-option">
                                     <input type="radio" name="quality" value="fast">
-                                    <span class="option-label"><?php echo t('triposr.quality.fast', 'Fast'); ?></span>
+                                    <span class="option-label"><?php echo t('triposr.quality.fast', 'Fast'); ?> — <?php echo t('triposr.quality.fast_cost', '8 KP'); ?></span>
                                     <span class="option-desc text-white-50 small"><?php echo t('triposr.quality.fast_desc', 'Faster, lower quality'); ?></span>
                                 </label>
                                 <label class="triposr-quality-option triposr-quality-default">
                                     <input type="radio" name="quality" value="balanced" checked>
-                                    <span class="option-label"><?php echo t('triposr.quality.balanced', 'Balanced'); ?></span>
+                                    <span class="option-label"><?php echo t('triposr.quality.balanced', 'Balanced'); ?> — <?php echo t('triposr.quality.balanced_cost', '15 KP'); ?></span>
                                     <span class="option-desc text-white-50 small"><?php echo t('triposr.quality.balanced_desc', 'Balanced'); ?></span>
                                 </label>
                                 <label class="triposr-quality-option">
                                     <input type="radio" name="quality" value="high">
-                                    <span class="option-label"><?php echo t('triposr.quality.high', 'High'); ?></span>
+                                    <span class="option-label"><?php echo t('triposr.quality.high', 'High'); ?> — <?php echo t('triposr.quality.high_cost', '30 KP'); ?></span>
                                     <span class="option-desc text-white-50 small"><?php echo t('triposr.quality.high_desc', 'Best quality, takes longer'); ?></span>
                                 </label>
                             </div>

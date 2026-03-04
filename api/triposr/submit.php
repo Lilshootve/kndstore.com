@@ -10,10 +10,13 @@ require_once __DIR__ . '/../../includes/json.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/storage.php';
 require_once __DIR__ . '/../../includes/triposr.php';
+require_once __DIR__ . '/../../includes/support_credits.php';
 
 define('TRIPOSR_MAX_ACTIVE_JOBS', 1);
 define('TRIPOSR_MAX_SUBMITS_PER_HOUR', 10);
+define('TRIPOSR_MAX_SUBMITS_PER_DAY', 30);
 define('TRIPOSR_MAX_IMAGE_DIMENSION', 4096);
+define('TRIPOSR_MAX_IMAGE_SIZE', 10 * 1024 * 1024); // 10MB
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -39,16 +42,32 @@ try {
         $quality = 'balanced';
     }
 
-    // Limit: active jobs per user
+    $cost = triposr_quality_cost($quality);
+
+    // Limit: active jobs per user (max 1)
     $activeCount = triposr_count_active_jobs($pdo, $userId);
     if ($activeCount >= TRIPOSR_MAX_ACTIVE_JOBS) {
-        json_error('ACTIVE_LIMIT', 'You have too many jobs in progress. Please wait for one to complete.', 429);
+        json_error('ACTIVE_LIMIT', t('triposr.error.active_limit', 'Ya tienes un modelo generándose. Espera a que termine.'), 429);
     }
 
     // Rate limit: submits per hour
     $hourCount = triposr_count_jobs_last_hour($pdo, $userId);
     if ($hourCount >= TRIPOSR_MAX_SUBMITS_PER_HOUR) {
-        json_error('RATE_LIMIT', 'You have reached the hourly limit. Please try again later.', 429);
+        json_error('RATE_LIMIT', t('triposr.error.rate_limit', 'Límite por hora alcanzado. Máximo 10 generaciones por hora.'), 429);
+    }
+
+    // Daily limit
+    $dayCount = triposr_count_jobs_today($pdo, $userId);
+    if ($dayCount >= TRIPOSR_MAX_SUBMITS_PER_DAY) {
+        json_error('DAILY_LIMIT', t('triposr.error.daily_limit', 'Límite diario alcanzado. Máximo 30 generaciones por día.'), 429);
+    }
+
+    // Check points before image validation (fail fast)
+    release_available_points_if_due($pdo, $userId);
+    expire_points_if_due($pdo, $userId);
+    $available = get_available_points($pdo, $userId);
+    if ($available < $cost) {
+        json_error('INSUFFICIENT_POINTS', t('triposr.error.insufficient_points', 'Puntos insuficientes. Tienes {available} KP, necesitas {cost} KP para calidad {quality}.', ['available' => $available, 'cost' => $cost, 'quality' => $quality]), 400);
     }
 
     // Validate uploaded image
@@ -71,8 +90,7 @@ try {
     }
 
     $file = $_FILES['image'];
-    $maxSize = 10 * 1024 * 1024; // 10MB
-    if ($file['size'] > $maxSize) {
+    if ($file['size'] > TRIPOSR_MAX_IMAGE_SIZE) {
         json_error('FILE_TOO_LARGE', 'Image must be 10MB or smaller.');
     }
 
@@ -84,13 +102,11 @@ try {
         json_error('INVALID_IMAGE', 'Only JPG, PNG and WebP images are allowed. SVG and other formats are not supported.');
     }
 
-    // Reject SVG (sometimes misreported)
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     if ($ext === 'svg') {
         json_error('INVALID_IMAGE', 'SVG is not supported. Use JPG, PNG or WebP.');
     }
 
-    // Validate dimensions (max 4096x4096)
     $imageInfo = @getimagesize($file['tmp_name']);
     if ($imageInfo === false) {
         json_error('INVALID_IMAGE', 'Could not read image dimensions. File may be corrupted.');
@@ -101,7 +117,7 @@ try {
         json_error('INVALID_IMAGE', 'Invalid image dimensions.');
     }
     if ($width > TRIPOSR_MAX_IMAGE_DIMENSION || $height > TRIPOSR_MAX_IMAGE_DIMENSION) {
-        json_error('IMAGE_TOO_LARGE', 'Image dimensions must not exceed ' . TRIPOSR_MAX_IMAGE_DIMENSION . 'x' . TRIPOSR_MAX_IMAGE_DIMENSION . '.');
+        json_error('IMAGE_TOO_LARGE', 'Image dimensions must not exceed 4096x4096.');
     }
 
     // Ensure directories exist
@@ -139,6 +155,14 @@ try {
         json_error('JOB_CREATE_FAILED', 'Could not create job.', 500);
     }
 
+    // Deduct points and record in ledger (source_id = job id)
+    $now = gmdate('Y-m-d H:i:s');
+    $stmt = $pdo->prepare(
+        "INSERT INTO points_ledger (user_id, source_type, source_id, entry_type, status, points, created_at)
+         VALUES (?, '3d_generation', ?, 'spend', 'spent', ?, ?)"
+    );
+    $stmt->execute([$userId, (int) $job['id'], -$cost, $now]);
+
     $siteUrl = rtrim(defined('SITE_URL') ? SITE_URL : ('https://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')), '/');
     $imageUrl = $siteUrl . '/api/triposr/image.php?t=' . urlencode($job['job_uuid']);
     $callbackUrl = $siteUrl . '/api/triposr/callback.php';
@@ -167,17 +191,24 @@ try {
             update_triposr_job($pdo, $job['job_uuid'], [
                 'status' => 'failed',
                 'error_message' => 'GPU server unreachable: ' . $err,
-                'completed_at' => date('Y-m-d H:i:s'),
+                'completed_at' => $now,
             ]);
+            triposr_refund_points($pdo, (int) $job['id'], $userId, $cost);
         } else {
             update_triposr_job($pdo, $job['job_uuid'], ['status' => 'processing']);
         }
+    }
+
+    if (isset($_SESSION['sc_badge_cache'])) {
+        unset($_SESSION['sc_badge_cache']);
     }
 
     json_success([
         'job_id' => $job['job_uuid'],
         'status' => $job['status'],
         'quality' => $quality,
+        'cost' => $cost,
+        'available_after' => get_available_points($pdo, $userId),
     ]);
 } catch (\Throwable $e) {
     error_log('triposr/submit: ' . $e->getMessage());

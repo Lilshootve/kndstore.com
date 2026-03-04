@@ -16,6 +16,11 @@ The 3D integration uses **InstantMesh** as the generation engine. Users upload a
    source sql/triposr_jobs_alter_quality.sql
    ```
 
+3. Add 3D source types to points_ledger (for KP cost/refund):
+   ```sql
+   source sql/points_ledger_add_3d_generation.sql
+   ```
+
 ## Configuration
 
 1. Copy the example config:
@@ -73,7 +78,16 @@ The GPU server (InstantMesh) must:
 
 - **Active jobs**: Max 1 job in `pending` or `processing` per user.
 - **Rate limit**: Max 10 submissions per hour per user (counted in `triposr_jobs`).
-- **Image validation**: JPG/PNG/WebP only, max 10MB, max 4096×4096, MIME validated. SVG rejected.
+- **Daily limit**: Max 30 submissions per day per user.
+- **Image validation**: JPG/PNG/WebP only, max 10MB, max 4096×4096, MIME validated with finfo_file. SVG rejected.
+
+## Points (KP) Cost
+
+- **fast**: 8 KP
+- **balanced**: 15 KP
+- **high**: 30 KP
+
+Points are deducted at submit and recorded in `points_ledger` with `source_type='3d_generation'`. Automatic refund (`source_type='3d_generation_refund'`) when job fails (callback) or is cancelled by user.
 
 ## Endpoints
 

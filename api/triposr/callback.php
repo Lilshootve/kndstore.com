@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../includes/triposr_config.php';
 require_once __DIR__ . '/../../includes/json.php';
 require_once __DIR__ . '/../../includes/storage.php';
 require_once __DIR__ . '/../../includes/triposr.php';
+require_once __DIR__ . '/../../includes/support_credits.php';
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -107,6 +108,11 @@ try {
 
     if (!empty($updates)) {
         update_triposr_job($pdo, $jobId, $updates);
+
+        if (($updates['status'] ?? '') === 'failed') {
+            $cost = triposr_quality_cost($job['quality'] ?? 'balanced');
+            triposr_refund_points($pdo, (int) $job['id'], (int) $job['user_id'], $cost);
+        }
     }
 
     header('Content-Type: application/json');
