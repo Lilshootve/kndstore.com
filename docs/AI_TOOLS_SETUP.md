@@ -88,8 +88,10 @@ Success:
   "job_id": "uuid",
   "status": "completed",
   "result_url": "https://gpu-server/result.png",
-  "character_id": "uuid",
-  "preview_image_url": "https://..."
+  "result": { "files": [...], "meta": {...} },
+  "secret": "...",
+  "timestamp": 1234567890,
+  "signature": "HMAC-SHA256 hex"
 }
 ```
 
@@ -103,7 +105,11 @@ Failure:
 }
 ```
 
-KND downloads from `result_url` (or `model_url`) and stores in `storage/ai/outputs/`.
+KND validates `secret` (and optionally `signature`). Downloads from `result_url` (or `model_url`) and stores in `storage/ai/outputs/`.
+
+## ComfyUI Router
+
+See `comfy-router/README_DEPLOY.md` for the ComfyUI-based GPU router (text2img, upscale, character, texture_seamless).
 
 ## KP Costs
 
