@@ -114,16 +114,14 @@
       await loadState();
       await loadShop();
       renderCustomizeModal();
-      modal.classList.add('show');
-      modal.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
+      modal.classList.add('avatar-modal-open');
+      document.body.classList.add('avatar-modal-open');
     },
     closeCustomize() {
       const modal = document.getElementById('avatar-customize-modal');
       if (modal) {
-        modal.classList.remove('show');
-        modal.style.display = 'none';
-        document.body.style.overflow = '';
+        modal.classList.remove('avatar-modal-open');
+        document.body.classList.remove('avatar-modal-open');
       }
       const container = document.getElementById('avatar-preview');
       if (container) renderAvatar(container, state.loadout);
@@ -162,6 +160,9 @@
   function renderCustomizeModal() {
     const modal = document.getElementById('avatar-customize-modal');
     if (!modal) return;
+
+    const scrollEl = modal.querySelector('.avatar-modal-scroll');
+    const scrollTop = scrollEl ? scrollEl.scrollTop : 0;
 
     const preview = modal.querySelector('#avatar-customize-preview');
     const tabs = modal.querySelector('#avatar-slot-tabs');
@@ -252,6 +253,8 @@
         renderCustomizeModal();
       });
     });
+
+    if (scrollEl) scrollEl.scrollTop = scrollTop;
   }
 
   document.addEventListener('DOMContentLoaded', () => {

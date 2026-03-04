@@ -201,12 +201,12 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
       </div>
 
       <!-- Avatar Customize Modal -->
-      <div id="avatar-customize-modal" class="modal fade" tabindex="-1" style="display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.8); position:fixed; inset:0; z-index:9999;">
-        <div class="modal-dialog modal-lg">
+      <div id="avatar-customize-modal" class="avatar-modal-overlay" tabindex="-1" role="dialog" aria-labelledby="avatar-modal-title">
+        <div class="avatar-modal-scroll">
           <div class="modal-content glass-card-neon p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h4><i class="fas fa-palette me-2" style="color:#00d4ff;"></i><?php echo t('avatar.customize', 'Customize Avatar'); ?></h4>
-              <button type="button" id="avatar-customize-close" class="btn btn-outline-light btn-sm">&times;</button>
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+              <h4 id="avatar-modal-title"><i class="fas fa-palette me-2" style="color:#00d4ff;"></i><?php echo t('avatar.customize', 'Customize Avatar'); ?></h4>
+              <button type="button" id="avatar-customize-close" class="btn btn-outline-light btn-sm" aria-label="Close">&times;</button>
             </div>
             <div class="row">
               <div class="col-md-5 mb-3 mb-md-0">
