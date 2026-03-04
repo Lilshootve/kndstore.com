@@ -87,32 +87,4 @@
 .avatar-rarity-epic { color: #a78bfa; }
 .avatar-rarity-legendary { color: #fbbf24; }
 
-/* Avatar modal overlay - enterprise-grade, above navbar */
-body.avatar-modal-open {
-  overflow: hidden;
-}
-
-#avatar-customize-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: max(16px, env(safe-area-inset-top)) 16px 16px;
-  background: rgba(0, 0, 0, 0.85);
-  overflow: hidden;
-}
-
-#avatar-customize-modal.avatar-modal-open {
-  display: flex;
-}
-
-#avatar-customize-modal .avatar-modal-scroll {
-  width: 100%;
-  max-width: 800px;
-  max-height: calc(100vh - 40px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 0 0 24px;
-}
+/* Avatar modal overlay - defined in style.css (Avatar Modal HUD section) */

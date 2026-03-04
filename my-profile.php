@@ -200,31 +200,33 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
         <p class="text-white-50 small mb-0"><?php echo t('profile.coming_soon', 'Coming Soon'); ?></p>
       </div>
 
-      <!-- Avatar Customize Modal -->
+      <!-- Avatar Customize Modal (KND HUD) -->
       <div id="avatar-customize-modal" class="avatar-modal-overlay" tabindex="-1" role="dialog" aria-labelledby="avatar-modal-title">
         <div class="avatar-modal-scroll">
-          <div class="modal-content glass-card-neon p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
-              <h4 id="avatar-modal-title"><i class="fas fa-palette me-2" style="color:#00d4ff;"></i><?php echo t('avatar.customize', 'Customize Avatar'); ?></h4>
-              <button type="button" id="avatar-customize-close" class="btn btn-outline-light btn-sm" aria-label="Close">&times;</button>
+          <div class="avatar-modal-hud">
+            <div class="avatar-modal-header">
+              <h4 id="avatar-modal-title"><?php echo t('avatar.customize', 'Customize Avatar'); ?></h4>
+              <button type="button" id="avatar-customize-close" class="avatar-modal-close" aria-label="Close">&times;</button>
             </div>
-            <div class="row">
-              <div class="col-md-5 mb-3 mb-md-0">
-                <div id="avatar-customize-preview" class="avatar-stage"></div>
-                <p class="text-white-50 small mt-2 text-center"><?php echo t('avatar.kp', 'KP'); ?>: <strong id="avatar-kp-balance-modal">—</strong></p>
+            <div class="avatar-modal-grid">
+              <div class="avatar-modal-preview-panel">
+                <div class="avatar-preview-frame">
+                  <span class="avatar-kp-pill"><i class="fas fa-coins"></i> <strong id="avatar-kp-balance-modal">—</strong> KP</span>
+                  <div id="avatar-customize-preview" class="avatar-stage avatar-stage-modal"></div>
+                </div>
               </div>
-              <div class="col-md-7">
-                <div id="avatar-slot-tabs" class="d-flex flex-wrap gap-2 mb-3" data-active="hair"></div>
-                <ul class="nav nav-tabs mb-2">
-                  <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#avatar-owned-tab"><?php echo t('avatar.owned', 'Owned'); ?></a></li>
-                  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#avatar-shop-tab"><?php echo t('avatar.shop', 'Shop'); ?></a></li>
-                </ul>
-                <div class="tab-content">
+              <div class="avatar-modal-controls">
+                <div id="avatar-slot-tabs" class="avatar-slot-seg" data-active="hair"></div>
+                <div class="avatar-owned-shop-seg nav nav-tabs" role="tablist">
+                  <a class="nav-link active" data-bs-toggle="tab" href="#avatar-owned-tab"><?php echo t('avatar.owned', 'Owned'); ?></a>
+                  <a class="nav-link" data-bs-toggle="tab" href="#avatar-shop-tab"><?php echo t('avatar.shop', 'Shop'); ?></a>
+                </div>
+                <div class="tab-content avatar-tab-content">
                   <div id="avatar-owned-tab" class="tab-pane show active">
-                    <div id="avatar-owned-pane" class="d-flex flex-wrap gap-2"></div>
+                    <div id="avatar-owned-pane" class="avatar-items-grid"></div>
                   </div>
                   <div id="avatar-shop-tab" class="tab-pane">
-                    <div id="avatar-shop-pane" class="d-flex flex-wrap gap-2"></div>
+                    <div id="avatar-shop-pane" class="avatar-items-grid"></div>
                   </div>
                 </div>
               </div>

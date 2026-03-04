@@ -4,7 +4,7 @@
   const BODY_SVG = '/assets/avatars/base/body.svg';
   const BODY_FALLBACK_SVG = '/assets/avatars/_placeholder.svg';
   const LAYER_ORDER = ['bg', 'body', 'bottom', 'shoes', 'top', 'accessory', 'hair', 'frame'];
-  const SLOT_ORDER = ['bg', 'bottom', 'shoes', 'top', 'hair', 'accessory', 'frame'];
+  const SLOT_ORDER = ['bg', 'top', 'bottom', 'shoes', 'hair', 'accessory', 'frame'];
   const SLOT_TO_COL = { hair: 'hair_item_id', top: 'top_item_id', bottom: 'bottom_item_id', shoes: 'shoes_item_id', accessory1: 'accessory1_item_id', accessory: 'accessory1_item_id', bg: 'bg_item_id', frame: 'frame_item_id' };
 
   let state = { loadout: {}, inventory: [], inventoryIds: [], kpBalance: 0 };
@@ -181,7 +181,8 @@
     if (tabs) {
       tabs.innerHTML = SLOT_ORDER.map(slot => {
         const label = t('avatar.slot_' + slot, slotLabels[slot] || slot);
-        return `<button type="button" class="btn btn-sm ${activeSlot === slot ? 'btn-neon-primary' : 'btn-outline-secondary'}" data-slot="${slot}">${label}</button>`;
+        const active = activeSlot === slot ? ' avatar-slot-active' : '';
+        return `<button type="button" class="avatar-slot-btn${active}" data-slot="${slot}">${label}</button>`;
       }).join('');
     }
 
@@ -205,12 +206,13 @@
     function cardHtml(item, isOwned) {
       const eq = equippedId === item.id;
       const rarity = item.rarity || 'common';
+      const r = t('avatar.rarity_' + rarity, rarity);
       return `
         <div class="avatar-shop-card rarity-${rarity} ${eq ? 'frame-equipped' : ''}">
-          <div class="avatar-rarity-badge avatar-rarity-${rarity}">${t('avatar.rarity_' + rarity, rarity)}</div>
-          <div class="small text-white-50 mt-1">${item.name}</div>
-          ${!isOwned ? `<div class="mt-2">${item.price_kp} KP</div><button type="button" class="btn btn-sm btn-neon-primary mt-2 avatar-btn-buy" data-id="${item.id}">${t('avatar.buy', 'Buy')}</button>` : ''}
-          ${isOwned ? `<button type="button" class="btn btn-sm ${eq ? 'btn-success' : 'btn-outline-light'} mt-2 avatar-btn-equip" data-slot="${activeSlot}" data-id="${item.id}">${eq ? t('avatar.equipped', 'Equipped') : t('avatar.equip', 'Equip')}</button>` : ''}
+          <span class="avatar-rarity-chip avatar-rarity-${rarity}">${r}</span>
+          <div class="avatar-card-name">${item.name}</div>
+          ${!isOwned ? `<div class="avatar-card-price">${item.price_kp} KP</div><button type="button" class="avatar-card-btn avatar-btn-buy" data-id="${item.id}">${t('avatar.buy', 'Buy')}</button>` : ''}
+          ${isOwned ? `<button type="button" class="avatar-card-btn avatar-btn-equip ${eq ? 'avatar-btn-equipped' : ''}" data-slot="${activeSlot}" data-id="${item.id}">${eq ? t('avatar.equipped', 'Equipped') : t('avatar.equip', 'Equip')}</button>` : ''}
         </div>
       `;
     }
@@ -218,7 +220,7 @@
     if (ownedPane) {
       const items = invBySlot[activeSlot] || [];
       const isDefaultEquipped = !equippedId;
-      const defaultBtn = `<div class="avatar-shop-card"><div class="small text-white-50">${t('avatar.default', 'Default')}</div><button type="button" class="btn btn-sm ${isDefaultEquipped ? 'btn-success' : 'btn-outline-secondary'} mt-2 avatar-btn-equip" data-slot="${activeSlot}" data-id="">${isDefaultEquipped ? t('avatar.equipped', 'Equipped') : t('avatar.equip', 'Equip')}</button></div>`;
+      const defaultBtn = `<div class="avatar-shop-card"><span class="avatar-rarity-chip" style="opacity:.6">—</span><div class="avatar-card-name">${t('avatar.default', 'Default')}</div><button type="button" class="avatar-card-btn avatar-btn-equip ${isDefaultEquipped ? 'avatar-btn-equipped' : ''}" data-slot="${activeSlot}" data-id="">${isDefaultEquipped ? t('avatar.equipped', 'Equipped') : t('avatar.equip', 'Equip')}</button></div>`;
       ownedPane.innerHTML = defaultBtn + (items.length ? items.map(i => cardHtml(i, true)).join('') : `<p class="text-white-50 small">${t('avatar.no_owned', 'No items in this slot')}</p>`);
     }
 
