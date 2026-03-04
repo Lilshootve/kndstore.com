@@ -10,8 +10,11 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 require_once __DIR__ . '/includes/knd_profile.php';
+require_once __DIR__ . '/includes/csrf.php';
 
 require_login();
+
+$csrfToken = csrf_token();
 
 $pdo = getDBConnection();
 if (!$pdo) {
@@ -27,6 +30,7 @@ $seoDesc = 'Your KND Arena identity: Level, XP, stats for LastRoll, Insight, Dro
 $ogHead = '    <meta property="og:title" content="' . htmlspecialchars($seoTitle) . '">' . "\n";
 $ogHead .= '    <meta property="og:description" content="' . htmlspecialchars($seoDesc) . '">' . "\n";
 $ogHead .= '    <meta property="og:type" content="website">' . "\n";
+$ogHead .= '    <link rel="stylesheet" href="/assets/css/avatar.css?v=' . @filemtime(__DIR__ . '/assets/css/avatar.css') . '">' . "\n";
 echo generateHeader($seoTitle, $seoDesc, $ogHead);
 ?>
 
@@ -173,24 +177,58 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
       </div>
       <?php endif; ?>
 
-      <!-- Inventory placeholders -->
-      <div class="row g-4 mb-4">
-        <div class="col-12 col-md-6">
-          <div class="glass-card-neon p-4 profile-placeholder-card">
-            <div class="d-flex align-items-center mb-2">
-              <div class="profile-stat-icon" style="opacity:.6;"><i class="fas fa-award"></i></div>
-              <h5 class="mb-0 ms-2 text-white-50" style="font-size:1rem;"><?php echo t('profile.badges', 'Badges'); ?></h5>
-            </div>
-            <p class="text-white-50 small mb-0"><?php echo t('profile.coming_soon', 'Coming Soon'); ?></p>
+      <!-- Avatar Section -->
+      <div class="glass-card-neon p-4 mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 class="mb-0" style="font-size:1rem;"><i class="fas fa-user-astronaut me-2" style="color:#00d4ff;"></i><?php echo t('avatar.title', 'KND Avatar'); ?></h5>
+          <div class="d-flex align-items-center gap-2">
+            <span class="text-white-50 small"><?php echo t('avatar.kp', 'KP'); ?>: <strong id="avatar-kp-balance" style="color:#00d4ff;">—</strong></span>
+            <button type="button" id="avatar-btn-customize" class="btn btn-sm btn-neon-primary">
+              <i class="fas fa-palette me-1"></i><?php echo t('profile.avatar_customize', 'Customize'); ?>
+            </button>
           </div>
         </div>
-        <div class="col-12 col-md-6">
-          <div class="glass-card-neon p-4 profile-placeholder-card">
-            <div class="d-flex align-items-center mb-2">
-              <div class="profile-stat-icon" style="opacity:.6;"><i class="fas fa-palette"></i></div>
-              <h5 class="mb-0 ms-2 text-white-50" style="font-size:1rem;"><?php echo t('profile.cosmetics', 'Cosmetics'); ?></h5>
+        <div id="avatar-preview" class="avatar-stage"></div>
+      </div>
+
+      <!-- Badges placeholder -->
+      <div class="glass-card-neon p-4 mb-4 profile-placeholder-card">
+        <div class="d-flex align-items-center mb-2">
+          <div class="profile-stat-icon" style="opacity:.6;"><i class="fas fa-award"></i></div>
+          <h5 class="mb-0 ms-2 text-white-50" style="font-size:1rem;"><?php echo t('profile.badges', 'Badges'); ?></h5>
+        </div>
+        <p class="text-white-50 small mb-0"><?php echo t('profile.coming_soon', 'Coming Soon'); ?></p>
+      </div>
+
+      <!-- Avatar Customize Modal -->
+      <div id="avatar-customize-modal" class="modal fade" tabindex="-1" style="display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.8); position:fixed; inset:0; z-index:9999;">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content glass-card-neon p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4><i class="fas fa-palette me-2" style="color:#00d4ff;"></i><?php echo t('avatar.customize', 'Customize Avatar'); ?></h4>
+              <button type="button" id="avatar-customize-close" class="btn btn-outline-light btn-sm">&times;</button>
             </div>
-            <p class="text-white-50 small mb-0"><?php echo t('profile.coming_soon', 'Coming Soon'); ?></p>
+            <div class="row">
+              <div class="col-md-5 mb-3 mb-md-0">
+                <div id="avatar-customize-preview" class="avatar-stage"></div>
+                <p class="text-white-50 small mt-2 text-center"><?php echo t('avatar.kp', 'KP'); ?>: <strong id="avatar-kp-balance-modal">—</strong></p>
+              </div>
+              <div class="col-md-7">
+                <div id="avatar-slot-tabs" class="d-flex flex-wrap gap-2 mb-3" data-active="hair"></div>
+                <ul class="nav nav-tabs mb-2">
+                  <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#avatar-owned-tab"><?php echo t('avatar.owned', 'Owned'); ?></a></li>
+                  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#avatar-shop-tab"><?php echo t('avatar.shop', 'Shop'); ?></a></li>
+                </ul>
+                <div class="tab-content">
+                  <div id="avatar-owned-tab" class="tab-pane show active">
+                    <div id="avatar-owned-pane" class="d-flex flex-wrap gap-2"></div>
+                  </div>
+                  <div id="avatar-shop-tab" class="tab-pane">
+                    <div id="avatar-shop-pane" class="d-flex flex-wrap gap-2"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -230,6 +268,9 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 .profile-rarity-legendary { color: #fbbf24; }
 </style>
 
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
+<script>var CSRF = '<?php echo addslashes($csrfToken); ?>';</script>
 <script src="/assets/js/navigation-extend.js"></script>
+<script src="/assets/js/avatar.js" defer></script>
 <?php echo generateFooter(); ?>
 <?php echo generateScripts(); ?>
