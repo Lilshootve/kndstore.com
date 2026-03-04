@@ -16,9 +16,11 @@
     }
 
     window.showLevelUp = function (oldLevel, newLevel) {
-        if (typeof oldLevel !== 'number' || typeof newLevel !== 'number' || newLevel <= oldLevel) return;
+        var oldL = Number(oldLevel);
+        var newL = Number(newLevel);
+        if (isNaN(oldL) || isNaN(newL) || newL <= oldL) return;
 
-        var tier = getTierForLevel(newLevel);
+        var tier = getTierForLevel(newL);
         var tierClass = tier ? ' knd-level-up-tier-' + tier : '';
 
         var overlay = document.createElement('div');
@@ -29,7 +31,7 @@
         var html = '<div class="knd-level-up-backdrop"></div>';
         html += '<div class="knd-level-up-content' + tierClass + '">';
         html += '  <div class="knd-level-up-title">LEVEL UP</div>';
-        html += '  <div class="knd-level-up-levels">Level ' + oldLevel + ' <span class="knd-level-up-arrow">&rarr;</span> Level ' + newLevel + '</div>';
+        html += '  <div class="knd-level-up-levels">Level ' + oldL + ' <span class="knd-level-up-arrow">&rarr;</span> Level ' + newL + '</div>';
         html += '</div>';
 
         overlay.innerHTML = html;
@@ -51,7 +53,37 @@
         });
 
         setTimeout(close, DURATION_MS);
+
+        try {
+            localStorage.setItem('knd_last_seen_level', String(newL));
+        } catch (e) {}
     };
+
+    // Fallback: detect level-up on page load (e.g. leveled via admin, different tab)
+    function checkLevelUpOnLoad() {
+        var badge = document.querySelector('.lvl-badge[data-level]');
+        if (!badge) return;
+        var current = parseInt(badge.getAttribute('data-level'), 10);
+        if (isNaN(current) || current < 1) return;
+        var lastStr;
+        try {
+            lastStr = localStorage.getItem('knd_last_seen_level');
+        } catch (e) { return; }
+        var last = (lastStr != null && lastStr !== '') ? parseInt(lastStr, 10) : NaN;
+        if (!isNaN(last) && current > last) {
+            if (typeof updateNavLevelBadge === 'function') updateNavLevelBadge(current);
+            showLevelUp(last, current);
+        }
+        try {
+            localStorage.setItem('knd_last_seen_level', String(current));
+        } catch (e) {}
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', checkLevelUpOnLoad);
+    } else {
+        checkLevelUpOnLoad();
+    }
 
     // Ensure styles exist
     var styleId = 'knd-level-up-styles';

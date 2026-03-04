@@ -194,7 +194,7 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 <script>
 var ARENA_CSRF = <?php echo json_encode($csrfToken); ?>;
 </script>
-<script src="/assets/js/arena-daily.js?v=<?php echo @filemtime(__DIR__ . '/assets/js/arena-daily.js'); ?>"></script>
+<script src="/assets/js/arena-daily.js?v=<?php echo @filemtime(__DIR__ . '/assets/js/arena-daily.js'); ?>" defer></script>
 <?php endif; ?>
 
 <?php echo generateFooter(); ?>

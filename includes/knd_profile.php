@@ -7,10 +7,10 @@ require_once __DIR__ . '/knd_xp.php';
 define('XP_MAX_LEVEL', 30);
 
 /**
- * Get XP badge data for navbar (level, xp, next_in, pct). Uses $_SESSION['xp_badge_cache'] for 60s.
+ * Get XP badge data for navbar (level, xp, next_in, pct). Uses $_SESSION['xp_badge_cache'] for 15s.
  */
 function get_xp_badge_data(PDO $pdo, int $userId): array {
-    $ttl = 60;
+    $ttl = 15;
     $cache = $_SESSION['xp_badge_cache'] ?? null;
     if ($cache && isset($cache['cached_at']) && (time() - $cache['cached_at']) < $ttl) {
         return $cache;

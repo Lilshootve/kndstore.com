@@ -94,22 +94,25 @@
                 .then(function (r) { return r.json(); })
                 .then(function (d) {
                     if (d.ok) {
-                        var dd = d.data;
+                        var dd = d.data || d;
                         if (dd.xp_delta > 0 && typeof showXpGain === 'function') {
                             setTimeout(function () { showXpGain(dd.xp_delta); }, 200);
                         }
-                        if (dd.level_up && dd.old_level != null && dd.new_level != null) {
+                        var lup = dd.level_up === true || dd.level_up === 1;
+                        var oldL = dd.old_level != null ? Number(dd.old_level) : NaN;
+                        var newL = dd.new_level != null ? Number(dd.new_level) : NaN;
+                        if (lup && !isNaN(oldL) && !isNaN(newL) && newL > oldL) {
                             if (typeof updateNavLevelBadge === 'function') {
-                                setTimeout(function () { updateNavLevelBadge(dd.new_level); }, 300);
+                                setTimeout(function () { updateNavLevelBadge(newL); }, 300);
                             }
                             if (typeof showLevelUp === 'function') {
-                                setTimeout(function () { showLevelUp(dd.old_level, dd.new_level); }, 400);
+                                setTimeout(function () { showLevelUp(oldL, newL); }, 400);
                             }
                             if (typeof kndToast === 'function') {
-                                setTimeout(function () { kndToast('success', 'Level Up: ' + dd.old_level + ' → ' + dd.new_level); }, 500);
+                                setTimeout(function () { kndToast('success', 'Level Up: ' + oldL + ' → ' + newL); }, 500);
                             }
-                        } else if (dd.level && typeof updateNavLevelBadge === 'function') {
-                            setTimeout(function () { updateNavLevelBadge(dd.level); }, 200);
+                        } else if (dd.level != null && typeof updateNavLevelBadge === 'function') {
+                            setTimeout(function () { updateNavLevelBadge(Number(dd.level)); }, 200);
                         }
                         var msg = '+' + dd.reward_kp + ' KP';
                         if (dd.bonus_xp > 0) msg += ' + ' + dd.bonus_xp + ' XP';
@@ -190,22 +193,25 @@
                     .then(function (r) { return r.json(); })
                     .then(function (d) {
                         if (d.ok) {
-                            var dd = d.data;
+                            var dd = d.data || d;
                             if (dd.xp_delta > 0 && typeof showXpGain === 'function') {
                                 setTimeout(function () { showXpGain(dd.xp_delta); }, 200);
                             }
-                            if (dd.level_up && dd.old_level != null && dd.new_level != null) {
+                            var lup = dd.level_up === true || dd.level_up === 1;
+                            var oldL = dd.old_level != null ? Number(dd.old_level) : NaN;
+                            var newL = dd.new_level != null ? Number(dd.new_level) : NaN;
+                            if (lup && !isNaN(oldL) && !isNaN(newL) && newL > oldL) {
                                 if (typeof updateNavLevelBadge === 'function') {
-                                    setTimeout(function () { updateNavLevelBadge(dd.new_level); }, 300);
+                                    setTimeout(function () { updateNavLevelBadge(newL); }, 300);
                                 }
                                 if (typeof showLevelUp === 'function') {
-                                    setTimeout(function () { showLevelUp(dd.old_level, dd.new_level); }, 400);
+                                    setTimeout(function () { showLevelUp(oldL, newL); }, 400);
                                 }
                                 if (typeof kndToast === 'function') {
-                                    setTimeout(function () { kndToast('success', 'Level Up: ' + dd.old_level + ' → ' + dd.new_level); }, 500);
+                                    setTimeout(function () { kndToast('success', 'Level Up: ' + oldL + ' → ' + newL); }, 500);
                                 }
-                            } else if (dd.level && typeof updateNavLevelBadge === 'function') {
-                                setTimeout(function () { updateNavLevelBadge(dd.level); }, 200);
+                            } else if (dd.level != null && typeof updateNavLevelBadge === 'function') {
+                                setTimeout(function () { updateNavLevelBadge(Number(dd.level)); }, 200);
                             }
                             updateNavBadge(dd.balance);
                             loadMissions();
