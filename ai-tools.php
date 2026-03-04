@@ -139,6 +139,21 @@ echo generateHeader(t('ai.meta.title'), t('ai.hero.desc'), $extraCss);
             </form>
         </div>
 
+        <!-- Texture Lab -->
+        <div class="glass-card-neon ai-tool-card p-4 mb-4">
+            <h4 class="text-white mb-3"><i class="fas fa-border-all me-2" style="color: var(--knd-neon-blue);"></i><?php echo t('ai.texture.title'); ?></h4>
+            <form id="ai-texture-form" class="ai-form">
+                <input type="hidden" name="type" value="texture_seamless">
+                <div class="mb-3">
+                    <label class="form-label text-white-50"><?php echo t('ai.text2img.prompt'); ?></label>
+                    <textarea name="prompt" class="form-control bg-dark text-white" rows="2" maxlength="500" placeholder="<?php echo t('ai.texture.prompt_placeholder', 'e.g. brick wall, wood grain, marble...'); ?>"></textarea>
+                </div>
+                <button type="submit" class="btn btn-neon-primary" id="ai-texture-submit">
+                    <i class="fas fa-border-all me-1"></i><?php echo t('ai.texture.generate'); ?>
+                </button>
+            </form>
+        </div>
+
         <!-- Image → 3D link -->
         <div class="glass-card-neon ai-tool-card p-4 mb-4">
             <h4 class="text-white mb-3"><i class="fas fa-cube me-2" style="color: var(--knd-neon-blue);"></i><?php echo t('ai.img23d.link'); ?></h4>
@@ -285,6 +300,16 @@ echo generateHeader(t('ai.meta.title'), t('ai.hero.desc'), $extraCss);
     });
 
     document.getElementById('ai-character-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const fd = new FormData(this);
+        if (!fd.get('prompt') || fd.get('prompt').trim().length === 0) {
+            if (typeof kndToast !== 'undefined') kndToast('Prompt is required', 'error');
+            return;
+        }
+        submitForm(this, fd);
+    });
+
+    document.getElementById('ai-texture-form').addEventListener('submit', function(e) {
         e.preventDefault();
         const fd = new FormData(this);
         if (!fd.get('prompt') || fd.get('prompt').trim().length === 0) {

@@ -1,6 +1,6 @@
 <?php
 /**
- * AI tools job submission (text2img, upscale, character_create, character_variation).
+ * AI tools job submission (text2img, upscale, character_create, character_variation, texture_seamless).
  * POST /api/ai/submit.php
  */
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -43,7 +43,7 @@ try {
     }
 
     $type = trim($_POST['type'] ?? '');
-    $allowedTypes = ['text2img', 'upscale', 'character_create', 'character_variation'];
+    $allowedTypes = ['text2img', 'upscale', 'character_create', 'character_variation', 'texture_seamless'];
     if (!in_array($type, $allowedTypes, true)) {
         json_error('INVALID_TYPE', 'type must be one of: ' . implode(', ', $allowedTypes));
     }
@@ -156,6 +156,18 @@ try {
             'character_id' => $charId,
             'variation_prompt' => $varPrompt,
             'type' => $varType,
+        ];
+    } elseif ($type === 'texture_seamless') {
+        $prompt = trim($_POST['prompt'] ?? '');
+        if (strlen($prompt) < 1) {
+            json_error('INVALID_INPUT', 'prompt is required.');
+        }
+        if (strlen($prompt) > AI_MAX_PROMPT_LEN) {
+            json_error('INVALID_INPUT', 'Prompt max ' . AI_MAX_PROMPT_LEN . ' characters.');
+        }
+        $payload = [
+            'prompt' => $prompt,
+            'seed' => !empty($_POST['seed']) ? (int) $_POST['seed'] : null,
         ];
     }
 

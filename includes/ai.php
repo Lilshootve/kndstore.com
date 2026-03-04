@@ -14,6 +14,7 @@ const AI_COSTS = [
     'upscale' => 5,
     'character_create' => 15,
     'character_variation' => 6,
+    'texture_seamless' => 4,
 ];
 
 function ai_job_cost(string $type, ?string $subtype = null): int {

@@ -32,7 +32,21 @@ try {
     }
 
     $secret = $body['secret'] ?? '';
-    if (!hash_equals(AI_CALLBACK_SECRET, $secret)) {
+    $signature = $body['signature'] ?? '';
+    $timestamp = $body['timestamp'] ?? '';
+
+    if ($signature !== '' && $timestamp !== '' && AI_CALLBACK_SECRET !== '') {
+        $payloadForSign = $body;
+        unset($payloadForSign['signature']);
+        $bodyToSign = json_encode($payloadForSign, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $expected = hash_hmac('sha256', $timestamp . $bodyToSign, AI_CALLBACK_SECRET);
+        if (!hash_equals($expected, $signature)) {
+            http_response_code(403);
+            header('Content-Type: application/json');
+            echo json_encode(['ok' => false, 'error' => 'Invalid signature']);
+            exit;
+        }
+    } elseif (!hash_equals(AI_CALLBACK_SECRET, $secret)) {
         http_response_code(403);
         header('Content-Type: application/json');
         echo json_encode(['ok' => false, 'error' => 'Invalid secret']);
