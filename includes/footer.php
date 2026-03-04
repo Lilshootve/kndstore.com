@@ -48,6 +48,10 @@ function generateFooter() {
     $footer .= '                                <li class="mb-3"><a href="/arena" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.arena.knd_arena', 'KND Arena') . '</a></li>' . "\n";
     $footer .= '                                <li class="mb-3"><a href="/how-knd-arena-works" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.arena.how_it_works', 'How Arena Works') . '</a></li>' . "\n";
     $footer .= '                            </ul>' . "\n";
+    $footer .= '                            <h5 class="mb-4 mt-4">' . t('footer.tools.title', 'Tools') . '</h5>' . "\n";
+    $footer .= '                            <ul class="list-unstyled">' . "\n";
+    $footer .= '                                <li class="mb-3"><a href="/triposr-3d.php" class="text-decoration-none" style="opacity: 0.8;"><i class="fas fa-cube me-2" style="color: var(--knd-neon-blue);"></i>' . t('footer.tools.triposr_3d', '3D from Image') . '</a></li>' . "\n";
+    $footer .= '                            </ul>' . "\n";
     $footer .= '                        </div>' . "\n";
     $footer .= '                        ' . "\n";
     $footer .= '                        <div class="col-md-6">' . "\n";
