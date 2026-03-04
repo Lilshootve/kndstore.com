@@ -1,3 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect x="2" y="2" width="96" height="96" fill="none" stroke="var(--av-accent, #a78bfa)" stroke-width="3"/>
+  <rect x="6" y="6" width="88" height="88" rx="7" fill="none" stroke="rgba(25,211,255,.55)" stroke-width="2.4"></rect>
+  <rect x="10" y="10" width="80" height="80" rx="6" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="1.2"></rect>
 </svg>

@@ -1,4 +1,8 @@
 <?php
+/**
+ * Image to 3D (InstantMesh) - Upload image, generate downloadable 3D model.
+ * URL /triposr-3d.php kept for backward compatibility.
+ */
 require_once __DIR__ . '/includes/session.php';
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/auth.php';

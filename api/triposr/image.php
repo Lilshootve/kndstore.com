@@ -1,7 +1,8 @@
 <?php
 /**
- * Serves the input image for a TripoSR job.
+ * Serves the input image for an InstantMesh 3D job.
  * Called by the GPU server - job_uuid in ?t= is used (unguessable).
+ * Endpoint kept at /api/triposr/image.php for backward compatibility.
  */
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
@@ -45,7 +46,7 @@ try {
     readfile($fullPath);
     exit;
 } catch (\Throwable $e) {
-    error_log('triposr/image: ' . $e->getMessage());
+    error_log('instantmesh/image: ' . $e->getMessage());
     http_response_code(500);
     exit('Error');
 }

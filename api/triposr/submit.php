@@ -1,4 +1,8 @@
 <?php
+/**
+ * InstantMesh 3D job submission.
+ * Endpoint: POST /api/triposr/submit.php (kept for backward compatibility)
+ */
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 ini_set('display_errors', '0');
@@ -167,16 +171,16 @@ try {
     $imageUrl = $siteUrl . '/api/triposr/image.php?t=' . urlencode($job['job_uuid']);
     $callbackUrl = $siteUrl . '/api/triposr/callback.php';
 
-    if (!empty(TRIPOSR_API_URL)) {
+    if (!empty(INSTANTMESH_API_URL)) {
         $payload = json_encode([
             'job_id' => $job['job_uuid'],
             'image_url' => $imageUrl,
             'callback_url' => $callbackUrl,
-            'secret' => TRIPOSR_CALLBACK_SECRET,
+            'secret' => INSTANTMESH_CALLBACK_SECRET,
             'quality' => $quality,
             'timestamp' => time(),
         ]);
-        $ch = curl_init(TRIPOSR_API_URL);
+        $ch = curl_init(INSTANTMESH_API_URL);
         curl_setopt_array($ch, [
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $payload,
@@ -211,6 +215,6 @@ try {
         'available_after' => get_available_points($pdo, $userId),
     ]);
 } catch (\Throwable $e) {
-    error_log('triposr/submit: ' . $e->getMessage());
+    error_log('instantmesh/submit: ' . $e->getMessage());
     json_error('INTERNAL_ERROR', 'An unexpected error occurred.', 500);
 }

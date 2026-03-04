@@ -1,4 +1,8 @@
 <?php
+/**
+ * InstantMesh 3D job callback from GPU server.
+ * Endpoint: POST /api/triposr/callback.php (kept for backward compatibility)
+ */
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 ini_set('display_errors', '0');
@@ -29,7 +33,7 @@ try {
     }
 
     $secret = $body['secret'] ?? '';
-    if (!hash_equals(TRIPOSR_CALLBACK_SECRET, $secret)) {
+    if (!hash_equals(INSTANTMESH_CALLBACK_SECRET, $secret)) {
         http_response_code(403);
         header('Content-Type: application/json');
         echo json_encode(['ok' => false, 'error' => 'Invalid secret']);
@@ -118,7 +122,7 @@ try {
     header('Content-Type: application/json');
     echo json_encode(['ok' => true]);
 } catch (\Throwable $e) {
-    error_log('triposr/callback: ' . $e->getMessage());
+    error_log('instantmesh/callback: ' . $e->getMessage());
     http_response_code(500);
     header('Content-Type: application/json');
     echo json_encode(['ok' => false, 'error' => 'Internal error']);

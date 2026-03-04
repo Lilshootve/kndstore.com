@@ -1,4 +1,8 @@
 <?php
+/**
+ * Download generated 3D model (InstantMesh).
+ * Endpoint: GET /api/triposr/download.php (kept for backward compatibility)
+ */
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 ini_set('display_errors', '0');
@@ -62,7 +66,7 @@ try {
     readfile($fullPath);
     exit;
 } catch (\Throwable $e) {
-    error_log('triposr/download: ' . $e->getMessage());
+    error_log('instantmesh/download: ' . $e->getMessage());
     header('Location: /triposr-3d.php?error=server');
     exit;
 }

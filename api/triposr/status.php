@@ -1,4 +1,8 @@
 <?php
+/**
+ * Poll InstantMesh 3D job status.
+ * Endpoint: GET /api/triposr/status.php (kept for backward compatibility)
+ */
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 ini_set('display_errors', '0');
@@ -46,6 +50,6 @@ try {
 
     json_success($data);
 } catch (\Throwable $e) {
-    error_log('triposr/status: ' . $e->getMessage());
+    error_log('instantmesh/status: ' . $e->getMessage());
     json_error('INTERNAL_ERROR', 'An unexpected error occurred.', 500);
 }

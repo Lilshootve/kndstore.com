@@ -14,13 +14,14 @@
     };
 
     window.updateNavLevelBadge = function (level) {
-        if (!level || level < 1) return;
+        var lvl = Number(level);
+        if (!lvl || lvl < 1) return;
         var badge = document.querySelector('.lvl-badge');
         if (!badge) return;
         var current = parseInt(badge.getAttribute('data-level'), 10);
-        if (current === level) return;
-        badge.setAttribute('data-level', level);
-        badge.textContent = 'Lvl ' + level;
+        if (current === lvl) return;
+        badge.setAttribute('data-level', lvl);
+        badge.textContent = 'Lvl ' + lvl;
         badge.classList.remove('lvl-badge-flash');
         badge.offsetHeight;
         badge.classList.add('lvl-badge-flash');

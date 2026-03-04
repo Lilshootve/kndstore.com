@@ -816,14 +816,16 @@
                     }
                     if (ddata.level_up && ddata.old_level != null && ddata.new_level != null) {
                         var delay = Math.max(0, MIN_ROLL_MS - (Date.now() - rollStartTime)) + 300;
+                        var oldLvl = Number(ddata.old_level);
+                        var newLvl = Number(ddata.new_level);
                         if (typeof updateNavLevelBadge === 'function') {
-                            setTimeout(function () { updateNavLevelBadge(ddata.new_level); }, delay);
+                            setTimeout(function () { updateNavLevelBadge(newLvl); }, delay);
                         }
                         if (typeof showLevelUp === 'function') {
-                            setTimeout(function () { showLevelUp(ddata.old_level, ddata.new_level); }, delay);
+                            setTimeout(function () { showLevelUp(oldLvl, newLvl); }, delay);
                         }
                         if (typeof kndToast === 'function') {
-                            setTimeout(function () { kndToast('success', 'Level Up: ' + ddata.old_level + ' → ' + ddata.new_level); }, delay + 400);
+                            setTimeout(function () { kndToast('success', 'Level Up: ' + oldLvl + ' → ' + newLvl); }, delay + 400);
                         }
                     } else if (ddata.level && typeof updateNavLevelBadge === 'function') {
                         updateNavLevelBadge(ddata.level);

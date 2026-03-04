@@ -1,5 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0V10M0 10H10" stroke="var(--av-secondary, rgba(0,212,255,.3))" stroke-width="0.5"/></pattern></defs>
-  <rect width="100" height="100" fill="var(--av-primary, #0a0e17)"/>
-  <rect width="100" height="100" fill="url(#grid)"/>
+  <rect width="100" height="100" fill="rgba(255,255,255,.02)"></rect>
+  <g stroke="rgba(25,211,255,.12)" stroke-width=".6">
+    <path d="M12 0v100M25 0v100M38 0v100M50 0v100M62 0v100M75 0v100M88 0v100"></path>
+    <path d="M0 12h100M0 25h100M0 38h100M0 50h100M0 62h100M0 75h100M0 88h100"></path>
+  </g>
+  <g stroke="rgba(255,255,255,.06)" stroke-width="1.2">
+    <path d="M0 20h100M0 52h100M0 80h100"></path>
+  </g>
 </svg>

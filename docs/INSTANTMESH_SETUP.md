@@ -2,7 +2,7 @@
 
 ## Overview
 
-The 3D integration uses **InstantMesh** as the generation engine. Users upload an image and receive a downloadable 3D model (OBJ/GLB). KND uses `TRIPOSR_API_URL` and `TRIPOSR_CALLBACK_SECRET` for compatibility with existing infrastructure.
+The 3D integration uses **InstantMesh** as the generation engine. Users upload an image and receive a downloadable 3D model (OBJ/GLB). Endpoints remain under `/api/triposr/*` for backward compatibility.
 
 ## Database
 
@@ -16,7 +16,13 @@ The 3D integration uses **InstantMesh** as the generation engine. Users upload a
    source sql/triposr_jobs_alter_quality.sql
    ```
 
-3. Add 3D source types to points_ledger (for KP cost/refund):
+3. Add engine column (optional, for tracking):
+   ```sql
+   source sql/triposr_jobs_alter_engine.sql
+   ```
+   The table `triposr_jobs` is kept for compatibility; the engine is InstantMesh.
+
+4. Add 3D source types to points_ledger (for KP cost/refund):
    ```sql
    source sql/points_ledger_add_3d_generation.sql
    ```
@@ -29,16 +35,18 @@ The 3D integration uses **InstantMesh** as the generation engine. Users upload a
    ```
 
 2. Edit `config/triposr_secrets.local.php`:
-   - `TRIPOSR_API_URL`: GPU server `/generate` endpoint (e.g. `https://gpu.example.com/generate`)
-   - `TRIPOSR_CALLBACK_SECRET`: Shared secret for callback validation (`openssl rand -hex 32`)
+   - `INSTANTMESH_API_URL`: InstantMesh GPU server `/generate` endpoint (e.g. `https://gpu.example.com/generate`)
+   - `INSTANTMESH_CALLBACK_SECRET`: Shared secret for callback validation (`openssl rand -hex 32`)
    - `TRIPOSR_UPLOAD_DIR`: `triposr/uploads` (relative to storage/)
    - `TRIPOSR_OUTPUT_DIR`: `triposr/outputs` (relative to storage/)
+
+   Legacy: `TRIPOSR_API_URL` and `TRIPOSR_CALLBACK_SECRET` are supported as fallback.
 
 ## GPU Server Contract
 
 The GPU server (InstantMesh) must:
 
-1. **Accept POST** at `TRIPOSR_API_URL` with JSON:
+1. **Accept POST** at `INSTANTMESH_API_URL` with JSON:
    ```json
    {
      "job_id": "uuid",
@@ -107,4 +115,4 @@ Points are deducted at submit and recorded in `points_ledger` with `source_type=
 
 ## GPU Server (InstantMesh)
 
-See `gpu-server/README_DEPLOY.md` for the InstantMesh implementation. Set `TRIPOSR_API_URL` to `https://your-gpu-host/generate`.
+See `gpu-server/README_DEPLOY.md` for the InstantMesh implementation. Set `INSTANTMESH_API_URL` to `https://your-gpu-host/generate`. The worker expects `INSTANTMESH_CALLBACK_SECRET` or `TRIPOSR_CALLBACK_SECRET` in the environment.

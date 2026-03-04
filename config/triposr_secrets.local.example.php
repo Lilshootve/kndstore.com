@@ -1,15 +1,15 @@
 <?php
 /**
- * TripoSR configuration - Copy to triposr_secrets.local.php and fill in values.
- * Include this file from includes/config.php if TripoSR is enabled.
+ * InstantMesh 3D configuration - Copy to triposr_secrets.local.php and fill in values.
+ * Endpoints /api/triposr/* are kept for backward compatibility.
  */
 
-// Base URL of your GPU server /generate endpoint (InstantMesh: https://gpu.kndstore.com/generate)
-define('TRIPOSR_API_URL', 'https://your-gpu-server.com/generate');
+// Base URL of your InstantMesh GPU server /generate endpoint
+define('INSTANTMESH_API_URL', 'https://your-gpu-server.com/generate');
 
 // Secret shared with the GPU server for callback validation
-define('TRIPOSR_CALLBACK_SECRET', 'generate-with-openssl-rand-hex-32');
+define('INSTANTMESH_CALLBACK_SECRET', 'generate-with-openssl-rand-hex-32');
 
-// Directories relative to project root storage/
+// Directories relative to project storage/
 define('TRIPOSR_UPLOAD_DIR', 'triposr/uploads');
 define('TRIPOSR_OUTPUT_DIR', 'triposr/outputs');

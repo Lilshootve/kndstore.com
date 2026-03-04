@@ -1,6 +1,6 @@
 # KND Store - GPU Server (InstantMesh)
 
-Servidor GPU compatible con la API KND TripoSR. Procesa imágenes y genera modelos 3D con InstantMesh.
+Servidor GPU para generación 3D con InstantMesh. Compatible con la API KND (endpoints `/api/triposr/*`).
 
 ## Contrato API (compatible KND)
 
@@ -12,7 +12,7 @@ Recibe:
   "job_id": "uuid",
   "image_url": "https://kndstore.com/api/triposr/image.php?t=uuid",
   "callback_url": "https://kndstore.com/api/triposr/callback.php",
-  "secret": "TRIPOSR_CALLBACK_SECRET"
+  "secret": "shared_secret"
 }
 ```
 
@@ -36,7 +36,8 @@ Sirve el modelo generado (GLB o OBJ).
 | Variable | Descripción | Default |
 |----------|-------------|---------|
 | `GPU_HOST_BASE_URL` | URL base pública del servidor (para model_url en callback) | `http://localhost:8000` |
-| `TRIPOSR_CALLBACK_SECRET` | Secret compartido con KND | `""` |
+| `INSTANTMESH_CALLBACK_SECRET` | Secret compartido con KND (preferido) | `""` |
+| `TRIPOSR_CALLBACK_SECRET` | Legacy, fallback si INSTANTMESH no está | `""` |
 | `MAX_CONCURRENCY` | Máximo de jobs GPU simultáneos | `2` |
 | `INSTANTMESH_CONFIG` | Config InstantMesh (relativo a INSTANTMESH_DIR) | `configs/instant-mesh-large.yaml` |
 | `INSTANTMESH_DIR` | Ruta al repo InstantMesh | `/app/InstantMesh` |
@@ -71,7 +72,7 @@ pip install -r requirements.txt
 
 # Exportar variables
 export GPU_HOST_BASE_URL="https://gpu.tudominio.com"
-export TRIPOSR_CALLBACK_SECRET="tu-secret"
+export INSTANTMESH_CALLBACK_SECRET="tu-secret"
 export MAX_CONCURRENCY=2
 export INSTANTMESH_DIR="$(pwd)/InstantMesh"
 
@@ -94,7 +95,7 @@ docker build -t knd-gpu-server .
 ```bash
 docker run --gpus all -p 8000:8000 \
   -e GPU_HOST_BASE_URL="https://gpu.tudominio.com" \
-  -e TRIPOSR_CALLBACK_SECRET="tu-secret" \
+  -e INSTANTMESH_CALLBACK_SECRET="tu-secret" \
   -e MAX_CONCURRENCY=2 \
   knd-gpu-server
 ```
@@ -109,7 +110,8 @@ docker run --gpus all -p 8000:8000 \
 4. Configurar `GPU_HOST_BASE_URL` con la URL pública de la instancia.
 5. En KND `config/triposr_secrets.local.php`:
    ```php
-   define('TRIPOSR_API_URL', 'https://tu-runpod-url.runpod.net/generate');
+   define('INSTANTMESH_API_URL', 'https://tu-runpod-url.runpod.net/generate');
+   define('INSTANTMESH_CALLBACK_SECRET', 'tu-secret');
    ```
 
 ---
@@ -131,7 +133,7 @@ curl -X POST http://localhost:8000/generate \
     "job_id": "test-'$(uuidgen)'",
     "image_url": "https://kndstore.com/api/triposr/image.php?t=JOB_UUID_REAL",
     "callback_url": "https://kndstore.com/api/triposr/callback.php",
-    "secret": "TRIPOSR_CALLBACK_SECRET"
+    "secret": "tu-secret-compartido"
   }'
 ```
 

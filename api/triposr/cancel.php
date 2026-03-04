@@ -1,4 +1,8 @@
 <?php
+/**
+ * Cancel InstantMesh 3D job (refunds KP).
+ * Endpoint: POST /api/triposr/cancel.php (kept for backward compatibility)
+ */
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 ini_set('display_errors', '0');
@@ -58,6 +62,6 @@ try {
 
     json_success(['cancelled' => true, 'status' => 'failed']);
 } catch (\Throwable $e) {
-    error_log('triposr/cancel: ' . $e->getMessage());
+    error_log('instantmesh/cancel: ' . $e->getMessage());
     json_error('INTERNAL_ERROR', 'An unexpected error occurred.', 500);
 }

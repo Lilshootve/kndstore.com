@@ -1,3 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect x="35" y="70" width="30" height="25" rx="2" fill="var(--av-primary, #555)"/>
+  <path d="M44 70h12v14c0 2-2 4-4 4h-4c-2 0-4-2-4-4z" fill="var(--av-primary,#222833)" stroke="#9aa4b2" stroke-width="1.2" stroke-linejoin="round"></path>
+  <rect x="44" y="75" width="12" height="4" fill="var(--av-secondary,#2f3947)"></rect>
+  <path d="M46 80h8" fill="none" stroke="var(--av-accent,#19d3ff)" stroke-width="1.1" stroke-linecap="round" opacity=".75"></path>
 </svg>

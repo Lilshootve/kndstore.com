@@ -1,4 +1,5 @@
--- KND Store - TripoSR 3D generation jobs
+-- KND Store - 3D generation jobs (InstantMesh)
+-- Table name triposr_jobs kept for backward compatibility.
 -- Run AFTER users.sql
 
 CREATE TABLE IF NOT EXISTS `triposr_jobs` (
