@@ -47,5 +47,15 @@ try {
     json_success(['slot' => $slot, 'item_id' => $itemId]);
 } catch (\Throwable $e) {
     error_log('avatar/equip error: ' . $e->getMessage());
-    json_error('INTERNAL_ERROR', 'An unexpected error occurred.', 500);
+    $msg = 'An unexpected error occurred.';
+    if (!empty($_GET['debug']) || !empty($_POST['debug'])) {
+        $msg = $e->getMessage();
+    }
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'ok' => false,
+        'error' => ['code' => 'INTERNAL_ERROR', 'message' => $msg]
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
 }

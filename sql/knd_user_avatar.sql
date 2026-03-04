@@ -2,7 +2,7 @@
 -- Run after knd_avatar_items.sql, requires users table
 
 CREATE TABLE IF NOT EXISTS `knd_user_avatar` (
-  `user_id` INT NOT NULL,
+  `user_id` BIGINT NOT NULL,
   `hair_item_id` INT NULL,
   `top_item_id` INT NULL,
   `bottom_item_id` INT NULL,

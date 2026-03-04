@@ -1,6 +1,9 @@
 (function () {
   'use strict';
 
+  const BODY_SVG = '/assets/avatars/base/body.svg';
+  const BODY_FALLBACK_SVG = '/assets/avatars/_placeholder.svg';
+  const LAYER_ORDER = ['bg', 'body', 'bottom', 'shoes', 'top', 'accessory', 'hair', 'frame'];
   const SLOT_ORDER = ['bg', 'bottom', 'shoes', 'top', 'hair', 'accessory', 'frame'];
   const SLOT_TO_COL = { hair: 'hair_item_id', top: 'top_item_id', bottom: 'bottom_item_id', shoes: 'shoes_item_id', accessory1: 'accessory1_item_id', accessory: 'accessory1_item_id', bg: 'bg_item_id', frame: 'frame_item_id' };
 
@@ -43,16 +46,19 @@
 
     inner.innerHTML = '';
 
-    for (const slot of SLOT_ORDER) {
-      const col = slot === 'accessory' ? 'accessory1_item_id' : slot + '_item_id';
-      const itemId = loadout[col];
-      if (!itemId) continue;
-      const item = itemMap[itemId];
-      if (!item || !item.asset_path) continue;
-
-      const svg = await fetchSvg(item.asset_path);
-      if (!svg) continue;
-
+    for (const layerName of LAYER_ORDER) {
+      let svg = '';
+      if (layerName === 'body') {
+        svg = await fetchSvg(BODY_SVG) || await fetchSvg(BODY_FALLBACK_SVG);
+      } else {
+        const col = layerName === 'accessory' ? 'accessory1_item_id' : layerName + '_item_id';
+        const itemId = loadout[col];
+        if (!itemId) continue;
+        const item = itemMap[itemId];
+        if (!item || !item.asset_path) continue;
+        svg = await fetchSvg(item.asset_path);
+        if (!svg) continue;
+      }
       const layer = document.createElement('div');
       layer.className = 'avatar-layer';
       layer.innerHTML = svg;

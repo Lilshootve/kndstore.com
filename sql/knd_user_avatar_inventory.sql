@@ -2,7 +2,7 @@
 -- Run after knd_avatar_items.sql, requires users table
 
 CREATE TABLE IF NOT EXISTS `knd_user_avatar_inventory` (
-  `user_id` INT NOT NULL,
+  `user_id` BIGINT NOT NULL,
   `item_id` INT NOT NULL,
   `acquired_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`, `item_id`),
