@@ -129,6 +129,67 @@ function ai_get_job(PDO $pdo, string $jobUuid): ?array {
     return $row;
 }
 
+/**
+ * Get recent jobs for a user (for HUB "Recent Jobs" section).
+ * @return array<int, array{job_uuid: string, job_type: string, status: string, cost_kp: int, created_at: string}>
+ */
+function ai_get_recent_jobs(PDO $pdo, int $userId, int $limit = 5): array {
+    $stmt = $pdo->prepare(
+        "SELECT job_uuid, job_type, status, cost_kp, created_at
+         FROM triposr_jobs WHERE user_id = ? ORDER BY created_at DESC LIMIT ?"
+    );
+    if (!$stmt || !$stmt->execute([$userId, $limit])) return [];
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($rows as &$r) {
+        $r['job_type'] = $r['job_type'] ?? 'img23d';
+        $r['cost_kp'] = (int) ($r['cost_kp'] ?? 0);
+    }
+    return $rows;
+}
+
+/**
+ * Get jobs for a specific tool type (for tool page history).
+ * @return array<int, array{job_uuid: string, job_type: string, status: string, cost_kp: int, created_at: string, payload_json: string}>
+ */
+function ai_get_jobs_by_type(PDO $pdo, int $userId, string $jobType, int $limit = 10): array {
+    $stmt = $pdo->prepare(
+        "SELECT job_uuid, job_type, status, cost_kp, created_at, payload_json
+         FROM triposr_jobs WHERE user_id = ? AND job_type = ? ORDER BY created_at DESC LIMIT ?"
+    );
+    if (!$stmt || !$stmt->execute([$userId, $jobType, $limit])) return [];
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Get jobs with optional filters (for jobs.php).
+ */
+function ai_list_jobs(PDO $pdo, int $userId, ?string $jobType = null, ?string $status = null, ?string $dateFrom = null, ?string $dateTo = null, int $limit = 50, int $offset = 0): array {
+    $sql = "SELECT job_uuid, job_type, status, cost_kp, created_at, completed_at FROM triposr_jobs WHERE user_id = ?";
+    $params = [$userId];
+    if ($jobType) {
+        $sql .= " AND job_type = ?";
+        $params[] = $jobType;
+    }
+    if ($status) {
+        $sql .= " AND status = ?";
+        $params[] = $status;
+    }
+    if ($dateFrom) {
+        $sql .= " AND created_at >= ?";
+        $params[] = $dateFrom;
+    }
+    if ($dateTo) {
+        $sql .= " AND created_at <= ?";
+        $params[] = $dateTo . ' 23:59:59';
+    }
+    $sql .= " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    $params[] = $limit;
+    $params[] = $offset;
+    $stmt = $pdo->prepare($sql);
+    if (!$stmt || !$stmt->execute($params)) return [];
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 function ai_update_job(PDO $pdo, string $jobUuid, array $updates): bool {
     $allowed = ['status', 'output_path', 'error_message', 'completed_at', 'result_json'];
     $set = [];

@@ -1,0 +1,35 @@
+/* KND Labs - Hub & Tool Pages */
+
+.labs-hub-hero {
+    background: linear-gradient(135deg, rgba(37, 156, 174, 0.08) 0%, rgba(174, 37, 101, 0.08) 50%, rgba(0, 212, 255, 0.06) 100%);
+}
+
+.labs-tool-card .labs-card-meta {
+    font-size: 0.8rem;
+}
+
+.labs-tool-section .breadcrumb {
+    background: transparent;
+}
+
+.labs-tool-section .breadcrumb-item a {
+    color: var(--knd-neon-blue, #00d4ff);
+}
+
+.labs-tool-section .breadcrumb-item.active {
+    color: rgba(255,255,255,0.7);
+}
+
+.labs-result-preview {
+    min-height: 200px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.labs-form .preset-btn {
+    font-size: 0.75rem;
+}
