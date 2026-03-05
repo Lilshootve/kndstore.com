@@ -147,11 +147,14 @@ do {
         $result = comfyui_run_prompt($workflow, $comfyBase, $comfyToken);
         $promptId = $result['prompt_id'];
     } catch (\Throwable $e) {
-        logWorker("Job $jobId ComfyUI send failed: " . $e->getMessage());
-        httpPost($apiBase . '/api/labs/queue/fail.php', $headers, [
-            'job_id' => $jobId,
-            'error_message' => $e->getMessage(),
-        ]);
+        $msg = $e->getMessage();
+        logWorker("Job $jobId ComfyUI send failed: " . $msg);
+        $failData = ['job_id' => $jobId, 'error_message' => $msg];
+        $isValidation = (stripos($msg, 'prompt_outputs_failed_validation') !== false || stripos($msg, '400') !== false || stripos($msg, 'Value not in list') !== false);
+        if ($isValidation) {
+            $failData['no_retry'] = '1';
+        }
+        httpPost($apiBase . '/api/labs/queue/fail.php', $headers, $failData);
         if (!$loop) break;
         sleep($sleepSec);
         continue;

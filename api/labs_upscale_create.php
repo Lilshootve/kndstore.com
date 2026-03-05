@@ -2,7 +2,7 @@
 /**
  * POST /api/labs_upscale_create.php
  * Create upscale job. source_type: upload | recent
- * Uses filesystem: copies image to COMFY_INPUT_DIR as job_<id>_input.png
+ * Uploads image to ComfyUI via HTTP (no shared filesystem).
  */
 header('Cache-Control: no-store, no-cache');
 header('Content-Type: application/json');
@@ -14,15 +14,10 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/support_credits.php';
 require_once __DIR__ . '/../includes/ai.php';
 require_once __DIR__ . '/../includes/json.php';
-require_once __DIR__ . '/../includes/storage.php';
 require_once __DIR__ . '/../includes/comfyui.php';
 require_once __DIR__ . '/../includes/comfyui_provider.php';
 require_once __DIR__ . '/../includes/settings.php';
 require_once __DIR__ . '/../includes/labs_image_helper.php';
-
-if (file_exists(__DIR__ . '/../config/labs.php')) {
-    require_once __DIR__ . '/../config/labs.php';
-}
 
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5MB
 const MAX_DIMENSION = 2048;
@@ -88,42 +83,30 @@ try {
 
     $runpodUrl = comfyui_get_base_url_runpod($pdo);
     $baseUrl = comfyui_get_base_url($pdo, null);
+    $token = comfyui_get_token($pdo);
     $providerUsed = ($runpodUrl !== '' && rtrim($baseUrl, '/') === rtrim($runpodUrl, '/')) ? 'runpod' : 'local';
+
+    try {
+        $imageFilename = comfyui_upload_image($tmpPath, $baseUrl, $token);
+    } finally {
+        if ($tmpPath && $sourceType === 'recent') @unlink($tmpPath);
+    }
 
     $pdo->beginTransaction();
     $stmt = $pdo->prepare(
         "INSERT INTO knd_labs_jobs (user_id, tool, prompt, negative_prompt, status, cost_kp, quality, provider, priority, payload_json)
          VALUES (?, 'upscale', '', '', 'queued', ?, '4x', ?, 100, ?)"
     );
-    $payloadInit = ['tool' => 'upscale'];
-    if (!$stmt || !$stmt->execute([$userId, UPSCALE_COST_KP, $providerUsed, json_encode($payloadInit)])) {
+    $jobId = 0;
+    if (!$stmt || !$stmt->execute([$userId, UPSCALE_COST_KP, $providerUsed, '{}'])) {
         $pdo->rollBack();
         json_error('DB_ERROR', 'Could not create job.', 500);
     }
     $jobId = (int) $pdo->lastInsertId();
 
-    $inputFilename = 'job_' . $jobId . '_input.png';
-    $comfyInputDir = defined('COMFY_INPUT_DIR') ? COMFY_INPUT_DIR : (dirname(__DIR__) . '/comfyui/ComfyUI/input');
-    $destPath = rtrim($comfyInputDir, '/\\') . DIRECTORY_SEPARATOR . $inputFilename;
-
-    if (!is_dir($comfyInputDir)) {
-        @mkdir($comfyInputDir, 0755, true);
-    }
-    if (!is_dir($comfyInputDir) || !is_writable($comfyInputDir)) {
-        $pdo->rollBack();
-        json_error('CONFIG_ERROR', 'COMFY_INPUT_DIR not writable.', 500);
-    }
-
-    if (!labs_image_to_png($tmpPath, $destPath)) {
-        $pdo->rollBack();
-        if ($tmpPath && $sourceType === 'recent') @unlink($tmpPath);
-        json_error('INTERNAL_ERROR', 'Could not save image to input dir.', 500);
-    }
-    if ($tmpPath && $sourceType === 'recent') @unlink($tmpPath);
-
     $payload = [
         'tool' => 'upscale',
-        'image_filename' => $inputFilename,
+        'image_filename' => $imageFilename,
         'job_id' => $jobId,
     ];
     $stmt = $pdo->prepare("UPDATE knd_labs_jobs SET payload_json = ? WHERE id = ?");

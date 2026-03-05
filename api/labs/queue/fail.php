@@ -34,6 +34,8 @@ try {
     }
 
     $errorMessage = trim($_POST['error_message'] ?? 'Unknown error');
+    $noRetry = isset($_POST['no_retry']) && ($_POST['no_retry'] === '1' || $_POST['no_retry'] === 'true');
+    $retryInSeconds = isset($_POST['retry_in_seconds']) ? (int) $_POST['retry_in_seconds'] : null;
 
     $pdo = getDBConnection();
     if (!$pdo) {
@@ -52,8 +54,9 @@ try {
     }
 
     $attempts = (int) ($row['attempts'] ?? 0);
+    $finalFail = $noRetry || $retryInSeconds === 0 || $attempts >= 3;
 
-    if ($attempts >= 3) {
+    if ($finalFail) {
         $stmt = $pdo->prepare(
             "UPDATE knd_labs_jobs SET
                status = 'failed',
@@ -77,7 +80,7 @@ try {
         $stmt->execute([$jobId]);
     }
 
-    echo json_encode(['ok' => true, 'requeued' => $attempts < 3]);
+    echo json_encode(['ok' => true, 'requeued' => !$finalFail]);
 } catch (\Throwable $e) {
     error_log('api/labs/queue/fail: ' . $e->getMessage());
     http_response_code(500);

@@ -239,6 +239,33 @@ function comfyui_apply_checkpoint(array &$workflow, string $model = 'v1_5', bool
     }
 }
 
+/** Map legacy RealESRGAN models to 4x-UltraSharp (only model installed). */
+const COMFYUI_UPSCALE_MODEL_MAP = [
+    'RealESRGAN_x4plus.pth' => '4x-UltraSharp.pth',
+    'RealESRGAN_x2plus.pth' => '4x-UltraSharp.pth',
+];
+
+/**
+ * Strip _meta, normalize UpscaleModelLoader model_name (RealESRGAN -> 4x-UltraSharp).
+ */
+function comfyui_strip_meta(array $workflow): array {
+    $out = [];
+    foreach ($workflow as $nid => $node) {
+        if (!is_array($node)) {
+            $out[$nid] = $node;
+            continue;
+        }
+        $ctype = $node['class_type'] ?? '';
+        $inputs = $node['inputs'] ?? [];
+        if ($ctype === 'UpscaleModelLoader' && isset($inputs['model_name'])) {
+            $m = $inputs['model_name'];
+            $inputs['model_name'] = COMFYUI_UPSCALE_MODEL_MAP[$m] ?? $m;
+        }
+        $out[$nid] = ['class_type' => $ctype, 'inputs' => $inputs];
+    }
+    return $out;
+}
+
 /**
  * Send prompt to ComfyUI.
  * POST {COMFY_BASE}/prompt with { "prompt": workflow_json, "client_id": "knd-labs" }
@@ -258,8 +285,9 @@ function comfyui_run_prompt(array $workflow, ?string $baseUrl = null, string $to
     if ($base === '') throw new \RuntimeException('ComfyUI config not found');
 
     $url = $base . '/prompt';
+    $workflowClean = comfyui_strip_meta($workflow);
     $payload = [
-        'prompt' => $workflow,
+        'prompt' => $workflowClean,
         'client_id' => defined('COMFYUI_CLIENT_ID') ? COMFYUI_CLIENT_ID : 'knd-labs',
     ];
     $jsonBody = json_encode($payload);
