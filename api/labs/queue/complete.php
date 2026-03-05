@@ -48,19 +48,25 @@ try {
         exit;
     }
 
-    $stmt = $pdo->prepare(
-        "UPDATE knd_labs_jobs SET
-           status = 'done',
-           image_url = ?,
-           output_path = COALESCE(NULLIF(?, ''), output_path),
-           comfy_prompt_id = COALESCE(NULLIF(?, ''), comfy_prompt_id),
-           finished_at = NOW(),
-           locked_at = NULL,
-           locked_by = NULL,
-           updated_at = NOW()
-         WHERE id = ? AND status = 'processing'"
-    );
-    $stmt->execute([$imageUrl, $outputPath, $comfyPromptId, $jobId]);
+    $updates = [
+        "status = 'done'",
+        "image_url = ?",
+        "comfy_prompt_id = COALESCE(NULLIF(?, ''), comfy_prompt_id)",
+        "finished_at = NOW()",
+        "locked_at = NULL",
+        "locked_by = NULL",
+        "updated_at = NOW()",
+    ];
+    $params = [$imageUrl, $comfyPromptId];
+    $hasOutputPath = $pdo->query("SHOW COLUMNS FROM knd_labs_jobs LIKE 'output_path'")->rowCount() > 0;
+    if ($hasOutputPath && $outputPath !== '') {
+        $updates[] = "output_path = ?";
+        $params[] = $outputPath;
+    }
+    $params[] = $jobId;
+    $sql = "UPDATE knd_labs_jobs SET " . implode(', ', $updates) . " WHERE id = ? AND status = 'processing'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
 
     if ($stmt->rowCount() === 0) {
         http_response_code(404);

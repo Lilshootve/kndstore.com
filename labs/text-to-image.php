@@ -87,6 +87,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
                 <option value="iniverseMixSFWNSFW">Pony Real Guofeng V5.1</option>
                 <option value="juggernaut_ragnarok">Juggernaut XL Ragnarok</option>
                 <option value="juggernaut_v8">Juggernaut XL v8</option>
+                <option value="juggernaut_v9">Juggernaut XL v9</option>
                 <option value="NSFW_master">NSFW Master</option>
                 <option value="pornmaster_asian">PornMaster Asian SDXL</option>
                 <option value="realisticVision">Realistic Vision V6.0</option>
@@ -108,24 +109,24 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               </div>
               <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.steps', 'Steps'); ?></label>
-                <input type="number" name="steps" class="form-control form-control-sm bg-dark text-white" value="20" min="1" max="100">
+                <input type="number" name="steps" class="form-control form-control-sm bg-dark text-white" value="30" min="1" max="100">
               </div>
               <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.cfg', 'CFG'); ?></label>
-                <input type="number" name="cfg" class="form-control form-control-sm bg-dark text-white" value="7.5" min="1" max="30" step="0.5">
+                <input type="number" name="cfg" class="form-control form-control-sm bg-dark text-white" value="6" min="1" max="30" step="0.5">
               </div>
             </div>
             <div class="row g-2 mb-3">
               <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.sampler', 'Sampler'); ?></label>
                 <select name="sampler_name" class="form-select form-select-sm bg-dark text-white">
-                  <option value="euler" selected>Euler</option>
+                  <option value="euler">Euler</option>
                   <option value="euler_ancestral">Euler Ancestral</option>
                   <option value="heun">Heun</option>
                   <option value="dpm_2">DPM 2</option>
                   <option value="dpm_2_ancestral">DPM 2 Ancestral</option>
                   <option value="lms">LMS</option>
-                  <option value="dpmpp_2m">DPM++ 2M</option>
+                  <option value="dpmpp_2m" selected>DPM++ 2M</option>
                   <option value="dpmpp_2m_sde">DPM++ 2M SDE</option>
                   <option value="dpmpp_sde">DPM++ SDE</option>
                   <option value="ddim">DDIM</option>
@@ -136,8 +137,8 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.scheduler', 'Scheduler'); ?></label>
                 <select name="scheduler" class="form-select form-select-sm bg-dark text-white">
-                  <option value="normal" selected>Normal</option>
-                  <option value="karras">Karras</option>
+                  <option value="normal">Normal</option>
+                  <option value="karras" selected>Karras</option>
                   <option value="exponential">Exponential</option>
                   <option value="sgm_uniform">SGM Uniform</option>
                   <option value="simple">Simple</option>
@@ -153,9 +154,9 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
                 <label class="form-label text-white-50 small"><?php echo t('labs.width', 'Width'); ?></label>
                 <select name="width" id="labs-width-select" class="form-select form-select-sm bg-dark text-white">
                   <option value="256">256</option>
-                  <option value="512">512</option>
+                  <option value="512" selected>512</option>
                   <option value="768">768</option>
-                  <option value="1024" selected>1024</option>
+                  <option value="1024">1024</option>
                   <option value="1152">1152</option>
                   <option value="1280">1280</option>
                   <option value="1536">1536</option>
@@ -166,9 +167,9 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
                 <label class="form-label text-white-50 small"><?php echo t('labs.height', 'Height'); ?></label>
                 <select name="height" id="labs-height-select" class="form-select form-select-sm bg-dark text-white">
                   <option value="256">256</option>
-                  <option value="512">512</option>
+                  <option value="512" selected>512</option>
                   <option value="768">768</option>
-                  <option value="1024" selected>1024</option>
+                  <option value="1024">1024</option>
                   <option value="1152">1152</option>
                   <option value="1280">1280</option>
                   <option value="1536">1536</option>

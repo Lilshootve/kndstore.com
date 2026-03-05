@@ -57,10 +57,13 @@
           self.bindRegenerate();
           self.bindVariations();
           self.bindPromptValidation();
+          self.bindAdvancedToggle();
           self.bindViewDetails();
+          self.bindRecentFilter();
+          self.bindPrivateCheck();
           self.updateCostLabel();
           self.updateBalanceAfter();
-          self.recomputeGenerateState();
+          self.updateSubmitButton();
         });
     },
 
@@ -366,7 +369,15 @@
       document.querySelectorAll('.preset-neg-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
           var n = document.querySelector('[name="negative_prompt"]');
-          if (n) n.value = btn.getAttribute('data-value') || '';
+          if (!n) return;
+          var toAdd = (btn.getAttribute('data-value') || '').trim();
+          if (!toAdd) return;
+          var current = (n.value || '').trim();
+          if (current === '') {
+            n.value = toAdd;
+          } else {
+            n.value = current + ', ' + toAdd;
+          }
         });
       });
     },

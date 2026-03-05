@@ -59,12 +59,12 @@ try {
     }
 
     $seed = !empty($_POST['seed']) ? (int) $_POST['seed'] : random_int(0, 2147483647);
-    $steps = (int) ($_POST['steps'] ?? 20);
+    $steps = (int) ($_POST['steps'] ?? 30);
     $steps = max(1, min(100, $steps));
-    $cfg = (float) ($_POST['cfg'] ?? 7.5);
+    $cfg = (float) ($_POST['cfg'] ?? 6);
     $cfg = max(1, min(30, $cfg));
-    $width = (int) ($_POST['width'] ?? 1024);
-    $height = (int) ($_POST['height'] ?? 1024);
+    $width = (int) ($_POST['width'] ?? 512);
+    $height = (int) ($_POST['height'] ?? 512);
 
     $model = trim($_POST['model'] ?? 'v1_5');
     $modelKeys = array_keys(COMFYUI_CHECKPOINT_MAP);
@@ -103,8 +103,8 @@ try {
         'width' => $width,
         'height' => $height,
         'batch_size' => max(1, min(4, (int) ($_POST['batch_size'] ?? 1))),
-        'sampler_name' => trim($_POST['sampler_name'] ?? 'euler'),
-        'scheduler' => trim($_POST['scheduler'] ?? 'normal'),
+        'sampler_name' => trim($_POST['sampler_name'] ?? 'dpmpp_2m'),
+        'scheduler' => trim($_POST['scheduler'] ?? 'karras'),
         'denoise' => isset($_POST['denoise']) ? (float) $_POST['denoise'] : 1.0,
     ];
 

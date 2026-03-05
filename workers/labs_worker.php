@@ -119,15 +119,23 @@ function comfyui_get_history_standalone(string $promptId, string $baseUrl, strin
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 10,
+        CURLOPT_TIMEOUT => 15,
+        CURLOPT_CONNECTTIMEOUT => 5,
         CURLOPT_HTTPGET => true,
         CURLOPT_HTTPHEADER => $headers,
     ]);
     $body = curl_exec($ch);
+    $err = curl_error($ch);
+    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    if ($err) {
+        logWorker("ComfyUI history curl error: $err (HTTP $code)");
+        return null;
+    }
     if (!$body) return null;
     $data = json_decode($body, true);
-    return is_array($data) && isset($data[$promptId]) ? $data[$promptId] : null;
+    $hist = is_array($data) && isset($data[$promptId]) ? $data[$promptId] : null;
+    return $hist;
 }
 
 if (empty($cfg['WORKER_TOKEN']) || empty($cfg['API_BASE'])) {
@@ -137,7 +145,8 @@ if (empty($cfg['WORKER_TOKEN']) || empty($cfg['API_BASE'])) {
 
 $apiBase = rtrim($cfg['API_BASE'], '/');
 $workerToken = $cfg['WORKER_TOKEN'];
-$comfyBase = rtrim($cfg['COMFYUI_BASE'] ?? $cfg['COMFY_URL'] ?? 'https://comfy.kndstore.com', '/');
+// Prefer COMFYUI_LOCAL cuando el worker corre en el mismo PC que ComfyUI (evita túnel)
+$comfyBase = rtrim($cfg['COMFYUI_LOCAL'] ?? $cfg['COMFYUI_BASE'] ?? $cfg['COMFY_URL'] ?? 'https://comfy.kndstore.com', '/');
 $comfyToken = $cfg['COMFYUI_TOKEN'] ?? '';
 $comfyOutputDir = $cfg['COMFY_OUTPUT_DIR'] ?? (defined('COMFY_OUTPUT_DIR') ? COMFY_OUTPUT_DIR : '');
 $headers = ['X-KND-WORKER-TOKEN: ' . $workerToken];
@@ -236,13 +245,14 @@ do {
         continue;
     }
 
-    logWorker("Job $jobId: ComfyUI prompt_id=$promptId, polling...");
+    logWorker("Job $jobId: ComfyUI prompt_id=$promptId, polling $comfyBase/history/...");
     $maxPoll = 120;
-    $pollInterval = 2;
+    $pollInterval = 1;
     $imageUrl = null;
     $outputFilename = null;
     $outputSubfolder = '';
     $pollError = null;
+    $lastHistDebug = null;
     for ($i = 0; $i < $maxPoll; $i++) {
         sleep($pollInterval);
         $hist = comfyui_get_history_standalone($promptId, $comfyBase, $comfyToken);
@@ -252,20 +262,28 @@ do {
             $pollError = is_string($err) ? $err : json_encode($err);
             break;
         }
-        if (isset($hist['outputs']) && is_array($hist['outputs'])) {
-            foreach ($hist['outputs'] as $nodeOut) {
-                if (isset($nodeOut['images']) && is_array($nodeOut['images'])) {
-                    foreach ($nodeOut['images'] as $img) {
-                        if (!empty($img['filename'])) {
-                            $outputFilename = $img['filename'];
-                            $outputSubfolder = $img['subfolder'] ?? '';
-                            $imageUrl = '/api/labs/image.php?job_id=' . $jobId;
-                            break 3;
-                        }
+        $outputs = $hist['outputs'] ?? [];
+        if (!is_array($outputs)) $outputs = [];
+        foreach ($outputs as $nodeOut) {
+            if (!is_array($nodeOut)) continue;
+            foreach (['images', 'gifs'] as $key) {
+                if (!isset($nodeOut[$key]) || !is_array($nodeOut[$key])) continue;
+                foreach ($nodeOut[$key] as $img) {
+                    if (!empty($img['filename'])) {
+                        $outputFilename = $img['filename'];
+                        $outputSubfolder = $img['subfolder'] ?? '';
+                        $imageUrl = '/api/labs/image.php?job_id=' . $jobId;
+                        break 4;
                     }
                 }
             }
         }
+        if ($imageUrl !== null) break;
+        $lastHistDebug = isset($hist['outputs']) ? 'outputs=' . json_encode($hist['outputs'], JSON_UNESCAPED_UNICODE) : 'no outputs';
+    }
+    if ($imageUrl === null && $lastHistDebug !== null && !$pollError) {
+        $preview = strlen($lastHistDebug) > 600 ? substr($lastHistDebug, 0, 600) . '...' : $lastHistDebug;
+        logWorker("Job $jobId: history debug: $preview");
     }
 
     $outputPathRel = null;
