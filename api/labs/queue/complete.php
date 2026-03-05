@@ -39,6 +39,7 @@ try {
     }
 
     $comfyPromptId = trim($_POST['comfy_prompt_id'] ?? '');
+    $outputPath = trim($_POST['output_path'] ?? '');
 
     $pdo = getDBConnection();
     if (!$pdo) {
@@ -51,6 +52,7 @@ try {
         "UPDATE knd_labs_jobs SET
            status = 'done',
            image_url = ?,
+           output_path = COALESCE(NULLIF(?, ''), output_path),
            comfy_prompt_id = COALESCE(NULLIF(?, ''), comfy_prompt_id),
            finished_at = NOW(),
            locked_at = NULL,
@@ -58,7 +60,7 @@ try {
            updated_at = NOW()
          WHERE id = ? AND status = 'processing'"
     );
-    $stmt->execute([$imageUrl, $comfyPromptId, $jobId]);
+    $stmt->execute([$imageUrl, $outputPath, $comfyPromptId, $jobId]);
 
     if ($stmt->rowCount() === 0) {
         http_response_code(404);

@@ -46,15 +46,15 @@ function comfyui_upload_image(string $filePath, ?string $baseUrl = null, string 
  * Load workflow file path by tool.
  */
 function comfyui_workflow_path(string $tool): string {
-    $baseDir = dirname(__DIR__);
+    $baseDir = defined('WORKFLOWS_DIR') ? rtrim(WORKFLOWS_DIR, '/\\') : (dirname(__DIR__) . '/workflows');
     if ($tool === 'upscale') {
-        $path = $baseDir . '/workflows/upscale_api.json';
-        if (!is_readable($path)) $path = $baseDir . '/KND_MASTER_WORKFLOW_UPSCALE.json';
+        $path = $baseDir . '/upscale_api.json';
+        if (!is_readable($path)) $path = dirname(__DIR__) . '/KND_MASTER_WORKFLOW_UPSCALE.json';
     } elseif ($tool === 'text2img' || $tool === 'character') {
-        $path = $baseDir . '/workflows/text2img_api.json';
-        if (!is_readable($path)) $path = $baseDir . '/KND_MASTER_WORKFLOW_API.json';
+        $path = $baseDir . '/text2img_api.json';
+        if (!is_readable($path)) $path = dirname(__DIR__) . '/KND_MASTER_WORKFLOW_API.json';
     } else {
-        $path = $baseDir . '/KND_MASTER_WORKFLOW_API.json';
+        $path = dirname(__DIR__) . '/KND_MASTER_WORKFLOW_API.json';
     }
     return $path;
 }
@@ -128,8 +128,7 @@ function comfyui_inject_workflow(array $params, string $tool = 'text2img'): arra
             $inputs['image'] = $params['image_filename'];
         }
         if ($ctype === 'UpscaleModelLoader' && $tool === 'upscale') {
-            $scale = (int) ($params['scale'] ?? 4);
-            $inputs['model_name'] = $scale === 2 ? 'RealESRGAN_x2plus.pth' : 'RealESRGAN_x4plus.pth';
+            $inputs['model_name'] = '4x-UltraSharp.pth';
         }
         if ($ctype === 'SaveImage' && $tool === 'upscale' && isset($params['job_id'])) {
             $inputs['filename_prefix'] = 'knd_upscale/job_' . (int) $params['job_id'];

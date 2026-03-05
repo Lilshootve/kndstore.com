@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/json.php';
 require_once __DIR__ . '/../../includes/settings.php';
+require_once __DIR__ . '/../../includes/storage.php';
 require_once __DIR__ . '/../../includes/comfyui.php';
 require_once __DIR__ . '/../../includes/comfyui_provider.php';
 
@@ -38,6 +39,22 @@ try {
 
     if (($job['status'] ?? '') !== 'done') {
         json_error('NO_IMAGE', 'Image not ready.', 409);
+    }
+
+    $outputPath = $job['output_path'] ?? '';
+    if ($outputPath !== '') {
+        $fullPath = storage_path($outputPath);
+        $base = realpath(storage_path());
+        $resolved = is_file($fullPath) ? realpath($fullPath) : false;
+        if ($resolved && $base && strpos($resolved, $base) === 0 && is_readable($fullPath)) {
+            $download = isset($_GET['download']) && $_GET['download'] !== '0' && $_GET['download'] !== '';
+            header('Content-Type: image/png');
+            header('Content-Length: ' . filesize($fullPath));
+            header('X-Content-Type-Options: nosniff');
+            header('Content-Disposition: ' . ($download ? 'attachment' : 'inline') . '; filename="knd_labs_' . $jobId . '.png"');
+            readfile($fullPath);
+            exit;
+        }
     }
 
     $promptId = $job['comfy_prompt_id'] ?? '';

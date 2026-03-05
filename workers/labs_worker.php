@@ -12,6 +12,10 @@ $projectRoot = dirname(__DIR__);
 chdir($projectRoot);
 
 require_once $projectRoot . '/includes/comfyui.php';
+require_once $projectRoot . '/includes/storage.php';
+if (file_exists($projectRoot . '/config/labs.php')) {
+    require_once $projectRoot . '/config/labs.php';
+}
 
 $opts = getopt('', ['loop', 'sleep:', 'worker-id:']);
 $loop = isset($opts['loop']);
@@ -23,13 +27,19 @@ $cfg = load_worker_config();
 function load_worker_config(): array {
     $path = __DIR__ . '/worker_config.local.php';
     if (is_readable($path)) {
-        return (array) include $path;
+        $c = (array) include $path;
+        if (isset($c['COMFY_URL']) && !isset($c['COMFYUI_BASE'])) {
+            $c['COMFYUI_BASE'] = $c['COMFY_URL'];
+        }
+        return $c;
     }
     return [
-        'API_BASE'      => getenv('KND_API_BASE') ?: 'https://kndstore.com',
-        'WORKER_TOKEN'  => getenv('KND_WORKER_TOKEN') ?: '',
-        'COMFYUI_BASE'  => getenv('COMFYUI_BASE_URL') ?: 'https://comfy.kndstore.com',
-        'COMFYUI_TOKEN' => getenv('COMFYUI_TOKEN') ?: '',
+        'API_BASE'       => getenv('KND_API_BASE') ?: 'https://kndstore.com',
+        'WORKER_TOKEN'   => getenv('KND_WORKER_TOKEN') ?: '',
+        'COMFYUI_BASE'   => getenv('COMFYUI_BASE_URL') ?: 'https://comfy.kndstore.com',
+        'COMFYUI_TOKEN'  => getenv('COMFYUI_TOKEN') ?: '',
+        'COMFY_INPUT_DIR'  => getenv('COMFY_INPUT_DIR') ?: '',
+        'COMFY_OUTPUT_DIR' => getenv('COMFY_OUTPUT_DIR') ?: '',
     ];
 }
 
@@ -88,8 +98,9 @@ if (empty($cfg['WORKER_TOKEN']) || empty($cfg['API_BASE'])) {
 
 $apiBase = rtrim($cfg['API_BASE'], '/');
 $workerToken = $cfg['WORKER_TOKEN'];
-$comfyBase = rtrim($cfg['COMFYUI_BASE'] ?? 'https://comfy.kndstore.com', '/');
+$comfyBase = rtrim($cfg['COMFYUI_BASE'] ?? $cfg['COMFY_URL'] ?? 'https://comfy.kndstore.com', '/');
 $comfyToken = $cfg['COMFYUI_TOKEN'] ?? '';
+$comfyOutputDir = $cfg['COMFY_OUTPUT_DIR'] ?? (defined('COMFY_OUTPUT_DIR') ? COMFY_OUTPUT_DIR : '');
 $headers = ['X-KND-WORKER-TOKEN: ' . $workerToken];
 
 do {
@@ -150,6 +161,8 @@ do {
     $maxPoll = 120;
     $pollInterval = 2;
     $imageUrl = null;
+    $outputFilename = null;
+    $outputSubfolder = '';
     $pollError = null;
     for ($i = 0; $i < $maxPoll; $i++) {
         sleep($pollInterval);
@@ -165,12 +178,33 @@ do {
                 if (isset($nodeOut['images']) && is_array($nodeOut['images'])) {
                     foreach ($nodeOut['images'] as $img) {
                         if (!empty($img['filename'])) {
+                            $outputFilename = $img['filename'];
+                            $outputSubfolder = $img['subfolder'] ?? '';
                             $imageUrl = '/api/labs/image.php?job_id=' . $jobId;
                             break 3;
                         }
                     }
                 }
             }
+        }
+    }
+
+    $outputPathRel = null;
+    if ($tool === 'upscale' && $comfyOutputDir !== '' && $outputFilename !== null) {
+        $comfyOut = rtrim($comfyOutputDir, '/\\');
+        $srcPath = $outputSubfolder !== '' ? $comfyOut . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $outputSubfolder) . DIRECTORY_SEPARATOR . $outputFilename : $comfyOut . DIRECTORY_SEPARATOR . $outputFilename;
+        $labsDir = defined('LABS_UPLOAD_DIR') ? LABS_UPLOAD_DIR : 'uploads/labs';
+        $destRel = $labsDir . '/' . $jobId . '_upscaled.png';
+        $destFull = storage_path($destRel);
+        $destDir = dirname($destFull);
+        if (is_file($srcPath) && is_readable($srcPath)) {
+            if (!is_dir($destDir)) @mkdir($destDir, 0755, true);
+            if (is_dir($destDir) && @copy($srcPath, $destFull)) {
+                $outputPathRel = $destRel;
+                logWorker("Job $jobId: copied output to $destRel");
+            }
+        } else {
+            logWorker("Job $jobId: output file not found at $srcPath, using proxy");
         }
     }
 
@@ -181,11 +215,13 @@ do {
         ]);
         logWorker("Job $jobId failed: $pollError");
     } elseif ($imageUrl) {
-        $r = httpPost($apiBase . '/api/labs/queue/complete.php', $headers, [
+        $postData = [
             'job_id' => $jobId,
             'comfy_prompt_id' => $promptId,
             'image_url' => $imageUrl,
-        ]);
+        ];
+        if ($outputPathRel !== null) $postData['output_path'] = $outputPathRel;
+        $r = httpPost($apiBase . '/api/labs/queue/complete.php', $headers, $postData);
         if ($r['ok']) {
             logWorker("Job $jobId: done");
         } else {
