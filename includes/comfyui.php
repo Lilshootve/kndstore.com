@@ -245,6 +245,15 @@ const COMFYUI_UPSCALE_MODEL_MAP = [
     'RealESRGAN_x2plus.pth' => '4x-UltraSharp.pth',
 ];
 
+function comfyui_normalize_upscale_model(string $modelName): string {
+    $m = trim($modelName);
+    if (isset(COMFYUI_UPSCALE_MODEL_MAP[$m])) return COMFYUI_UPSCALE_MODEL_MAP[$m];
+    if (stripos($m, 'RealESRGAN') !== false || stripos($m, 'x4plus') !== false || stripos($m, 'x2plus') !== false) {
+        return '4x-UltraSharp.pth';
+    }
+    return $m;
+}
+
 /**
  * Strip _meta, normalize UpscaleModelLoader model_name (RealESRGAN -> 4x-UltraSharp).
  */
@@ -258,8 +267,7 @@ function comfyui_strip_meta(array $workflow): array {
         $ctype = $node['class_type'] ?? '';
         $inputs = $node['inputs'] ?? [];
         if ($ctype === 'UpscaleModelLoader' && isset($inputs['model_name'])) {
-            $m = $inputs['model_name'];
-            $inputs['model_name'] = COMFYUI_UPSCALE_MODEL_MAP[$m] ?? $m;
+            $inputs['model_name'] = comfyui_normalize_upscale_model((string) $inputs['model_name']);
         }
         $out[$nid] = ['class_type' => $ctype, 'inputs' => $inputs];
     }
