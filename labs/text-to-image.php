@@ -61,7 +61,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             </div>
             <div class="mb-3">
               <label class="form-label text-white-50"><?php echo t('labs.negative_prompt', 'Negative prompt'); ?></label>
-              <input type="text" name="negative_prompt" class="form-control bg-dark text-white" id="labs-negative-input" maxlength="500" placeholder="ugly, blurry, low quality">
+              <input type="text" name="negative_prompt" class="form-control bg-dark text-white" id="labs-negative-input" maxlength="500" value="ugly, blurry, low quality" placeholder="ugly, blurry, low quality">
               <div class="d-flex flex-wrap gap-1 mt-2">
                 <button type="button" class="btn btn-outline-secondary btn-sm preset-neg-btn" data-value="ugly, blurry, low quality"><?php echo t('labs.neg_default', 'Default'); ?></button>
                 <button type="button" class="btn btn-outline-secondary btn-sm preset-neg-btn" data-value="text, watermark, signature"><?php echo t('labs.neg_text', 'No text'); ?></button>
@@ -283,11 +283,19 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
   </div>
 </div>
 
+<?php $kndlabsJs = __DIR__ . '/../assets/js/kndlabs.js'; ?>
 <script src="/assets/js/navigation-extend.js"></script>
-<script src="/assets/js/kndlabs.js"></script>
+<script src="/assets/js/kndlabs.js?v=<?php echo file_exists($kndlabsJs) ? filemtime($kndlabsJs) : time(); ?>"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  KNDLabs.init({ formId: 'labs-comfy-form', jobType: 'text2img', costLabelId: 'labs-cost-label', pricingKey: 'text2img', qualitySelectId: 'labs-quality-select', balanceEl: '#labs-balance' });
-});
+(function() {
+  function run() {
+    KNDLabs.init({ formId: 'labs-comfy-form', jobType: 'text2img', costLabelId: 'labs-cost-label', pricingKey: 'text2img', qualitySelectId: 'labs-quality-select', balanceEl: '#labs-balance' });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+})();
 </script>
 <?php echo generateFooter(); echo generateScripts(); ?>

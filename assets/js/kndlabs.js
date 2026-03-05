@@ -333,12 +333,12 @@
       var form = document.getElementById(this.config.formId || 'labs-comfy-form');
       if (!form) return;
       var self = this;
-      document.querySelectorAll('.preset-btn').forEach(function(btn) {
+      form.querySelectorAll('.preset-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
           var p = form.querySelector('[name="prompt"]');
           if (p) p.value = btn.getAttribute('data-prompt') || '';
           var n = form.querySelector('[name="negative_prompt"]');
-          if (n && btn.getAttribute('data-negative')) n.value = btn.getAttribute('data-negative');
+          if (n) n.value = btn.getAttribute('data-negative') || n.value;
           var steps = form.querySelector('[name="steps"]');
           if (steps && btn.getAttribute('data-steps')) steps.value = btn.getAttribute('data-steps');
           var cfg = form.querySelector('[name="cfg"]');
@@ -366,18 +366,14 @@
     },
 
     bindPresetsNegative: function() {
-      document.querySelectorAll('.preset-neg-btn').forEach(function(btn) {
+      var form = document.getElementById(this.config.formId || 'labs-comfy-form');
+      if (!form) return;
+      form.querySelectorAll('.preset-neg-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
-          var n = document.querySelector('[name="negative_prompt"]');
+          var n = form.querySelector('[name="negative_prompt"]');
           if (!n) return;
-          var toAdd = (btn.getAttribute('data-value') || '').trim();
-          if (!toAdd) return;
-          var current = (n.value || '').trim();
-          if (current === '') {
-            n.value = toAdd;
-          } else {
-            n.value = current + ', ' + toAdd;
-          }
+          var val = (btn.getAttribute('data-value') || '').trim();
+          if (val) n.value = val;
         });
       });
     },
@@ -399,6 +395,7 @@
       if (prompt) {
         prompt.addEventListener('input', check);
         prompt.addEventListener('change', check);
+        prompt.addEventListener('keyup', check);
       }
       var model = document.getElementById('labs-model-select') || document.querySelector('#labs-comfy-form [name="model"]');
       var widthSel = document.getElementById('labs-width-select') || document.querySelector('#labs-comfy-form [name="width"]');
@@ -417,13 +414,13 @@
       if (!form) return;
       var prompt = document.getElementById('labs-prompt-input') || form.querySelector('[name="prompt"]');
       var model = document.getElementById('labs-model-select') || form.querySelector('[name="model"]');
-      var widthSel = document.getElementById('labs-width-select') || form.querySelector('[name="width"]');
-      var heightSel = document.getElementById('labs-height-select') || form.querySelector('[name="height"]');
+      var widthSel = form.querySelector('[name="width"]') || document.getElementById('labs-width-select');
+      var heightSel = form.querySelector('[name="height"]') || document.getElementById('labs-height-select');
       var promptVal = (prompt && prompt.value ? prompt.value : '').trim();
-      var modelVal = (model && model.value ? model.value : '');
-      var widthVal = widthSel ? (Number(widthSel.value) || 0) : 1024;
-      var heightVal = heightSel ? (Number(heightSel.value) || 0) : 1024;
-      var btn = document.getElementById('generateBtn') || document.getElementById('labs-submit-btn');
+      var modelVal = (model && model.value ? model.value : 'v1_5');
+      var widthVal = (widthSel && widthSel.value) ? (Number(widthSel.value) || 512) : 512;
+      var heightVal = (heightSel && heightSel.value) ? (Number(heightSel.value) || 512) : 512;
+      var btn = form.querySelector('[type="submit"]') || document.getElementById('generateBtn') || document.getElementById('labs-submit-btn');
       if (this.config.jobType === 'upscale') {
         var img = form.querySelector('[name="image"]');
         var hasFile = img && img.files && img.files.length > 0;
