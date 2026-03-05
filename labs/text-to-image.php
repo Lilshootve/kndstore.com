@@ -36,7 +36,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
           </div>
           <p class="text-white-50 small"><?php echo t('labs.cost_range', 'ComfyUI · Text to Image'); ?></p>
 
-          <form id="labs-comfy-form" class="labs-form">
+          <form id="labs-comfy-form" class="labs-form" method="post" action="#" onsubmit="return false;">
             <input type="hidden" name="tool" value="text2img">
             <div class="mb-3">
               <label class="form-label text-white-50"><?php echo t('ai.text2img.prompt'); ?></label>

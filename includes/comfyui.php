@@ -95,59 +95,75 @@ function comfyui_inject_workflow(array $params, string $tool = 'text2img'): arra
 
 /**
  * Send prompt to ComfyUI.
+ * POST {COMFY_BASE}/prompt with { "prompt": workflow_json, "client_id": "knd-labs" }
  * @return array ['prompt_id' => string] or throw
  */
 function comfyui_run_prompt(array $workflow): array {
     if (!file_exists(dirname(__DIR__) . '/config/comfyui.php')) {
         throw new \RuntimeException('ComfyUI config not found');
     }
-    require_once __DIR__ . '/../config/comfyui.php';
+    require_once dirname(__DIR__) . '/config/comfyui.php';
 
     $base = rtrim(COMFYUI_BASE_URL, '/');
     $url = $base . '/prompt';
     $payload = [
         'prompt' => $workflow,
-        'client_id' => COMFYUI_CLIENT_ID,
+        'client_id' => defined('COMFYUI_CLIENT_ID') ? COMFYUI_CLIENT_ID : 'knd-labs',
     ];
+    $jsonBody = json_encode($payload);
+
     $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => json_encode($payload),
-        CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => (int) (COMFYUI_TIMEOUT ?? 30),
-    ]);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonBody);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', 'Accept: application/json']);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, (int) (defined('COMFYUI_TIMEOUT') ? COMFYUI_TIMEOUT : 120));
+
     $body = curl_exec($ch);
     $err = curl_error($ch);
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+
+    $bodyPreview = is_string($body) ? substr($body, 0, 500) : '';
+    error_log('ComfyUI /prompt: HTTP ' . $code . ' | body: ' . $bodyPreview);
+
     if ($err) {
         throw new \RuntimeException('ComfyUI unreachable: ' . $err);
     }
+    if ($code < 200 || $code >= 300) {
+        throw new \RuntimeException('ComfyUI HTTP ' . $code . ': ' . $bodyPreview);
+    }
+    if (preg_match('/^\s*</', trim($body ?? ''))) {
+        throw new \RuntimeException('ComfyUI returned HTML instead of JSON. Check COMFYUI_BASE_URL - wrong endpoint or base URL.');
+    }
     $data = json_decode($body, true);
     if (!is_array($data) || empty($data['prompt_id'])) {
-        $msg = is_array($data) && isset($data['error']) ? $data['error'] : ($body ?: 'Invalid response');
-        throw new \RuntimeException('ComfyUI error: ' . (is_string($msg) ? $msg : json_encode($msg)));
+        $msg = is_array($data) && isset($data['error']) ? (is_string($data['error']) ? $data['error'] : json_encode($data['error'])) : ($body ?: 'Invalid response');
+        throw new \RuntimeException('ComfyUI error: ' . $msg);
     }
     return ['prompt_id' => $data['prompt_id']];
 }
 
 /**
  * Get ComfyUI history for a prompt.
+ * GET {COMFY_BASE}/history/{prompt_id}
  */
 function comfyui_get_history(string $promptId): ?array {
-    if (!file_exists(__DIR__ . '/../config/comfyui.php')) return null;
-    require_once __DIR__ . '/../config/comfyui.php';
+    if (!file_exists(dirname(__DIR__) . '/config/comfyui.php')) return null;
+    require_once dirname(__DIR__) . '/config/comfyui.php';
     $base = rtrim(COMFYUI_BASE_URL, '/');
     $url = $base . '/history/' . urlencode($promptId);
     $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 10,
-    ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_HTTPGET, true);
     $body = curl_exec($ch);
+    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    $bodyPreview = is_string($body) ? substr($body, 0, 500) : '';
+    error_log('ComfyUI /history/' . $promptId . ': HTTP ' . $code . ' | body: ' . $bodyPreview);
     if (!$body) return null;
+    if (preg_match('/^\s*</', trim($body))) return null;
     $data = json_decode($body, true);
     return is_array($data) && isset($data[$promptId]) ? $data[$promptId] : null;
 }

@@ -36,7 +36,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
           </div>
           <p class="text-white-50 small"><?php echo t('labs.cost_fixed', 'ComfyUI · 2x/4x upscale'); ?></p>
 
-          <form id="labs-comfy-form" class="labs-form">
+          <form id="labs-comfy-form" class="labs-form" method="post" action="#" onsubmit="return false;">
             <input type="hidden" name="tool" value="upscale">
             <div class="mb-3">
               <div class="ai-dropzone" id="labs-upscale-dropzone">

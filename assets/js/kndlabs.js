@@ -6,6 +6,7 @@
   'use strict';
 
   var POLL_INTERVAL = 2000;
+  var POLL_MAX_COUNT = 150;  // ~5 min
   var API_GENERATE = '/api/labs/generate.php';
   var API_STATUS = '/api/labs/status.php';
   var API_JOBS = '/api/labs/jobs.php';
@@ -44,7 +45,19 @@
       if (text) text.textContent = 'Processing...';
 
       var self = this;
+      var pollCount = 0;
       function poll() {
+        pollCount++;
+        if (pollCount > POLL_MAX_COUNT) {
+          self.stopPoll();
+          if (panel) panel.style.display = 'none';
+          if (errorEl) {
+            errorEl.textContent = 'Taking too long. Ensure ComfyUI is running and config/comfyui.php has COMFYUI_BASE_URL set.';
+            errorEl.style.display = 'block';
+          }
+          self.currentJobId = null;
+          return;
+        }
         fetch(API_STATUS + '?job_id=' + encodeURIComponent(jobId))
           .then(function(r) { return r.json(); })
           .then(function(d) {
@@ -106,8 +119,15 @@
         preview.innerHTML = '<div class="ai-spinner"><i class="fas fa-cog fa-spin fa-2x"></i></div><p class="text-white-50 mt-2 mb-0">Processing...</p>';
       }
 
-      fetch(API_GENERATE, { method: 'POST', body: fd })
-        .then(function(r) { return r.json(); })
+      fetch(API_GENERATE, {
+        method: 'POST',
+        body: fd,
+        cache: 'no-store',
+        credentials: 'same-origin'
+      })
+        .then(function(r) {
+          return r.json().catch(function() { return { ok: false, error: { message: 'Invalid response' } }; });
+        })
         .then(function(d) {
           if (submitBtn) submitBtn.disabled = false;
           if (d.ok && d.data && d.data.job_id) {
@@ -119,10 +139,11 @@
             else alert(msg);
           }
         })
-        .catch(function() {
+        .catch(function(err) {
           if (submitBtn) submitBtn.disabled = false;
-          if (typeof kndToast !== 'undefined') kndToast('Network error', 'error');
-          else alert('Network error');
+          var msg = (err && err.message) ? err.message : 'Network error. Check console.';
+          if (typeof kndToast !== 'undefined') kndToast(msg, 'error');
+          else alert(msg);
         });
     },
 
@@ -133,6 +154,7 @@
       var self = this;
       form.addEventListener('submit', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         var prompt = form.querySelector('[name="prompt"]');
         if (prompt && self.config.jobType !== 'upscale') {
           if (!prompt.value || prompt.value.trim().length === 0) {
