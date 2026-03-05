@@ -62,7 +62,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             <div class="mb-3">
               <label class="form-label text-white-50"><?php echo t('labs.negative_prompt', 'Negative prompt'); ?></label>
               <input type="text" name="negative_prompt" class="form-control bg-dark text-white" id="labs-negative-input" maxlength="500" value="ugly, blurry, low quality" placeholder="ugly, blurry, low quality">
-              <div class="d-flex flex-wrap gap-1 mt-2">
+              <div class="d-flex flex-wrap gap-1 mt-2" id="preset-neg-btns">
                 <button type="button" class="btn btn-outline-secondary btn-sm preset-neg-btn" data-value="ugly, blurry, low quality"><?php echo t('labs.neg_default', 'Default'); ?></button>
                 <button type="button" class="btn btn-outline-secondary btn-sm preset-neg-btn" data-value="text, watermark, signature"><?php echo t('labs.neg_text', 'No text'); ?></button>
                 <button type="button" class="btn btn-outline-secondary btn-sm preset-neg-btn" data-value="bad anatomy, extra limbs, mutated"><?php echo t('labs.neg_anatomy', 'Anatomy'); ?></button>
@@ -191,7 +191,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               <label for="labs-private-check" class="form-check-label text-white-50 small"><?php echo t('labs.private_toggle', 'Keep this generation private'); ?></label>
             </div>
             <p class="text-white-50 small mb-3" id="labs-microcopy-private"><?php echo t('labs.images_stored', 'Your images are private. Stored for 30 days.'); ?></p>
-            <button type="submit" class="btn btn-neon-primary w-100" id="generateBtn" disabled>
+            <button type="submit" class="btn btn-neon-primary w-100" id="generateBtn">
               <i class="fas fa-magic me-2"></i><?php echo t('ai.text2img.generate'); ?>
             </button>
           </form>
@@ -283,13 +283,26 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
   </div>
 </div>
 
-<?php $kndlabsJs = __DIR__ . '/../assets/js/kndlabs.js'; ?>
 <script src="/assets/js/navigation-extend.js"></script>
+<?php $kndlabsJs = __DIR__ . '/../assets/js/kndlabs.js'; ?>
 <script src="/assets/js/kndlabs.js?v=<?php echo file_exists($kndlabsJs) ? filemtime($kndlabsJs) : time(); ?>"></script>
 <script>
 (function() {
+  // Inline fix: negative presets (run before KNDLabs)
+  var form = document.getElementById('labs-comfy-form');
+  if (form) {
+    form.querySelectorAll('.preset-neg-btn').forEach(function(btn) {
+      btn.onclick = function() {
+        var inp = form.querySelector('[name="negative_prompt"]');
+        if (inp && btn.dataset.value) inp.value = btn.dataset.value;
+      };
+    });
+  }
+  // Init KNDLabs (handles submit, status, etc.)
   function run() {
-    KNDLabs.init({ formId: 'labs-comfy-form', jobType: 'text2img', costLabelId: 'labs-cost-label', pricingKey: 'text2img', qualitySelectId: 'labs-quality-select', balanceEl: '#labs-balance' });
+    if (typeof KNDLabs !== 'undefined') {
+      KNDLabs.init({ formId: 'labs-comfy-form', jobType: 'text2img', costLabelId: 'labs-cost-label', pricingKey: 'text2img', qualitySelectId: 'labs-quality-select', balanceEl: '#labs-balance' });
+    }
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', run);

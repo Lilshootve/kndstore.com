@@ -412,14 +412,6 @@
     recomputeGenerateState: function() {
       var form = document.getElementById(this.config.formId || 'labs-comfy-form');
       if (!form) return;
-      var prompt = document.getElementById('labs-prompt-input') || form.querySelector('[name="prompt"]');
-      var model = document.getElementById('labs-model-select') || form.querySelector('[name="model"]');
-      var widthSel = form.querySelector('[name="width"]') || document.getElementById('labs-width-select');
-      var heightSel = form.querySelector('[name="height"]') || document.getElementById('labs-height-select');
-      var promptVal = (prompt && prompt.value ? prompt.value : '').trim();
-      var modelVal = (model && model.value ? model.value : 'v1_5');
-      var widthVal = (widthSel && widthSel.value) ? (Number(widthSel.value) || 512) : 512;
-      var heightVal = (heightSel && heightSel.value) ? (Number(heightSel.value) || 512) : 512;
       var btn = form.querySelector('[type="submit"]') || document.getElementById('generateBtn') || document.getElementById('labs-submit-btn');
       if (this.config.jobType === 'upscale') {
         var img = form.querySelector('[name="image"]');
@@ -427,8 +419,8 @@
         if (btn) btn.disabled = !hasFile;
         return;
       }
-      var valid = promptVal.length > 0 && modelVal !== '' && widthVal > 0 && heightVal > 0;
-      if (btn) btn.disabled = !valid;
+      // text2img: always enabled, validate on submit
+      if (btn) btn.disabled = false;
     },
 
     updateSubmitButton: function() {
