@@ -33,6 +33,6 @@ The router injects these payload keys into workflows:
 ## Required Models
 
 - **CheckpointLoaderSimple**: e.g. `v1-5-pruned-emaonly.safetensors` or your SD model.
-- **UpscaleModelLoader**: `RealESRGAN_x2plus.pth`, `RealESRGAN_x4plus.pth` for upscale workflows.
+- **UpscaleModelLoader**: `4x-UltraSharp.pth` for upscale workflows.
 
 Place models in ComfyUI's `models/` directories (checkpoints, upscale_models).
