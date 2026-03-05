@@ -87,7 +87,6 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
                 <option value="iniverseMixSFWNSFW">Pony Real Guofeng V5.1</option>
                 <option value="juggernaut_ragnarok">Juggernaut XL Ragnarok</option>
                 <option value="juggernaut_v8">Juggernaut XL v8</option>
-                <option value="juggernaut_v9">Juggernaut XL v9</option>
                 <option value="NSFW_master">NSFW Master</option>
                 <option value="pornmaster_asian">PornMaster Asian SDXL</option>
                 <option value="realisticVision">Realistic Vision V6.0</option>

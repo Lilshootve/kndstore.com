@@ -195,7 +195,6 @@ const COMFYUI_CHECKPOINT_MAP = [
     'iniverseMixSFWNSFW' => 'iniverseMixSFWNSFW_ponyRealGuofengV51.safetensors',
     'juggernaut_ragnarok' => 'juggernautXL_ragnarokBy.safetensors',
     'juggernaut_v8' => 'juggernautXL_v8Rundiffusion.safetensors',
-    'juggernaut_v9' => 'Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors',
     'NSFW_master' => 'NSFW_master.safetensors',
     'pornmaster_asian' => 'pornmaster_asianSdxlV1VAE.safetensors',
     'realisticVision' => 'realisticVisionV60B1_v51HyperVAE.safetensors',
