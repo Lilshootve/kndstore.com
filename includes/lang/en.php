@@ -102,11 +102,11 @@ return [
     'custom_design.brief.title' => 'Design Brief',
     'custom_design.how_it_works.title' => 'How It Works',
     
-    // InstantMesh 3D (Imagen → 3D)
-    'triposr.meta.title' => 'Imagen → 3D (InstantMesh) - KND Store',
+    // Image → 3D (InstantMesh)
+    'triposr.meta.title' => 'Image → 3D (InstantMesh) - KND Store',
     'triposr.meta.description' => 'Upload an image and generate a downloadable 3D model (GLB/OBJ).',
-    'triposr.hero.title' => 'Imagen → 3D (InstantMesh)',
-    'triposr.hero.subtitle' => 'Imagen → 3D',
+    'triposr.hero.title' => 'Image → 3D (InstantMesh)',
+    'triposr.hero.subtitle' => 'Image → 3D',
     'triposr.hero.desc' => 'Upload an image and generate a downloadable 3D model (GLB/OBJ).',
     'triposr.upload.label' => 'Choose an image',
     'triposr.upload.hint' => 'JPG, PNG or WebP. Max 10MB. Single object on neutral background works best.',
@@ -202,7 +202,7 @@ return [
     'footer.tools.title' => 'Tools',
     'footer.tools.knd_labs' => 'KND Labs',
     'footer.tools.ai_creator' => 'AI Asset Creator',
-    'footer.tools.triposr_3d' => 'Imagen → 3D',
+    'footer.tools.triposr_3d' => 'Image → 3D',
     'footer.contact.title' => 'Contact',
     'footer.contact.support_247' => '24/7 Support',
     'footer.payments.title' => 'Payment Methods',

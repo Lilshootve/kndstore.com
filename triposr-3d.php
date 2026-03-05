@@ -35,16 +35,16 @@ echo generateHeader(t('triposr.meta.title'), t('triposr.meta.description'), $ext
 <?php echo generateNavigation(); ?>
 
 <!-- Hero Section -->
-<section class="hero-section triposr-hero">
+<section class="hero-section triposr-hero" style="padding-top:110px; padding-bottom:50px; min-height:auto;">
     <div class="container">
-        <div class="row align-items-center min-vh-100">
+        <div class="row align-items-center">
             <div class="col-lg-8 mx-auto text-center">
                 <div class="triposr-hero-badge mb-3">
                     <i class="fas fa-cube"></i>
-                    <span><?php echo t('triposr.hero.subtitle', 'Imagen → 3D'); ?></span>
+                    <span><?php echo t('triposr.hero.subtitle', 'Image → 3D'); ?></span>
                 </div>
                 <h1 class="hero-title triposr-hero-title">
-                    <span class="text-gradient"><?php echo t('triposr.hero.title', 'Imagen → 3D (InstantMesh)'); ?></span>
+                    <span class="text-gradient"><?php echo t('triposr.hero.title', 'Image → 3D (InstantMesh)'); ?></span>
                 </h1>
                 <p class="hero-subtitle triposr-hero-desc">
                     <?php echo t('triposr.hero.desc', 'Upload an image and generate a downloadable 3D model (GLB/OBJ).'); ?>
