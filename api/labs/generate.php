@@ -15,6 +15,7 @@ require_once __DIR__ . '/../../includes/support_credits.php';
 require_once __DIR__ . '/../../includes/ai.php';
 require_once __DIR__ . '/../../includes/json.php';
 require_once __DIR__ . '/../../includes/comfyui.php';
+require_once __DIR__ . '/../../includes/comfyui_provider.php';
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -90,28 +91,34 @@ try {
         'height' => $height,
     ];
 
+    $baseUrl = comfyui_get_base_url($pdo, null);
+    $token = comfyui_get_token($pdo);
+
     $imageFilename = null;
     if ($tool === 'upscale') {
         if (empty($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
             json_error('INVALID_IMAGE', 'Image upload required for upscale.');
         }
         $tmpPath = $_FILES['image']['tmp_name'];
-        $imageFilename = comfyui_upload_image($tmpPath);
+        $imageFilename = comfyui_upload_image($tmpPath, $baseUrl, $token);
         $params['image_filename'] = $imageFilename;
     }
 
     $workflow = comfyui_inject_workflow($params, $tool);
     comfyui_apply_checkpoint($workflow, $model, $refinerEnabled);
-    $result = comfyui_run_prompt($workflow);
+    $result = comfyui_run_prompt($workflow, $baseUrl, $token);
+
+    $runpodUrl = comfyui_get_base_url_runpod($pdo);
+    $providerUsed = ($runpodUrl !== '' && rtrim($baseUrl, '/') === rtrim($runpodUrl, '/')) ? 'runpod' : 'local';
     $promptId = $result['prompt_id'];
 
     $qualityCol = ($tool === 'text2img') ? $quality : (($tool === 'upscale') ? (string) $scale . 'x' : 'base');
     $stmt = $pdo->prepare(
-        "INSERT INTO knd_labs_jobs (user_id, tool, prompt, negative_prompt, comfy_prompt_id, status, cost_kp, quality)
-         VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)"
+        "INSERT INTO knd_labs_jobs (user_id, tool, prompt, negative_prompt, comfy_prompt_id, status, cost_kp, quality, provider)
+         VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?)"
     );
-    if (!$stmt || !$stmt->execute([$userId, $tool, $prompt, $negativePrompt, $promptId, $costKp, $qualityCol])) {
-        json_error('DB_ERROR', 'Could not create job. Run sql/knd_labs_jobs_alter_cost.sql if needed.', 500);
+    if (!$stmt || !$stmt->execute([$userId, $tool, $prompt, $negativePrompt, $promptId, $costKp, $qualityCol, $providerUsed])) {
+        json_error('DB_ERROR', 'Could not create job. Run sql/knd_labs_jobs_alter_provider.sql if needed.', 500);
     }
     $jobId = (int) $pdo->lastInsertId();
 

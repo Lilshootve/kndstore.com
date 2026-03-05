@@ -140,6 +140,7 @@ $navCards = [
     ['title' => 'Create Test Order', 'desc' => 'Generate a synthetic order for testing', 'href' => '/admin/test_order.php', 'icon' => 'fa-flask', 'perm' => 'system.create_test_order', 'badge' => null],
     ['title' => 'Storage Diagnostics', 'desc' => 'Inspect JSON files, permissions and sizes', 'href' => '/admin/debug_storage.php', 'icon' => 'fa-database', 'perm' => 'system.storage_diag', 'badge' => null, 'show' => file_exists(__DIR__ . '/debug_storage.php')],
     ['title' => 'Path Diagnostics', 'desc' => 'Verify file paths and config', 'href' => '/admin/diag_paths.php', 'icon' => 'fa-folder-open', 'perm' => 'system.storage_diag', 'badge' => null],
+    ['title' => 'Labs Settings', 'desc' => 'ComfyUI provider (Local / RunPod / Auto)', 'href' => '/admin/labs_settings.php', 'icon' => 'fa-microscope', 'perm' => 'system.storage_diag', 'badge' => null],
     ['title' => 'Purge Cache', 'desc' => 'Clear OPcache and LiteSpeed cache', 'href' => '/admin/purge_cache.php', 'icon' => 'fa-sync-alt', 'perm' => 'system.purge_cache', 'badge' => null],
     ['title' => 'Email Test', 'desc' => 'Send a test confirmation email', 'href' => '/admin/email-test.php', 'icon' => 'fa-envelope', 'perm' => 'system.storage_diag', 'badge' => null, 'show' => file_exists(__DIR__ . '/email-test.php')],
 ];

@@ -10,6 +10,8 @@ require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/json.php';
+require_once __DIR__ . '/../../includes/settings.php';
+require_once __DIR__ . '/../../includes/comfyui_provider.php';
 
 try {
     api_require_login();
@@ -38,6 +40,10 @@ try {
         json_error('NO_IMAGE', 'Image not ready.', 409);
     }
 
+    $token = comfyui_get_token($pdo);
+    $headers = ['Accept: image/*'];
+    if ($token !== '') $headers[] = 'X-KND-TOKEN: ' . $token;
+
     $ch = curl_init($imageUrl);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
@@ -45,6 +51,7 @@ try {
         CURLOPT_TIMEOUT => 60,
         CURLOPT_CONNECTTIMEOUT => 10,
         CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_HTTPHEADER => $headers,
     ]);
     $bin = curl_exec($ch);
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);

@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/support_credits.php';
 require_once __DIR__ . '/../../includes/json.php';
 require_once __DIR__ . '/../../includes/comfyui.php';
+require_once __DIR__ . '/../../includes/comfyui_provider.php';
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -41,10 +42,25 @@ try {
         json_error('JOB_NOT_FOUND', 'Job not found.', 404);
     }
 
+    $baseUrl = null;
+    $token = comfyui_get_token($pdo);
+    $jobProvider = $job['provider'] ?? null;
+    if ($jobProvider) {
+        $baseUrl = $jobProvider === 'runpod'
+            ? comfyui_get_base_url_runpod($pdo)
+            : comfyui_get_base_url_local($pdo);
+        if ($baseUrl === '' && $jobProvider === 'runpod') {
+            $baseUrl = comfyui_get_base_url($pdo, null);
+        }
+    }
+    if ($baseUrl === null || $baseUrl === '') {
+        $baseUrl = comfyui_get_base_url($pdo, null);
+    }
+
     // Refresh status from ComfyUI if still running
     if ($job['status'] === 'pending' || $job['status'] === 'processing') {
         $promptId = $job['comfy_prompt_id'] ?? '';
-        $historyRaw = $promptId ? comfyui_get_history($promptId) : null;
+        $historyRaw = $promptId ? comfyui_get_history($promptId, $baseUrl, $token) : null;
 
         // Some ComfyUI history responses come wrapped like: { "<promptId>": { ... } }
         $history = $historyRaw;
@@ -72,15 +88,7 @@ try {
         }
 
         if ($filename) {
-            // Build ComfyUI view URL
-            $base = '';
-            if (file_exists(__DIR__ . '/../../config/comfyui.php')) {
-                require_once __DIR__ . '/../../config/comfyui.php';
-                if (defined('COMFYUI_BASE_URL')) {
-                    $base = rtrim(COMFYUI_BASE_URL, '/');
-                }
-            }
-
+            $base = rtrim($baseUrl ?: '', '/');
             $params = ['filename' => $filename, 'type' => $imgType];
             if ($subfolder !== '') $params['subfolder'] = $subfolder;
 

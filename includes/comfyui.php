@@ -5,21 +5,31 @@
 
 /**
  * Upload image to ComfyUI and return filename.
+ * @param string $filePath Path to image file
+ * @param string|null $baseUrl Override base URL (from provider)
+ * @param string $token Optional X-KND-TOKEN for auth
  */
-function comfyui_upload_image(string $filePath): string {
-    if (!file_exists(dirname(__DIR__) . '/config/comfyui.php')) {
-        throw new \RuntimeException('ComfyUI config not found');
+function comfyui_upload_image(string $filePath, ?string $baseUrl = null, string $token = ''): string {
+    if ($baseUrl === null && file_exists(dirname(__DIR__) . '/config/comfyui.php')) {
+        require_once dirname(__DIR__) . '/config/comfyui.php';
+        $baseUrl = defined('COMFYUI_BASE_URL') ? rtrim(COMFYUI_BASE_URL, '/') : '';
     }
-    require_once dirname(__DIR__) . '/config/comfyui.php';
-    $base = rtrim(COMFYUI_BASE_URL, '/');
+    $base = $baseUrl ? rtrim($baseUrl, '/') : '';
+    if ($base === '') throw new \RuntimeException('ComfyUI config not found');
+
     $url = $base . '/upload/image';
     $cfile = new \CURLFile($filePath, mime_content_type($filePath) ?: 'image/png', basename($filePath));
+    $headers = [];
+    if ($token !== '') $headers[] = 'X-KND-TOKEN: ' . $token;
+
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => ['image' => $cfile],
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT => 30,
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_HTTPHEADER => $headers,
     ]);
     $body = curl_exec($ch);
     $err = curl_error($ch);
@@ -128,28 +138,37 @@ function comfyui_apply_checkpoint(array &$workflow, string $model = 'dreamshaper
 /**
  * Send prompt to ComfyUI.
  * POST {COMFY_BASE}/prompt with { "prompt": workflow_json, "client_id": "knd-labs" }
+ * @param array $workflow Workflow JSON
+ * @param string|null $baseUrl Override base URL (from provider)
+ * @param string $token Optional X-KND-TOKEN for auth
  * @return array ['prompt_id' => string] or throw
  */
-function comfyui_run_prompt(array $workflow): array {
-    if (!file_exists(dirname(__DIR__) . '/config/comfyui.php')) {
-        throw new \RuntimeException('ComfyUI config not found');
+function comfyui_run_prompt(array $workflow, ?string $baseUrl = null, string $token = ''): array {
+    if (!defined('COMFYUI_CLIENT_ID') && file_exists(dirname(__DIR__) . '/config/comfyui.php')) {
+        require_once dirname(__DIR__) . '/config/comfyui.php';
     }
-    require_once dirname(__DIR__) . '/config/comfyui.php';
+    if ($baseUrl === null) {
+        $baseUrl = defined('COMFYUI_BASE_URL') ? COMFYUI_BASE_URL : '';
+    }
+    $base = $baseUrl ? rtrim($baseUrl, '/') : '';
+    if ($base === '') throw new \RuntimeException('ComfyUI config not found');
 
-    $base = rtrim(COMFYUI_BASE_URL, '/');
     $url = $base . '/prompt';
     $payload = [
         'prompt' => $workflow,
         'client_id' => defined('COMFYUI_CLIENT_ID') ? COMFYUI_CLIENT_ID : 'knd-labs',
     ];
     $jsonBody = json_encode($payload);
+    $headers = ['Content-Type: application/json', 'Accept: application/json'];
+    if ($token !== '') $headers[] = 'X-KND-TOKEN: ' . $token;
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonBody);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', 'Accept: application/json']);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, (int) (defined('COMFYUI_TIMEOUT') ? COMFYUI_TIMEOUT : 120));
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
 
     $body = curl_exec($ch);
     $err = curl_error($ch);
@@ -200,16 +219,30 @@ function comfyui_run_prompt(array $workflow): array {
 /**
  * Get ComfyUI history for a prompt.
  * GET {COMFY_BASE}/history/{prompt_id}
+ * @param string $promptId ComfyUI prompt ID
+ * @param string|null $baseUrl Override base URL (from provider)
+ * @param string $token Optional X-KND-TOKEN for auth
  */
-function comfyui_get_history(string $promptId): ?array {
-    if (!file_exists(dirname(__DIR__) . '/config/comfyui.php')) return null;
-    require_once dirname(__DIR__) . '/config/comfyui.php';
-    $base = rtrim(COMFYUI_BASE_URL, '/');
+function comfyui_get_history(string $promptId, ?string $baseUrl = null, string $token = ''): ?array {
+    if ($baseUrl === null && file_exists(dirname(__DIR__) . '/config/comfyui.php')) {
+        require_once dirname(__DIR__) . '/config/comfyui.php';
+        $baseUrl = defined('COMFYUI_BASE_URL') ? COMFYUI_BASE_URL : '';
+    }
+    $base = $baseUrl ? rtrim($baseUrl, '/') : '';
+    if ($base === '') return null;
+
     $url = $base . '/history/' . urlencode($promptId);
+    $headers = ['Accept: application/json'];
+    if ($token !== '') $headers[] = 'X-KND-TOKEN: ' . $token;
+
     $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-    curl_setopt($ch, CURLOPT_HTTPGET, true);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 10,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_HTTPGET => true,
+        CURLOPT_HTTPHEADER => $headers,
+    ]);
     $body = curl_exec($ch);
     $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
