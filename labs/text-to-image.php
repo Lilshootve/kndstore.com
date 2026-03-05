@@ -1,11 +1,18 @@
 <?php
 require_once __DIR__ . '/_init.php';
+require_once __DIR__ . '/../includes/comfyui.php';
 
 $toolName = t('ai.text2img.title', 'Text → Image');
 $jobType = 'text2img';
-$costMin = 3;
-$costMax = 6;
-$historyJobs = $pdo ? ai_get_jobs_by_type($pdo, current_user_id(), $jobType, 10) : [];
+$historyJobs = [];
+if ($pdo) {
+    try {
+        $historyJobs = comfyui_get_user_jobs($pdo, current_user_id(), 10);
+    } catch (\Throwable $e) {
+        $historyJobs = [];
+    }
+}
+$historyJobs = array_filter($historyJobs, fn($j) => ($j['tool'] ?? '') === 'text2img');
 
 $aiCss = __DIR__ . '/../assets/css/ai-tools.css';
 $labsCss = __DIR__ . '/../assets/css/knd-labs.css';
@@ -27,10 +34,10 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             <h4 class="text-white mb-0"><?php echo htmlspecialchars($toolName); ?></h4>
             <span class="ai-balance-badge"><i class="fas fa-coins me-1"></i><?php echo number_format($balance); ?> KP</span>
           </div>
-          <p class="text-white-50 small"><?php echo t('labs.cost_range', 'Cost: {min}–{max} KP', ['min' => $costMin, 'max' => $costMax]); ?></p>
+          <p class="text-white-50 small"><?php echo t('labs.cost_range', 'ComfyUI · Text to Image'); ?></p>
 
-          <form id="labs-t2i-form" class="labs-form">
-            <input type="hidden" name="type" value="text2img">
+          <form id="labs-comfy-form" class="labs-form">
+            <input type="hidden" name="tool" value="text2img">
             <div class="mb-3">
               <label class="form-label text-white-50"><?php echo t('ai.text2img.prompt'); ?></label>
               <textarea name="prompt" class="form-control bg-dark text-white" rows="3" maxlength="500" placeholder="Describe the image..."></textarea>
@@ -42,14 +49,41 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               </div>
             </div>
             <div class="mb-3">
-              <label class="form-label text-white-50"><?php echo t('ai.text2img.mode_label', 'Quality'); ?></label>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="mode" id="mode-standard" value="standard" checked>
-                <label class="form-check-label text-white-50" for="mode-standard"><?php echo t('ai.text2img.mode_standard'); ?></label>
+              <label class="form-label text-white-50"><?php echo t('labs.negative_prompt', 'Negative prompt'); ?></label>
+              <input type="text" name="negative_prompt" class="form-control bg-dark text-white" maxlength="500" placeholder="ugly, blurry, low quality">
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-white-50 small"><?php echo t('labs.seed', 'Seed'); ?></label>
+                <input type="number" name="seed" class="form-control form-control-sm bg-dark text-white" placeholder="Random">
               </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="mode" id="mode-high" value="high">
-                <label class="form-check-label text-white-50" for="mode-high"><?php echo t('ai.text2img.mode_high'); ?></label>
+              <div class="col-3">
+                <label class="form-label text-white-50 small"><?php echo t('labs.steps', 'Steps'); ?></label>
+                <input type="number" name="steps" class="form-control form-control-sm bg-dark text-white" value="20" min="10" max="50">
+              </div>
+              <div class="col-3">
+                <label class="form-label text-white-50 small"><?php echo t('labs.cfg', 'CFG'); ?></label>
+                <input type="number" name="cfg" class="form-control form-control-sm bg-dark text-white" value="7.5" min="1" max="20" step="0.5">
+              </div>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-white-50 small"><?php echo t('labs.width', 'Width'); ?></label>
+                <select name="width" class="form-select form-select-sm bg-dark text-white">
+                  <option value="512">512</option>
+                  <option value="768">768</option>
+                  <option value="1024" selected>1024</option>
+                  <option value="1280">1280</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label text-white-50 small"><?php echo t('labs.height', 'Height'); ?></label>
+                <select name="height" class="form-select form-select-sm bg-dark text-white">
+                  <option value="512">512</option>
+                  <option value="768">768</option>
+                  <option value="1024" selected>1024</option>
+                  <option value="1280">1280</option>
+                </select>
               </div>
             </div>
             <button type="submit" class="btn btn-neon-primary w-100" id="labs-submit-btn">
@@ -84,13 +118,11 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
           <h6 class="text-white mb-3"><?php echo t('labs.tool_history', 'Recent'); ?></h6>
           <ul class="list-unstyled mb-0">
             <?php foreach (array_slice($historyJobs, 0, 5) as $j): ?>
-            <li class="d-flex align-items-center justify-content-between py-2 border-bottom border-secondary">
+            <li class="d-flex align-items-center justify-content-between py-2 border-bottom border-secondary flex-wrap gap-2">
               <span class="text-white-50 small"><?php echo date('M j, H:i', strtotime($j['created_at'])); ?></span>
-              <span class="badge bg-<?php echo $j['status'] === 'completed' ? 'success' : ($j['status'] === 'failed' ? 'danger' : 'warning'); ?>"><?php echo $j['status']; ?></span>
-              <?php if ($j['status'] === 'completed'): ?>
-              <a href="/api/ai/download.php?job_id=<?php echo urlencode($j['job_uuid']); ?>" class="btn btn-sm btn-outline-success" target="_blank"><i class="fas fa-download"></i></a>
-              <?php else: ?>
-              <a href="/labs-job.php?job_id=<?php echo urlencode($j['job_uuid']); ?>" class="btn btn-sm btn-outline-secondary"><?php echo t('labs.view'); ?></a>
+              <span class="badge bg-<?php echo ($j['status'] ?? '') === 'done' ? 'success' : (($j['status'] ?? '') === 'failed' ? 'danger' : 'warning'); ?>"><?php echo htmlspecialchars($j['status'] ?? 'pending'); ?></span>
+              <?php if (!empty($j['image_url'])): ?>
+              <a href="<?php echo htmlspecialchars($j['image_url']); ?>" class="btn btn-sm btn-outline-success" target="_blank"><i class="fas fa-download"></i></a>
               <?php endif; ?>
             </li>
             <?php endforeach; ?>
@@ -103,8 +135,8 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
 </section>
 
 <script src="/assets/js/navigation-extend.js"></script>
-<script src="/assets/js/knd-labs.js"></script>
+<script src="/assets/js/kndlabs.js"></script>
 <script>
-KNDLabs.init({ formId: 'labs-t2i-form', jobType: 'text2img', balanceEl: null });
+KNDLabs.init({ formId: 'labs-comfy-form', jobType: 'text2img' });
 </script>
 <?php echo generateFooter(); echo generateScripts(); ?>
