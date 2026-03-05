@@ -3,6 +3,15 @@
  * KND Labs - ComfyUI workflow injection and API helpers
  */
 
+if (!function_exists('array_is_list')) {
+    /** @param array $arr */
+    function array_is_list($arr): bool {
+        if (!is_array($arr)) return false;
+        if ($arr === []) return true;
+        return array_keys($arr) === range(0, count($arr) - 1);
+    }
+}
+
 /**
  * Upload image to ComfyUI and return filename.
  * @param string $filePath Path to image file
