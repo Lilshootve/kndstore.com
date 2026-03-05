@@ -93,6 +93,38 @@ function comfyui_inject_workflow(array $params, string $tool = 'text2img'): arra
     return $wf;
 }
 
+/** SDXL models installed on GPU server */
+const COMFYUI_CHECKPOINT_MAP = [
+    'juggernaut' => 'Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors',
+    'realvis'    => 'RealVisXL_V5.0_fp16.safetensors',
+    'dreamshaper'=> 'DreamShaperXL_Turbo_v2_1.safetensors',
+];
+const COMFYUI_REFINER = 'sd_xl_refiner_1.0.safetensors';
+
+/**
+ * Override CheckpointLoaderSimple nodes with valid SDXL model.
+ * @param array $workflow Workflow by reference
+ * @param string $model juggernaut|realvis|dreamshaper (default: dreamshaper)
+ * @param bool $refinerEnabled Use refiner for second checkpoint node
+ */
+function comfyui_apply_checkpoint(array &$workflow, string $model = 'dreamshaper', bool $refinerEnabled = false): void {
+    $baseCkpt = COMFYUI_CHECKPOINT_MAP[$model] ?? COMFYUI_CHECKPOINT_MAP['dreamshaper'];
+    $checkpointNodes = 0;
+    foreach ($workflow as $nid => &$node) {
+        if (!is_array($node) || ($node['class_type'] ?? '') !== 'CheckpointLoaderSimple') continue;
+        $inputs = &$node['inputs'];
+        if (!isset($inputs['ckpt_name'])) continue;
+        $checkpointNodes++;
+        if ($checkpointNodes === 1) {
+            $inputs['ckpt_name'] = $baseCkpt;
+        } elseif ($refinerEnabled) {
+            $inputs['ckpt_name'] = COMFYUI_REFINER;
+        } else {
+            $inputs['ckpt_name'] = $baseCkpt;
+        }
+    }
+}
+
 /**
  * Send prompt to ComfyUI.
  * POST {COMFY_BASE}/prompt with { "prompt": workflow_json, "client_id": "knd-labs" }
@@ -131,15 +163,36 @@ function comfyui_run_prompt(array $workflow): array {
         throw new \RuntimeException('ComfyUI unreachable: ' . $err);
     }
     if ($code < 200 || $code >= 300) {
-        throw new \RuntimeException('ComfyUI HTTP ' . $code . ': ' . $bodyPreview);
+        $errMsg = 'ComfyUI HTTP ' . $code;
+        $data = json_decode($body, true);
+        if (is_array($data)) {
+            if (!empty($data['error'])) $errMsg = is_string($data['error']) ? $data['error'] : json_encode($data['error']);
+            elseif (!empty($data['node_errors'])) $errMsg = is_string($data['node_errors']) ? $data['node_errors'] : json_encode($data['node_errors']);
+            else $errMsg .= ': ' . $bodyPreview;
+        } else {
+            $errMsg .= ': ' . $bodyPreview;
+        }
+        error_log('ComfyUI /prompt error: ' . $errMsg);
+        throw new \RuntimeException($errMsg);
     }
     if (preg_match('/^\s*</', trim($body ?? ''))) {
         throw new \RuntimeException('ComfyUI returned HTML instead of JSON. Check COMFYUI_BASE_URL - wrong endpoint or base URL.');
     }
     $data = json_decode($body, true);
     if (!is_array($data) || empty($data['prompt_id'])) {
-        $msg = is_array($data) && isset($data['error']) ? (is_string($data['error']) ? $data['error'] : json_encode($data['error'])) : ($body ?: 'Invalid response');
-        throw new \RuntimeException('ComfyUI error: ' . $msg);
+        $msg = 'Invalid response';
+        if (is_array($data)) {
+            if (isset($data['error'])) {
+                $err = $data['error'];
+                $msg = is_string($err) ? $err : (isset($err['message']) ? $err['message'] : json_encode($err));
+            } elseif (isset($data['node_errors'])) {
+                $msg = is_string($data['node_errors']) ? $data['node_errors'] : json_encode($data['node_errors']);
+            }
+        } elseif ($body) {
+            $msg = substr($body, 0, 300);
+        }
+        error_log('ComfyUI validation error: ' . $msg);
+        throw new \RuntimeException($msg);
     }
     return ['prompt_id' => $data['prompt_id']];
 }

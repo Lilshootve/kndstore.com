@@ -126,7 +126,7 @@
         credentials: 'same-origin'
       })
         .then(function(r) {
-          return r.json().catch(function() { return { ok: false, error: { message: 'Invalid response' } }; });
+          return r.json().catch(function() { return { ok: false, error: { message: 'Invalid response from server' } }; });
         })
         .then(function(d) {
           if (submitBtn) submitBtn.disabled = false;
@@ -137,6 +137,10 @@
             var msg = (d.error && d.error.message) ? d.error.message : 'Error';
             if (typeof kndToast !== 'undefined') kndToast(msg, 'error');
             else alert(msg);
+            var prev = document.getElementById('labs-result-preview');
+            if (prev) prev.innerHTML = '<i class="fas fa-image fa-3x text-white-50 mb-3"></i><p class="text-white-50 mb-0">Submit to generate</p>';
+            var errEl = document.getElementById('labs-error-msg');
+            if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
           }
         })
         .catch(function(err) {

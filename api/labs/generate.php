@@ -51,6 +51,11 @@ try {
     $width = (int) ($_POST['width'] ?? 1024);
     $height = (int) ($_POST['height'] ?? 1024);
 
+    $model = trim($_POST['model'] ?? 'dreamshaper');
+    $allowedModels = ['juggernaut', 'realvis', 'dreamshaper'];
+    if (!in_array($model, $allowedModels, true)) $model = 'dreamshaper';
+    $refinerEnabled = !empty($_POST['refiner_enabled']);
+
     $params = [
         'prompt' => $prompt ?: 'high quality image',
         'negative_prompt' => $negativePrompt,
@@ -72,6 +77,7 @@ try {
     }
 
     $workflow = comfyui_inject_workflow($params, $tool);
+    comfyui_apply_checkpoint($workflow, $model, $refinerEnabled);
     $result = comfyui_run_prompt($workflow);
     $promptId = $result['prompt_id'];
 
@@ -91,5 +97,7 @@ try {
     ]);
 } catch (\Throwable $e) {
     error_log('api/labs/generate: ' . $e->getMessage());
-    json_error('INTERNAL_ERROR', $e->getMessage(), 500);
+    $code = (strpos($e->getMessage(), 'ComfyUI') !== false || strpos($e->getMessage(), 'invalid') !== false) ? 'COMFYUI_ERROR' : 'INTERNAL_ERROR';
+    $status = ($code === 'COMFYUI_ERROR') ? 400 : 500;
+    json_error($code, $e->getMessage(), $status);
 }

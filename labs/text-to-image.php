@@ -52,6 +52,14 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               <label class="form-label text-white-50"><?php echo t('labs.negative_prompt', 'Negative prompt'); ?></label>
               <input type="text" name="negative_prompt" class="form-control bg-dark text-white" maxlength="500" placeholder="ugly, blurry, low quality">
             </div>
+            <div class="mb-3">
+              <label class="form-label text-white-50 small"><?php echo t('labs.model', 'Model'); ?></label>
+              <select name="model" class="form-select form-select-sm bg-dark text-white">
+                <option value="dreamshaper" selected>DreamShaper XL</option>
+                <option value="juggernaut">Juggernaut XL</option>
+                <option value="realvis">RealVis XL</option>
+              </select>
+            </div>
             <div class="row g-2 mb-3">
               <div class="col-6">
                 <label class="form-label text-white-50 small"><?php echo t('labs.seed', 'Seed'); ?></label>
