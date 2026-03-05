@@ -124,6 +124,10 @@
 
     # How KND Arena Works
     RewriteRule ^how-knd-arena-works/?$ /how-knd-arena-works.php [L]
+
+    # KND Labs friendly URL
+    RewriteRule ^labs/?$ /knd-labs.php [L]
+    RewriteRule ^knd-labs/?$ /knd-labs.php [L]
 </IfModule>
 
 # Configuración de compresión adicional
