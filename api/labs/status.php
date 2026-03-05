@@ -10,6 +10,7 @@ ini_set('display_errors', '0');
 require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/auth.php';
+require_once __DIR__ . '/../../includes/support_credits.php';
 require_once __DIR__ . '/../../includes/json.php';
 require_once __DIR__ . '/../../includes/comfyui.php';
 
@@ -27,25 +28,35 @@ try {
 
     $jobId = trim($_GET['job_id'] ?? '');
     if ($jobId === '') {
-        json_error('INVALID_INPUT', 'job_id is required.');
+        json_error('INVALID_INPUT', 'job_id is required.', 400);
     }
 
     $stmt = $pdo->prepare("SELECT * FROM knd_labs_jobs WHERE id = ? AND user_id = ? LIMIT 1");
     if (!$stmt || !$stmt->execute([$jobId, current_user_id()])) {
         json_error('DB_ERROR', 'Could not fetch job.', 500);
     }
+
     $job = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$job) {
         json_error('JOB_NOT_FOUND', 'Job not found.', 404);
     }
 
+    // Refresh status from ComfyUI if still running
     if ($job['status'] === 'pending' || $job['status'] === 'processing') {
         $promptId = $job['comfy_prompt_id'] ?? '';
-        $history = $promptId ? comfyui_get_history($promptId) : null;
-        if ($history && isset($history['outputs']) && is_array($history['outputs'])) {
-            $filename = null;
-            $subfolder = '';
-            $imgType = 'output';
+        $historyRaw = $promptId ? comfyui_get_history($promptId) : null;
+
+        // Some ComfyUI history responses come wrapped like: { "<promptId>": { ... } }
+        $history = $historyRaw;
+        if (is_array($historyRaw) && $promptId !== '' && isset($historyRaw[$promptId]) && is_array($historyRaw[$promptId])) {
+            $history = $historyRaw[$promptId];
+        }
+
+        $filename = null;
+        $subfolder = '';
+        $imgType = 'output';
+
+        if (is_array($history) && isset($history['outputs']) && is_array($history['outputs'])) {
             foreach ($history['outputs'] as $nodeOutputs) {
                 if (isset($nodeOutputs['images']) && is_array($nodeOutputs['images'])) {
                     foreach ($nodeOutputs['images'] as $img) {
@@ -58,40 +69,64 @@ try {
                     }
                 }
             }
-            if ($filename) {
-                $base = '';
-                if (file_exists(__DIR__ . '/../../config/comfyui.php')) {
-                    require_once __DIR__ . '/../../config/comfyui.php';
+        }
+
+        if ($filename) {
+            // Build ComfyUI view URL
+            $base = '';
+            if (file_exists(__DIR__ . '/../../config/comfyui.php')) {
+                require_once __DIR__ . '/../../config/comfyui.php';
+                if (defined('COMFYUI_BASE_URL')) {
                     $base = rtrim(COMFYUI_BASE_URL, '/');
                 }
-                $params = ['filename' => $filename, 'type' => $imgType];
-                if ($subfolder !== '') $params['subfolder'] = $subfolder;
-                $imageUrl = $base ? ($base . '/view?' . http_build_query($params)) : null;
-                $stmt2 = $pdo->prepare("UPDATE knd_labs_jobs SET status = 'done', image_url = ?, updated_at = NOW() WHERE id = ?");
-                if ($stmt2) $stmt2->execute([$imageUrl, $jobId]);
-                $job['status'] = 'done';
-                $job['image_url'] = $imageUrl;
+            }
+
+            $params = ['filename' => $filename, 'type' => $imgType];
+            if ($subfolder !== '') $params['subfolder'] = $subfolder;
+
+            $imageUrl = $base ? ($base . '/view?' . http_build_query($params)) : null;
+
+            $stmt2 = $pdo->prepare("UPDATE knd_labs_jobs SET status = 'done', image_url = ?, updated_at = NOW() WHERE id = ?");
+            if ($stmt2) $stmt2->execute([$imageUrl, $jobId]);
+
+            $job['status'] = 'done';
+            $job['image_url'] = $imageUrl;
+        } else {
+            // Check error status from history if available
+            if (is_array($history) && isset($history['status']) && is_array($history['status'])) {
+                $st = $history['status'];
+                if (($st['status_str'] ?? '') === 'error') {
+                    $errMsg = $st['messages'] ?? 'ComfyUI error';
+                    $errStr = is_string($errMsg) ? $errMsg : json_encode($errMsg);
+
+                    $stmt2 = $pdo->prepare("UPDATE knd_labs_jobs SET status = 'failed', error_message = ?, updated_at = NOW() WHERE id = ?");
+                    if ($stmt2) $stmt2->execute([$errStr, $jobId]);
+
+                    $job['status'] = 'failed';
+                    $job['error_message'] = $errStr;
+                } else {
+                    $stmt2 = $pdo->prepare("UPDATE knd_labs_jobs SET status = 'processing', updated_at = NOW() WHERE id = ?");
+                    if ($stmt2) $stmt2->execute([$jobId]);
+                    $job['status'] = 'processing';
+                }
             } else {
                 $stmt2 = $pdo->prepare("UPDATE knd_labs_jobs SET status = 'processing', updated_at = NOW() WHERE id = ?");
                 if ($stmt2) $stmt2->execute([$jobId]);
                 $job['status'] = 'processing';
             }
-        } elseif ($history && isset($history['status'])) {
-            $status = $history['status'];
-            if (isset($status['status_str']) && $status['status_str'] === 'error') {
-                $errMsg = $status['messages'] ?? 'ComfyUI error';
-                $stmt2 = $pdo->prepare("UPDATE knd_labs_jobs SET status = 'failed', error_message = ?, updated_at = NOW() WHERE id = ?");
-                if ($stmt2) $stmt2->execute([is_string($errMsg) ? $errMsg : json_encode($errMsg), $jobId]);
-                $job['status'] = 'failed';
-                $job['error_message'] = is_string($errMsg) ? $errMsg : 'Unknown error';
-        } else {
-            $stmt2 = $pdo->prepare("UPDATE knd_labs_jobs SET status = 'processing', updated_at = NOW() WHERE id = ?");
-            if ($stmt2) $stmt2->execute([$jobId]);
-            $job['status'] = 'processing';
         }
     }
 
-    $data = ['status' => $job['status'], 'image_url' => $job['image_url'] ?? null, 'error_message' => $job['error_message'] ?? null];
+    $data = [
+        'status' => $job['status'],
+        'image_url' => $job['image_url'] ?? null,
+        'error_message' => $job['error_message'] ?? null
+    ];
+    $uid = current_user_id();
+    if ($uid) {
+        release_available_points_if_due($pdo, $uid);
+        $data['available_after'] = get_available_points($pdo, $uid);
+    }
     json_success($data);
 } catch (\Throwable $e) {
     error_log('api/labs/status: ' . $e->getMessage());

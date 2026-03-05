@@ -32,9 +32,9 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
         <div class="glass-card-neon p-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="text-white mb-0"><?php echo htmlspecialchars($toolName); ?></h4>
-            <span class="ai-balance-badge"><i class="fas fa-coins me-1"></i><?php echo number_format($balance); ?> KP</span>
+            <span class="ai-balance-badge" id="labs-balance"><i class="fas fa-coins me-1"></i><?php echo number_format($balance); ?> KP</span>
           </div>
-          <p class="text-white-50 small"><?php echo t('labs.cost_range', 'ComfyUI · Text to Image'); ?></p>
+          <p class="text-white-50 small" id="labs-cost-label"><?php echo t('labs.cost_label', 'Cost: 3 KP'); ?></p>
 
           <form id="labs-comfy-form" class="labs-form" method="post" action="#" onsubmit="return false;">
             <input type="hidden" name="tool" value="text2img">
@@ -51,6 +51,13 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             <div class="mb-3">
               <label class="form-label text-white-50"><?php echo t('labs.negative_prompt', 'Negative prompt'); ?></label>
               <input type="text" name="negative_prompt" class="form-control bg-dark text-white" maxlength="500" placeholder="ugly, blurry, low quality">
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-white-50"><?php echo t('ai.text2img.mode_label', 'Quality'); ?></label>
+              <select name="quality" id="labs-quality-select" class="form-select bg-dark text-white">
+                <option value="standard" selected>Standard (3 KP)</option>
+                <option value="high">High (6 KP)</option>
+              </select>
             </div>
             <div class="mb-3">
               <label class="form-label text-white-50 small"><?php echo t('labs.model', 'Model'); ?></label>
@@ -109,7 +116,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             <p class="text-white-50 mb-0"><?php echo t('labs.no_result_yet', 'Submit to generate'); ?></p>
           </div>
           <div id="labs-result-actions" class="mt-3" style="display:none;">
-            <a href="#" id="labs-download-btn" class="btn btn-success me-2"><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
+            <a href="#" id="labs-download-btn" class="btn btn-success me-2" download><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
             <button type="button" id="labs-retry-btn" class="btn btn-outline-primary"><i class="fas fa-redo me-1"></i><?php echo t('labs.generate_again', 'Generate again'); ?></button>
           </div>
           <div id="labs-status-panel" class="mt-3" style="display:none;">
@@ -145,6 +152,6 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
 <script src="/assets/js/navigation-extend.js"></script>
 <script src="/assets/js/kndlabs.js"></script>
 <script>
-KNDLabs.init({ formId: 'labs-comfy-form', jobType: 'text2img' });
+KNDLabs.init({ formId: 'labs-comfy-form', jobType: 'text2img', costLabelId: 'labs-cost-label', pricingKey: 'text2img', qualitySelectId: 'labs-quality-select', balanceEl: '#labs-balance' });
 </script>
 <?php echo generateFooter(); echo generateScripts(); ?>

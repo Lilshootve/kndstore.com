@@ -32,12 +32,19 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
         <div class="glass-card-neon p-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="text-white mb-0"><?php echo htmlspecialchars($toolName); ?></h4>
-            <span class="ai-balance-badge"><i class="fas fa-coins me-1"></i><?php echo number_format($balance); ?> KP</span>
+            <span class="ai-balance-badge" id="labs-balance"><i class="fas fa-coins me-1"></i><?php echo number_format($balance); ?> KP</span>
           </div>
-          <p class="text-white-50 small"><?php echo t('labs.cost_fixed', 'ComfyUI · 2x/4x upscale'); ?></p>
+          <p class="text-white-50 small" id="labs-cost-label"><?php echo t('labs.cost_label', 'Cost: 5 KP'); ?></p>
 
           <form id="labs-comfy-form" class="labs-form" method="post" action="#" onsubmit="return false;">
             <input type="hidden" name="tool" value="upscale">
+            <div class="mb-3">
+              <label class="form-label text-white-50"><?php echo t('ai.upscale.scale'); ?></label>
+              <select name="scale" id="labs-scale-select" class="form-select bg-dark text-white mb-2">
+                <option value="2" selected>2x (5 KP)</option>
+                <option value="4">4x (8 KP)</option>
+              </select>
+            </div>
             <div class="mb-3">
               <div class="ai-dropzone" id="labs-upscale-dropzone">
                 <input type="file" name="image" id="labs-upscale-file" accept="image/jpeg,image/jpg,image/png,image/webp" hidden>
@@ -64,7 +71,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             <p class="text-white-50 mb-0"><?php echo t('labs.no_result_yet', 'Submit to generate'); ?></p>
           </div>
           <div id="labs-result-actions" class="mt-3" style="display:none;">
-            <a href="#" id="labs-download-btn" class="btn btn-success me-2"><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
+            <a href="#" id="labs-download-btn" class="btn btn-success me-2" download><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
             <button type="button" id="labs-retry-btn" class="btn btn-outline-primary"><i class="fas fa-redo me-1"></i><?php echo t('labs.generate_again', 'Generate again'); ?></button>
           </div>
           <div id="labs-status-panel" class="mt-3" style="display:none;">
@@ -114,7 +121,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
       if (btn) btn.disabled = false;
     }
   });
-  KNDLabs.init({ formId: 'labs-comfy-form', jobType: 'upscale' });
+  KNDLabs.init({ formId: 'labs-comfy-form', jobType: 'upscale', costLabelId: 'labs-cost-label', pricingKey: 'upscale', scaleSelectId: 'labs-scale-select', balanceEl: '#labs-balance' });
 })();
 </script>
 <?php echo generateFooter(); echo generateScripts(); ?>

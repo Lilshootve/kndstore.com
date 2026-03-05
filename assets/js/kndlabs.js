@@ -6,29 +6,77 @@
   'use strict';
 
   var POLL_INTERVAL = 2000;
-  var POLL_MAX_COUNT = 150;  // ~5 min
+  var POLL_MAX_COUNT = 150;
   var API_GENERATE = '/api/labs/generate.php';
   var API_STATUS = '/api/labs/status.php';
   var API_JOBS = '/api/labs/jobs.php';
+  var API_IMAGE = '/api/labs/image.php';
+  var API_PRICING = '/api/labs/pricing.php';
 
   var KNDLabs = {
     config: {},
     pollTimer: null,
     currentJobId: null,
+    pricing: null,
 
     init: function(cfg) {
       this.config = cfg || {};
       this.config.balanceEl = this.config.balanceEl
         ? document.querySelector(this.config.balanceEl)
         : null;
-      this.bindForm();
-      this.bindPresets();
-      this.bindRetry();
+      var self = this;
+      fetch(API_PRICING, { credentials: 'same-origin' })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (d.ok && d.data) self.pricing = d.data;
+          self.bindForm();
+          self.bindPresets();
+          self.bindRetry();
+          self.bindPricingUpdates();
+          self.updateCostLabel();
+        })
+        .catch(function() {
+          self.bindForm();
+          self.bindPresets();
+          self.bindRetry();
+          self.bindPricingUpdates();
+        });
+    },
+
+    getCost: function() {
+      var p = this.pricing;
+      var key = this.config.pricingKey || 'text2img';
+      if (!p) return key === 'text2img' ? 3 : (key === 'upscale' ? 5 : 15);
+      if (key === 'text2img') {
+        var q = document.getElementById(this.config.qualitySelectId);
+        var qual = q ? q.value : 'standard';
+        return (p.text2img && p.text2img[qual]) || 3;
+      }
+      if (key === 'upscale') {
+        var s = document.getElementById(this.config.scaleSelectId);
+        var scale = s ? s.value : '2';
+        return (p.upscale && p.upscale[scale + 'x']) || (scale === '4' ? 8 : 5);
+      }
+      return (p.character && p.character.base) || 15;
+    },
+
+    updateCostLabel: function() {
+      var el = document.getElementById(this.config.costLabelId);
+      if (el) el.textContent = 'Cost: ' + this.getCost() + ' KP';
+    },
+
+    bindPricingUpdates: function() {
+      var self = this;
+      var q = document.getElementById(this.config.qualitySelectId);
+      if (q) q.addEventListener('change', function() { self.updateCostLabel(); });
+      var s = document.getElementById(this.config.scaleSelectId);
+      if (s) s.addEventListener('change', function() { self.updateCostLabel(); });
     },
 
     updateBalance: function(kp) {
-      var el = this.config.balanceEl;
-      if (el) el.textContent = parseInt(kp, 10).toLocaleString() + ' KP';
+      var sel = this.config.balanceEl;
+      var el = typeof sel === 'string' ? document.querySelector(sel) : sel;
+      if (el) el.innerHTML = '<i class="fas fa-coins me-1"></i>' + parseInt(kp, 10).toLocaleString() + ' KP';
     },
 
     showStatus: function(jobId) {
@@ -76,17 +124,18 @@
             } else if (st === 'done' || st === 'completed') {
               self.stopPoll();
               if (panel) panel.style.display = 'none';
-              var imgUrl = d.data.image_url;
-              if (preview && imgUrl) {
-                preview.innerHTML = '<img src="' + imgUrl + '" alt="Result" class="img-fluid rounded" style="max-height:400px;" crossorigin="anonymous">';
+              var proxyPreview = API_IMAGE + '?job_id=' + encodeURIComponent(jobId);
+              var proxyDownload = API_IMAGE + '?job_id=' + encodeURIComponent(jobId) + '&download=1';
+              if (preview) {
+                preview.innerHTML = '<img src="' + proxyPreview + '" alt="Result" class="img-fluid rounded" style="max-height:400px;">';
               }
               var dlBtn = document.getElementById('labs-download-btn');
-              if (dlBtn && imgUrl) {
-                dlBtn.href = imgUrl;
-                dlBtn.target = '_blank';
+              if (dlBtn) {
+                dlBtn.href = proxyDownload;
                 dlBtn.download = 'knd-labs-output.png';
               }
               if (actions) actions.style.display = 'block';
+              if (d.data.available_after !== undefined) self.updateBalance(d.data.available_after);
               self.currentJobId = null;
             }
           })
@@ -131,7 +180,9 @@
         .then(function(d) {
           if (submitBtn) submitBtn.disabled = false;
           if (d.ok && d.data && d.data.job_id) {
+            if (d.data.available_after !== undefined) self.updateBalance(d.data.available_after);
             formEl.reset();
+            self.updateCostLabel();
             self.showStatus(d.data.job_id);
           } else {
             var msg = (d.error && d.error.message) ? d.error.message : 'Error';
