@@ -130,5 +130,7 @@ def _inject_params(wf: dict, job_type: str, payload: dict) -> dict:
             inputs["height"] = height
         if ctype == "LoadImage" and "_comfy_image" in payload:
             inputs["image"] = payload["_comfy_image"]
+        if ctype == "UpscaleModelLoader" and job_type == "upscale":
+            inputs["model_name"] = "4x-UltraSharp.pth"
 
     return wf
