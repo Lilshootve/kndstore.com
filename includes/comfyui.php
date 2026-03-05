@@ -66,11 +66,23 @@ function comfyui_inject_workflow(array $params, string $tool = 'text2img'): arra
     $negative = $params['negative_prompt'] ?? 'ugly, blurry, low quality';
     $seed = isset($params['seed']) ? (int) $params['seed'] : random_int(0, 2147483647);
     $steps = (int) ($params['steps'] ?? 20);
+    $steps = max(1, min(100, $steps));
     $cfg = (float) ($params['cfg'] ?? 7.5);
+    $cfg = max(1, min(30, $cfg));
     $width = (int) ($params['width'] ?? 1024);
     $height = (int) ($params['height'] ?? 1024);
-    $width = max(512, min(2048, $width - ($width % 8)));
-    $height = max(512, min(2048, $height - ($height % 8)));
+    $width = max(256, min(2048, $width - ($width % 8)));
+    $height = max(256, min(2048, $height - ($height % 8)));
+    $batchSize = isset($params['batch_size']) ? max(1, min(4, (int) $params['batch_size'])) : 1;
+    $samplerName = $params['sampler_name'] ?? 'euler';
+    $scheduler = $params['scheduler'] ?? 'normal';
+    $denoise = isset($params['denoise']) ? (float) $params['denoise'] : 1.0;
+    $denoise = max(0.01, min(1.0, $denoise));
+
+    $allowedSamplers = ['euler', 'euler_ancestral', 'heun', 'dpm_2', 'dpm_2_ancestral', 'lms', 'dpm_fast', 'dpm_adaptive', 'dpmpp_2s_ancestral', 'dpmpp_sde', 'dpmpp_2m', 'dpmpp_2m_sde', 'dpmpp_3m_sde', 'ddpm', 'lcm', 'ddim', 'uni_pc', 'uni_pc_bh2'];
+    if (!in_array($samplerName, $allowedSamplers, true)) $samplerName = 'euler';
+    $allowedSchedulers = ['normal', 'karras', 'exponential', 'sgm_uniform', 'simple'];
+    if (!in_array($scheduler, $allowedSchedulers, true)) $scheduler = 'normal';
 
     $injectedPositive = false;
     foreach ($wf as $nid => $node) {
@@ -91,10 +103,14 @@ function comfyui_inject_workflow(array $params, string $tool = 'text2img'): arra
             $inputs['seed'] = $seed;
             $inputs['steps'] = $steps;
             $inputs['cfg'] = $cfg;
+            $inputs['denoise'] = $denoise;
+            if (isset($inputs['sampler_name'])) $inputs['sampler_name'] = $samplerName;
+            if (isset($inputs['scheduler'])) $inputs['scheduler'] = $scheduler;
         }
         if ($ctype === 'EmptyLatentImage') {
             $inputs['width'] = $width;
             $inputs['height'] = $height;
+            $inputs['batch_size'] = $batchSize;
         }
         if ($ctype === 'LoadImage' && !empty($params['image_filename'])) {
             $inputs['image'] = $params['image_filename'];
@@ -103,22 +119,41 @@ function comfyui_inject_workflow(array $params, string $tool = 'text2img'): arra
     return $wf;
 }
 
-/** SDXL models installed on GPU server */
+/** Checkpoint models available in ComfyUI */
 const COMFYUI_CHECKPOINT_MAP = [
-    'juggernaut' => 'Juggernaut-XL_v9_RunDiffusionPhoto_v2.safetensors',
-    'realvis'    => 'RealVisXL_V5.0_fp16.safetensors',
-    'dreamshaper'=> 'DreamShaperXL_Turbo_v2_1.safetensors',
+    'cyberrealistic_final' => 'cyberrealistic_final.safetensors',
+    'flux_dev' => 'flux_dev.safetensors',
+    'iniverseMixSFWNSFW' => 'iniverseMixSFWNSFW_ponyRealGuofengV51.safetensors',
+    'juggernaut_ragnarok' => 'juggernautXL_ragnarokBy.safetensors',
+    'juggernaut_v8' => 'juggernautXL_v8Rundiffusion.safetensors',
+    'NSFW_master' => 'NSFW_master.safetensors',
+    'pornmaster_asian' => 'pornmaster_asianSdxlV1VAE.safetensors',
+    'realisticVision' => 'realisticVisionV60B1_v51HyperVAE.safetensors',
+    'sd_xl_base' => 'sd_xl_base_1.0.safetensors',
+    'sd_xl_refiner' => 'sd_xl_refiner_1.0.safetensors',
+    'v1_5' => 'v1-5-pruned-emaonly.safetensors',
+    'waiANINSFWPONY' => 'waiANINSFWPONYXL_v130.safetensors',
+    'waiNSFW_v120' => 'waiNSFWIllustrious_v120.safetensors',
+    'waiNSFW_v150' => 'waiNSFWIllustrious_v150.safetensors',
 ];
 const COMFYUI_REFINER = 'sd_xl_refiner_1.0.safetensors';
 
+/** If $model ends with .safetensors, use as ckpt directly; else lookup in map */
+function comfyui_resolve_checkpoint(string $model, ?string $overrideCkpt): string {
+    if ($overrideCkpt !== null && $overrideCkpt !== '') return $overrideCkpt;
+    if (substr(strtolower($model), -13) === '.safetensors') return $model;
+    return COMFYUI_CHECKPOINT_MAP[$model] ?? COMFYUI_CHECKPOINT_MAP['v1_5'];
+}
+
 /**
- * Override CheckpointLoaderSimple nodes with valid SDXL model.
+ * Override CheckpointLoaderSimple nodes with valid model.
  * @param array $workflow Workflow by reference
- * @param string $model juggernaut|realvis|dreamshaper (default: dreamshaper)
+ * @param string $model Key from map or full .safetensors filename
  * @param bool $refinerEnabled Use refiner for second checkpoint node
+ * @param string|null $overrideCkpt If set (from settings), use this checkpoint for base model
  */
-function comfyui_apply_checkpoint(array &$workflow, string $model = 'dreamshaper', bool $refinerEnabled = false): void {
-    $baseCkpt = COMFYUI_CHECKPOINT_MAP[$model] ?? COMFYUI_CHECKPOINT_MAP['dreamshaper'];
+function comfyui_apply_checkpoint(array &$workflow, string $model = 'v1_5', bool $refinerEnabled = false, ?string $overrideCkpt = null): void {
+    $baseCkpt = comfyui_resolve_checkpoint($model, $overrideCkpt);
     $checkpointNodes = 0;
     foreach ($workflow as $nid => &$node) {
         if (!is_array($node) || ($node['class_type'] ?? '') !== 'CheckpointLoaderSimple') continue;
@@ -185,7 +220,10 @@ function comfyui_run_prompt(array $workflow, ?string $baseUrl = null, string $to
         $errMsg = 'ComfyUI HTTP ' . $code;
         $data = json_decode($body, true);
         if (is_array($data)) {
-            if (!empty($data['error'])) $errMsg = is_string($data['error']) ? $data['error'] : json_encode($data['error']);
+            if (!empty($data['message'])) {
+                $errMsg = $data['message'];
+                if (!empty($data['details'])) $errMsg .= ' | ' . (is_string($data['details']) ? $data['details'] : json_encode($data['details']));
+            } elseif (!empty($data['error'])) $errMsg = is_string($data['error']) ? $data['error'] : json_encode($data['error']);
             elseif (!empty($data['node_errors'])) $errMsg = is_string($data['node_errors']) ? $data['node_errors'] : json_encode($data['node_errors']);
             else $errMsg .= ': ' . $bodyPreview;
         } else {

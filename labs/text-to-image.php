@@ -62,42 +62,103 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             <div class="mb-3">
               <label class="form-label text-white-50 small"><?php echo t('labs.model', 'Model'); ?></label>
               <select name="model" class="form-select form-select-sm bg-dark text-white">
-                <option value="dreamshaper" selected>DreamShaper XL</option>
-                <option value="juggernaut">Juggernaut XL</option>
-                <option value="realvis">RealVis XL</option>
+                <option value="v1_5" selected>v1.5 Pruned EMA</option>
+                <option value="sd_xl_base">SD XL Base 1.0</option>
+                <option value="sd_xl_refiner">SD XL Refiner 1.0</option>
+                <option value="cyberrealistic_final">CyberRealistic Final</option>
+                <option value="flux_dev">Flux Dev</option>
+                <option value="iniverseMixSFWNSFW">Pony Real Guofeng V5.1</option>
+                <option value="juggernaut_ragnarok">Juggernaut XL Ragnarok</option>
+                <option value="juggernaut_v8">Juggernaut XL v8</option>
+                <option value="NSFW_master">NSFW Master</option>
+                <option value="pornmaster_asian">PornMaster Asian SDXL</option>
+                <option value="realisticVision">Realistic Vision V6.0</option>
+                <option value="waiANINSFWPONY">PONY XL v1.30</option>
+                <option value="waiNSFW_v120">Illustrious v1.20</option>
+                <option value="waiNSFW_v150">Illustrious v1.50</option>
               </select>
             </div>
             <div class="row g-2 mb-3">
-              <div class="col-6">
+              <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.seed', 'Seed'); ?></label>
                 <input type="number" name="seed" class="form-control form-control-sm bg-dark text-white" placeholder="Random">
               </div>
-              <div class="col-3">
+              <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.steps', 'Steps'); ?></label>
-                <input type="number" name="steps" class="form-control form-control-sm bg-dark text-white" value="20" min="10" max="50">
+                <input type="number" name="steps" class="form-control form-control-sm bg-dark text-white" value="20" min="1" max="100">
               </div>
-              <div class="col-3">
+              <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.cfg', 'CFG'); ?></label>
-                <input type="number" name="cfg" class="form-control form-control-sm bg-dark text-white" value="7.5" min="1" max="20" step="0.5">
+                <input type="number" name="cfg" class="form-control form-control-sm bg-dark text-white" value="7.5" min="1" max="30" step="0.5">
               </div>
             </div>
             <div class="row g-2 mb-3">
-              <div class="col-6">
-                <label class="form-label text-white-50 small"><?php echo t('labs.width', 'Width'); ?></label>
-                <select name="width" class="form-select form-select-sm bg-dark text-white">
-                  <option value="512">512</option>
-                  <option value="768">768</option>
-                  <option value="1024" selected>1024</option>
-                  <option value="1280">1280</option>
+              <div class="col-4">
+                <label class="form-label text-white-50 small"><?php echo t('labs.sampler', 'Sampler'); ?></label>
+                <select name="sampler_name" class="form-select form-select-sm bg-dark text-white">
+                  <option value="euler" selected>Euler</option>
+                  <option value="euler_ancestral">Euler Ancestral</option>
+                  <option value="heun">Heun</option>
+                  <option value="dpm_2">DPM 2</option>
+                  <option value="dpm_2_ancestral">DPM 2 Ancestral</option>
+                  <option value="lms">LMS</option>
+                  <option value="dpmpp_2m">DPM++ 2M</option>
+                  <option value="dpmpp_2m_sde">DPM++ 2M SDE</option>
+                  <option value="dpmpp_sde">DPM++ SDE</option>
+                  <option value="ddim">DDIM</option>
+                  <option value="lcm">LCM</option>
+                  <option value="uni_pc">UniPC</option>
                 </select>
               </div>
-              <div class="col-6">
-                <label class="form-label text-white-50 small"><?php echo t('labs.height', 'Height'); ?></label>
-                <select name="height" class="form-select form-select-sm bg-dark text-white">
+              <div class="col-4">
+                <label class="form-label text-white-50 small"><?php echo t('labs.scheduler', 'Scheduler'); ?></label>
+                <select name="scheduler" class="form-select form-select-sm bg-dark text-white">
+                  <option value="normal" selected>Normal</option>
+                  <option value="karras">Karras</option>
+                  <option value="exponential">Exponential</option>
+                  <option value="sgm_uniform">SGM Uniform</option>
+                  <option value="simple">Simple</option>
+                </select>
+              </div>
+              <div class="col-4">
+                <label class="form-label text-white-50 small"><?php echo t('labs.denoise', 'Denoise'); ?></label>
+                <input type="number" name="denoise" class="form-control form-control-sm bg-dark text-white" value="1" min="0.01" max="1" step="0.01">
+              </div>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-4">
+                <label class="form-label text-white-50 small"><?php echo t('labs.width', 'Width'); ?></label>
+                <select name="width" class="form-select form-select-sm bg-dark text-white">
+                  <option value="256">256</option>
                   <option value="512">512</option>
                   <option value="768">768</option>
                   <option value="1024" selected>1024</option>
+                  <option value="1152">1152</option>
                   <option value="1280">1280</option>
+                  <option value="1536">1536</option>
+                  <option value="2048">2048</option>
+                </select>
+              </div>
+              <div class="col-4">
+                <label class="form-label text-white-50 small"><?php echo t('labs.height', 'Height'); ?></label>
+                <select name="height" class="form-select form-select-sm bg-dark text-white">
+                  <option value="256">256</option>
+                  <option value="512">512</option>
+                  <option value="768">768</option>
+                  <option value="1024" selected>1024</option>
+                  <option value="1152">1152</option>
+                  <option value="1280">1280</option>
+                  <option value="1536">1536</option>
+                  <option value="2048">2048</option>
+                </select>
+              </div>
+              <div class="col-4">
+                <label class="form-label text-white-50 small"><?php echo t('labs.batch', 'Batch'); ?></label>
+                <select name="batch_size" class="form-select form-select-sm bg-dark text-white">
+                  <option value="1" selected>1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
                 </select>
               </div>
             </div>

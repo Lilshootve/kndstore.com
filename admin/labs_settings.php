@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         settings_set($pdo, 'comfyui_base_url_local', trim($_POST['comfyui_base_url_local'] ?? ''));
         settings_set($pdo, 'comfyui_base_url_runpod', trim($_POST['comfyui_base_url_runpod'] ?? ''));
+        settings_set($pdo, 'comfyui_default_ckpt', trim($_POST['comfyui_default_ckpt'] ?? ''));
         $timeout = max(500, min(30000, (int) ($_POST['auto_timeout_ms'] ?? 3000)));
         settings_set($pdo, 'labs_auto_timeout_ms', (string) $timeout);
         $token = trim($_POST['comfyui_token'] ?? '');
@@ -45,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $mode = comfyui_get_provider_mode($pdo);
 $localUrl = comfyui_get_base_url_local($pdo);
 $runpodUrl = comfyui_get_base_url_runpod($pdo);
+$defaultCkpt = settings_get($pdo, 'comfyui_default_ckpt', '');
 $timeoutMs = comfyui_get_auto_timeout_ms($pdo);
 $tokenVal = comfyui_get_token($pdo);
 $tokenMasked = $tokenVal !== '' ? (substr($tokenVal, 0, 8) . '…') : '';
@@ -93,6 +95,11 @@ echo generateHeader('Labs Settings | KND Admin', 'ComfyUI Provider configuration
             <div class="mb-3">
                 <label class="form-label">RunPod Base URL</label>
                 <input type="url" name="comfyui_base_url_runpod" class="form-control" value="<?php echo htmlspecialchars($runpodUrl); ?>" placeholder="https://xxx.proxy.runpod.net">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Default Checkpoint</label>
+                <input type="text" name="comfyui_default_ckpt" class="form-control" value="<?php echo htmlspecialchars($defaultCkpt); ?>" placeholder="e.g. v1-5-pruned-emaonly.safetensors" style="max-width:400px;">
+                <small class="text-white-50">Override: use this checkpoint for all models. Must exist in ComfyUI models/checkpoints. Leave empty to use built-in SDXL models (DreamShaper, etc.).</small>
             </div>
             <div class="mb-3">
                 <label class="form-label">Auto Timeout (ms)</label>
