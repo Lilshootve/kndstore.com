@@ -51,7 +51,8 @@ function comfyui_workflow_path(string $tool): string {
         $path = $baseDir . '/upscale_api.json';
         if (!is_readable($path)) $path = dirname(__DIR__) . '/KND_MASTER_WORKFLOW_UPSCALE.json';
     } elseif ($tool === 'text2img' || $tool === 'character') {
-        $path = $baseDir . '/text2img_api.json';
+        $path = $baseDir . '/knd-workflow-api.json';
+        if (!is_readable($path)) $path = $baseDir . '/text2img_api.json';
         if (!is_readable($path)) $path = dirname(__DIR__) . '/KND_MASTER_WORKFLOW_API.json';
     } else {
         $path = dirname(__DIR__) . '/KND_MASTER_WORKFLOW_API.json';
