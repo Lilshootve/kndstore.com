@@ -125,9 +125,15 @@
     # How KND Arena Works
     RewriteRule ^how-knd-arena-works/?$ /how-knd-arena-works.php [L]
 
-    # KND Labs: /labs y /labs/ sirven knd-labs.php (evita depender de labs/index.php)
+    # KND Labs: HUB y tool pages
     RewriteRule ^labs/?$ /knd-labs.php [L]
     RewriteRule ^knd-labs/?$ /knd-labs.php [L]
+    RewriteRule ^labs/text-to-image\.php$ /labs-text-to-image.php [L]
+    RewriteRule ^labs/upscale\.php$ /labs-upscale.php [L]
+    RewriteRule ^labs/character-lab\.php$ /labs-character-lab.php [L]
+    RewriteRule ^labs/texture-lab\.php$ /labs-texture-lab.php [L]
+    RewriteRule ^labs/jobs\.php$ /labs-jobs.php [L]
+    RewriteRule ^labs/job\.php$ /labs-job.php [L]
 </IfModule>
 
 # Configuración de compresión adicional

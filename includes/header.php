@@ -70,7 +70,7 @@ function generateNavigation() {
     $nav .= '                </li>' . "\n";
     // KND Labs hub link
     $phpSelf = $_SERVER['PHP_SELF'] ?? '';
-    $labsActive = in_array($current_page, ['knd-labs.php', 'ai-tools.php', 'triposr-3d.php']) || (strpos($phpSelf, '/labs/') !== false);
+    $labsActive = in_array($current_page, ['knd-labs.php', 'ai-tools.php', 'triposr-3d.php', 'labs-text-to-image.php', 'labs-upscale.php', 'labs-character-lab.php', 'labs-texture-lab.php', 'labs-jobs.php', 'labs-job.php']) || (strpos($phpSelf, '/labs/') !== false);
     $nav .= '                <li class="nav-item">' . "\n";
     $nav .= '                    <a class="nav-link' . ($labsActive ? ' active' : '') . '" href="/labs"><i class="fas fa-microscope me-1"></i>' . t('nav.labs', 'KND Labs') . '</a>' . "\n";
     $nav .= '                </li>' . "\n";

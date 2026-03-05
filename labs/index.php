@@ -90,7 +90,7 @@ echo generateHeader(t('labs.meta.title', 'KND Labs | KND Store'), t('labs.meta.d
           <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('ai.img23d.link'); ?></h3>
           <p class="text-white-50 small flex-grow-1"><?php echo t('labs.card_img23d_desc', 'Upload an image and generate a 3D model.'); ?></p>
           <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 8]); ?> &middot; ~2m</div>
-          <a href="/labs/image-to-3d.php" class="btn btn-neon-primary w-100 mt-auto"><i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?></a>
+          <a href="/triposr-3d.php" class="btn btn-neon-primary w-100 mt-auto"><i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?></a>
         </div>
       </div>
     </div>
