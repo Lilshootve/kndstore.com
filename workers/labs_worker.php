@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 /**
- * KND Labs Worker - Process queued jobs, send to ComfyUI
+ * KND Labs HTTP Worker - No MySQL needed. Uses API lease/complete/fail.
  * Usage:
  *   php workers/labs_worker.php              (single run: process 1 job)
  *   php workers/labs_worker.php --loop --sleep=2 --worker-id=PC1
@@ -11,133 +11,119 @@ declare(strict_types=1);
 $projectRoot = dirname(__DIR__);
 chdir($projectRoot);
 
-require_once $projectRoot . '/includes/config.php';
-require_once $projectRoot . '/includes/settings.php';
 require_once $projectRoot . '/includes/comfyui.php';
-require_once $projectRoot . '/includes/comfyui_provider.php';
 
 $opts = getopt('', ['loop', 'sleep:', 'worker-id:']);
 $loop = isset($opts['loop']);
 $sleepSec = isset($opts['sleep']) ? max(1, (int) $opts['sleep']) : 2;
-$workerId = $opts['worker-id'] ?? 'worker-' . gethostname();
+$workerId = $opts['worker-id'] ?? 'http-' . gethostname();
+
+$cfg = load_worker_config();
+
+function load_worker_config(): array {
+    $path = __DIR__ . '/worker_config.local.php';
+    if (is_readable($path)) {
+        return (array) include $path;
+    }
+    return [
+        'API_BASE'      => getenv('KND_API_BASE') ?: 'https://kndstore.com',
+        'WORKER_TOKEN'  => getenv('KND_WORKER_TOKEN') ?: '',
+        'COMFYUI_BASE'  => getenv('COMFYUI_BASE_URL') ?: 'https://comfy.kndstore.com',
+        'COMFYUI_TOKEN' => getenv('COMFYUI_TOKEN') ?: '',
+    ];
+}
 
 function logWorker(string $msg): void {
     $ts = date('Y-m-d H:i:s');
     echo "[$ts] $msg\n";
 }
 
-$pdo = getDBConnection();
-if (!$pdo) {
-    logWorker('ERROR: No database connection');
+function httpPost(string $url, array $headers, array $post = []): array {
+    $ch = curl_init($url);
+    $allHeaders = ['Content-Type: application/x-www-form-urlencoded'];
+    foreach ($headers as $h) $allHeaders[] = $h;
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => http_build_query($post),
+        CURLOPT_HTTPHEADER => $allHeaders,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_CONNECTTIMEOUT => 10,
+    ]);
+    $body = curl_exec($ch);
+    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $err = curl_error($ch);
+    curl_close($ch);
+    if ($err) {
+        return ['ok' => false, 'error' => $err];
+    }
+    $data = json_decode($body, true);
+    return is_array($data) ? $data : ['ok' => false, 'error' => 'Invalid JSON'];
+}
+
+function comfyui_get_history_standalone(string $promptId, string $baseUrl, string $token = ''): ?array {
+    $base = rtrim($baseUrl, '/');
+    $url = $base . '/history/' . urlencode($promptId);
+    $headers = ['Accept: application/json'];
+    if ($token !== '') $headers[] = 'X-KND-TOKEN: ' . $token;
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 10,
+        CURLOPT_HTTPGET => true,
+        CURLOPT_HTTPHEADER => $headers,
+    ]);
+    $body = curl_exec($ch);
+    curl_close($ch);
+    if (!$body) return null;
+    $data = json_decode($body, true);
+    return is_array($data) && isset($data[$promptId]) ? $data[$promptId] : null;
+}
+
+if (empty($cfg['WORKER_TOKEN']) || empty($cfg['API_BASE'])) {
+    logWorker('ERROR: Set API_BASE and WORKER_TOKEN in workers/worker_config.local.php');
     exit(1);
 }
 
+$apiBase = rtrim($cfg['API_BASE'], '/');
+$workerToken = $cfg['WORKER_TOKEN'];
+$comfyBase = rtrim($cfg['COMFYUI_BASE'] ?? 'https://comfy.kndstore.com', '/');
+$comfyToken = $cfg['COMFYUI_TOKEN'] ?? '';
+$headers = ['X-KND-WORKER-TOKEN: ' . $workerToken];
+
 do {
-    // Max 1 job processing at a time - check if current one is done (ComfyUI finished)
-    $stmt = $pdo->query("SELECT id, comfy_prompt_id, provider FROM knd_labs_jobs WHERE status = 'processing' AND finished_at IS NULL LIMIT 1");
-    $proc = $stmt ? $stmt->fetch(PDO::FETCH_ASSOC) : null;
-    if ($proc) {
-        $promptId = $proc['comfy_prompt_id'] ?? '';
-        if ($promptId) {
-            $baseUrl = ($proc['provider'] ?? '') === 'runpod'
-                ? comfyui_get_base_url_runpod($pdo) : comfyui_get_base_url_local($pdo);
-            if (!$baseUrl) $baseUrl = comfyui_get_base_url($pdo, null);
-            $hist = comfyui_get_history($promptId, $baseUrl, comfyui_get_token($pdo));
-            $filename = null;
-            if (is_array($hist['outputs'] ?? null)) {
-                foreach ($hist['outputs'] as $nodeOut) {
-                    if (isset($nodeOut['images']) && is_array($nodeOut['images'])) {
-                        foreach ($nodeOut['images'] as $img) {
-                            if (!empty($img['filename'])) {
-                                $filename = $img['filename'];
-                                break 2;
-                            }
-                        }
-                    }
-                }
-            }
-            if ($filename) {
-                $pid = (int) $proc['id'];
-                $pdo->prepare("UPDATE knd_labs_jobs SET status = 'done', image_url = ?, finished_at = NOW(), updated_at = NOW() WHERE id = ?")
-                    ->execute(['/api/labs/image.php?job_id=' . $pid, $pid]);
-                logWorker("Job $pid: marked done (ComfyUI finished)");
-                continue;
-            }
-        }
-        logWorker('Another job is processing, waiting...');
+    $resp = httpPost($apiBase . '/api/labs/queue/lease.php', $headers, ['worker_id' => $workerId]);
+    if (!$resp['ok']) {
+        logWorker('lease failed: ' . ($resp['error'] ?? 'unknown'));
+        if ($loop) sleep($sleepSec);
+        continue;
+    }
+    $job = $resp['job'] ?? null;
+    if (!$job) {
         if ($loop) {
+            logWorker('No jobs in queue');
             sleep($sleepSec);
             continue;
         }
         exit(0);
     }
 
-    $job = null;
-    try {
-        $pdo->beginTransaction();
-        $stmt = $pdo->query(
-            "SELECT id, user_id, tool, prompt, negative_prompt, payload_json, provider, attempts
-             FROM knd_labs_jobs
-             WHERE status = 'queued'
-             ORDER BY priority ASC, created_at ASC
-             LIMIT 1
-             FOR UPDATE SKIP LOCKED"
-        );
-        $job = $stmt ? $stmt->fetch(PDO::FETCH_ASSOC) : null;
-        if (!$job) {
-            $pdo->rollBack();
-            if ($loop) {
-                logWorker('No jobs in queue');
-                sleep($sleepSec);
-                continue;
-            }
-            exit(0);
-        }
+    $jobId = (int) $job['id'];
+    $payload = $job['payload'] ?? [];
+    $tool = $payload['tool'] ?? 'text2img';
+    $attempts = (int) ($job['attempts'] ?? 1);
 
-        $jobId = (int) $job['id'];
-        $attempts = (int) ($job['attempts'] ?? 0) + 1;
-
-        $pdo->prepare(
-            "UPDATE knd_labs_jobs SET
-               status = 'processing',
-               locked_at = NOW(),
-               locked_by = ?,
-               started_at = IFNULL(started_at, NOW()),
-               attempts = ?,
-               updated_at = NOW()
-             WHERE id = ?"
-        )->execute([$workerId, $attempts, $jobId]);
-
-        $pdo->commit();
-    } catch (\Throwable $e) {
-        $pdo->rollBack();
-        logWorker('ERROR picking job: ' . $e->getMessage());
-        if ($loop) sleep($sleepSec);
+    if (empty($payload)) {
+        httpPost($apiBase . '/api/labs/queue/fail.php', $headers, [
+            'job_id' => $jobId,
+            'error_message' => 'Invalid payload',
+        ]);
+        logWorker("Job $jobId: invalid payload");
+        if (!$loop) break;
         continue;
     }
 
-    $payload = json_decode($job['payload_json'] ?? '{}', true);
-    if (!is_array($payload)) {
-        $pdo->prepare("UPDATE knd_labs_jobs SET status = 'failed', error_message = ?, finished_at = NOW(), updated_at = NOW() WHERE id = ?")
-            ->execute(['Invalid payload', $jobId]);
-        logWorker("Job $jobId: invalid payload");
-        if ($loop) continue;
-        exit(0);
-    }
-
-    $baseUrl = null;
-    $provider = $job['provider'] ?? null;
-    if ($provider === 'runpod') {
-        $baseUrl = comfyui_get_base_url_runpod($pdo);
-    } else {
-        $baseUrl = comfyui_get_base_url_local($pdo);
-    }
-    if (!$baseUrl) {
-        $baseUrl = comfyui_get_base_url($pdo, null);
-    }
-    $token = comfyui_get_token($pdo);
-
-    $tool = $payload['tool'] ?? 'text2img';
     $model = $payload['model'] ?? 'v1_5';
     $refinerEnabled = !empty($payload['refiner_enabled']);
     $overrideCkpt = $payload['override_ckpt'] ?? null;
@@ -145,24 +131,71 @@ do {
     try {
         $workflow = comfyui_inject_workflow($payload, $tool);
         comfyui_apply_checkpoint($workflow, $model, $refinerEnabled, $overrideCkpt);
-        $result = comfyui_run_prompt($workflow, $baseUrl, $token);
+        $result = comfyui_run_prompt($workflow, $comfyBase, $comfyToken);
         $promptId = $result['prompt_id'];
-
-        $pdo->prepare("UPDATE knd_labs_jobs SET comfy_prompt_id = ?, updated_at = NOW() WHERE id = ?")
-            ->execute([$promptId, $jobId]);
-
-        logWorker("Job $jobId: enqueued to ComfyUI, prompt_id=$promptId");
     } catch (\Throwable $e) {
-        $errMsg = $e->getMessage();
-        logWorker("Job $jobId failed: $errMsg");
+        logWorker("Job $jobId ComfyUI send failed: " . $e->getMessage());
+        httpPost($apiBase . '/api/labs/queue/fail.php', $headers, [
+            'job_id' => $jobId,
+            'error_message' => $e->getMessage(),
+        ]);
+        if (!$loop) break;
+        sleep($sleepSec);
+        continue;
+    }
 
-        if ($attempts >= 3) {
-            $pdo->prepare("UPDATE knd_labs_jobs SET status = 'failed', error_message = ?, finished_at = NOW(), updated_at = NOW() WHERE id = ?")
-                ->execute([$errMsg, $jobId]);
-        } else {
-            $pdo->prepare("UPDATE knd_labs_jobs SET status = 'queued', locked_at = NULL, locked_by = NULL, updated_at = NOW() WHERE id = ?")
-                ->execute([$jobId]);
+    logWorker("Job $jobId: ComfyUI prompt_id=$promptId, polling...");
+    $maxPoll = 120;
+    $pollInterval = 2;
+    $imageUrl = null;
+    $pollError = null;
+    for ($i = 0; $i < $maxPoll; $i++) {
+        sleep($pollInterval);
+        $hist = comfyui_get_history_standalone($promptId, $comfyBase, $comfyToken);
+        if (!$hist) continue;
+        if (isset($hist['status']['status_str']) && $hist['status']['status_str'] === 'error') {
+            $err = $hist['status']['messages'] ?? 'ComfyUI error';
+            $pollError = is_string($err) ? $err : json_encode($err);
+            break;
         }
+        if (isset($hist['outputs']) && is_array($hist['outputs'])) {
+            foreach ($hist['outputs'] as $nodeOut) {
+                if (isset($nodeOut['images']) && is_array($nodeOut['images'])) {
+                    foreach ($nodeOut['images'] as $img) {
+                        if (!empty($img['filename'])) {
+                            $imageUrl = '/api/labs/image.php?job_id=' . $jobId;
+                            break 3;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if ($pollError) {
+        httpPost($apiBase . '/api/labs/queue/fail.php', $headers, [
+            'job_id' => $jobId,
+            'error_message' => $pollError,
+        ]);
+        logWorker("Job $jobId failed: $pollError");
+    } elseif ($imageUrl) {
+        $r = httpPost($apiBase . '/api/labs/queue/complete.php', $headers, [
+            'job_id' => $jobId,
+            'comfy_prompt_id' => $promptId,
+            'image_url' => $imageUrl,
+        ]);
+        if ($r['ok']) {
+            logWorker("Job $jobId: done");
+        } else {
+            logWorker("Job $jobId complete failed: " . ($r['error'] ?? ''));
+        }
+    } elseif (!$pollError) {
+        $errMsg = 'ComfyUI timeout: no image after ' . ($maxPoll * $pollInterval) . 's';
+        httpPost($apiBase . '/api/labs/queue/fail.php', $headers, [
+            'job_id' => $jobId,
+            'error_message' => $errMsg,
+        ]);
+        logWorker("Job $jobId: $errMsg");
     }
 
     if (!$loop) break;

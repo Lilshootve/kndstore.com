@@ -1,56 +1,76 @@
-# KND Labs Worker - Ejecución en Windows
+# KND Labs Worker - Ejecución en Windows (HTTP Mode)
 
-El worker procesa los jobs en cola y envía prompts a ComfyUI (local o RunPod).
+El worker procesa los jobs en cola **sin conexión MySQL directa**. Usa la API HTTP (lease/complete/fail) en Hostinger.
 
 ## Requisitos
 
-- PHP CLI (con extensions: pdo_mysql, curl, json)
-- Acceso a MySQL (remoto, p.ej. Hostinger)
-- ComfyUI accesible (localhost o RunPod según provider)
+- PHP CLI (extensiones: **curl**, json) — **no necesita pdo_mysql**
+- ComfyUI accesible (https://comfy.kndstore.com o 127.0.0.1:8188)
+
+## Configuración
+
+### 1. Token en el servidor (Hostinger)
+
+Crea `config/worker_secrets.local.php` (copia de `config/worker_secrets.local.example.php`):
+
+```php
+<?php
+return [
+    'WORKER_TOKEN' => 'tu_token_seguro_minimo_32_caracteres',
+];
+```
+
+Este archivo **no se sube a Git**. Genera un token aleatorio, p.ej.:
+`php -r "echo bin2hex(random_bytes(24));"`
+
+### 2. Config en tu PC (Windows)
+
+Crea `workers/worker_config.local.php` (copia de `workers/worker_config.local.example.php`):
+
+```php
+<?php
+return [
+    'API_BASE'       => 'https://kndstore.com',
+    'WORKER_TOKEN'   => 'el_mismo_token_que_worker_secrets',
+    'COMFYUI_BASE'   => 'https://comfy.kndstore.com',   // o http://127.0.0.1:8188
+    'COMFYUI_TOKEN'  => '',   // X-KND-TOKEN si ComfyUI lo usa
+];
+```
+
+**IMPORTANTE**: `WORKER_TOKEN` debe coincidir exactamente con el de `worker_secrets.local.php` en el servidor.
 
 ## Uso
 
 ```bash
-# Un solo job (single-run)
+# Un solo job
 php workers/labs_worker.php
 
-# Loop continuo (recomendado para Task Scheduler)
+# Loop continuo (Task Scheduler)
 php workers/labs_worker.php --loop --sleep=2 --worker-id=PC1
 ```
 
-- `--loop` : Ejecutar en bucle hasta que lo detengas
-- `--sleep=N` : Segundos entre iteraciones (default: 2)
-- `--worker-id=ID` : Identificador del worker (default: hostname)
+- `--loop`: ejecutar en bucle
+- `--sleep=N`: segundos entre iteraciones (default: 2)
+- `--worker-id=ID`: identificador del worker
 
 ## Task Scheduler (Windows)
 
-1. Abre **Task Scheduler** (Programador de tareas)
-2. Crear tarea básica o tarea…
-3. **Trigger**:
-   - Al iniciar sesión, o
-   - Al iniciar el equipo + Repetir cada 1 minuto (opcional si usas un .bat con loop)
-4. **Acción**: Iniciar un programa
-   - Programa: `php.exe` (ruta completa, p.ej. `C:\php\php.exe`)
+1. **Programador de tareas** → Crear tarea
+2. **Trigger**: Al iniciar sesión (o Repetir cada 1 min)
+3. **Acción**:
+   - Programa: `C:\php\php.exe`
    - Argumentos: `C:\ruta\kndstore\workers\labs_worker.php --loop --sleep=2 --worker-id=PC1`
    - Iniciar en: `C:\ruta\kndstore`
 
-## Alternativa: .bat con loop
+## Flujo HTTP
 
-Crea `workers/run_labs_worker.bat`:
-
-```batch
-@echo off
-cd /d "%~dp0.."
-:loop
-php workers/labs_worker.php --loop --sleep=2 --worker-id=PC1
-timeout /t 5
-goto loop
-```
-
-Ejecuta el .bat manualmente o desde Task Scheduler (acción: iniciar el .bat).
+1. **lease.php** — toma 1 job queued, lo pasa a processing
+2. Worker envía prompt a ComfyUI local
+3. Poll `/history/{prompt_id}` hasta imagen lista
+4. **complete.php** o **fail.php** según resultado
 
 ## Notas
 
-- **Máx. 1 job en processing** a la vez: el worker no toma otro job hasta que el actual esté en cola de ComfyUI.
-- **Reintentos**: 3 intentos; tras 3 fallos el job pasa a `failed`.
-- **MySQL 8.0+** recomendado por `FOR UPDATE SKIP LOCKED`; en 5.7 fallará (quitar `SKIP LOCKED` si es necesario).
+- Límite 2 jobs activos por usuario (generate.php en Hostinger)
+- 3 intentos por job; tras 3 fallos → `failed`
+- El worker solo usa HTTP; no necesita MySQL en tu PC
