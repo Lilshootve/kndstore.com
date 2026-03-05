@@ -255,7 +255,23 @@ function comfyui_normalize_upscale_model(string $modelName): string {
 }
 
 /**
+ * Validate workflow: every node must have inputs as object/dict, never a list.
+ * Throws on invalid structure (non-empty list inputs); empty list is normalized in strip_meta.
+ */
+function comfyui_validate_workflow_inputs(array $workflow): void {
+    foreach ($workflow as $nid => $node) {
+        if (!is_array($node)) continue;
+        $inputs = $node['inputs'] ?? [];
+        if (!is_array($inputs)) continue;
+        if (array_is_list($inputs) && !empty($inputs)) {
+            throw new \InvalidArgumentException('Workflow validation failed: node ' . $nid . ' has inputs as list (ComfyUI requires object).');
+        }
+    }
+}
+
+/**
  * Strip _meta, normalize UpscaleModelLoader model_name (RealESRGAN -> 4x-UltraSharp).
+ * Ensures every node.inputs is an associative object (never list) for ComfyUI compatibility.
  */
 function comfyui_strip_meta(array $workflow): array {
     $out = [];
@@ -266,7 +282,16 @@ function comfyui_strip_meta(array $workflow): array {
         }
         $ctype = $node['class_type'] ?? '';
         $inputs = $node['inputs'] ?? [];
-        if ($ctype === 'UpscaleModelLoader' && isset($inputs['model_name'])) {
+        if (!is_array($inputs)) {
+            $inputs = [];
+        }
+        if (array_is_list($inputs)) {
+            if (!empty($inputs)) {
+                throw new \InvalidArgumentException('Workflow validation failed: node ' . $nid . ' has inputs as list (ComfyUI requires object).');
+            }
+            $inputs = (object) [];
+        }
+        if ($ctype === 'UpscaleModelLoader' && is_array($inputs) && isset($inputs['model_name'])) {
             $inputs['model_name'] = comfyui_normalize_upscale_model((string) $inputs['model_name']);
         }
         $out[$nid] = ['class_type' => $ctype, 'inputs' => $inputs];
@@ -293,6 +318,7 @@ function comfyui_run_prompt(array $workflow, ?string $baseUrl = null, string $to
     if ($base === '') throw new \RuntimeException('ComfyUI config not found');
 
     $url = $base . '/prompt';
+    comfyui_validate_workflow_inputs($workflow);
     $workflowClean = comfyui_strip_meta($workflow);
     $payload = [
         'prompt' => $workflowClean,
