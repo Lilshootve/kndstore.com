@@ -51,7 +51,6 @@ function generateFooter() {
     $footer .= '                            <h5 class="mb-4 mt-4">' . t('footer.tools.title', 'Tools') . '</h5>' . "\n";
     $footer .= '                            <ul class="list-unstyled">' . "\n";
     $footer .= '                                <li class="mb-3"><a href="/labs" class="text-decoration-none" style="opacity: 0.8;"><i class="fas fa-microscope me-2" style="color: var(--knd-neon-blue);"></i>' . t('footer.tools.knd_labs', 'KND Labs') . '</a></li>' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="/ai-tools.php" class="text-decoration-none" style="opacity: 0.8;"><i class="fas fa-magic me-2" style="color: var(--knd-neon-blue);"></i>' . t('footer.tools.ai_creator', 'AI Asset Creator') . '</a></li>' . "\n";
     $footer .= '                                <li class="mb-3"><a href="/triposr-3d.php" class="text-decoration-none" style="opacity: 0.8;"><i class="fas fa-cube me-2" style="color: var(--knd-neon-blue);"></i>' . t('footer.tools.triposr_3d', 'Image → 3D') . '</a></li>' . "\n";
     $footer .= '                            </ul>' . "\n";
     $footer .= '                        </div>' . "\n";
