@@ -71,6 +71,45 @@ function httpPost(string $url, array $headers, array $post = []): array {
     return is_array($data) ? $data : ['ok' => false, 'error' => 'Invalid JSON'];
 }
 
+function workerDownloadFile(string $url, array $headers): ?string {
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT => 60,
+        CURLOPT_HTTPGET => true,
+        CURLOPT_HTTPHEADER => $headers,
+    ]);
+    $body = curl_exec($ch);
+    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    return ($body !== false && $code >= 200 && $code < 300) ? $body : null;
+}
+
+function workerUploadToComfyui(string $filePath, string $baseUrl, string $token = ''): string {
+    $mime = mime_content_type($filePath) ?: 'image/png';
+    $cfile = new \CURLFile($filePath, $mime, basename($filePath));
+    $url = rtrim($baseUrl, '/') . '/upload/image';
+    $headers = ['Content-Type: multipart/form-data'];
+    if ($token !== '') $headers[] = 'X-KND-TOKEN: ' . $token;
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => ['image' => $cfile],
+        CURLOPT_HTTPHEADER => $headers,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 60,
+    ]);
+    $body = curl_exec($ch);
+    $err = curl_error($ch);
+    curl_close($ch);
+    if ($err) throw new \RuntimeException('ComfyUI upload failed: ' . $err);
+    $data = json_decode($body, true);
+    if (empty($data['name'])) throw new \RuntimeException('ComfyUI upload: no filename');
+    return $data['name'];
+}
+
 function comfyui_get_history_standalone(string $promptId, string $baseUrl, string $token = ''): ?array {
     $base = rtrim($baseUrl, '/');
     $url = $base . '/history/' . urlencode($promptId);
@@ -138,6 +177,43 @@ do {
     $model = $payload['model'] ?? 'v1_5';
     $refinerEnabled = !empty($payload['refiner_enabled']);
     $overrideCkpt = $payload['override_ckpt'] ?? null;
+
+    if ($tool === 'upscale' && !empty($payload['image_url'])) {
+        $imgData = workerDownloadFile($payload['image_url'], $headers);
+        if (!$imgData) {
+            httpPost($apiBase . '/api/labs/queue/fail.php', $headers, [
+                'job_id' => $jobId,
+                'error_message' => 'Could not download source image',
+                'no_retry' => '1',
+            ]);
+            logWorker("Job $jobId: download failed");
+            if (!$loop) break;
+            sleep($sleepSec);
+            continue;
+        }
+        $tmpFile = tempnam(sys_get_temp_dir(), 'knd_up');
+        if (!$tmpFile || file_put_contents($tmpFile, $imgData) === false) {
+            if ($tmpFile) @unlink($tmpFile);
+            httpPost($apiBase . '/api/labs/queue/fail.php', $headers, [
+                'job_id' => $jobId,
+                'error_message' => 'Could not save temp image',
+                'no_retry' => '1',
+            ]);
+            logWorker("Job $jobId: temp save failed");
+            if (!$loop) break;
+            sleep($sleepSec);
+            continue;
+        }
+        try {
+            $payload['image_filename'] = workerUploadToComfyui($tmpFile, $comfyBase, $comfyToken);
+        } finally {
+            @unlink($tmpFile);
+        }
+        $payload['job_id'] = $jobId;
+    }
+    if ($tool === 'upscale' && !isset($payload['job_id'])) {
+        $payload['job_id'] = $jobId;
+    }
 
     try {
         $workflow = comfyui_inject_workflow($payload, $tool);

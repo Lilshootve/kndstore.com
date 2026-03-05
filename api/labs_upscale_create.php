@@ -2,7 +2,8 @@
 /**
  * POST /api/labs_upscale_create.php
  * Create upscale job. source_type: upload | recent
- * Uploads image to ComfyUI via HTTP (no shared filesystem).
+ * Stores image on Hostinger. Worker downloads and uploads to ComfyUI.
+ * No Hostinger->ComfyUI HTTP calls.
  */
 header('Cache-Control: no-store, no-cache');
 header('Content-Type: application/json');
@@ -14,6 +15,7 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/support_credits.php';
 require_once __DIR__ . '/../includes/ai.php';
 require_once __DIR__ . '/../includes/json.php';
+require_once __DIR__ . '/../includes/storage.php';
 require_once __DIR__ . '/../includes/comfyui.php';
 require_once __DIR__ . '/../includes/comfyui_provider.php';
 require_once __DIR__ . '/../includes/settings.php';
@@ -22,6 +24,7 @@ require_once __DIR__ . '/../includes/labs_image_helper.php';
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5MB
 const MAX_DIMENSION = 2048;
 const UPSCALE_COST_KP = 5;
+const LABS_TMP_DIR = 'uploads/labs/tmp';
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -65,31 +68,14 @@ try {
             json_error('INVALID_IMAGE', $valid['error'] ?? 'Invalid image.', 400);
         }
     } else {
-        $sourceJobId = (int) ($_POST['source_job_id'] ?? 0);
-        if ($sourceJobId <= 0) json_error('INVALID_INPUT', 'source_job_id required for recent.', 400);
-        $bytes = comfyui_fetch_job_image_bytes($pdo, $sourceJobId, $userId);
-        if (!$bytes) json_error('INVALID_SOURCE', 'Could not fetch source image.', 400);
-        $tmpPath = tempnam(sys_get_temp_dir(), 'knd_up');
-        if (!$tmpPath || file_put_contents($tmpPath, $bytes) === false) {
-            if ($tmpPath) @unlink($tmpPath);
-            json_error('INTERNAL_ERROR', 'Temp file error.', 500);
-        }
-        $valid = labs_validate_image($tmpPath, MAX_UPLOAD_BYTES, MAX_DIMENSION);
-        if (!$valid['ok']) {
-            if ($tmpPath) @unlink($tmpPath);
-            json_error('INVALID_IMAGE', $valid['error'] ?? 'Invalid image.', 400);
-        }
+        json_error('UNSUPPORTED', 'source_type=recent not supported (no Hostinger->ComfyUI). Use upload.', 400);
     }
 
+    $providerUsed = 'local';
     $runpodUrl = comfyui_get_base_url_runpod($pdo);
     $baseUrl = comfyui_get_base_url($pdo, null);
-    $token = comfyui_get_token($pdo);
-    $providerUsed = ($runpodUrl !== '' && rtrim($baseUrl, '/') === rtrim($runpodUrl, '/')) ? 'runpod' : 'local';
-
-    try {
-        $imageFilename = comfyui_upload_image($tmpPath, $baseUrl, $token);
-    } finally {
-        if ($tmpPath && $sourceType === 'recent') @unlink($tmpPath);
+    if ($runpodUrl !== '' && rtrim($baseUrl, '/') === rtrim($runpodUrl, '/')) {
+        $providerUsed = 'runpod';
     }
 
     $pdo->beginTransaction();
@@ -97,17 +83,30 @@ try {
         "INSERT INTO knd_labs_jobs (user_id, tool, prompt, negative_prompt, status, cost_kp, quality, provider, priority, payload_json)
          VALUES (?, 'upscale', '', '', 'queued', ?, '4x', ?, 100, ?)"
     );
-    $jobId = 0;
     if (!$stmt || !$stmt->execute([$userId, UPSCALE_COST_KP, $providerUsed, '{}'])) {
         $pdo->rollBack();
         json_error('DB_ERROR', 'Could not create job.', 500);
     }
     $jobId = (int) $pdo->lastInsertId();
 
+    $tmpDir = storage_path(LABS_TMP_DIR);
+    if (!is_dir($tmpDir)) @mkdir($tmpDir, 0755, true);
+    $filename = 'job_' . $jobId . '_input.png';
+    $storedPath = LABS_TMP_DIR . '/' . $filename;
+    $fullPath = storage_path($storedPath);
+
+    if (!labs_image_to_png($tmpPath, $fullPath)) {
+        $pdo->rollBack();
+        if ($tmpPath && $sourceType === 'recent') @unlink($tmpPath);
+        json_error('INTERNAL_ERROR', 'Could not store image.', 500);
+    }
+    if ($tmpPath && $sourceType === 'recent') @unlink($tmpPath);
+
+    $imageUrl = rtrim(defined('SITE_URL') ? SITE_URL : 'https://kndstore.com', '/') . '/api/labs/tmp_image.php?job_id=' . $jobId;
     $payload = [
         'tool' => 'upscale',
-        'image_filename' => $imageFilename,
         'job_id' => $jobId,
+        'image_url' => $imageUrl,
     ];
     $stmt = $pdo->prepare("UPDATE knd_labs_jobs SET payload_json = ? WHERE id = ?");
     $stmt->execute([json_encode($payload), $jobId]);
@@ -118,6 +117,6 @@ try {
     json_success(['job_id' => (string) $jobId]);
 } catch (\Throwable $e) {
     if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
-    error_log('api/labs_upscale_create: ' . $e->getMessage());
+    error_log('api/labs/upscale_create: ' . $e->getMessage());
     json_error('INTERNAL_ERROR', $e->getMessage(), 500);
 }
