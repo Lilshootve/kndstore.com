@@ -3,6 +3,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 header('Expires: 0');
 
+try {
 require_once __DIR__ . '/includes/session.php';
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/auth.php';
@@ -21,7 +22,11 @@ if ($pdo) {
     release_available_points_if_due($pdo, $userId);
     expire_points_if_due($pdo, $userId);
     $balance = get_available_points($pdo, $userId);
-    $recentJobs = ai_get_recent_jobs($pdo, $userId, 5);
+    try {
+        $recentJobs = ai_get_recent_jobs($pdo, $userId, 5);
+    } catch (\Throwable $e) {
+        $recentJobs = [];
+    }
 }
 
 $aiCss = __DIR__ . '/assets/css/ai-tools.css';
@@ -194,3 +199,7 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
 <script src="/assets/js/navigation-extend.js"></script>
 <?php echo generateFooter(); ?>
 <?php echo generateScripts(); ?>
+<?php } catch (\Throwable $e) {
+    if (!headers_sent()) header('Content-Type: text/html; charset=utf-8');
+    echo '<h1>KND Labs - Error</h1><p>' . htmlspecialchars($e->getMessage()) . '</p><p><a href="/">Volver al inicio</a></p>';
+} ?>

@@ -134,17 +134,21 @@ function ai_get_job(PDO $pdo, string $jobUuid): ?array {
  * @return array<int, array{job_uuid: string, job_type: string, status: string, cost_kp: int, created_at: string}>
  */
 function ai_get_recent_jobs(PDO $pdo, int $userId, int $limit = 5): array {
-    $stmt = $pdo->prepare(
-        "SELECT job_uuid, job_type, status, cost_kp, created_at
-         FROM triposr_jobs WHERE user_id = ? ORDER BY created_at DESC LIMIT ?"
-    );
-    if (!$stmt || !$stmt->execute([$userId, $limit])) return [];
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($rows as &$r) {
-        $r['job_type'] = $r['job_type'] ?? 'img23d';
-        $r['cost_kp'] = (int) ($r['cost_kp'] ?? 0);
+    try {
+        $stmt = $pdo->prepare(
+            "SELECT job_uuid, COALESCE(job_type,'img23d') as job_type, status, COALESCE(cost_kp,0) as cost_kp, created_at
+             FROM triposr_jobs WHERE user_id = ? ORDER BY created_at DESC LIMIT ?"
+        );
+        if (!$stmt || !$stmt->execute([$userId, $limit])) return [];
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($rows as &$r) {
+            $r['job_type'] = $r['job_type'] ?? 'img23d';
+            $r['cost_kp'] = (int) ($r['cost_kp'] ?? 0);
+        }
+        return $rows;
+    } catch (\Throwable $e) {
+        return [];
     }
-    return $rows;
 }
 
 /**
