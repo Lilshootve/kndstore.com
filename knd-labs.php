@@ -18,13 +18,17 @@ require_login();
 $pdo = getDBConnection();
 $balance = 0;
 $recentJobs = [];
+$labsRecentPrivate = false;
 if ($pdo) {
     $userId = current_user_id();
     release_available_points_if_due($pdo, $userId);
     expire_points_if_due($pdo, $userId);
     $balance = get_available_points($pdo, $userId);
+    $labsRecentPrivate = comfyui_user_prefers_private_recent($pdo, $userId);
     try {
-        $recentJobs = comfyui_get_user_jobs($pdo, $userId, 8);
+        $recentJobs = $labsRecentPrivate
+            ? comfyui_get_user_jobs($pdo, $userId, 8)
+            : comfyui_get_recent_jobs_public($pdo, 24);
     } catch (\Throwable $e) {
         $recentJobs = [];
     }
@@ -142,15 +146,21 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
     </div>
 
     <!-- Recent Jobs -->
-    <div class="glass-card-neon p-4 mb-5">
-      <div class="d-flex align-items-center justify-content-between mb-3">
+    <div class="glass-card-neon p-4 mb-5" id="labs-recent-section">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
         <h3 class="mb-0" style="font-size:1.15rem;"><i class="fas fa-history me-2" style="color:var(--knd-neon-blue);"></i><?php echo t('labs.recent_jobs', 'Recent Jobs'); ?></h3>
-        <a href="/labs-jobs.php" class="btn btn-outline-neon btn-sm"><?php echo t('labs.view_all_jobs', 'View All Jobs'); ?></a>
+        <div class="d-flex align-items-center gap-2">
+          <label class="d-flex align-items-center gap-2 text-white-50 small mb-0">
+            <input type="checkbox" id="labs-recent-private" <?php echo $labsRecentPrivate ? 'checked' : ''; ?>>
+            <?php echo t('labs.show_only_mine', 'Only my jobs'); ?>
+          </label>
+          <a href="/labs-jobs.php" class="btn btn-outline-neon btn-sm"><?php echo t('labs.view_all_jobs', 'View All Jobs'); ?></a>
+        </div>
       </div>
       <?php if (empty($recentJobs)): ?>
-      <p class="text-white-50 small mb-0"><?php echo t('labs.no_recent_jobs', 'No jobs yet. Start with any tool above.'); ?></p>
+      <p class="text-white-50 small mb-0" id="labs-recent-empty"><?php echo $labsRecentPrivate ? t('labs.no_recent_jobs', 'No jobs yet. Start with any tool above.') : t('labs.no_public_jobs', 'No public creations yet. Be the first!'); ?></p>
       <?php else: ?>
-      <div class="row g-3">
+      <div class="row g-3" id="labs-recent-grid">
         <?php foreach ($recentJobs as $j):
           $status = $j['status'] ?? 'pending';
           $statusClass = $status === 'done' ? 'success' : ($status === 'failed' ? 'danger' : 'warning');
@@ -196,6 +206,21 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
 </section>
 
 <script src="/assets/js/navigation-extend.js"></script>
+<script>
+(function() {
+  var cb = document.getElementById('labs-recent-private');
+  if (!cb) return;
+  cb.addEventListener('change', function() {
+    var fd = new FormData();
+    fd.set('private', cb.checked ? '1' : '0');
+    fetch('/api/labs/preference.php', { method: 'POST', body: fd, credentials: 'same-origin' })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.ok) location.reload();
+      });
+  });
+})();
+</script>
 <?php echo generateFooter(); ?>
 <?php echo generateScripts(); ?>
 <?php } catch (\Throwable $e) {

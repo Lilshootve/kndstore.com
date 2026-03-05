@@ -500,6 +500,8 @@ return [
     'labs.recent_jobs' => 'Trabajos recientes',
     'labs.view_all_jobs' => 'Ver todos los trabajos',
     'labs.no_recent_jobs' => 'Sin trabajos aún. Usa cualquier herramienta arriba.',
+    'labs.no_public_jobs' => 'Aún no hay creaciones públicas. ¡Sé el primero!',
+    'labs.show_only_mine' => 'Solo mis trabajos',
     'labs.job_tool' => 'Herramienta',
     'labs.job_status' => 'Estado',
     'labs.job_cost' => 'Costo',

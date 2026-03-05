@@ -579,6 +579,8 @@ return [
     'labs.recent_jobs' => 'Recent Jobs',
     'labs.view_all_jobs' => 'View All Jobs',
     'labs.no_recent_jobs' => 'No jobs yet. Start with any tool above.',
+    'labs.no_public_jobs' => 'No public creations yet. Be the first!',
+    'labs.show_only_mine' => 'Only my jobs',
     'labs.job_tool' => 'Tool',
     'labs.job_status' => 'Status',
     'labs.job_cost' => 'Cost',

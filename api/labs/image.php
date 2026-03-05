@@ -20,8 +20,16 @@ try {
     $pdo = getDBConnection();
     if (!$pdo) json_error('DB_CONNECTION_FAILED', 'Database connection failed.', 500);
 
-    $stmt = $pdo->prepare("SELECT * FROM knd_labs_jobs WHERE id = ? AND user_id = ? LIMIT 1");
-    $stmt->execute([$jobId, current_user_id()]);
+    $currentUserId = current_user_id();
+    $stmt = $pdo->prepare(
+        "SELECT j.* FROM knd_labs_jobs j
+         LEFT JOIN users u ON j.user_id = u.id
+         WHERE j.id = ? AND (
+           j.user_id = ? OR
+           (j.status = 'done' AND COALESCE(u.labs_recent_private, 0) = 0)
+         ) LIMIT 1"
+    );
+    $stmt->execute([$jobId, $currentUserId]);
     $job = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$job) json_error('JOB_NOT_FOUND', 'Job not found.', 404);
 

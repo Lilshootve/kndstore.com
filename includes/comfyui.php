@@ -232,3 +232,38 @@ function comfyui_get_user_jobs(PDO $pdo, int $userId, int $limit = 20): array {
     if (!$stmt || !$stmt->execute([$userId])) return [];
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+/**
+ * Get user's labs_recent_private preference (0=public, 1=private).
+ * Returns false (public) if column missing or error.
+ */
+function comfyui_user_prefers_private_recent(PDO $pdo, int $userId): bool {
+    try {
+        $stmt = $pdo->prepare("SELECT COALESCE(labs_recent_private, 0) FROM users WHERE id = ? LIMIT 1");
+        if (!$stmt || !$stmt->execute([$userId])) return false;
+        return (int) $stmt->fetchColumn() === 1;
+    } catch (\Throwable $e) {
+        return false;
+    }
+}
+
+/**
+ * Get recent ComfyUI jobs from all users (public catalog).
+ * Only includes done jobs from users with labs_recent_private = 0.
+ */
+function comfyui_get_recent_jobs_public(PDO $pdo, int $limit = 24): array {
+    try {
+        $limit = max(1, min(50, (int) $limit));
+        $stmt = $pdo->prepare(
+            "SELECT j.id, j.tool, j.prompt, j.status, j.image_url, j.cost_kp, j.created_at, j.user_id
+             FROM knd_labs_jobs j
+             INNER JOIN users u ON j.user_id = u.id
+             WHERE j.status = 'done' AND COALESCE(u.labs_recent_private, 0) = 0
+             ORDER BY j.created_at DESC LIMIT {$limit}"
+        );
+        if (!$stmt || !$stmt->execute()) return [];
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (\Throwable $e) {
+        return [];
+    }
+}
