@@ -135,11 +135,12 @@ function ai_get_job(PDO $pdo, string $jobUuid): ?array {
  */
 function ai_get_recent_jobs(PDO $pdo, int $userId, int $limit = 5): array {
     try {
+        $limit = (int) max(1, min(100, $limit));
         $stmt = $pdo->prepare(
             "SELECT job_uuid, COALESCE(job_type,'img23d') as job_type, status, COALESCE(cost_kp,0) as cost_kp, created_at
-             FROM triposr_jobs WHERE user_id = ? ORDER BY created_at DESC LIMIT ?"
+             FROM triposr_jobs WHERE user_id = ? ORDER BY created_at DESC LIMIT {$limit}"
         );
-        if (!$stmt || !$stmt->execute([$userId, $limit])) return [];
+        if (!$stmt || !$stmt->execute([$userId])) return [];
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         foreach ($rows as &$r) {
             $r['job_type'] = $r['job_type'] ?? 'img23d';
@@ -156,11 +157,12 @@ function ai_get_recent_jobs(PDO $pdo, int $userId, int $limit = 5): array {
  * @return array<int, array{job_uuid: string, job_type: string, status: string, cost_kp: int, created_at: string, payload_json: string}>
  */
 function ai_get_jobs_by_type(PDO $pdo, int $userId, string $jobType, int $limit = 10): array {
+    $limit = (int) max(1, min(100, $limit));
     $stmt = $pdo->prepare(
         "SELECT job_uuid, job_type, status, cost_kp, created_at, payload_json
-         FROM triposr_jobs WHERE user_id = ? AND job_type = ? ORDER BY created_at DESC LIMIT ?"
+         FROM triposr_jobs WHERE user_id = ? AND job_type = ? ORDER BY created_at DESC LIMIT {$limit}"
     );
-    if (!$stmt || !$stmt->execute([$userId, $jobType, $limit])) return [];
+    if (!$stmt || !$stmt->execute([$userId, $jobType])) return [];
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
@@ -186,9 +188,9 @@ function ai_list_jobs(PDO $pdo, int $userId, ?string $jobType = null, ?string $s
         $sql .= " AND created_at <= ?";
         $params[] = $dateTo . ' 23:59:59';
     }
-    $sql .= " ORDER BY created_at DESC LIMIT ? OFFSET ?";
-    $params[] = $limit;
-    $params[] = $offset;
+    $limit = (int) max(1, min(500, $limit));
+    $offset = (int) max(0, $offset);
+    $sql .= " ORDER BY created_at DESC LIMIT {$limit} OFFSET {$offset}";
     $stmt = $pdo->prepare($sql);
     if (!$stmt || !$stmt->execute($params)) return [];
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
