@@ -9,6 +9,7 @@ require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/support_credits.php';
 require_once __DIR__ . '/includes/ai.php';
+require_once __DIR__ . '/includes/comfyui.php';
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 
@@ -23,7 +24,7 @@ if ($pdo) {
     expire_points_if_due($pdo, $userId);
     $balance = get_available_points($pdo, $userId);
     try {
-        $recentJobs = ai_get_recent_jobs($pdo, $userId, 5);
+        $recentJobs = comfyui_get_user_jobs($pdo, $userId, 8);
     } catch (\Throwable $e) {
         $recentJobs = [];
     }
@@ -149,41 +150,39 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
       <?php if (empty($recentJobs)): ?>
       <p class="text-white-50 small mb-0"><?php echo t('labs.no_recent_jobs', 'No jobs yet. Start with any tool above.'); ?></p>
       <?php else: ?>
-      <div class="table-responsive">
-        <table class="table table-dark table-sm mb-0">
-          <thead>
-            <tr>
-              <th><?php echo t('labs.job_tool', 'Tool'); ?></th>
-              <th><?php echo t('labs.job_status', 'Status'); ?></th>
-              <th><?php echo t('labs.job_cost', 'Cost'); ?></th>
-              <th><?php echo t('labs.job_created', 'Created'); ?></th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach ($recentJobs as $j):
-              $toolLabel = t('labs.job_type_' . $j['job_type'], $j['job_type']);
-              $statusClass = $j['status'] === 'completed' ? 'success' : ($j['status'] === 'failed' ? 'danger' : 'warning');
-              $created = date('M j, H:i', strtotime($j['created_at']));
-            ?>
-            <tr>
-              <td><i class="fas fa-<?php echo $j['job_type'] === 'text2img' ? 'font' : ($j['job_type'] === 'upscale' ? 'search-plus' : ($j['job_type'] === 'character_create' || $j['job_type'] === 'character_variation' ? 'user-astronaut' : ($j['job_type'] === 'texture_seamless' ? 'border-all' : 'cube'))); ?> me-2 text-white-50"></i><?php echo htmlspecialchars($toolLabel); ?></td>
-              <td><span class="badge bg-<?php echo $statusClass; ?>"><?php echo htmlspecialchars($j['status']); ?></span></td>
-              <td><?php echo (int)$j['cost_kp']; ?> KP</td>
-              <td class="text-white-50 small"><?php echo $created; ?></td>
-              <td>
-                <?php if ($j['status'] === 'completed'): ?>
-                <a href="/api/ai/download.php?job_id=<?php echo urlencode($j['job_uuid']); ?>" class="btn btn-sm btn-success" target="_blank"><i class="fas fa-download"></i></a>
-                <?php elseif (in_array($j['status'], ['pending','processing'], true)): ?>
-                <a href="/labs-job.php?job_id=<?php echo urlencode($j['job_uuid']); ?>" class="btn btn-sm btn-outline-primary"><?php echo t('labs.view', 'View'); ?></a>
-                <?php else: ?>
-                <a href="/labs-job.php?job_id=<?php echo urlencode($j['job_uuid']); ?>" class="btn btn-sm btn-outline-secondary"><?php echo t('labs.view', 'View'); ?></a>
-                <?php endif; ?>
-              </td>
-            </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
+      <div class="row g-3">
+        <?php foreach ($recentJobs as $j):
+          $status = $j['status'] ?? 'pending';
+          $statusClass = $status === 'done' ? 'success' : ($status === 'failed' ? 'danger' : 'warning');
+          $tool = $j['tool'] ?? 'text2img';
+          $toolLabel = $tool === 'text2img' ? (t('ai.text2img.title', 'Text → Image')) : ($tool === 'upscale' ? t('ai.upscale.title', 'Upscale') : t('ai.character.title', 'Character Lab'));
+          $toolIcon = $tool === 'text2img' ? 'font' : ($tool === 'upscale' ? 'search-plus' : 'user-astronaut');
+          $hasImage = ($status === 'done') && !empty($j['image_url']);
+          $imgSrc = $hasImage ? ('/api/labs/image.php?job_id=' . (int)$j['id']) : '';
+          $downloadHref = $hasImage ? ('/api/labs/image.php?job_id=' . (int)$j['id'] . '&download=1') : '#';
+        ?>
+        <div class="col-6 col-md-4 col-lg-3">
+          <div class="labs-recent-job-card rounded overflow-hidden bg-dark" style="border:1px solid rgba(0,212,255,0.2);">
+            <div class="d-flex align-items-center justify-content-center bg-black" style="aspect-ratio:1; min-height:100px;">
+              <?php if ($hasImage): ?>
+              <img src="<?php echo htmlspecialchars($imgSrc); ?>" alt="" class="img-fluid" style="object-fit:cover; width:100%; height:100%;">
+              <?php else: ?>
+              <i class="fas fa-<?php echo $toolIcon; ?> fa-2x text-white-50"></i>
+              <?php endif; ?>
+            </div>
+            <div class="p-2 small">
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
+                <span class="text-white-50"><?php echo date('M j, H:i', strtotime($j['created_at'])); ?></span>
+                <span class="badge bg-<?php echo $statusClass; ?>" style="font-size:.7rem;"><?php echo htmlspecialchars($status); ?></span>
+              </div>
+              <div class="text-white-50" style="font-size:.75rem;"><i class="fas fa-<?php echo $toolIcon; ?> me-1"></i><?php echo htmlspecialchars($toolLabel); ?></div>
+              <?php if ($hasImage): ?>
+              <a href="<?php echo htmlspecialchars($downloadHref); ?>" class="btn btn-sm btn-success w-100 mt-1" download><i class="fas fa-download me-1"></i><?php echo t('ai.download', 'Download'); ?></a>
+              <?php endif; ?>
+            </div>
+          </div>
+        </div>
+        <?php endforeach; ?>
       </div>
       <?php endif; ?>
     </div>

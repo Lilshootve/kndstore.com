@@ -227,7 +227,7 @@ function comfyui_get_history(string $promptId): ?array {
 function comfyui_get_user_jobs(PDO $pdo, int $userId, int $limit = 20): array {
     $limit = max(1, min(50, (int) $limit));
     $stmt = $pdo->prepare(
-        "SELECT id, tool, prompt, status, image_url, created_at FROM knd_labs_jobs WHERE user_id = ? ORDER BY created_at DESC LIMIT {$limit}"
+        "SELECT id, tool, prompt, status, image_url, cost_kp, created_at FROM knd_labs_jobs WHERE user_id = ? ORDER BY created_at DESC LIMIT {$limit}"
     );
     if (!$stmt || !$stmt->execute([$userId])) return [];
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
