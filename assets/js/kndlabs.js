@@ -165,7 +165,16 @@
       var self = this;
       var preview = document.getElementById('labs-result-preview');
       if (preview) {
-        preview.innerHTML = '<div class="ai-spinner"><i class="fas fa-cog fa-spin fa-2x"></i></div><p class="text-white-50 mt-2 mb-0">Processing...</p>';
+        preview.innerHTML = '<div class="labs-processing-anim">' +
+          '<div class="labs-processing-rings">' +
+          '<div class="labs-processing-scan"></div>' +
+          '<div class="labs-processing-ring"></div><div class="labs-processing-ring"></div><div class="labs-processing-ring"></div>' +
+          '<div class="labs-processing-orbit"><div class="labs-processing-dot"></div></div>' +
+          '<div class="labs-processing-core"></div>' +
+          '</div>' +
+          '<div class="labs-processing-bar"><div class="labs-processing-bar-fill"></div></div>' +
+          '<span class="labs-processing-label">Processing...</span>' +
+          '</div>';
       }
 
       fetch(API_GENERATE, {
