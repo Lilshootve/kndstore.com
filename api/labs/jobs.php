@@ -26,15 +26,26 @@ try {
 
     $limit = (int) ($_GET['limit'] ?? 20);
     $limit = max(1, min(50, $limit));
+    $filterProvider = trim($_GET['provider'] ?? '');
+
+    $where = "user_id = ?";
+    $params = [current_user_id()];
+    if ($filterProvider === 'local') {
+        $where .= " AND (provider = 'local' OR provider IS NULL)";
+    } elseif ($filterProvider === 'runpod') {
+        $where .= " AND provider = 'runpod'";
+    } elseif ($filterProvider === 'failed') {
+        $where .= " AND status = 'failed'";
+    }
 
     $stmt = $pdo->prepare(
-        "SELECT id, tool, prompt, status, image_url, created_at
+        "SELECT id, tool, prompt, status, image_url, cost_kp, provider, created_at
          FROM knd_labs_jobs
-         WHERE user_id = ?
+         WHERE {$where}
          ORDER BY created_at DESC
          LIMIT {$limit}"
     );
-    if (!$stmt || !$stmt->execute([current_user_id()])) {
+    if (!$stmt || !$stmt->execute($params)) {
         json_error('DB_ERROR', 'Could not fetch jobs.', 500);
     }
     $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);

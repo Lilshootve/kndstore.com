@@ -138,8 +138,14 @@ try {
         $etaSeconds = $queuePosition * $avgSec;
     }
 
+    $stage = $job['status'];
+    if ($job['status'] === 'processing') {
+        $stage = !empty($job['comfy_prompt_id']) ? 'generating' : 'picked';
+    }
+
     $data = [
         'status' => $job['status'],
+        'stage' => $stage,
         'provider' => $job['provider'] ?? null,
         'queue_position' => $queuePosition,
         'eta_seconds' => $etaSeconds,

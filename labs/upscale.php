@@ -110,6 +110,24 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
   var content = document.getElementById('labs-upscale-content');
   var preview = document.getElementById('labs-upscale-preview');
   var previewImg = document.getElementById('labs-upscale-preview-img');
+  var params = new URLSearchParams(window.location.search);
+  var sourceJobId = params.get('source_job_id');
+  if (sourceJobId) {
+    fetch('/api/labs/image.php?job_id=' + encodeURIComponent(sourceJobId) + '&t=' + Date.now(), { credentials: 'same-origin' })
+      .then(function(r) { return r.blob(); })
+      .then(function(blob) {
+        var f = new File([blob], 'source.png', { type: 'image/png' });
+        var dt = new DataTransfer();
+        dt.items.add(f);
+        if (fileInput) fileInput.files = dt.files;
+        if (previewImg) previewImg.src = URL.createObjectURL(blob);
+        if (preview) preview.style.display = 'block';
+        if (content) content.style.display = 'none';
+        var btn = document.getElementById('labs-submit-btn');
+        if (btn) btn.disabled = false;
+      })
+      .catch(function() {});
+  }
   if (dz) dz.addEventListener('click', function(){ fileInput && fileInput.click(); });
   if (fileInput) fileInput.addEventListener('change', function(){
     var f = this.files[0];
