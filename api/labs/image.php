@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/json.php';
 require_once __DIR__ . '/../../includes/settings.php';
+require_once __DIR__ . '/../../includes/comfyui.php';
 require_once __DIR__ . '/../../includes/comfyui_provider.php';
 
 try {
@@ -35,12 +36,47 @@ try {
     $job = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$job) json_error('JOB_NOT_FOUND', 'Job not found.', 404);
 
-    $imageUrl = $job['image_url'] ?? '';
-    if (!$imageUrl || ($job['status'] ?? '') !== 'done') {
+    if (($job['status'] ?? '') !== 'done') {
         json_error('NO_IMAGE', 'Image not ready.', 409);
     }
 
+    $promptId = $job['comfy_prompt_id'] ?? '';
+    if (!$promptId) json_error('NO_IMAGE', 'No ComfyUI prompt for this job.', 409);
+
+    $baseUrl = null;
+    $provider = $job['provider'] ?? null;
+    if ($provider === 'runpod') {
+        $baseUrl = comfyui_get_base_url_runpod($pdo);
+    } else {
+        $baseUrl = comfyui_get_base_url_local($pdo);
+    }
+    if (!$baseUrl) $baseUrl = comfyui_get_base_url($pdo, null);
     $token = comfyui_get_token($pdo);
+
+    $history = comfyui_get_history($promptId, $baseUrl, $token);
+    $filename = null;
+    $subfolder = '';
+    $imgType = 'output';
+    if (is_array($history['outputs'] ?? null)) {
+        foreach ($history['outputs'] as $nodeOutputs) {
+            if (isset($nodeOutputs['images']) && is_array($nodeOutputs['images'])) {
+                foreach ($nodeOutputs['images'] as $img) {
+                    if (!empty($img['filename'])) {
+                        $filename = $img['filename'];
+                        $subfolder = $img['subfolder'] ?? '';
+                        $imgType = $img['type'] ?? 'output';
+                        break 2;
+                    }
+                }
+            }
+        }
+    }
+    if (!$filename) json_error('FETCH_FAILED', 'Could not resolve image from ComfyUI history.', 502);
+
+    $params = ['filename' => $filename, 'type' => $imgType];
+    if ($subfolder !== '') $params['subfolder'] = $subfolder;
+    $imageUrl = rtrim($baseUrl, '/') . '/view?' . http_build_query($params);
+
     $headers = ['Accept: image/*'];
     if ($token !== '') $headers[] = 'X-KND-TOKEN: ' . $token;
 
@@ -62,7 +98,7 @@ try {
         json_error('FETCH_FAILED', 'Could not fetch image from ComfyUI.', 502);
     }
 
-    $download = isset($_GET['download']) && $_GET['download'] !== '0';
+    $download = isset($_GET['download']) && $_GET['download'] !== '0' && $_GET['download'] !== '';
     $filename = 'knd_labs_' . $jobId . '.png';
 
     header('Content-Type: ' . ($ct ?: 'image/png'));

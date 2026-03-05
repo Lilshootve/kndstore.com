@@ -88,13 +88,9 @@ try {
         }
 
         if ($filename) {
-            $base = rtrim($baseUrl ?: '', '/');
-            $params = ['filename' => $filename, 'type' => $imgType];
-            if ($subfolder !== '') $params['subfolder'] = $subfolder;
+            $imageUrl = '/api/labs/image.php?job_id=' . $jobId;
 
-            $imageUrl = $base ? ($base . '/view?' . http_build_query($params)) : null;
-
-            $stmt2 = $pdo->prepare("UPDATE knd_labs_jobs SET status = 'done', image_url = ?, updated_at = NOW() WHERE id = ?");
+            $stmt2 = $pdo->prepare("UPDATE knd_labs_jobs SET status = 'done', image_url = ?, finished_at = NOW(), updated_at = NOW() WHERE id = ?");
             if ($stmt2) $stmt2->execute([$imageUrl, $jobId]);
 
             $job['status'] = 'done';
@@ -107,7 +103,7 @@ try {
                     $errMsg = $st['messages'] ?? 'ComfyUI error';
                     $errStr = is_string($errMsg) ? $errMsg : json_encode($errMsg);
 
-                    $stmt2 = $pdo->prepare("UPDATE knd_labs_jobs SET status = 'failed', error_message = ?, updated_at = NOW() WHERE id = ?");
+                    $stmt2 = $pdo->prepare("UPDATE knd_labs_jobs SET status = 'failed', error_message = ?, finished_at = NOW(), updated_at = NOW() WHERE id = ?");
                     if ($stmt2) $stmt2->execute([$errStr, $jobId]);
 
                     $job['status'] = 'failed';
@@ -125,8 +121,28 @@ try {
         }
     }
 
+    $avgSeconds = ['text2img' => 60, 'upscale' => 40, 'character' => 45];
+    $avgSec = $avgSeconds[$job['tool'] ?? 'text2img'] ?? 60;
+
+    $queuePosition = null;
+    $etaSeconds = null;
+    if ($job['status'] === 'queued') {
+        $stmtPos = $pdo->prepare(
+            "SELECT COUNT(*) FROM knd_labs_jobs j2
+             JOIN knd_labs_jobs j0 ON j0.id = ?
+             WHERE j2.status = 'queued'
+             AND (j2.priority < j0.priority OR (j2.priority = j0.priority AND j2.created_at <= j0.created_at))"
+        );
+        $stmtPos->execute([$jobId]);
+        $queuePosition = (int) $stmtPos->fetchColumn();
+        $etaSeconds = $queuePosition * $avgSec;
+    }
+
     $data = [
         'status' => $job['status'],
+        'provider' => $job['provider'] ?? null,
+        'queue_position' => $queuePosition,
+        'eta_seconds' => $etaSeconds,
         'image_url' => $job['image_url'] ?? null,
         'error_message' => $job['error_message'] ?? null
     ];

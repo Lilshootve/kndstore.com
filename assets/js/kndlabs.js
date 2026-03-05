@@ -111,7 +111,21 @@
           .then(function(d) {
             if (!d.ok || !d.data) return;
             var st = d.data.status;
-            if (text) text.textContent = st.charAt(0).toUpperCase() + st.slice(1);
+            var msg = st.charAt(0).toUpperCase() + st.slice(1);
+            if (st === 'queued') {
+              var pos = d.data.queue_position;
+              var eta = d.data.eta_seconds;
+              msg = 'En cola';
+              if (typeof pos === 'number') msg += ' (# ' + pos + ')';
+              if (typeof eta === 'number' && eta > 0) {
+                var m = Math.floor(eta / 60);
+                var s = eta % 60;
+                msg += ' ~ETA ' + (m > 0 ? m + 'm ' : '') + s + 's';
+              }
+            } else if (st === 'processing') {
+              msg = 'Generando…';
+            }
+            if (text) text.textContent = msg;
 
             if (st === 'failed') {
               self.stopPoll();
@@ -177,14 +191,20 @@
           '</div>';
       }
 
-      fetch(API_GENERATE, {
+        fetch(API_GENERATE, {
         method: 'POST',
         body: fd,
         cache: 'no-store',
         credentials: 'same-origin'
       })
         .then(function(r) {
-          return r.json().catch(function() { return { ok: false, error: { message: 'Invalid response from server' } }; });
+          return r.json().catch(function() { return { ok: false, error: { message: 'Invalid response from server' } }; })
+            .then(function(d) {
+              if (r.status === 429 && d.error && d.error.code === 'RATE_LIMIT') {
+                d.error.message = d.error.message || 'Too many active jobs. Wait for current ones to finish.';
+              }
+              return d;
+            });
         })
         .then(function(d) {
           if (submitBtn) submitBtn.disabled = false;

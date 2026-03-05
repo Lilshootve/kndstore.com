@@ -1,8 +1,8 @@
 <?php
 /**
- * KND Labs - ComfyUI generate
+ * KND Labs - Queue job (instant response)
  * POST /api/labs/generate.php
- * tool, prompt, negative_prompt, seed, width, height, steps, cfg
+ * Validates, charges KP, creates job status=queued. Worker processes it.
  */
 header('Cache-Control: no-store, no-cache');
 header('Content-Type: application/json');
@@ -47,11 +47,22 @@ try {
     $negativePrompt = trim($_POST['negative_prompt'] ?? 'ugly, blurry, low quality');
     if (strlen($negativePrompt) > 500) $negativePrompt = substr($negativePrompt, 0, 500);
 
+    $userId = current_user_id();
+
+    // Rate limit: max 2 active (queued + processing) per user
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM knd_labs_jobs WHERE user_id = ? AND status IN ('queued','processing')");
+    if ($stmt && $stmt->execute([$userId])) {
+        $active = (int) $stmt->fetchColumn();
+        if ($active >= 2) {
+            json_error('RATE_LIMIT', 'Too many active jobs. Wait for current ones to finish.', 429);
+        }
+    }
+
     $seed = !empty($_POST['seed']) ? (int) $_POST['seed'] : random_int(0, 2147483647);
     $steps = (int) ($_POST['steps'] ?? 20);
     $steps = max(1, min(100, $steps));
     $cfg = (float) ($_POST['cfg'] ?? 7.5);
-    $cfg = max(1, min(20, $cfg));
+    $cfg = max(1, min(30, $cfg));
     $width = (int) ($_POST['width'] ?? 1024);
     $height = (int) ($_POST['height'] ?? 1024);
 
@@ -76,7 +87,6 @@ try {
         $costKp = 15;
     }
 
-    $userId = current_user_id();
     release_available_points_if_due($pdo, $userId);
     expire_points_if_due($pdo, $userId);
     $available = get_available_points($pdo, $userId);
@@ -100,6 +110,8 @@ try {
 
     $baseUrl = comfyui_get_base_url($pdo, null);
     $token = comfyui_get_token($pdo);
+    $runpodUrl = comfyui_get_base_url_runpod($pdo);
+    $providerUsed = ($runpodUrl !== '' && rtrim($baseUrl, '/') === rtrim($runpodUrl, '/')) ? 'runpod' : 'local';
 
     $imageFilename = null;
     if ($tool === 'upscale') {
@@ -114,29 +126,41 @@ try {
     $overrideCkpt = settings_get($pdo, 'comfyui_default_ckpt', '');
     $overrideCkpt = trim($overrideCkpt) !== '' ? trim($overrideCkpt) : null;
 
-    $workflow = comfyui_inject_workflow($params, $tool);
-    comfyui_apply_checkpoint($workflow, $model, $refinerEnabled, $overrideCkpt);
-    $result = comfyui_run_prompt($workflow, $baseUrl, $token);
-
-    $runpodUrl = comfyui_get_base_url_runpod($pdo);
-    $providerUsed = ($runpodUrl !== '' && rtrim($baseUrl, '/') === rtrim($runpodUrl, '/')) ? 'runpod' : 'local';
-    $promptId = $result['prompt_id'];
+    $payload = array_merge($params, [
+        'tool' => $tool,
+        'model' => $model,
+        'refiner_enabled' => $refinerEnabled,
+        'override_ckpt' => $overrideCkpt,
+    ]);
+    $payloadJson = json_encode($payload);
 
     $qualityCol = ($tool === 'text2img') ? $quality : (($tool === 'upscale') ? (string) $scale . 'x' : 'base');
+    $priority = 100;
+
     $stmt = $pdo->prepare(
-        "INSERT INTO knd_labs_jobs (user_id, tool, prompt, negative_prompt, comfy_prompt_id, status, cost_kp, quality, provider)
-         VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?)"
+        "INSERT INTO knd_labs_jobs (user_id, tool, prompt, negative_prompt, status, cost_kp, quality, provider, priority, payload_json)
+         VALUES (?, ?, ?, ?, 'queued', ?, ?, ?, ?, ?)"
     );
-    if (!$stmt || !$stmt->execute([$userId, $tool, $prompt, $negativePrompt, $promptId, $costKp, $qualityCol, $providerUsed])) {
-        json_error('DB_ERROR', 'Could not create job. Run sql/knd_labs_jobs_alter_provider.sql if needed.', 500);
+    if (!$stmt || !$stmt->execute([$userId, $tool, $prompt, $negativePrompt, $costKp, $qualityCol, $providerUsed, $priority, $payloadJson])) {
+        json_error('DB_ERROR', 'Could not create job. Run sql/knd_labs_jobs_alter_queue.sql if needed.', 500);
     }
     $jobId = (int) $pdo->lastInsertId();
 
     ai_spend_points($pdo, $userId, $jobId, $costKp);
 
+    $avgSeconds = ['text2img' => 60, 'upscale' => 40, 'character' => 45];
+    $avgSec = $avgSeconds[$tool] ?? 60;
+
+    $stmtQ = $pdo->query("SELECT COUNT(*) FROM knd_labs_jobs WHERE status = 'queued'");
+    $queuePosition = $stmtQ ? (int) $stmtQ->fetchColumn() : 1;
+    $etaSeconds = $queuePosition * $avgSec;
+
     json_success([
         'job_id' => (string) $jobId,
-        'prompt_id' => $promptId,
+        'status' => 'queued',
+        'provider_used' => $providerUsed,
+        'queue_position' => $queuePosition,
+        'eta_seconds' => $etaSeconds,
         'cost' => $costKp,
         'available_after' => get_available_points($pdo, $userId),
     ]);
@@ -144,5 +168,6 @@ try {
     error_log('api/labs/generate: ' . $e->getMessage());
     $code = (strpos($e->getMessage(), 'ComfyUI') !== false || strpos($e->getMessage(), 'invalid') !== false) ? 'COMFYUI_ERROR' : 'INTERNAL_ERROR';
     $status = ($code === 'COMFYUI_ERROR') ? 400 : 500;
+    if (strpos($e->getMessage(), 'RATE_LIMIT') !== false) $status = 429;
     json_error($code, $e->getMessage(), $status);
 }
