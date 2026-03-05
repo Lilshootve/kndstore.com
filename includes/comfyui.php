@@ -43,18 +43,30 @@ function comfyui_upload_image(string $filePath, ?string $baseUrl = null, string 
 }
 
 /**
+ * Load workflow file path by tool.
+ */
+function comfyui_workflow_path(string $tool): string {
+    $baseDir = dirname(__DIR__);
+    if ($tool === 'upscale') {
+        $path = $baseDir . '/workflows/upscale_api.json';
+        if (!is_readable($path)) $path = $baseDir . '/KND_MASTER_WORKFLOW_UPSCALE.json';
+    } elseif ($tool === 'text2img' || $tool === 'character') {
+        $path = $baseDir . '/workflows/text2img_api.json';
+        if (!is_readable($path)) $path = $baseDir . '/KND_MASTER_WORKFLOW_API.json';
+    } else {
+        $path = $baseDir . '/KND_MASTER_WORKFLOW_API.json';
+    }
+    return $path;
+}
+
+/**
  * Load master workflow and inject parameters.
- * @param array $params prompt, negative_prompt, seed, steps, cfg, width, height, image_filename (for upscale)
+ * @param array $params prompt, negative_prompt, seed, steps, cfg, width, height, image_filename (for upscale), scale, job_id (for upscale)
  * @param string $tool text2img|upscale|character
  * @return array workflow for ComfyUI API
  */
 function comfyui_inject_workflow(array $params, string $tool = 'text2img'): array {
-    $baseDir = dirname(__DIR__);
-    if ($tool === 'upscale') {
-        $path = $baseDir . '/KND_MASTER_WORKFLOW_UPSCALE.json';
-    } else {
-        $path = $baseDir . '/KND_MASTER_WORKFLOW_API.json';
-    }
+    $path = comfyui_workflow_path($tool);
     if (!is_readable($path)) {
         throw new \RuntimeException('Workflow file not found: ' . basename($path));
     }
@@ -115,8 +127,65 @@ function comfyui_inject_workflow(array $params, string $tool = 'text2img'): arra
         if ($ctype === 'LoadImage' && !empty($params['image_filename'])) {
             $inputs['image'] = $params['image_filename'];
         }
+        if ($ctype === 'UpscaleModelLoader' && $tool === 'upscale') {
+            $scale = (int) ($params['scale'] ?? 4);
+            $inputs['model_name'] = $scale === 2 ? 'RealESRGAN_x2plus.pth' : 'RealESRGAN_x4plus.pth';
+        }
+        if ($ctype === 'SaveImage' && $tool === 'upscale' && isset($params['job_id'])) {
+            $inputs['filename_prefix'] = 'knd_upscale/job_' . (int) $params['job_id'];
+        }
     }
     return $wf;
+}
+
+/**
+ * Fetch image bytes from a completed labs job (for upscale source_type=recent).
+ * @return string|null raw image bytes or null on failure
+ */
+function comfyui_fetch_job_image_bytes(PDO $pdo, int $jobId, int $userId): ?string {
+    $stmt = $pdo->prepare("SELECT comfy_prompt_id, provider FROM knd_labs_jobs WHERE id = ? AND user_id = ? AND status = 'done' LIMIT 1");
+    if (!$stmt || !$stmt->execute([$jobId, $userId])) return null;
+    $job = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$job || empty($job['comfy_prompt_id'])) return null;
+    require_once __DIR__ . '/comfyui_provider.php';
+    $baseUrl = ($job['provider'] ?? '') === 'runpod'
+        ? comfyui_get_base_url_runpod($pdo) : comfyui_get_base_url_local($pdo);
+    if (!$baseUrl) $baseUrl = comfyui_get_base_url($pdo, null);
+    $token = comfyui_get_token($pdo);
+    $hist = comfyui_get_history($job['comfy_prompt_id'], $baseUrl, $token);
+    if (!$hist || !isset($hist['outputs'])) return null;
+    $filename = null;
+    $subfolder = '';
+    $imgType = 'output';
+    foreach ($hist['outputs'] as $nodeOut) {
+        if (isset($nodeOut['images']) && is_array($nodeOut['images'])) {
+            foreach ($nodeOut['images'] as $img) {
+                if (!empty($img['filename'])) {
+                    $filename = $img['filename'];
+                    $subfolder = $img['subfolder'] ?? '';
+                    $imgType = $img['type'] ?? 'output';
+                    break 2;
+                }
+            }
+        }
+    }
+    if (!$filename) return null;
+    $params = ['filename' => $filename, 'type' => $imgType];
+    if ($subfolder !== '') $params['subfolder'] = $subfolder;
+    $url = rtrim($baseUrl, '/') . '/view?' . http_build_query($params);
+    $headers = ['Accept: image/*'];
+    if ($token !== '') $headers[] = 'X-KND-TOKEN: ' . $token;
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT => 60,
+        CURLOPT_HTTPHEADER => $headers,
+    ]);
+    $bin = curl_exec($ch);
+    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    return ($bin !== false && $code >= 200 && $code < 300) ? $bin : null;
 }
 
 /** Checkpoint models available in ComfyUI */

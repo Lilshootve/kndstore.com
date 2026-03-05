@@ -130,7 +130,9 @@ do {
 
     try {
         $workflow = comfyui_inject_workflow($payload, $tool);
-        comfyui_apply_checkpoint($workflow, $model, $refinerEnabled, $overrideCkpt);
+        if ($tool !== 'upscale') {
+            comfyui_apply_checkpoint($workflow, $model, $refinerEnabled, $overrideCkpt);
+        }
         $result = comfyui_run_prompt($workflow, $comfyBase, $comfyToken);
         $promptId = $result['prompt_id'];
     } catch (\Throwable $e) {
