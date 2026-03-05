@@ -5,7 +5,7 @@ require_once __DIR__ . '/../includes/triposr.php';
 
 $jobId = trim($_GET['job_id'] ?? '');
 if ($jobId === '') {
-    header('Location: /labs/jobs.php?error=missing');
+    header('Location: /labs-jobs.php?error=missing');
     exit;
 }
 
@@ -16,7 +16,7 @@ if ($pdo && current_user_id()) {
 }
 
 if (!$job || (int) $job['user_id'] !== (int) current_user_id()) {
-    header('Location: /labs/jobs.php?error=not_found');
+    header('Location: /labs-jobs.php?error=not_found');
     exit;
 }
 
@@ -35,7 +35,7 @@ echo generateHeader(t('labs.job_detail', 'Job #{id} | KND Labs', ['id' => substr
     <nav aria-label="breadcrumb"><ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="/"><?php echo t('nav.home', 'Home'); ?></a></li>
       <li class="breadcrumb-item"><a href="/labs"><?php echo t('labs.title', 'KND Labs'); ?></a></li>
-      <li class="breadcrumb-item"><a href="/labs/jobs.php"><?php echo t('labs.view_all_jobs', 'Jobs'); ?></a></li>
+      <li class="breadcrumb-item"><a href="/labs-jobs.php"><?php echo t('labs.view_all_jobs', 'Jobs'); ?></a></li>
       <li class="breadcrumb-item active"><?php echo htmlspecialchars(substr($jobId, 0, 8)); ?></li>
     </ol></nav>
 
@@ -66,7 +66,7 @@ echo generateHeader(t('labs.job_detail', 'Job #{id} | KND Labs', ['id' => substr
         </div>
       </div>
       <div class="mt-4">
-        <a href="/labs/jobs.php" class="btn btn-outline-primary"><?php echo t('labs.back_to_jobs', 'Back to Jobs'); ?></a>
+        <a href="/labs-jobs.php" class="btn btn-outline-primary"><?php echo t('labs.back_to_jobs', 'Back to Jobs'); ?></a>
       </div>
     </div>
   </div>

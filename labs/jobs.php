@@ -102,7 +102,7 @@ echo generateHeader(t('labs.jobs_title', 'My Jobs | KND Labs'), t('labs.jobs_des
               <td><?php echo (int)($j['cost_kp'] ?? 0); ?> KP</td>
               <td class="text-white-50 small"><?php echo date('Y-m-d H:i', strtotime($j['created_at'])); ?></td>
               <td>
-                <a href="/labs/job.php?job_id=<?php echo urlencode($j['job_uuid']); ?>" class="btn btn-sm btn-outline-primary me-1"><?php echo t('labs.view'); ?></a>
+                <a href="/labs-job.php?job_id=<?php echo urlencode($j['job_uuid']); ?>" class="btn btn-sm btn-outline-primary me-1"><?php echo t('labs.view'); ?></a>
                 <?php if ($j['status'] === 'completed'): ?>
                 <a href="/api/ai/download.php?job_id=<?php echo urlencode($j['job_uuid']); ?>" class="btn btn-sm btn-success" target="_blank"><i class="fas fa-download"></i></a>
                 <?php endif; ?>

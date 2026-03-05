@@ -73,7 +73,7 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
           <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('ai.text2img.title'); ?></h3>
           <p class="text-white-50 small flex-grow-1"><?php echo t('labs.card_text2img_desc', 'Generate images from text prompts.'); ?></p>
           <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 3]); ?> · <?php echo t('labs.avg_time', '~{time}', ['time' => '10s']); ?></div>
-          <a href="/labs/text-to-image.php" class="btn btn-neon-primary w-100 mt-auto">
+          <a href="/labs-text-to-image.php" class="btn btn-neon-primary w-100 mt-auto">
             <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>
           </a>
         </div>
@@ -88,7 +88,7 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
           <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('ai.upscale.title'); ?></h3>
           <p class="text-white-50 small flex-grow-1"><?php echo t('labs.card_upscale_desc', 'Upscale images 2x or 4x.'); ?></p>
           <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 5]); ?> · <?php echo t('labs.avg_time', '~{time}', ['time' => '40s']); ?></div>
-          <a href="/labs/upscale.php" class="btn btn-neon-primary w-100 mt-auto">
+          <a href="/labs-upscale.php" class="btn btn-neon-primary w-100 mt-auto">
             <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>
           </a>
         </div>
@@ -103,7 +103,7 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
           <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('ai.character.title'); ?></h3>
           <p class="text-white-50 small flex-grow-1"><?php echo t('labs.card_character_desc', 'Create game/anime/realistic characters.'); ?></p>
           <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 15]); ?> · <?php echo t('labs.avg_time', '~{time}', ['time' => '30s']); ?></div>
-          <a href="/labs/character-lab.php" class="btn btn-neon-primary w-100 mt-auto">
+          <a href="/labs-character-lab.php" class="btn btn-neon-primary w-100 mt-auto">
             <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>
           </a>
         </div>
@@ -118,7 +118,7 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
           <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('ai.texture.title'); ?></h3>
           <p class="text-white-50 small flex-grow-1"><?php echo t('labs.card_texture_desc', 'Generate seamless textures for 3D/games.'); ?></p>
           <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 4]); ?> · <?php echo t('labs.avg_time', '~{time}', ['time' => '15s']); ?></div>
-          <a href="/labs/texture-lab.php" class="btn btn-neon-primary w-100 mt-auto">
+          <a href="/labs-texture-lab.php" class="btn btn-neon-primary w-100 mt-auto">
             <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>
           </a>
         </div>
@@ -144,7 +144,7 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
     <div class="glass-card-neon p-4 mb-5">
       <div class="d-flex align-items-center justify-content-between mb-3">
         <h3 class="mb-0" style="font-size:1.15rem;"><i class="fas fa-history me-2" style="color:var(--knd-neon-blue);"></i><?php echo t('labs.recent_jobs', 'Recent Jobs'); ?></h3>
-        <a href="/labs/jobs.php" class="btn btn-outline-neon btn-sm"><?php echo t('labs.view_all_jobs', 'View All Jobs'); ?></a>
+        <a href="/labs-jobs.php" class="btn btn-outline-neon btn-sm"><?php echo t('labs.view_all_jobs', 'View All Jobs'); ?></a>
       </div>
       <?php if (empty($recentJobs)): ?>
       <p class="text-white-50 small mb-0"><?php echo t('labs.no_recent_jobs', 'No jobs yet. Start with any tool above.'); ?></p>
@@ -175,9 +175,9 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
                 <?php if ($j['status'] === 'completed'): ?>
                 <a href="/api/ai/download.php?job_id=<?php echo urlencode($j['job_uuid']); ?>" class="btn btn-sm btn-success" target="_blank"><i class="fas fa-download"></i></a>
                 <?php elseif (in_array($j['status'], ['pending','processing'], true)): ?>
-                <a href="/labs/job.php?job_id=<?php echo urlencode($j['job_uuid']); ?>" class="btn btn-sm btn-outline-primary"><?php echo t('labs.view', 'View'); ?></a>
+                <a href="/labs-job.php?job_id=<?php echo urlencode($j['job_uuid']); ?>" class="btn btn-sm btn-outline-primary"><?php echo t('labs.view', 'View'); ?></a>
                 <?php else: ?>
-                <a href="/labs/job.php?job_id=<?php echo urlencode($j['job_uuid']); ?>" class="btn btn-sm btn-outline-secondary"><?php echo t('labs.view', 'View'); ?></a>
+                <a href="/labs-job.php?job_id=<?php echo urlencode($j['job_uuid']); ?>" class="btn btn-sm btn-outline-secondary"><?php echo t('labs.view', 'View'); ?></a>
                 <?php endif; ?>
               </td>
             </tr>
