@@ -9,3 +9,6 @@ workers/worker_config.local.php
 storage/*.json
 storage/logs/*.log
 storage/logs/*.txt
+
+# Runtime logs
+logs/*.log
