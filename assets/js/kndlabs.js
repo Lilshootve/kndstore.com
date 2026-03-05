@@ -59,6 +59,8 @@
           self.bindPromptValidation();
           self.bindViewDetails();
           self.updateCostLabel();
+          self.updateBalanceAfter();
+          self.recomputeGenerateState();
         });
     },
 
@@ -371,42 +373,58 @@
 
     bindPromptValidation: function() {
       var self = this;
-      var prompt = document.getElementById('labs-prompt-input');
+      if (self.config.jobType === 'upscale') return;
+      var prompt = document.getElementById('labs-prompt-input') || document.querySelector('[name="prompt"]');
       var hint = document.getElementById('labs-prompt-hint');
-      var form = document.getElementById(this.config.formId || 'labs-comfy-form');
-      if (!prompt || self.config.jobType === 'upscale') return;
       function check() {
-        var v = (prompt.value || '').trim();
-        if (v.length === 0) {
-          if (hint) hint.textContent = 'Enter a prompt';
-          self.updateSubmitButton();
-          return;
+        var v = (prompt && prompt.value ? prompt.value : '').trim();
+        if (hint) {
+          if (v.length === 0) hint.textContent = 'Enter a prompt';
+          else if (v.length < 10) hint.textContent = 'Add style, environment or lighting for better results';
+          else hint.textContent = '';
         }
-        if (v.length < 10) {
-          if (hint) hint.textContent = 'Add style, environment or lighting for better results';
-        } else {
-          if (hint) hint.textContent = '';
-        }
-        self.updateSubmitButton();
+        self.recomputeGenerateState();
       }
-      prompt.addEventListener('input', check);
-      prompt.addEventListener('change', check);
-      check();
+      if (prompt) {
+        prompt.addEventListener('input', check);
+        prompt.addEventListener('change', check);
+      }
+      var model = document.getElementById('labs-model-select') || document.querySelector('#labs-comfy-form [name="model"]');
+      var widthSel = document.getElementById('labs-width-select') || document.querySelector('#labs-comfy-form [name="width"]');
+      var heightSel = document.getElementById('labs-height-select') || document.querySelector('#labs-comfy-form [name="height"]');
+      [model, widthSel, heightSel].forEach(function(el) {
+        if (el) {
+          el.addEventListener('input', function() { self.recomputeGenerateState(); });
+          el.addEventListener('change', function() { self.recomputeGenerateState(); });
+        }
+      });
+      self.recomputeGenerateState();
+    },
+
+    recomputeGenerateState: function() {
+      var form = document.getElementById(this.config.formId || 'labs-comfy-form');
+      if (!form) return;
+      var prompt = document.getElementById('labs-prompt-input') || form.querySelector('[name="prompt"]');
+      var model = document.getElementById('labs-model-select') || form.querySelector('[name="model"]');
+      var widthSel = document.getElementById('labs-width-select') || form.querySelector('[name="width"]');
+      var heightSel = document.getElementById('labs-height-select') || form.querySelector('[name="height"]');
+      var promptVal = (prompt && prompt.value ? prompt.value : '').trim();
+      var modelVal = (model && model.value ? model.value : '');
+      var widthVal = widthSel ? (Number(widthSel.value) || 0) : 1024;
+      var heightVal = heightSel ? (Number(heightSel.value) || 0) : 1024;
+      var btn = document.getElementById('generateBtn') || document.getElementById('labs-submit-btn');
+      if (this.config.jobType === 'upscale') {
+        var img = form.querySelector('[name="image"]');
+        var hasFile = img && img.files && img.files.length > 0;
+        if (btn) btn.disabled = !hasFile;
+        return;
+      }
+      var valid = promptVal.length > 0 && modelVal !== '' && widthVal > 0 && heightVal > 0;
+      if (btn) btn.disabled = !valid;
     },
 
     updateSubmitButton: function() {
-      var btn = document.getElementById('labs-submit-btn');
-      if (!btn) return;
-      var form = document.getElementById(this.config.formId || 'labs-comfy-form');
-      var prompt = form ? form.querySelector('[name="prompt"]') : null;
-      if (this.config.jobType === 'upscale') {
-        var img = form ? form.querySelector('[name="image"]') : null;
-        var hasFile = img && img.files && img.files.length > 0;
-        btn.disabled = !hasFile;
-      } else {
-        var v = prompt ? (prompt.value || '').trim() : '';
-        btn.disabled = v.length === 0;
-      }
+      this.recomputeGenerateState();
     },
 
     bindAdvancedToggle: function() {

@@ -78,7 +78,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             </div>
             <div class="mb-3">
               <label class="form-label text-white-50 small"><?php echo t('labs.model', 'Model'); ?></label>
-              <select name="model" class="form-select form-select-sm bg-dark text-white">
+              <select name="model" id="labs-model-select" class="form-select form-select-sm bg-dark text-white">
                 <option value="v1_5" selected>v1.5 Pruned EMA</option>
                 <option value="sd_xl_base">SD XL Base 1.0</option>
                 <option value="sd_xl_refiner">SD XL Refiner 1.0</option>
@@ -151,7 +151,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             <div class="row g-2 mb-3">
               <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.width', 'Width'); ?></label>
-                <select name="width" class="form-select form-select-sm bg-dark text-white">
+                <select name="width" id="labs-width-select" class="form-select form-select-sm bg-dark text-white">
                   <option value="256">256</option>
                   <option value="512">512</option>
                   <option value="768">768</option>
@@ -164,7 +164,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               </div>
               <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.height', 'Height'); ?></label>
-                <select name="height" class="form-select form-select-sm bg-dark text-white">
+                <select name="height" id="labs-height-select" class="form-select form-select-sm bg-dark text-white">
                   <option value="256">256</option>
                   <option value="512">512</option>
                   <option value="768">768</option>
@@ -191,7 +191,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               <label for="labs-private-check" class="form-check-label text-white-50 small"><?php echo t('labs.private_toggle', 'Keep this generation private'); ?></label>
             </div>
             <p class="text-white-50 small mb-3" id="labs-microcopy-private"><?php echo t('labs.images_stored', 'Your images are private. Stored for 30 days.'); ?></p>
-            <button type="submit" class="btn btn-neon-primary w-100" id="labs-submit-btn" disabled>
+            <button type="submit" class="btn btn-neon-primary w-100" id="generateBtn" disabled>
               <i class="fas fa-magic me-2"></i><?php echo t('ai.text2img.generate'); ?>
             </button>
           </form>
@@ -286,6 +286,8 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
 <script src="/assets/js/navigation-extend.js"></script>
 <script src="/assets/js/kndlabs.js"></script>
 <script>
-KNDLabs.init({ formId: 'labs-comfy-form', jobType: 'text2img', costLabelId: 'labs-cost-label', pricingKey: 'text2img', qualitySelectId: 'labs-quality-select', balanceEl: '#labs-balance' });
+document.addEventListener('DOMContentLoaded', function() {
+  KNDLabs.init({ formId: 'labs-comfy-form', jobType: 'text2img', costLabelId: 'labs-cost-label', pricingKey: 'text2img', qualitySelectId: 'labs-quality-select', balanceEl: '#labs-balance' });
+});
 </script>
 <?php echo generateFooter(); echo generateScripts(); ?>
