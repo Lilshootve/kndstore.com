@@ -1,0 +1,179 @@
+.instantmesh-page {
+    --im-border: rgba(103, 213, 255, 0.18);
+    --im-soft: rgba(8, 16, 28, 0.7);
+}
+
+.instantmesh-hero {
+    border: 1px solid var(--im-border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    background: linear-gradient(145deg, rgba(8, 16, 28, 0.92), rgba(10, 24, 38, 0.82));
+}
+
+.instantmesh-hero__badge {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid rgba(53, 194, 255, 0.35);
+    color: var(--knd-accent-soft);
+    font-size: 0.75rem;
+    margin-bottom: 0.65rem;
+}
+
+.instantmesh-hero__title {
+    margin: 0;
+}
+
+.instantmesh-hero__subtitle {
+    color: var(--knd-text-alt);
+    margin-top: 0.5rem;
+    margin-bottom: 0.7rem;
+}
+
+.instantmesh-chips {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.instantmesh-layout {
+    display: grid;
+    grid-template-columns: 360px minmax(0, 1fr);
+    gap: 1rem;
+}
+
+.instantmesh-input-panel,
+.instantmesh-output-panel {
+    min-height: 420px;
+}
+
+.instantmesh-dropzone {
+    border: 1px dashed var(--im-border);
+    border-radius: 12px;
+    background: var(--im-soft);
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.instantmesh-dropzone.is-dragover {
+    border-color: rgba(53, 194, 255, 0.5);
+    box-shadow: 0 0 0 1px rgba(53, 194, 255, 0.18) inset;
+}
+
+.instantmesh-dropzone__content i {
+    font-size: 2.2rem;
+    margin-bottom: 0.7rem;
+    color: var(--knd-accent-soft);
+}
+
+.instantmesh-dropzone__content p,
+.instantmesh-dropzone__content small {
+    color: var(--knd-text-alt);
+}
+
+.instantmesh-preview-wrap {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.instantmesh-preview-wrap img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+}
+
+.instantmesh-preview-remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
+.instantmesh-status__label {
+    color: var(--knd-text-alt);
+    font-weight: 600;
+}
+
+.instantmesh-progress {
+    height: 10px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.instantmesh-progress .progress-bar {
+    background: linear-gradient(90deg, #35c2ff, #8b5cff);
+}
+
+.instantmesh-viewer {
+    background: var(--im-soft);
+    border: 1px solid var(--im-border);
+    border-radius: 12px;
+    min-height: 320px;
+    position: relative;
+}
+
+#instantmesh-model-viewer {
+    width: 100%;
+    height: 320px;
+    background: transparent;
+}
+
+.instantmesh-meta {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.instantmesh-meta div {
+    color: var(--knd-text-alt);
+    font-size: 0.9rem;
+}
+
+.instantmesh-meta span {
+    opacity: 0.75;
+    margin-right: 0.3rem;
+}
+
+.instantmesh-history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 0.9rem;
+}
+
+.instantmesh-history-card {
+    border: 1px solid var(--im-border);
+    border-radius: 12px;
+    background: rgba(8, 16, 28, 0.72);
+    overflow: hidden;
+}
+
+.instantmesh-history-thumb {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.instantmesh-history-body {
+    padding: 0.75rem;
+}
+
+.instantmesh-faq {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.instantmesh-faq p {
+    margin: 0.3rem 0 0;
+    color: var(--knd-text-alt);
+}
+
+@media (max-width: 991px) {
+    .instantmesh-layout {
+        grid-template-columns: 1fr;
+    }
+}

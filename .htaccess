@@ -133,6 +133,7 @@
     RewriteRule ^labs/consistency\.php$ /labs-consistency.php [L]
     RewriteRule ^labs/character-lab\.php$ /labs-character-lab.php [L]
     RewriteRule ^labs/texture-lab\.php$ /labs-texture-lab.php [L]
+    RewriteRule ^labs/instantmesh-3d/?$ /instantmesh-3d.php [L]
     RewriteRule ^labs/jobs\.php$ /labs-jobs.php [L]
     RewriteRule ^labs/job\.php$ /labs-job.php [L]
 </IfModule>
