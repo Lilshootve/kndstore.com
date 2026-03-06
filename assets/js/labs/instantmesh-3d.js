@@ -247,9 +247,9 @@
                 '<div class="instantmesh-history-body">' +
                 '<div class="d-flex justify-content-between align-items-center mb-2">' +
                 '<span class="badge ' + badgeCls + '">' + String(job.status || 'queued') + '</span>' +
-                '<small class="text-white-50">' + formatDate(job.created_at || '') + '</small>' +
+                '<small class="instantmesh-history-date">' + formatDate(job.created_at || '') + '</small>' +
                 '</div>' +
-                '<button type="button" class="btn btn-outline-light btn-sm w-100" data-open-job="' + String(job.public_id || '') + '">Open</button>' +
+                '<button type="button" class="btn btn-outline-light btn-sm w-100 instantmesh-history-cta" data-open-job="' + String(job.public_id || '') + '">View Details</button>' +
                 '</div>' +
                 '</article>';
         }).join('');

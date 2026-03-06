@@ -46,20 +46,43 @@ echo generateHeader('Image → 3D | KND Labs', 'Generate OBJ / GLB assets from a
         </nav>
 
         <div class="instantmesh-hero knd-panel-soft mt-4">
-            <div class="instantmesh-hero__badge">KND Labs</div>
-            <h1 class="instantmesh-hero__title">Image → 3D</h1>
-            <p class="instantmesh-hero__subtitle">Turn a single product image or character render into a downloadable 3D mesh.</p>
-            <div class="instantmesh-chips">
-                <span class="knd-chip">OBJ</span>
-                <span class="knd-chip">GLB</span>
-                <span class="knd-chip">Background Removal</span>
-                <span class="knd-chip">GPU Processed</span>
+            <div class="instantmesh-hero__content">
+                <div class="instantmesh-hero__badge">KND Labs</div>
+                <h1 class="instantmesh-hero__title">Image → 3D Mesh Generator</h1>
+                <p class="instantmesh-hero__subtitle">Convert a single image into a production-ready 3D asset for prototyping, previews or concept work.</p>
+                <div class="instantmesh-chips">
+                    <span class="knd-chip">OBJ</span>
+                    <span class="knd-chip">GLB</span>
+                    <span class="knd-chip">Background Removal</span>
+                    <span class="knd-chip">GPU Processed</span>
+                </div>
             </div>
+            <aside class="instantmesh-hero__stats knd-panel-soft">
+                <div class="instantmesh-stat-card">
+                    <span class="instantmesh-stat-card__label">Generation Cost</span>
+                    <strong class="instantmesh-stat-card__value"><?php echo (int) $instantmeshCost; ?> credits</strong>
+                </div>
+                <div class="instantmesh-stat-card">
+                    <span class="instantmesh-stat-card__label">Output Formats</span>
+                    <strong class="instantmesh-stat-card__value">GLB / OBJ</strong>
+                </div>
+                <div class="instantmesh-stat-card">
+                    <span class="instantmesh-stat-card__label">Processing</span>
+                    <strong class="instantmesh-stat-card__value">Dedicated GPU Queue</strong>
+                </div>
+                <div class="instantmesh-stat-card">
+                    <span class="instantmesh-stat-card__label">Average Time</span>
+                    <strong class="instantmesh-stat-card__value">~2-4 min</strong>
+                </div>
+            </aside>
         </div>
 
         <div class="instantmesh-layout mt-4">
             <aside class="knd-panel instantmesh-input-panel">
-                <h3 class="knd-section-title mb-3">Input</h3>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="knd-section-title mb-0">Input</h3>
+                    <span class="instantmesh-panel-tag">Single Image</span>
+                </div>
 
                 <form id="instantmesh-form" enctype="multipart/form-data" onsubmit="return false;">
                     <div id="instantmesh-dropzone" class="instantmesh-dropzone">
@@ -100,13 +123,18 @@ echo generateHeader('Image → 3D | KND Labs', 'Generate OBJ / GLB assets from a
                         <i class="fas fa-cube me-2"></i>Generate 3D
                     </button>
 
-                    <p class="knd-muted small mt-3 mb-1">Cost: <strong id="instantmesh-cost"><?php echo (int) $instantmeshCost; ?></strong> credits</p>
-                    <p class="knd-muted small mb-0">Use centered subjects with clean silhouettes for better geometry.</p>
+                    <div class="instantmesh-input-foot mt-3">
+                        <p class="knd-muted small mb-1">Cost: <strong id="instantmesh-cost"><?php echo (int) $instantmeshCost; ?></strong> credits</p>
+                        <p class="knd-muted small mb-0">Use centered subjects with clean silhouettes for better geometry.</p>
+                    </div>
                 </form>
             </aside>
 
             <section class="knd-panel instantmesh-output-panel">
-                <h3 class="knd-section-title mb-3">Output / Status</h3>
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <h3 class="knd-section-title mb-0">Output / Status</h3>
+                    <span class="instantmesh-panel-tag">Live Job Monitor</span>
+                </div>
 
                 <div class="instantmesh-status">
                     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -119,9 +147,10 @@ echo generateHeader('Image → 3D | KND Labs', 'Generate OBJ / GLB assets from a
                 </div>
 
                 <div id="viewer-wrap" class="instantmesh-viewer mt-3">
-                    <div id="viewer-empty" class="knd-canvas__empty">
-                        <i class="fas fa-cube fa-2x mb-2"></i>
-                        <p class="mb-0">No generations yet. Drop an image and create your first 3D asset.</p>
+                    <div id="viewer-empty" class="instantmesh-viewer-empty">
+                        <div class="instantmesh-viewer-empty__icon"><i class="fas fa-cube"></i></div>
+                        <h4>No 3D preview yet</h4>
+                        <p class="mb-0">Start a generation to preview your GLB directly in this panel.</p>
                     </div>
                     <model-viewer id="instantmesh-model-viewer" camera-controls auto-rotate interaction-prompt="none" style="display:none;"></model-viewer>
                 </div>
@@ -131,11 +160,11 @@ echo generateHeader('Image → 3D | KND Labs', 'Generate OBJ / GLB assets from a
                     <a id="download-obj" href="#" class="btn btn-outline-light disabled" aria-disabled="true">Download OBJ</a>
                 </div>
 
-                <div class="instantmesh-meta mt-3">
-                    <div><span>Date:</span> <strong id="meta-date">—</strong></div>
-                    <div><span>Seed:</span> <strong id="meta-seed">—</strong></div>
-                    <div><span>Remove BG:</span> <strong id="meta-remove-bg">—</strong></div>
-                    <div><span>Total time:</span> <strong id="meta-time">—</strong></div>
+                <div class="instantmesh-meta-grid mt-3">
+                    <div class="instantmesh-meta-item"><span>Date</span><strong id="meta-date">—</strong></div>
+                    <div class="instantmesh-meta-item"><span>Seed</span><strong id="meta-seed">—</strong></div>
+                    <div class="instantmesh-meta-item"><span>Remove BG</span><strong id="meta-remove-bg">—</strong></div>
+                    <div class="instantmesh-meta-item"><span>Total Time</span><strong id="meta-time">—</strong></div>
                 </div>
 
                 <div id="instantmesh-error" class="alert alert-danger mt-3 mb-0" style="display:none;"></div>
@@ -143,7 +172,10 @@ echo generateHeader('Image → 3D | KND Labs', 'Generate OBJ / GLB assets from a
         </div>
 
         <section class="knd-panel-soft mt-4">
-            <h3 class="knd-section-title mb-3">Recent Generations</h3>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                <h3 class="knd-section-title mb-0">Recent Generations</h3>
+                <span class="knd-muted small">Your latest InstantMesh jobs</span>
+            </div>
             <div id="instantmesh-history" class="instantmesh-history-grid">
                 <p class="knd-muted small mb-0"><i class="fas fa-spinner fa-spin me-1"></i>Loading recent jobs...</p>
             </div>
@@ -151,22 +183,46 @@ echo generateHeader('Image → 3D | KND Labs', 'Generate OBJ / GLB assets from a
 
         <section class="knd-panel-soft mt-4 mb-2">
             <h3 class="knd-section-title mb-3">FAQ</h3>
-            <div class="instantmesh-faq">
-                <div>
-                    <strong>What kind of images work best?</strong>
-                    <p>Clear, centered subjects with simple backgrounds produce cleaner geometry.</p>
+            <div class="accordion instantmesh-faq-accordion" id="instantmeshFaq">
+                <div class="accordion-item instantmesh-faq-item">
+                    <h2 class="accordion-header" id="faq-heading-one">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-one" aria-expanded="true" aria-controls="faq-collapse-one">
+                            What kind of images work best?
+                        </button>
+                    </h2>
+                    <div id="faq-collapse-one" class="accordion-collapse collapse show" aria-labelledby="faq-heading-one" data-bs-parent="#instantmeshFaq">
+                        <div class="accordion-body">Clear, centered subjects with simple backgrounds produce cleaner geometry and more stable silhouettes.</div>
+                    </div>
                 </div>
-                <div>
-                    <strong>Can I generate OBJ and GLB together?</strong>
-                    <p>Yes. Select <em>Both</em> in Output Format to request both exports.</p>
+                <div class="accordion-item instantmesh-faq-item">
+                    <h2 class="accordion-header" id="faq-heading-two">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-two" aria-expanded="false" aria-controls="faq-collapse-two">
+                            Can I generate OBJ and GLB together?
+                        </button>
+                    </h2>
+                    <div id="faq-collapse-two" class="accordion-collapse collapse" aria-labelledby="faq-heading-two" data-bs-parent="#instantmeshFaq">
+                        <div class="accordion-body">Yes. Select <em>Both</em> in Output Format to request simultaneous exports in a single generation.</div>
+                    </div>
                 </div>
-                <div>
-                    <strong>Can I close the page while generating?</strong>
-                    <p>Yes. Jobs run in the queue. You can reopen this page and check Recent Generations.</p>
+                <div class="accordion-item instantmesh-faq-item">
+                    <h2 class="accordion-header" id="faq-heading-three">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-three" aria-expanded="false" aria-controls="faq-collapse-three">
+                            Can I close the page while generating?
+                        </button>
+                    </h2>
+                    <div id="faq-collapse-three" class="accordion-collapse collapse" aria-labelledby="faq-heading-three" data-bs-parent="#instantmeshFaq">
+                        <div class="accordion-body">Yes. Jobs run in queue and remain associated to your account. You can come back later and open them from Recent Generations.</div>
+                    </div>
                 </div>
-                <div>
-                    <strong>Why is GLB recommended for preview?</strong>
-                    <p>GLB is easier to render directly in-browser and offers a smoother workflow.</p>
+                <div class="accordion-item instantmesh-faq-item">
+                    <h2 class="accordion-header" id="faq-heading-four">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-four" aria-expanded="false" aria-controls="faq-collapse-four">
+                            Why is GLB recommended for preview?
+                        </button>
+                    </h2>
+                    <div id="faq-collapse-four" class="accordion-collapse collapse" aria-labelledby="faq-heading-four" data-bs-parent="#instantmeshFaq">
+                        <div class="accordion-body">GLB is browser-friendly and enables native visual inspection directly inside this page using model-viewer.</div>
+                    </div>
                 </div>
             </div>
         </section>
