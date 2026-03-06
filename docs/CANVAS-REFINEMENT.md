@@ -1,13 +1,16 @@
-# Canvas - Refinamiento UI/UX
+# Canvas, Upscale, Consistency - Refinamiento UI/UX
 
 ## Archivos modificados
 
 | Archivo | Cambios |
 |---------|---------|
 | `labs/text-to-image.php` | Layout canvas, botón Generate, prompt/dropdowns knd-*, Recent Creations, drawer Details |
+| `labs/upscale.php` | Generate abajo, knd-form, Recent Creations, Details drawer |
+| `labs/consistency.php` | Generate abajo, knd-form, Recent Creations, Details drawer |
 | `assets/css/knd-labs.css` | .labs-gen-btn, .labs-gen-area, .labs-form controls, .knd-details-drawer |
 | `assets/css/knd-ui.css` | .knd-showcase-card__placeholder |
-| `assets/js/kndlabs.js` | bindViewDetails con drawer KND, reuseJobSettings, esc() |
+| `assets/js/kndlabs.js` | bindViewDetails tool-aware, reuseJobSettings (text2img/consistency) |
+| `api/labs/job.php` | scale, upscale_model para upscale; base_prompt, scene_prompt para consistency |
 
 ---
 

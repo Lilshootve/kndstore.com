@@ -63,6 +63,10 @@ try {
         $data['base_prompt'] = $payload['base_prompt'] ?? '';
         $data['scene_prompt'] = $payload['scene_prompt'] ?? '';
     }
+    if ($tool === 'upscale') {
+        $data['scale'] = $payload['scale'] ?? 2;
+        $data['upscale_model'] = $payload['upscale_model'] ?? '';
+    }
 
     json_success($data);
 } catch (\Throwable $e) {

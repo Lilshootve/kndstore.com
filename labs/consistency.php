@@ -73,8 +73,8 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             <input type="hidden" name="tool" value="consistency">
 
             <div class="mb-3">
-              <label class="form-label text-white-50"><?php echo t('labs.consistency.mode', 'Mode'); ?></label>
-              <select name="mode" id="labs-mode" class="form-select bg-dark text-white">
+              <label class="form-label text-white-50 knd-label"><?php echo t('labs.consistency.mode', 'Mode'); ?></label>
+              <select name="mode" id="labs-mode" class="knd-select form-select text-white">
                 <option value="style" <?php echo $preloadMode === 'style' ? 'selected' : ''; ?>><?php echo t('labs.consistency.mode_style', 'Style Lock'); ?></option>
                 <option value="character" <?php echo $preloadMode === 'character' ? 'selected' : ''; ?>><?php echo t('labs.consistency.mode_character', 'Character Lock'); ?></option>
                 <option value="both" <?php echo $preloadMode === 'both' ? 'selected' : ''; ?>><?php echo t('labs.consistency.mode_both', 'Style + Character'); ?></option>
@@ -92,7 +92,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
                 <label for="ref-upload" class="form-check-label text-white-50"><?php echo t('labs.consistency.ref_upload', 'Upload Reference Image'); ?></label>
               </div>
               <div id="labs-ref-recent-area" class="mt-2" style="display:<?php echo $refJobId > 0 ? 'block' : 'none'; ?>;">
-                <select name="reference_job_id" id="labs-reference-job" class="form-select form-select-sm bg-dark text-white">
+                <select name="reference_job_id" id="labs-reference-job" class="knd-select form-select form-select-sm text-white">
                   <option value=""><?php echo t('labs.consistency.select_job', 'Select a job...'); ?></option>
                   <?php foreach ($refJobs as $j):
                     $jid = $j['id'] ?? 0;
@@ -106,24 +106,24 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
                 <?php endif; ?>
               </div>
               <div id="labs-ref-upload-area" class="mt-2" style="display:<?php echo $refJobId <= 0 ? 'block' : 'none'; ?>;">
-                <input type="file" name="reference_image" id="labs-reference-file" accept="image/jpeg,image/jpg,image/png,image/webp" class="form-control form-control-sm bg-dark text-white">
+                <input type="file" name="reference_image" id="labs-reference-file" accept="image/jpeg,image/jpg,image/png,image/webp" class="knd-input form-control form-control-sm text-white">
                 <div class="form-text text-white-50 small">PNG, JPG, WebP. Max 5MB, 2048px</div>
               </div>
             </div>
 
             <div class="mb-3">
-              <label class="form-label text-white-50"><?php echo t('labs.consistency.base_prompt', 'Base Prompt'); ?></label>
-              <textarea name="base_prompt" id="labs-base-prompt" class="form-control bg-dark text-white" rows="2" maxlength="500" placeholder="Identity / style description (persistent)..."><?php echo htmlspecialchars($preloadFromJob['base_prompt'] ?? ''); ?></textarea>
+              <label class="form-label text-white-50 knd-label"><?php echo t('labs.consistency.base_prompt', 'Base Prompt'); ?></label>
+              <textarea name="base_prompt" id="labs-base-prompt" class="knd-textarea form-control text-white" rows="2" maxlength="500" placeholder="Identity / style description (persistent)..."><?php echo htmlspecialchars($preloadFromJob['base_prompt'] ?? ''); ?></textarea>
               <div class="form-text text-white-50 small"><?php echo t('labs.consistency.base_help', 'Persistent identity or style'); ?></div>
             </div>
             <div class="mb-3">
-              <label class="form-label text-white-50"><?php echo t('labs.consistency.scene_prompt', 'Scene Prompt'); ?></label>
-              <textarea name="scene_prompt" id="labs-scene-prompt" class="form-control bg-dark text-white" rows="2" maxlength="500" placeholder="Scene / variation for this generation..."><?php echo htmlspecialchars($preloadFromJob['scene_prompt'] ?? ''); ?></textarea>
+              <label class="form-label text-white-50 knd-label"><?php echo t('labs.consistency.scene_prompt', 'Scene Prompt'); ?></label>
+              <textarea name="scene_prompt" id="labs-scene-prompt" class="knd-textarea form-control text-white" rows="2" maxlength="500" placeholder="Scene / variation for this generation..."><?php echo htmlspecialchars($preloadFromJob['scene_prompt'] ?? ''); ?></textarea>
               <div class="form-text text-white-50 small"><?php echo t('labs.consistency.scene_help', 'What changes in this image'); ?></div>
             </div>
             <div class="mb-3">
-              <label class="form-label text-white-50"><?php echo t('labs.negative_prompt', 'Negative Prompt'); ?></label>
-              <input type="text" name="negative_prompt" class="form-control bg-dark text-white" maxlength="500" value="<?php echo htmlspecialchars($preloadFromJob['negative_prompt'] ?? 'ugly, blurry, low quality'); ?>">
+              <label class="form-label text-white-50 knd-label"><?php echo t('labs.negative_prompt', 'Negative Prompt'); ?></label>
+              <input type="text" name="negative_prompt" class="knd-input form-control text-white" maxlength="500" value="<?php echo htmlspecialchars($preloadFromJob['negative_prompt'] ?? 'ugly, blurry, low quality'); ?>">
             </div>
 
             <div class="mb-3">
@@ -155,29 +155,29 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               <div class="row g-2 mb-3">
                 <div class="col-4">
                   <label class="form-label text-white-50 small"><?php echo t('labs.width', 'Width'); ?></label>
-                  <input type="number" name="width" class="form-control form-control-sm bg-dark text-white" value="<?php echo (int)($preloadFromJob['width'] ?? 1024); ?>" min="256" max="2048" step="8">
+                  <input type="number" name="width" class="knd-input form-control form-control-sm text-white" value="<?php echo (int)($preloadFromJob['width'] ?? 1024); ?>" min="256" max="2048" step="8">
                 </div>
                 <div class="col-4">
                   <label class="form-label text-white-50 small"><?php echo t('labs.height', 'Height'); ?></label>
-                  <input type="number" name="height" class="form-control form-control-sm bg-dark text-white" value="<?php echo (int)($preloadFromJob['height'] ?? 1024); ?>" min="256" max="2048" step="8">
+                  <input type="number" name="height" class="knd-input form-control form-control-sm text-white" value="<?php echo (int)($preloadFromJob['height'] ?? 1024); ?>" min="256" max="2048" step="8">
                 </div>
                 <div class="col-4">
                   <label class="form-label text-white-50 small"><?php echo t('labs.seed', 'Seed'); ?></label>
-                  <input type="number" name="seed" class="form-control form-control-sm bg-dark text-white" placeholder="Random" value="<?php echo isset($preloadFromJob['seed']) && $preloadFromJob['seed'] !== '' && $preloadFromJob['seed'] !== null ? (int)$preloadFromJob['seed'] : ''; ?>">
+                  <input type="number" name="seed" class="knd-input form-control form-control-sm text-white" placeholder="Random" value="<?php echo isset($preloadFromJob['seed']) && $preloadFromJob['seed'] !== '' && $preloadFromJob['seed'] !== null ? (int)$preloadFromJob['seed'] : ''; ?>">
                 </div>
               </div>
               <div class="row g-2 mb-3">
                 <div class="col-4">
                   <label class="form-label text-white-50 small"><?php echo t('labs.steps', 'Steps'); ?></label>
-                  <input type="number" name="steps" class="form-control form-control-sm bg-dark text-white" value="<?php echo (int)($preloadFromJob['steps'] ?? 28); ?>" min="1" max="100">
+                  <input type="number" name="steps" class="knd-input form-control form-control-sm text-white" value="<?php echo (int)($preloadFromJob['steps'] ?? 28); ?>" min="1" max="100">
                 </div>
                 <div class="col-4">
                   <label class="form-label text-white-50 small"><?php echo t('labs.cfg', 'CFG'); ?></label>
-                  <input type="number" name="cfg" class="form-control form-control-sm bg-dark text-white" value="<?php echo (float)($preloadFromJob['cfg'] ?? 7); ?>" min="1" max="30" step="0.5">
+                  <input type="number" name="cfg" class="knd-input form-control form-control-sm text-white" value="<?php echo (float)($preloadFromJob['cfg'] ?? 7); ?>" min="1" max="30" step="0.5">
                 </div>
                 <div class="col-4">
                   <label class="form-label text-white-50 small"><?php echo t('labs.sampler', 'Sampler'); ?></label>
-                  <select name="sampler" class="form-select form-select-sm bg-dark text-white">
+                  <select name="sampler" class="knd-select form-select form-select-sm text-white">
                     <?php $preloadSampler = $preloadFromJob['sampler'] ?? 'dpmpp_2m'; ?>
                     <option value="dpmpp_2m" <?php echo $preloadSampler === 'dpmpp_2m' ? 'selected' : ''; ?>>DPM++ 2M</option>
                     <option value="euler" <?php echo $preloadSampler === 'euler' ? 'selected' : ''; ?>>Euler</option>
@@ -189,7 +189,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               </div>
               <div class="mb-2">
                 <label class="form-label text-white-50 small"><?php echo t('labs.model', 'Model'); ?></label>
-                <select name="model" class="form-select form-select-sm bg-dark text-white">
+                <select name="model" class="knd-select form-select form-select-sm text-white">
                   <option value="juggernaut_v8" selected>Juggernaut XL v8</option>
                   <option value="sd_xl_base">SD XL Base</option>
                   <option value="waiANINSFWPONY">PONY XL</option>
@@ -200,8 +200,8 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
           </form>
       </aside>
 
-      <div class="d-flex flex-column">
-        <div class="knd-canvas knd-panel-soft flex-grow-1 mb-3">
+      <div class="d-flex flex-column flex-grow-1">
+        <div class="knd-canvas knd-panel-soft flex-grow-1 mb-0">
           <div id="labs-result-preview" class="labs-result-preview text-center py-5" style="min-height:320px;">
             <div id="labs-placeholder-tips" class="labs-placeholder-tips">
               <i class="fas fa-lock fa-3x mb-3" style="color:var(--knd-accent-soft);opacity:.4;"></i>
@@ -209,35 +209,37 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               <p class="text-white-50 mb-0 small"><?php echo t('labs.consistency.tip2', 'Base prompt = persistent style/identity, Scene prompt = variation.'); ?></p>
             </div>
           </div>
-          <div class="text-center mt-3">
-            <button type="submit" form="labs-comfy-form" class="knd-btn-primary" id="generateBtn">
-              <i class="fas fa-bolt me-2"></i><?php echo t('labs.consistency.generate', 'Generate'); ?>
-            </button>
+        </div>
+        <div class="labs-gen-area text-center py-4">
+          <button type="submit" form="labs-comfy-form" class="labs-gen-btn" id="generateBtn">
+            <i class="fas fa-bolt me-2"></i><?php echo t('labs.consistency.generate', 'Generate'); ?>
+          </button>
+        </div>
+        <div id="labs-result-actions" class="mt-3 px-3" style="display:none;">
+          <a href="#" id="labs-download-btn" class="btn btn-success me-2 mb-1" download><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
+          <a href="#" id="labs-generate-variations-btn" class="btn btn-neon-primary me-2 mb-1"><i class="fas fa-images me-1"></i><?php echo t('labs.generate_variations', 'Generate Variations'); ?></a>
+          <a href="#" id="labs-use-style-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-palette me-1"></i><?php echo t('labs.consistency.use_style', 'Use as Style Reference'); ?></a>
+          <a href="#" id="labs-use-char-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-user me-1"></i><?php echo t('labs.consistency.use_char', 'Use as Character Reference'); ?></a>
+          <a href="/labs-upscale.php" id="labs-use-input-btn" class="btn btn-outline-secondary me-2 mb-1"><i class="fas fa-search-plus me-1"></i><?php echo t('labs.use_as_input', 'Use as input'); ?></a>
+        </div>
+        <div id="labs-status-panel" class="mt-3 px-3" style="display:none;">
+          <div class="labs-stepper mb-2">
+            <span class="labs-stepper-dot" data-step="queued"></span>
+            <span class="labs-stepper-line"></span>
+            <span class="labs-stepper-dot" data-step="picked"></span>
+            <span class="labs-stepper-line"></span>
+            <span class="labs-stepper-dot" data-step="generating"></span>
+            <span class="labs-stepper-line"></span>
+            <span class="labs-stepper-dot" data-step="done"></span>
           </div>
-          <div id="labs-result-actions" class="mt-3" style="display:none;">
-            <a href="#" id="labs-download-btn" class="btn btn-success me-2 mb-1" download><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
-            <a href="#" id="labs-generate-variations-btn" class="btn btn-neon-primary me-2 mb-1"><i class="fas fa-images me-1"></i><?php echo t('labs.generate_variations', 'Generate Variations'); ?></a>
-            <a href="#" id="labs-use-style-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-palette me-1"></i><?php echo t('labs.consistency.use_style', 'Use as Style Reference'); ?></a>
-            <a href="#" id="labs-use-char-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-user me-1"></i><?php echo t('labs.consistency.use_char', 'Use as Character Reference'); ?></a>
-            <a href="/labs-upscale.php" id="labs-use-input-btn" class="btn btn-outline-secondary me-2 mb-1"><i class="fas fa-search-plus me-1"></i><?php echo t('labs.use_as_input', 'Use as input'); ?></a>
+          <p class="text-white-50 small mb-1"><?php echo t('labs.queued_leave', 'Generation is queued. You can leave this page.'); ?></p>
+          <div class="d-flex align-items-center">
+            <div class="ai-spinner me-2"><i class="fas fa-cog fa-spin"></i></div>
+            <span id="labs-status-text"><?php echo t('ai.status.processing'); ?></span>
           </div>
-          <div id="labs-status-panel" class="mt-3" style="display:none;">
-            <div class="labs-stepper mb-2">
-              <span class="labs-stepper-dot" data-step="queued"></span>
-              <span class="labs-stepper-line"></span>
-              <span class="labs-stepper-dot" data-step="picked"></span>
-              <span class="labs-stepper-line"></span>
-              <span class="labs-stepper-dot" data-step="generating"></span>
-              <span class="labs-stepper-line"></span>
-              <span class="labs-stepper-dot" data-step="done"></span>
-            </div>
-            <p class="text-white-50 small mb-1"><?php echo t('labs.queued_leave', 'Generation is queued. You can leave this page.'); ?></p>
-            <div class="d-flex align-items-center">
-              <div class="ai-spinner me-2"><i class="fas fa-cog fa-spin"></i></div>
-              <span id="labs-status-text"><?php echo t('ai.status.processing'); ?></span>
-            </div>
-          </div>
-          <div id="labs-error-msg" class="alert alert-danger mt-3" style="display:none;"></div>
+        </div>
+        <div id="labs-error-msg" class="alert alert-danger mt-3 mx-3" style="display:none;"></div>
+        <div class="px-3">
           <?php require __DIR__ . '/partials/image_details_panel.php'; ?>
         </div>
       </div>
@@ -266,6 +268,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               <a href="<?php echo htmlspecialchars($imgUrl); ?>" class="btn btn-sm btn-outline-success" target="_blank" download><i class="fas fa-download"></i></a>
               <a href="/labs-consistency.php?reference_job_id=<?php echo (int)$jid; ?>&mode=style" class="btn btn-sm btn-outline-secondary"><?php echo t('labs.consistency.reuse', 'Use as reference'); ?></a>
               <?php endif; ?>
+              <button type="button" class="btn btn-sm btn-outline-secondary labs-view-details" data-job-id="<?php echo (int)$jid; ?>"><?php echo t('labs.view_details', 'View details'); ?></button>
             </li>
             <?php endforeach; ?>
         </ul>
@@ -274,8 +277,52 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
         <?php endif; ?>
       </aside>
     </div>
+
+    <div class="labs-recent-creations mt-5">
+      <div class="knd-section-title mb-3"><?php echo t('labs.recent_creations', 'Recent Creations'); ?></div>
+      <div class="knd-card-grid" id="labs-recent-creations-grid">
+        <?php foreach (array_slice($historyJobs, 0, 8) as $j):
+          $jid = $j['id'] ?? 0;
+          $imgUrl = !empty($j['image_url']) ? $j['image_url'] : '/api/labs/image.php?job_id=' . $jid;
+          if (strpos($imgUrl, 'job_id=') === false && $jid) $imgUrl = '/api/labs/image.php?job_id=' . $jid;
+          $status = $j['status'] ?? 'pending';
+          $statusClass = $status === 'done' ? 'knd-badge-success' : ($status === 'failed' ? 'knd-badge--danger' : 'knd-badge--warning');
+        ?>
+        <div class="knd-showcase-card labs-creation-card" data-job-id="<?php echo (int)$jid; ?>">
+          <div class="knd-showcase-card__img">
+            <?php if (!empty($imgUrl) && $status === 'done'): ?>
+            <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+            <?php endif; ?>
+            <span class="knd-showcase-card__placeholder" style="<?php echo (!empty($imgUrl) && $status === 'done') ? 'display:none;' : ''; ?>"><i class="fas fa-lock"></i></span>
+          </div>
+          <div class="knd-showcase-card__body">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="knd-showcase-card__title"><?php echo t('labs.consistency.title', 'Consistency'); ?></span>
+              <span class="knd-badge <?php echo $statusClass; ?>"><?php echo htmlspecialchars($status); ?></span>
+            </div>
+            <div class="knd-showcase-card__meta"><?php echo date('M j, H:i', strtotime($j['created_at'])); ?></div>
+            <button type="button" class="btn btn-sm knd-btn-secondary mt-2 w-100 labs-view-details" data-job-id="<?php echo (int)$jid; ?>">
+              <i class="fas fa-info-circle me-1"></i><?php echo t('labs.details', 'Details'); ?>
+            </button>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <?php if (empty($historyJobs)): ?>
+      <p class="knd-muted small mb-0"><?php echo t('labs.no_creations_yet', 'Generate your first image to see it here.'); ?></p>
+      <?php endif; ?>
+    </div>
   </div>
 </section>
+
+<div class="knd-details-drawer__backdrop" id="labs-details-backdrop"></div>
+<div class="knd-details-drawer" id="labs-details-drawer" tabindex="-1">
+  <div class="knd-details-drawer__header d-flex justify-content-between align-items-center">
+    <h5 class="text-white mb-0"><?php echo t('labs.view_details', 'View details'); ?></h5>
+    <button type="button" class="btn btn-sm btn-link text-white-50 p-0" id="labs-details-close" aria-label="Close"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="knd-details-drawer__body" id="labs-details-body"></div>
+</div>
 
 <script src="/assets/js/navigation-extend.js"></script>
 <?php $kndlabsJs = __DIR__ . '/../assets/js/kndlabs.js'; ?>

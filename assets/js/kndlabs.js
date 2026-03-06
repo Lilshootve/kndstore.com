@@ -621,10 +621,20 @@
             var sizeStr = (J.width && J.height) ? J.width + '\u00D7' + J.height : '';
             var html = '';
             html += '<div class="knd-details-block"><div class="knd-details-block__title">Config</div>';
-            html += '<p class="text-white-50 small mb-1"><strong class="text-white">Prompt:</strong><br>' + (J.prompt ? self.esc(J.prompt) : '-') + '</p>';
-            html += '<p class="text-white-50 small mb-1"><strong class="text-white">Negative:</strong><br>' + (J.negative_prompt ? self.esc(J.negative_prompt) : '-') + '</p>';
-            html += '<p class="text-white-50 small mb-0">Model: ' + (J.model || '-') + ' | Quality: ' + (J.cost_kp ? J.cost_kp + ' KP' : '-') + '</p>';
-            html += '<p class="text-white-50 small mb-0">Aspect: ' + (sizeStr || '-') + ' | Steps: ' + (J.steps || '-') + ' | CFG: ' + (J.cfg || '-') + ' | Sampler: ' + (J.sampler_name || '-') + '</p>';
+            if (J.tool === 'upscale') {
+              html += '<p class="text-white-50 small mb-1">Scale: ' + (J.scale ? J.scale + 'x' : '-') + '</p>';
+              html += '<p class="text-white-50 small mb-0">Model: ' + (J.upscale_model || J.model || '-') + ' | Cost: ' + (J.cost_kp ? J.cost_kp + ' KP' : '-') + '</p>';
+            } else if (J.tool === 'consistency') {
+              html += '<p class="text-white-50 small mb-1"><strong class="text-white">Base:</strong><br>' + (J.base_prompt ? self.esc(J.base_prompt) : '-') + '</p>';
+              html += '<p class="text-white-50 small mb-1"><strong class="text-white">Scene:</strong><br>' + (J.scene_prompt ? self.esc(J.scene_prompt) : '-') + '</p>';
+              html += '<p class="text-white-50 small mb-1"><strong class="text-white">Negative:</strong><br>' + (J.negative_prompt ? self.esc(J.negative_prompt) : '-') + '</p>';
+              html += '<p class="text-white-50 small mb-0">Mode: ' + (J.mode || '-') + ' | ' + (sizeStr || '-') + ' | ' + (J.cost_kp ? J.cost_kp + ' KP' : '-') + '</p>';
+            } else {
+              html += '<p class="text-white-50 small mb-1"><strong class="text-white">Prompt:</strong><br>' + (J.prompt ? self.esc(J.prompt) : '-') + '</p>';
+              html += '<p class="text-white-50 small mb-1"><strong class="text-white">Negative:</strong><br>' + (J.negative_prompt ? self.esc(J.negative_prompt) : '-') + '</p>';
+              html += '<p class="text-white-50 small mb-0">Model: ' + (J.model || '-') + ' | Quality: ' + (J.cost_kp ? J.cost_kp + ' KP' : '-') + '</p>';
+              html += '<p class="text-white-50 small mb-0">Aspect: ' + (sizeStr || '-') + ' | Steps: ' + (J.steps || '-') + ' | CFG: ' + (J.cfg || '-') + ' | Sampler: ' + (J.sampler_name || '-') + '</p>';
+            }
             html += '</div>';
             html += '<div class="knd-details-block"><div class="knd-details-block__title">Result</div>';
             html += '<div class="knd-details-preview">';
@@ -644,17 +654,22 @@
               html += '<a href="/labs-consistency.php?reference_job_id=' + jid + '&mode=' + mode + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-palette me-1"></i>Consistency</a>';
               html += '<a href="/labs-consistency.php?reference_job_id=' + jid + '&mode=' + mode + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-images me-1"></i>Create Variations</a>';
             }
+            if (J.status === 'done' && J.tool === 'upscale') {
+              html += '<a href="/labs-upscale.php?source_job_id=' + jid + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-search-plus me-1"></i>Use as input</a>';
+            }
             if (J.status === 'done') {
               html += '<a href="' + imgUrl.replace(/"/g, '&quot;') + '" class="btn btn-sm knd-btn-secondary" download><i class="fas fa-download me-1"></i>Download</a>';
             }
-            html += '<button type="button" class="btn btn-sm knd-btn-secondary labs-details-reuse" data-job-id="' + jid + '"><i class="fas fa-copy me-1"></i>Reuse Settings</button>';
+            if (J.tool === 'text2img' || J.tool === 'consistency') {
+              html += '<button type="button" class="btn btn-sm knd-btn-secondary labs-details-reuse" data-job-id="' + jid + '"><i class="fas fa-copy me-1"></i>Reuse Settings</button>';
+            }
             html += '</div></div>';
             var body = document.getElementById('labs-details-body');
             if (!body) return;
             body.innerHTML = html;
             body.querySelectorAll('.labs-details-reuse').forEach(function(b) {
               b.addEventListener('click', function() {
-                self.reuseJobSettings(jid);
+                self.reuseJobSettings(jid, J.tool);
                 closeDrawer();
               });
             });
@@ -671,7 +686,7 @@
       return div.innerHTML;
     },
 
-    reuseJobSettings: function(jid) {
+    reuseJobSettings: function(jid, tool) {
       var self = this;
       fetch(API_JOB + '?job_id=' + jid, { credentials: 'same-origin' })
         .then(function(r) { return r.json(); })
@@ -680,17 +695,31 @@
           var J = d.data;
           var form = document.getElementById(self.config.formId || 'labs-comfy-form');
           if (!form) return;
-          var set = function(name, val) { var el = form.querySelector('[name="' + name + '"]'); if (el && val != null) el.value = val; };
-          set('prompt', J.prompt);
-          set('negative_prompt', J.negative_prompt);
-          set('model', J.model);
-          set('seed', J.seed);
-          set('steps', J.steps);
-          set('cfg', J.cfg);
-          set('width', J.width);
-          set('height', J.height);
-          set('sampler_name', J.sampler_name);
-          set('scheduler', J.scheduler);
+          var set = function(name, val) { var el = form.querySelector('[name="' + name + '"]'); if (el && val != null && val !== '') el.value = val; };
+          if (tool === 'consistency') {
+            set('base_prompt', J.base_prompt);
+            set('scene_prompt', J.scene_prompt);
+            set('negative_prompt', J.negative_prompt);
+            set('mode', J.mode);
+            set('width', J.width);
+            set('height', J.height);
+            set('seed', J.seed);
+            set('steps', J.steps);
+            set('cfg', J.cfg);
+            set('sampler', J.sampler_name || J.sampler);
+            set('model', J.model);
+          } else {
+            set('prompt', J.prompt);
+            set('negative_prompt', J.negative_prompt);
+            set('model', J.model);
+            set('seed', J.seed);
+            set('steps', J.steps);
+            set('cfg', J.cfg);
+            set('width', J.width);
+            set('height', J.height);
+            set('sampler_name', J.sampler_name);
+            set('scheduler', J.scheduler);
+          }
           if (self.updateCostLabel) self.updateCostLabel();
           if (self.updateBalanceAfter) self.updateBalanceAfter();
         });

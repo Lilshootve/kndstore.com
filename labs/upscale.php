@@ -33,19 +33,19 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
         <form id="labs-comfy-form" class="labs-form" method="post" action="#" onsubmit="return false;">
             <input type="hidden" name="tool" value="upscale">
             <div class="mb-3">
-              <label class="form-label text-white-50"><?php echo t('ai.upscale.scale'); ?></label>
-              <select name="scale" id="labs-scale-select" class="form-select bg-dark text-white mb-2">
+              <label class="form-label text-white-50 knd-label"><?php echo t('ai.upscale.scale'); ?></label>
+              <select name="scale" id="labs-scale-select" class="knd-select form-select text-white mb-2">
                 <option value="2">2x (5 KP)</option>
                 <option value="4" selected>4x (8 KP)</option>
               </select>
               <div class="form-text text-white-50 small"><?php echo t('labs.upscale_scale_help', 'Higher scale = more detail, higher cost'); ?></div>
             </div>
             <div class="mb-3 collapse" id="labs-upscale-advanced">
-              <label class="form-label text-white-50 small"><?php echo t('labs.denoise', 'Denoise'); ?></label>
-              <input type="number" name="upscale_denoise" class="form-control form-control-sm bg-dark text-white" value="0.10" min="0" max="0.35" step="0.05" placeholder="0.10">
+              <label class="form-label text-white-50 small knd-label"><?php echo t('labs.denoise', 'Denoise'); ?></label>
+              <input type="number" name="upscale_denoise" class="knd-input form-control form-control-sm text-white" value="0.10" min="0" max="0.35" step="0.05" placeholder="0.10">
               <div class="form-text text-white-50 small"><?php echo t('labs.upscale_denoise_help', '0–0.35. Lower = preserve detail'); ?></div>
               <label class="form-label text-white-50 small mt-2"><?php echo t('labs.upscaler_model', 'Upscaler model'); ?></label>
-              <select name="upscale_model" class="form-select form-select-sm bg-dark text-white">
+              <select name="upscale_model" class="knd-select form-select form-select-sm text-white">
                 <option value="4x-UltraSharp.pth" selected>4x-UltraSharp</option>
               </select>
             </div>
@@ -66,27 +66,29 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
           </form>
       </aside>
 
-      <div class="d-flex flex-column">
-        <div class="knd-canvas knd-panel-soft flex-grow-1 mb-3">
+      <div class="d-flex flex-column flex-grow-1">
+        <div class="knd-canvas knd-panel-soft flex-grow-1 mb-0">
           <div id="labs-result-preview" class="labs-result-preview text-center py-5" style="min-height:320px;">
             <div id="labs-upscale-empty" class="knd-canvas__empty">
               <i class="fas fa-search-plus fa-3x mb-3" style="color:var(--knd-accent-soft);opacity:.4;"></i>
               <p class="mb-0"><?php echo t('labs.no_result_yet', 'Submit to generate'); ?></p>
             </div>
           </div>
-          <div class="text-center mt-3">
-            <button type="submit" form="labs-comfy-form" class="knd-btn-primary" id="labs-submit-btn" disabled>
-              <i class="fas fa-search-plus me-2"></i><?php echo t('ai.upscale.title'); ?>
-            </button>
-          </div>
-          <div id="labs-result-actions" class="mt-3" style="display:none;">
+        </div>
+        <div class="labs-gen-area text-center py-4">
+          <button type="submit" form="labs-comfy-form" class="labs-gen-btn" id="labs-submit-btn" disabled>
+            <i class="fas fa-search-plus me-2"></i><?php echo t('ai.upscale.title'); ?>
+          </button>
+        </div>
+        <div id="labs-result-actions" class="mt-3 px-3" style="display:none;">
             <a href="#" id="labs-download-btn" class="btn btn-success me-2" download><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
             <button type="button" id="labs-retry-btn" class="btn btn-outline-primary"><i class="fas fa-redo me-1"></i><?php echo t('labs.generate_again', 'Generate again'); ?></button>
           </div>
-          <div id="labs-status-panel" class="mt-3" style="display:none;">
-            <div class="d-flex align-items-center"><div class="ai-spinner me-2"><i class="fas fa-cog fa-spin"></i></div><span id="labs-status-text"><?php echo t('ai.status.processing'); ?></span></div>
-          </div>
-          <div id="labs-error-msg" class="alert alert-danger mt-3" style="display:none;"></div>
+        <div id="labs-status-panel" class="mt-3 px-3" style="display:none;">
+          <div class="d-flex align-items-center"><div class="ai-spinner me-2"><i class="fas fa-cog fa-spin"></i></div><span id="labs-status-text"><?php echo t('ai.status.processing'); ?></span></div>
+        </div>
+        <div id="labs-error-msg" class="alert alert-danger mt-3 mx-3" style="display:none;"></div>
+        <div class="px-3">
           <?php require __DIR__ . '/partials/image_details_panel.php'; ?>
         </div>
       </div>
@@ -99,14 +101,18 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
         <div class="knd-divider"></div>
         <div class="knd-section-title"><?php echo t('labs.tool_history', 'Recent'); ?></div>
         <?php if (!empty($historyJobs)): ?>
-        <ul class="list-unstyled mb-0">
-            <?php foreach (array_slice($historyJobs, 0, 5) as $j): ?>
-            <li class="d-flex align-items-center justify-content-between py-2 border-bottom border-secondary flex-wrap gap-2">
+        <ul class="list-unstyled mb-0" id="labs-recent-list">
+            <?php foreach (array_slice($historyJobs, 0, 5) as $j):
+              $jid = $j['id'] ?? 0;
+              $imgUrl = !empty($j['image_url']) ? $j['image_url'] : '/api/labs/image.php?job_id=' . $jid;
+            ?>
+            <li class="labs-recent-item d-flex align-items-center justify-content-between py-2 border-bottom border-secondary flex-wrap gap-2" data-job-id="<?php echo (int)$jid; ?>" data-status="<?php echo htmlspecialchars($j['status'] ?? ''); ?>">
               <span class="text-white-50 small"><?php echo date('M j, H:i', strtotime($j['created_at'])); ?></span>
               <span class="badge bg-<?php echo ($j['status'] ?? '') === 'done' ? 'success' : (($j['status'] ?? '') === 'failed' ? 'danger' : 'warning'); ?>"><?php echo htmlspecialchars($j['status'] ?? 'pending'); ?></span>
-              <?php if (!empty($j['image_url'])): ?>
-              <a href="<?php echo htmlspecialchars($j['image_url']); ?>" class="btn btn-sm btn-outline-success" target="_blank"><i class="fas fa-download"></i></a>
+              <?php if (($j['status'] ?? '') === 'done' && !empty($imgUrl)): ?>
+              <a href="<?php echo htmlspecialchars($imgUrl); ?>" class="btn btn-sm btn-outline-success" target="_blank" download><i class="fas fa-download"></i></a>
               <?php endif; ?>
+              <button type="button" class="btn btn-sm btn-outline-secondary labs-view-details" data-job-id="<?php echo (int)$jid; ?>"><?php echo t('labs.view_details', 'View details'); ?></button>
             </li>
             <?php endforeach; ?>
         </ul>
@@ -115,8 +121,51 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
         <?php endif; ?>
       </aside>
     </div>
+
+    <div class="labs-recent-creations mt-5">
+      <div class="knd-section-title mb-3"><?php echo t('labs.recent_creations', 'Recent Creations'); ?></div>
+      <div class="knd-card-grid" id="labs-recent-creations-grid">
+        <?php foreach (array_slice($historyJobs, 0, 8) as $j):
+          $jid = $j['id'] ?? 0;
+          $imgUrl = !empty($j['image_url']) ? $j['image_url'] : '/api/labs/image.php?job_id=' . $jid;
+          $status = $j['status'] ?? 'pending';
+          $statusClass = $status === 'done' ? 'knd-badge-success' : ($status === 'failed' ? 'knd-badge--danger' : 'knd-badge--warning');
+        ?>
+        <div class="knd-showcase-card labs-creation-card" data-job-id="<?php echo (int)$jid; ?>">
+          <div class="knd-showcase-card__img">
+            <?php if (!empty($imgUrl) && $status === 'done'): ?>
+            <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+            <?php endif; ?>
+            <span class="knd-showcase-card__placeholder" style="<?php echo (!empty($imgUrl) && $status === 'done') ? 'display:none;' : ''; ?>"><i class="fas fa-search-plus"></i></span>
+          </div>
+          <div class="knd-showcase-card__body">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="knd-showcase-card__title"><?php echo t('ai.upscale.title', 'Upscale'); ?></span>
+              <span class="knd-badge <?php echo $statusClass; ?>"><?php echo htmlspecialchars($status); ?></span>
+            </div>
+            <div class="knd-showcase-card__meta"><?php echo date('M j, H:i', strtotime($j['created_at'])); ?></div>
+            <button type="button" class="btn btn-sm knd-btn-secondary mt-2 w-100 labs-view-details" data-job-id="<?php echo (int)$jid; ?>">
+              <i class="fas fa-info-circle me-1"></i><?php echo t('labs.details', 'Details'); ?>
+            </button>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <?php if (empty($historyJobs)): ?>
+      <p class="knd-muted small mb-0"><?php echo t('labs.no_creations_yet', 'Generate your first image to see it here.'); ?></p>
+      <?php endif; ?>
+    </div>
   </div>
 </section>
+
+<div class="knd-details-drawer__backdrop" id="labs-details-backdrop"></div>
+<div class="knd-details-drawer" id="labs-details-drawer" tabindex="-1">
+  <div class="knd-details-drawer__header d-flex justify-content-between align-items-center">
+    <h5 class="text-white mb-0"><?php echo t('labs.view_details', 'View details'); ?></h5>
+    <button type="button" class="btn btn-sm btn-link text-white-50 p-0" id="labs-details-close" aria-label="Close"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="knd-details-drawer__body" id="labs-details-body"></div>
+</div>
 
 <script src="/assets/js/navigation-extend.js"></script>
 <script src="/assets/js/kndlabs.js"></script>
