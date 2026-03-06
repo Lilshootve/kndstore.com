@@ -7,29 +7,15 @@ labs_perf_checkpoint('t2i_after_comfyui');
 
 $toolName = t('labs.canvas.title', 'Canvas');
 $jobType = 'text2img';
-$historyJobs = [];
 $providerFilter = trim($_GET['provider'] ?? '');
-if ($pdo) {
-    try {
-        $historyJobs = comfyui_get_user_jobs($pdo, current_user_id(), 12);
-    } catch (\Throwable $e) {
-        $historyJobs = [];
-    }
-}
+$historyJobs = [];
 labs_perf_checkpoint('t2i_after_history_fetch');
-$historyJobs = array_filter($historyJobs, fn($j) => ($j['tool'] ?? '') === 'text2img');
-if ($providerFilter === 'local') {
-    $historyJobs = array_filter($historyJobs, fn($j) => ($j['provider'] ?? '') !== 'runpod');
-} elseif ($providerFilter === 'runpod') {
-    $historyJobs = array_filter($historyJobs, fn($j) => ($j['provider'] ?? '') === 'runpod');
-} elseif ($providerFilter === 'failed') {
-    $historyJobs = array_filter($historyJobs, fn($j) => ($j['status'] ?? '') === 'failed');
-}
 
 $aiCss = __DIR__ . '/../assets/css/ai-tools.css';
 $labsCss = __DIR__ . '/../assets/css/knd-labs.css';
 $extraCss = '<link rel="stylesheet" href="/assets/css/ai-tools.css?v=' . (file_exists($aiCss) ? filemtime($aiCss) : time()) . '">';
 $extraCss .= '<link rel="stylesheet" href="/assets/css/knd-labs.css?v=' . (file_exists($labsCss) ? filemtime($labsCss) : time()) . '">';
+$extraCss .= '<script>window.KND_PRICING={"text2img":{"standard":3,"high":6},"upscale":{"2x":5,"4x":8},"character":{"base":15},"consistency":{"base":5}};</script>';
 labs_perf_checkpoint('t2i_before_header');
 echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $toolName]), t('labs.tool_page_desc', 'Create with AI'), $extraCss);
 ?>
@@ -324,73 +310,19 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
         <a href="/support-credits.php" class="knd-btn-secondary w-100 mb-4">+ <?php echo t('labs.add_credits', 'Add Credits'); ?></a>
         <div class="knd-divider"></div>
         <div class="knd-section-title"><?php echo t('labs.tool_history', 'Recent'); ?></div>
-        <?php if (!empty($historyJobs)): ?>
-          <select id="labs-recent-filter" class="knd-select form-select form-select-sm mb-3" style="width:100%;">
-            <option value="" <?php echo $providerFilter === '' ? 'selected' : ''; ?>><?php echo t('labs.all', 'All'); ?></option>
-            <option value="local" <?php echo $providerFilter === 'local' ? 'selected' : ''; ?>>Local</option>
-            <option value="runpod" <?php echo $providerFilter === 'runpod' ? 'selected' : ''; ?>>RunPod</option>
-            <option value="failed" <?php echo $providerFilter === 'failed' ? 'selected' : ''; ?>><?php echo t('labs.failed', 'Failed'); ?></option>
-          </select>
-          <ul class="list-unstyled mb-0" id="labs-recent-list">
-            <?php foreach (array_slice($historyJobs, 0, 8) as $j):
-              $jid = $j['id'] ?? 0;
-              $imgUrl = !empty($j['image_url']) ? $j['image_url'] : '/api/labs/image.php?job_id=' . $jid;
-              if (strpos($imgUrl, 'job_id=') === false && $jid) $imgUrl = '/api/labs/image.php?job_id=' . $jid;
-            ?>
-            <li class="labs-recent-item d-flex align-items-center justify-content-between py-2 border-bottom border-secondary flex-wrap gap-2" data-job-id="<?php echo (int)($j['id'] ?? 0); ?>" data-provider="<?php echo htmlspecialchars($j['provider'] ?? ''); ?>" data-status="<?php echo htmlspecialchars($j['status'] ?? ''); ?>">
-              <span class="text-white-50 small"><?php echo date('M j, H:i', strtotime($j['created_at'])); ?></span>
-              <span class="badge bg-<?php echo ($j['status'] ?? '') === 'done' ? 'success' : (($j['status'] ?? '') === 'failed' ? 'danger' : 'warning'); ?>"><?php echo htmlspecialchars($j['status'] ?? 'pending'); ?></span>
-              <?php if (!empty($imgUrl) && ($j['status'] ?? '') === 'done'): ?>
-              <div class="labs-recent-thumb" style="position:relative;">
-                <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="" class="rounded" style="width:48px;height:48px;object-fit:cover;" onerror="this.parentElement.classList.add('labs-img-error')">
-                <span class="labs-provider-offline" style="display:none;"><?php echo t('labs.provider_offline', 'Provider offline'); ?></span>
-              </div>
-              <a href="<?php echo htmlspecialchars($imgUrl); ?>" class="btn btn-sm btn-outline-success" target="_blank" download><i class="fas fa-download"></i></a>
-              <?php endif; ?>
-              <button type="button" class="btn btn-sm btn-outline-secondary labs-view-details" data-job-id="<?php echo (int)($j['id'] ?? 0); ?>"><?php echo t('labs.view_details', 'View details'); ?></button>
-            </li>
-            <?php endforeach; ?>
-          </ul>
-        <?php else: ?>
-        <p class="knd-muted small mb-0"><?php echo t('labs.no_result_yet', 'Submit to generate'); ?></p>
-        <?php endif; ?>
+        <div id="labs-history-sidebar-placeholder">
+          <p class="knd-muted small mb-0"><?php echo t('labs.no_result_yet', 'Submit to generate'); ?></p>
+        </div>
+        <ul class="list-unstyled mb-0" id="labs-recent-list" style="display:none;"></ul>
       </aside>
     </div>
 
-    <!-- Recent Creations - below workspace -->
+    <!-- Recent Creations - below workspace (lazy-loaded) -->
     <div class="labs-recent-creations mt-5">
       <div class="knd-section-title mb-3"><?php echo t('labs.recent_creations', 'Recent Creations'); ?></div>
       <div class="knd-card-grid" id="labs-recent-creations-grid">
-        <?php foreach (array_slice($historyJobs, 0, 8) as $j):
-          $jid = $j['id'] ?? 0;
-          $imgUrl = !empty($j['image_url']) ? $j['image_url'] : '/api/labs/image.php?job_id=' . $jid;
-          if (strpos($imgUrl, 'job_id=') === false && $jid) $imgUrl = '/api/labs/image.php?job_id=' . $jid;
-          $status = $j['status'] ?? 'pending';
-          $statusClass = $status === 'done' ? 'knd-badge-success' : ($status === 'failed' ? 'knd-badge--danger' : 'knd-badge--warning');
-        ?>
-        <div class="knd-showcase-card labs-creation-card" data-job-id="<?php echo (int)$jid; ?>">
-          <div class="knd-showcase-card__img">
-            <?php if (!empty($imgUrl) && $status === 'done'): ?>
-            <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-            <?php endif; ?>
-            <span class="knd-showcase-card__placeholder" style="<?php echo (!empty($imgUrl) && $status === 'done') ? 'display:none;' : ''; ?>"><i class="fas fa-image"></i></span>
-          </div>
-          <div class="knd-showcase-card__body">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <span class="knd-showcase-card__title"><?php echo t('labs.canvas.title', 'Canvas'); ?></span>
-              <span class="knd-badge <?php echo $statusClass; ?>"><?php echo htmlspecialchars($status); ?></span>
-            </div>
-            <div class="knd-showcase-card__meta"><?php echo date('M j, H:i', strtotime($j['created_at'])); ?></div>
-            <button type="button" class="btn btn-sm knd-btn-secondary mt-2 w-100 labs-view-details" data-job-id="<?php echo (int)$jid; ?>">
-              <i class="fas fa-info-circle me-1"></i><?php echo t('labs.details', 'Details'); ?>
-            </button>
-          </div>
-        </div>
-        <?php endforeach; ?>
+        <p class="knd-muted small mb-0"><?php echo t('labs.no_creations_yet', 'Generate your first image to see it here.'); ?></p>
       </div>
-      <?php if (empty($historyJobs)): ?>
-      <p class="knd-muted small mb-0"><?php echo t('labs.no_creations_yet', 'Generate your first image to see it here.'); ?></p>
-      <?php endif; ?>
     </div>
   </div>
 </section>
@@ -406,6 +338,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
 </div>
 
 <script src="/assets/js/navigation-extend.js"></script>
+<script src="/assets/js/labs-lazy-history.js" defer></script>
 <?php $kndlabsJs = __DIR__ . '/../assets/js/kndlabs.js'; ?>
 <script src="/assets/js/kndlabs.js?v=<?php echo file_exists($kndlabsJs) ? filemtime($kndlabsJs) : time(); ?>"></script>
 <script>
@@ -470,6 +403,15 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
   } else {
     run();
   }
+  function scheduleLazyHistory() {
+    var fn = function() {
+      if (window.LabsLazyHistory && window.LabsLazyHistory.load) {
+        window.LabsLazyHistory.load({ tool: 'text2img', limit: 12, toolLabel: 'Canvas', hasProviderFilter: true, provider: '<?php echo addslashes($providerFilter); ?>' });
+      }
+    };
+    if (window.requestIdleCallback) requestIdleCallback(fn, { timeout: 1500 }); else setTimeout(fn, 100);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scheduleLazyHistory); else scheduleLazyHistory();
 })();
 </script>
 <?php echo generateFooter(); echo generateScripts(); echo labs_perf_comment(); labs_perf_log(); ?>

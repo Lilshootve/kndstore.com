@@ -27,9 +27,14 @@ try {
     $limit = (int) ($_GET['limit'] ?? 20);
     $limit = max(1, min(50, $limit));
     $filterProvider = trim($_GET['provider'] ?? '');
+    $filterTool = trim($_GET['tool'] ?? '');
 
     $where = "user_id = ?";
     $params = [current_user_id()];
+    if ($filterTool !== '') {
+        $where .= " AND tool = ?";
+        $params[] = $filterTool;
+    }
     if ($filterProvider === 'local') {
         $where .= " AND (provider = 'local' OR provider IS NULL)";
     } elseif ($filterProvider === 'runpod') {

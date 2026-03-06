@@ -29,11 +29,8 @@
         ? document.querySelector(this.config.balanceEl)
         : null;
       var self = this;
-      fetch(API_PRICING, { credentials: 'same-origin' })
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          if (d.ok && d.data) self.pricing = d.data;
-          self.bindForm();
+      function doBind() {
+        self.bindForm();
           self.bindPresets();
           self.bindPresetsNegative();
           self.bindRetry();
@@ -49,24 +46,19 @@
           self.updateCostLabel();
           self.updateBalanceAfter();
           self.updateSubmitButton();
-        })
-        .catch(function() {
-          self.bindForm();
-          self.bindPresets();
-          self.bindPresetsNegative();
-          self.bindRetry();
-          self.bindRegenerate();
-          self.bindVariations();
-          self.bindPromptValidation();
-          self.bindAdvancedToggle();
-          self.bindViewDetails();
-          self.bindRecentFilter();
-          self.bindPrivateCheck();
-          self.bindUseLastPrompt();
-          self.updateCostLabel();
-          self.updateBalanceAfter();
-          self.updateSubmitButton();
-        });
+      }
+      if (typeof window !== 'undefined' && window.KND_PRICING) {
+        self.pricing = window.KND_PRICING;
+        doBind();
+      } else {
+        fetch(API_PRICING, { credentials: 'same-origin' })
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            if (d.ok && d.data) self.pricing = d.data;
+            doBind();
+          })
+          .catch(function() { doBind(); });
+      }
     },
 
     bindUseLastPrompt: function() {
