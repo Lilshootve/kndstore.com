@@ -303,12 +303,43 @@ function drop_play(PDO $pdo, int $userId): array {
         
         $xp = $DROP_XP_MAP[$rarity] ?? 2;
 
-        // Record drop (no reward_kp, set to 0)
-        $pdo->prepare(
-            "INSERT INTO knd_drops (user_id, season_id, entry_kp, rarity, reward_kp, config_id, xp_awarded, created_at)
-             VALUES (?, ?, ?, ?, 0, 0, ?, NOW())"
-        )->execute([$userId, (int)$season['id'], $entryKp, $rarity, $xp]);
-        $dropId = (int) $pdo->lastInsertId();
+        // Find a valid legacy config_id to satisfy FK in knd_drops
+$stmt = $pdo->prepare(
+    "SELECT id
+     FROM knd_drop_configs
+     WHERE season_id = ? AND rarity = ? AND is_active = 1
+     ORDER BY id ASC
+     LIMIT 1"
+);
+$stmt->execute([(int)$season['id'], $rarity]);
+$configRow = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$configRow) {
+    $stmt = $pdo->prepare(
+        "SELECT id
+         FROM knd_drop_configs
+         WHERE season_id = ? AND is_active = 1
+         ORDER BY id ASC
+         LIMIT 1"
+    );
+    $stmt->execute([(int)$season['id']]);
+    $configRow = $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+if (!$configRow) {
+    $pdo->rollBack();
+    return ['error' => 'NO_CONFIG', 'message' => 'No valid drop config found for this season.'];
+}
+
+$configId = (int)$configRow['id'];
+
+// Record drop (reward_kp stays 0, but config_id must be valid)
+$pdo->prepare(
+    "INSERT INTO knd_drops (user_id, season_id, entry_kp, rarity, reward_kp, config_id, xp_awarded, created_at)
+     VALUES (?, ?, ?, ?, 0, ?, ?, NOW())"
+)->execute([$userId, (int)$season['id'], $entryKp, $rarity, $configId, $xp]);
+
+$dropId = (int)$pdo->lastInsertId();
         
         // Record reward details
         record_drop_reward($pdo, $userId, $dropId, $itemId, $rarity, $wasDuplicate, $fragmentsAwarded, $pityBoost);

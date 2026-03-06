@@ -55,7 +55,7 @@ $ogHead  .= '    <meta property="og:type" content="website">' . "\n";
 $ogHead  .= '    <meta name="twitter:card" content="summary_large_image">' . "\n";
 echo generateHeader($seoTitle, $seoDesc, $ogHead);
 
-$entryKp = defined('DROP_ENTRY_KP') ? DROP_ENTRY_KP : 420;
+$entryKp = defined('DROP_ENTRY_KP') ? DROP_ENTRY_KP : 100;
 
 $rarityColors = [
   'common' => [
