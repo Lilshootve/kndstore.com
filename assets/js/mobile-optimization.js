@@ -16,70 +16,10 @@ const isSmallMobile = () => {
 
 // ===== OPTIMIZACIONES DE RENDIMIENTO MÓVIL =====
 
-// Reducir partículas en dispositivos móviles
+// Partículas: ya optimizadas en footer (único canvas). No inyectar en particles-bg.
 function optimizeParticlesForMobile() {
-    if (isMobile() && typeof particlesJS !== 'undefined') {
-        // Configuración reducida para móviles
-        const mobileParticleConfig = {
-            particles: {
-                number: {
-                    value: 30, // Reducido de 80
-                    density: {
-                        enable: true,
-                        value_area: 800
-                    }
-                },
-                color: {
-                    value: ["#259cae", "#ae2565"]
-                },
-                shape: {
-                    type: "circle"
-                },
-                opacity: {
-                    value: 0.3, // Reducido de 0.5
-                    random: false
-                },
-                size: {
-                    value: 2, // Reducido de 3
-                    random: true
-                },
-                line_linked: {
-                    enable: true,
-                    distance: 120, // Reducido de 150
-                    color: "#259cae",
-                    opacity: 0.2, // Reducido de 0.4
-                    width: 1
-                },
-                move: {
-                    enable: true,
-                    speed: 3, // Reducido de 6
-                    direction: "none",
-                    random: false,
-                    straight: false,
-                    out_mode: "out",
-                    bounce: false
-                }
-            },
-            interactivity: {
-                detect_on: "canvas",
-                events: {
-                    onhover: {
-                        enable: false, // Deshabilitado en móviles
-                        mode: "repulse"
-                    },
-                    onclick: {
-                        enable: false, // Deshabilitado en móviles
-                        mode: "push"
-                    },
-                    resize: true
-                }
-            },
-            retina_detect: true
-        };
-
-        // Aplicar configuración móvil
-        particlesJS("particles-bg", mobileParticleConfig);
-    }
+    // Footer particles config is in footer.php; particles-bg stays gradient-only.
+    // Evita canvas extra en móvil que bloqueaba render y consumía recursos.
 }
 
 // ===== OPTIMIZACIONES DE TOUCH =====
@@ -371,20 +311,7 @@ function optimizeForSlowConnections() {
             if (connection.effectiveType === 'slow-2g' || 
                 connection.effectiveType === '2g' || 
                 connection.effectiveType === '3g') {
-                
                 document.body.classList.add('slow-connection');
-                
-                // Reducir aún más las partículas
-                if (typeof particlesJS !== 'undefined') {
-                    const slowConnectionConfig = {
-                        particles: {
-                            number: { value: 15 },
-                            opacity: { value: 0.2 },
-                            move: { speed: 2 }
-                        }
-                    };
-                    particlesJS("particles-bg", slowConnectionConfig);
-                }
             }
         }
     }
@@ -394,11 +321,7 @@ function optimizeForSlowConnections() {
 
 // Función principal de inicialización
 function initMobileOptimizations() {
-    console.log('🚀 Inicializando optimizaciones móviles...');
-    
-    // Aplicar optimizaciones según el dispositivo
     if (isMobile()) {
-        console.log('📱 Dispositivo móvil detectado');
         
         // Optimizaciones de rendimiento
         optimizeParticlesForMobile();
@@ -420,14 +343,8 @@ function initMobileOptimizations() {
         
         // Manejo de orientación
         handleOrientationChange();
-        
-        console.log('✅ Optimizaciones móviles aplicadas');
     } else if (isTablet()) {
-        console.log('📱 Tablet detectada');
-        // Optimizaciones específicas para tablets
-        optimizeParticlesForMobile(); // Usar configuración móvil para tablets también
-    } else {
-        console.log('🖥️ Dispositivo de escritorio detectado');
+        optimizeParticlesForMobile();
     }
 }
 

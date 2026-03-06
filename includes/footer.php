@@ -184,9 +184,9 @@ function generateFooter() {
 function generateScripts() {
     $scripts = '';
     
-    // Level-up y badge (sin defer para disponibilidad temprana)
-    $scripts .= '<script src="/assets/js/knd-xp-fx.js"></script>' . "\n";
-    $scripts .= '<script src="/assets/js/level-up.js"></script>' . "\n";
+    // Level-up y badge (defer para no bloquear render)
+    $scripts .= '<script src="/assets/js/knd-xp-fx.js" defer></script>' . "\n";
+    $scripts .= '<script src="/assets/js/level-up.js" defer></script>' . "\n";
     
     // jQuery con preload
     $scripts .= '<script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>' . "\n";
@@ -212,41 +212,17 @@ function generateScripts() {
     // Confetti (Legendary) - toast/xp-fx/level-up loaded in header for early availability
     $scripts .= '<script src="assets/js/knd-confetti.js" defer></script>' . "\n";
     
-    // Configuración de partículas para el footer
+    // Partículas footer (único canvas, deferred para no bloquear render)
     $scripts .= '<script>' . "\n";
-    $scripts .= '// Partículas footer + header' . "\n";
     $scripts .= 'function initParticles() {' . "\n";
-    $scripts .= '  if (typeof particlesJS === "undefined") {' . "\n";
-    $scripts .= '    setTimeout(initParticles, 100);' . "\n";
-    $scripts .= '    return;' . "\n";
-    $scripts .= '  }' . "\n";
-    $scripts .= '  var nav = document.querySelector(".navbar");' . "\n";
-    $scripts .= '  if (nav && !document.getElementById("particles-header")) {' . "\n";
-    $scripts .= '    var ph = document.createElement("div");' . "\n";
-    $scripts .= '    ph.id = "particles-header";' . "\n";
-    $scripts .= '    nav.insertBefore(ph, nav.firstChild);' . "\n";
-    $scripts .= '  }' . "\n";
-    $scripts .= '  var headerEl = document.getElementById("particles-header");' . "\n";
-    $scripts .= '  if (headerEl) {' . "\n";
-    $scripts .= '    particlesJS("particles-header",{particles:{number:{value:18,density:{enable:true,value_area:600}},color:{value:["#35C2FF","#8B5CFF"]},opacity:{value:0.12,random:true},size:{value:2,random:true},line_linked:{enable:true,distance:120,color:"rgba(103,213,255,0.1)",opacity:0.08,width:0.8},move:{enable:true,speed:2,direction:"none",out_mode:"out"}},interactivity:{detect_on:"canvas",events:{resize:true}},retina_detect:true});' . "\n";
-    $scripts .= '  }' . "\n";
-    $scripts .= '  const particlesContainer = document.getElementById("particles-footer");' . "\n";
-    $scripts .= '  if (!particlesContainer) {' . "\n";
-    $scripts .= '    return;' . "\n";
-    $scripts .= '  }' . "\n";
+    $scripts .= '  if (typeof particlesJS === "undefined") { setTimeout(initParticles, 150); return; }' . "\n";
+    $scripts .= '  var el = document.getElementById("particles-footer");' . "\n";
+    $scripts .= '  if (!el) return;' . "\n";
     $scripts .= '  ' . "\n";
     $scripts .= '  particlesJS("particles-footer", {' . "\n";
     $scripts .= '  particles: {' . "\n";
-    $scripts .= '    number: {' . "\n";
-    $scripts .= '      value: 80,' . "\n";
-    $scripts .= '      density: {' . "\n";
-    $scripts .= '        enable: true,' . "\n";
-    $scripts .= '        value_area: 800' . "\n";
-    $scripts .= '      }' . "\n";
-    $scripts .= '    },' . "\n";
-    $scripts .= '    color: {' . "\n";
-    $scripts .= '      value: ["#35C2FF", "#8B5CFF", "#67D5FF"]' . "\n";
-    $scripts .= '    },' . "\n";
+    $scripts .= '    number: { value: 45, density: { enable: true, value_area: 900 } },' . "\n";
+    $scripts .= '    color: { value: ["#35C2FF", "#8B5CFF", "#67D5FF"] },' . "\n";
     $scripts .= '    shape: {' . "\n";
     $scripts .= '      type: "circle",' . "\n";
     $scripts .= '      stroke: {' . "\n";
@@ -277,16 +253,8 @@ function generateScripts() {
     $scripts .= '        sync: false' . "\n";
     $scripts .= '      }' . "\n";
     $scripts .= '    },' . "\n";
-    $scripts .= '    line_linked: {' . "\n";
-    $scripts .= '      enable: true,' . "\n";
-    $scripts .= '      distance: 150,' . "\n";
-    $scripts .= '      color: "#259cae",' . "\n";
-    $scripts .= '      opacity: 0.4,' . "\n";
-    $scripts .= '      width: 1' . "\n";
-    $scripts .= '    },' . "\n";
-    $scripts .= '    move: {' . "\n";
-    $scripts .= '      enable: true,' . "\n";
-    $scripts .= '      speed: 6,' . "\n";
+    $scripts .= '    line_linked: { enable: true, distance: 140, color: "rgba(53,194,255,0.5)", opacity: 0.5, width: 0.8 },' . "\n";
+    $scripts .= '    move: { enable: true, speed: 4,' . "\n";
     $scripts .= '      direction: "none",' . "\n";
     $scripts .= '      random: false,' . "\n";
     $scripts .= '      straight: false,' . "\n";
@@ -299,58 +267,18 @@ function generateScripts() {
     $scripts .= '      }' . "\n";
     $scripts .= '    }' . "\n";
     $scripts .= '  },' . "\n";
-    $scripts .= '  interactivity: {' . "\n";
-    $scripts .= '    detect_on: "canvas",' . "\n";
-    $scripts .= '    events: {' . "\n";
-    $scripts .= '      onhover: {' . "\n";
-    $scripts .= '        enable: true,' . "\n";
-    $scripts .= '        mode: "repulse"' . "\n";
-    $scripts .= '      },' . "\n";
-    $scripts .= '      onclick: {' . "\n";
-    $scripts .= '        enable: true,' . "\n";
-    $scripts .= '        mode: "push"' . "\n";
-    $scripts .= '      },' . "\n";
-    $scripts .= '      resize: true' . "\n";
-    $scripts .= '    },' . "\n";
-    $scripts .= '    modes: {' . "\n";
-    $scripts .= '      grab: {' . "\n";
-    $scripts .= '        distance: 400,' . "\n";
-    $scripts .= '        line_linked: {' . "\n";
-    $scripts .= '          opacity: 1' . "\n";
-    $scripts .= '        }' . "\n";
-    $scripts .= '      },' . "\n";
-    $scripts .= '      bubble: {' . "\n";
-    $scripts .= '        distance: 400,' . "\n";
-    $scripts .= '        size: 40,' . "\n";
-    $scripts .= '        duration: 2,' . "\n";
-    $scripts .= '        opacity: 8,' . "\n";
-    $scripts .= '        speed: 3' . "\n";
-    $scripts .= '      },' . "\n";
-    $scripts .= '      repulse: {' . "\n";
-    $scripts .= '        distance: 200,' . "\n";
-    $scripts .= '        duration: 0.4' . "\n";
-    $scripts .= '      },' . "\n";
-    $scripts .= '      push: {' . "\n";
-    $scripts .= '        particles_nb: 4' . "\n";
-    $scripts .= '      },' . "\n";
-    $scripts .= '      remove: {' . "\n";
-    $scripts .= '        particles_nb: 2' . "\n";
-    $scripts .= '      }' . "\n";
-    $scripts .= '    }' . "\n";
-    $scripts .= '  },' . "\n";
-    $scripts .= '  retina_detect: true' . "\n";
-    $scripts .= '  });' . "\n";
+    $scripts .= '  interactivity: { detect_on: "canvas", events: { resize: true } },' . "\n";
+    $scripts .= '  retina_detect: true });' . "\n";
     $scripts .= '}' . "\n";
-    $scripts .= '' . "\n";
-    $scripts .= '// Inicializar partículas cuando el DOM esté listo' . "\n";
-    $scripts .= 'if (document.readyState === "loading") {' . "\n";
-    $scripts .= '  document.addEventListener("DOMContentLoaded", initParticles);' . "\n";
-    $scripts .= '} else {' . "\n";
-    $scripts .= '  initParticles();' . "\n";
+    $scripts .= 'function scheduleParticles() {' . "\n";
+    $scripts .= '  if ("requestIdleCallback" in window) {' . "\n";
+    $scripts .= '    requestIdleCallback(function() { initParticles(); }, { timeout: 2500 });' . "\n";
+    $scripts .= '  } else {' . "\n";
+    $scripts .= '    window.addEventListener("load", function() { setTimeout(initParticles, 300); });' . "\n";
+    $scripts .= '  }' . "\n";
     $scripts .= '}' . "\n";
-    $scripts .= '' . "\n";
-    $scripts .= '// También intentar cuando la ventana se carga completamente' . "\n";
-    $scripts .= 'window.addEventListener("load", initParticles);' . "\n";
+    $scripts .= 'if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", scheduleParticles); }' . "\n";
+    $scripts .= 'else { scheduleParticles(); }' . "\n";
     $scripts .= '</script>' . "\n";
     
     // Panel de personalización de colores
