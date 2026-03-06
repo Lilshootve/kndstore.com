@@ -239,9 +239,47 @@ do {
         $payload['job_id'] = $jobId;
     }
 
+    if ($tool === 'consistency' && !empty($payload['ref_image_url'])) {
+        $imgData = workerDownloadFile($payload['ref_image_url'], $headers);
+        if (!$imgData) {
+            httpPost($apiBase . '/api/labs/queue/fail.php', $headers, [
+                'job_id' => $jobId,
+                'error_message' => 'Could not download reference image',
+                'no_retry' => '1',
+            ]);
+            logWorker("Job $jobId: reference download failed");
+            if (!$loop) break;
+            sleep($sleepSec);
+            continue;
+        }
+        $tmp = tempnam(sys_get_temp_dir(), 'knd_ref');
+        if ($tmp && file_put_contents($tmp, $imgData) !== false) {
+            try {
+                $payload['reference_image_filename'] = workerUploadToComfyui($tmp, $comfyBase, $comfyToken);
+            } finally {
+                @unlink($tmp);
+            }
+        }
+        if (empty($payload['reference_image_filename'])) {
+            httpPost($apiBase . '/api/labs/queue/fail.php', $headers, [
+                'job_id' => $jobId,
+                'error_message' => 'Could not upload reference image to ComfyUI',
+                'no_retry' => '1',
+            ]);
+            logWorker("Job $jobId: reference upload failed");
+            if (!$loop) break;
+            sleep($sleepSec);
+            continue;
+        }
+    }
+
     try {
         $workflow = comfyui_inject_workflow($payload, $tool);
-        if ($tool !== 'upscale') {
+        if ($tool === 'upscale') {
+            // upscale: no checkpoint/ipadapter
+        } elseif ($tool === 'consistency') {
+            // consistency: workflow already has checkpoint in params
+        } elseif ($tool !== 'upscale') {
             comfyui_apply_checkpoint($workflow, $model, $refinerEnabled, $overrideCkpt);
             $controlFilename = null;
             $refFilename = null;
@@ -286,6 +324,9 @@ do {
                 }
             }
             comfyui_apply_ipadapter_controlnet($workflow, $payload, $controlFilename, $refFilename);
+        }
+        if ($tool === 'consistency' && empty($payload['reference_image_filename'])) {
+            throw new \RuntimeException('Consistency job requires reference image.');
         }
         $debugDir = $projectRoot . '/workers/_debug';
         if (is_dir($debugDir) || @mkdir($debugDir, 0755, true)) {
@@ -364,6 +405,22 @@ do {
             }
         } else {
             logWorker("Job $jobId: output file not found at $srcPath, using proxy");
+        }
+    } elseif ($tool === 'consistency' && $comfyOutputDir !== '' && $outputFilename !== null) {
+        $comfyOut = rtrim($comfyOutputDir, '/\\');
+        $srcPath = $outputSubfolder !== '' ? $comfyOut . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $outputSubfolder) . DIRECTORY_SEPARATOR . $outputFilename : $comfyOut . DIRECTORY_SEPARATOR . $outputFilename;
+        $labsDir = defined('LABS_UPLOAD_DIR') ? LABS_UPLOAD_DIR : 'uploads/labs';
+        $destRel = $labsDir . '/' . $jobId . '_consistency.png';
+        $destFull = storage_path($destRel);
+        $destDir = dirname($destFull);
+        if (is_file($srcPath) && is_readable($srcPath)) {
+            if (!is_dir($destDir)) @mkdir($destDir, 0755, true);
+            if (is_dir($destDir) && @copy($srcPath, $destFull)) {
+                $outputPathRel = $destRel;
+                logWorker("Job $jobId: copied consistency output to $destRel");
+            }
+        } else {
+            logWorker("Job $jobId: consistency output not found at $srcPath, using proxy");
         }
     }
 

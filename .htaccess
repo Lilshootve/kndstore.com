@@ -130,6 +130,7 @@
     RewriteRule ^knd-labs/?$ /knd-labs.php [L]
     RewriteRule ^labs/text-to-image\.php$ /labs-text-to-image.php [L]
     RewriteRule ^labs/upscale\.php$ /labs-upscale.php [L]
+    RewriteRule ^labs/consistency\.php$ /labs-consistency.php [L]
     RewriteRule ^labs/character-lab\.php$ /labs-character-lab.php [L]
     RewriteRule ^labs/texture-lab\.php$ /labs-texture-lab.php [L]
     RewriteRule ^labs/jobs\.php$ /labs-jobs.php [L]

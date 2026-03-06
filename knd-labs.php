@@ -102,6 +102,21 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
       <div class="col-12 col-sm-6 col-lg-4">
         <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card labs-tool-card">
           <div class="d-flex align-items-start justify-content-between mb-3">
+            <div class="arena-card-icon"><i class="fas fa-lock"></i></div>
+            <span class="badge bg-success px-2 py-1" style="font-size:.7rem;"><?php echo t('arena.live', 'LIVE'); ?></span>
+          </div>
+          <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('labs.consistency.title', 'Consistency System'); ?></h3>
+          <p class="text-white-50 small flex-grow-1"><?php echo t('labs.consistency.card_desc', 'Generate images with locked style or character consistency.'); ?></p>
+          <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 5]); ?> · <?php echo t('labs.avg_time', '~{time}', ['time' => '30s']); ?></div>
+          <a href="/labs-consistency.php" class="btn btn-neon-primary w-100 mt-auto">
+            <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-lg-4">
+        <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card labs-tool-card">
+          <div class="d-flex align-items-start justify-content-between mb-3">
             <div class="arena-card-icon"><i class="fas fa-user-astronaut"></i></div>
             <span class="badge bg-success px-2 py-1" style="font-size:.7rem;"><?php echo t('arena.live', 'LIVE'); ?></span>
           </div>

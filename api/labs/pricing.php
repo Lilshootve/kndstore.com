@@ -20,6 +20,9 @@ $pricing = [
     'character' => [
         'base' => 15,
     ],
+    'consistency' => [
+        'base' => 5,
+    ],
 ];
 
 json_success($pricing);

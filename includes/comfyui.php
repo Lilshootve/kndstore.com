@@ -59,6 +59,9 @@ function comfyui_workflow_path(string $tool): string {
     if ($tool === 'upscale') {
         $path = $baseDir . '/upscale_api.json';
         if (!is_readable($path)) $path = dirname(__DIR__) . '/KND_MASTER_WORKFLOW_UPSCALE.json';
+    } elseif ($tool === 'consistency') {
+        $path = $baseDir . '/consistency_api.json';
+        if (!is_readable($path)) $path = dirname(__DIR__) . '/KND_MASTER_WORKFLOW_API.json';
     } elseif ($tool === 'text2img' || $tool === 'character') {
         $path = $baseDir . '/knd-workflow-api.json';
         if (!is_readable($path)) $path = $baseDir . '/text2img_api.json';
@@ -85,6 +88,11 @@ function comfyui_inject_workflow(array $params, string $tool = 'text2img'): arra
         throw new \RuntimeException('Invalid workflow JSON');
     }
     $prompt = $params['prompt'] ?? '';
+    if ($tool === 'consistency') {
+        $base = trim($params['base_prompt'] ?? '');
+        $scene = trim($params['scene_prompt'] ?? '');
+        $prompt = $base !== '' && $scene !== '' ? $base . ', ' . $scene : ($base ?: $scene ?: 'high quality image');
+    }
     $negative = $params['negative_prompt'] ?? 'ugly, blurry, low quality';
     $seed = isset($params['seed']) ? (int) $params['seed'] : random_int(0, 2147483647);
     $steps = (int) ($params['steps'] ?? 30);
@@ -134,8 +142,18 @@ function comfyui_inject_workflow(array $params, string $tool = 'text2img'): arra
             $inputs['height'] = $height;
             $inputs['batch_size'] = $batchSize;
         }
-        if ($ctype === 'LoadImage' && !empty($params['image_filename'])) {
-            $inputs['image'] = $params['image_filename'];
+        if ($ctype === 'LoadImage') {
+            if (!empty($params['image_filename'])) {
+                $inputs['image'] = $params['image_filename'];
+            } elseif ($tool === 'consistency' && !empty($params['reference_image_filename'])) {
+                $inputs['image'] = $params['reference_image_filename'];
+            }
+        }
+        if ($ctype === 'CheckpointLoaderSimple' && $tool === 'consistency' && !empty($params['model_ckpt'])) {
+            $inputs['ckpt_name'] = $params['model_ckpt'];
+        }
+        if ($ctype === 'SaveImage' && $tool === 'consistency' && isset($params['job_id'])) {
+            $inputs['filename_prefix'] = 'knd_consistency/job_' . (int) $params['job_id'];
         }
         if ($ctype === 'UpscaleModelLoader' && $tool === 'upscale') {
             $model = $params['upscale_model'] ?? '4x-UltraSharp.pth';

@@ -121,7 +121,7 @@ try {
         }
     }
 
-    $avgSeconds = ['text2img' => 60, 'upscale' => 40, 'character' => 45];
+    $avgSeconds = ['text2img' => 60, 'upscale' => 40, 'character' => 45, 'consistency' => 45];
     $avgSec = $avgSeconds[$job['tool'] ?? 'text2img'] ?? 60;
 
     $queuePosition = null;

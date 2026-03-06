@@ -81,6 +81,7 @@
         var scale = s ? s.value : '2';
         return (p.upscale && p.upscale[scale + 'x']) || (scale === '4' ? 8 : 5);
       }
+      if (key === 'consistency') return (p.consistency && p.consistency.base) || 5;
       return (p.character && p.character.base) || 15;
     },
 
@@ -236,10 +237,44 @@
       });
     },
 
+    buildConsistencyFormData: function(formEl) {
+      var fd = new FormData();
+      fd.set('mode', (formEl.querySelector('[name="mode"]')?.value || 'style'));
+      fd.set('reference_source', (formEl.querySelector('[name="reference_source"]:checked')?.value || 'upload'));
+      var refJob = formEl.querySelector('[name="reference_job_id"]');
+      if (refJob && refJob.value) fd.set('reference_job_id', refJob.value);
+      var refFile = formEl.querySelector('[name="reference_image"]');
+      if (refFile && refFile.files && refFile.files[0]) fd.set('reference_image', refFile.files[0]);
+      fd.set('base_prompt', (formEl.querySelector('[name="base_prompt"]')?.value || '').trim());
+      fd.set('scene_prompt', (formEl.querySelector('[name="scene_prompt"]')?.value || '').trim());
+      fd.set('negative_prompt', (formEl.querySelector('[name="negative_prompt"]')?.value || 'ugly, blurry, low quality'));
+      fd.set('lock_seed', formEl.querySelector('[name="lock_seed"]')?.checked ? '1' : '0');
+      fd.set('inherit_model', formEl.querySelector('[name="inherit_model"]')?.checked ? '1' : '0');
+      fd.set('inherit_resolution', formEl.querySelector('[name="inherit_resolution"]')?.checked ? '1' : '0');
+      fd.set('inherit_sampling', formEl.querySelector('[name="inherit_sampling"]')?.checked ? '1' : '0');
+      fd.set('width', formEl.querySelector('[name="width"]')?.value || 1024);
+      fd.set('height', formEl.querySelector('[name="height"]')?.value || 1024);
+      fd.set('steps', formEl.querySelector('[name="steps"]')?.value || 28);
+      fd.set('cfg', formEl.querySelector('[name="cfg"]')?.value || 7);
+      fd.set('sampler', formEl.querySelector('[name="sampler"]')?.value || 'dpmpp_2m');
+      var seedEl = formEl.querySelector('[name="seed"]');
+      if (seedEl && seedEl.value) fd.set('seed', seedEl.value);
+      var modelEl = formEl.querySelector('[name="model"]');
+      if (modelEl && modelEl.value) fd.set('model', modelEl.value);
+      return fd;
+    },
+
     submitForm: function(formEl) {
-      var fd = new FormData(formEl);
-      var tool = fd.get('tool') || this.config.jobType || 'text2img';
-      fd.set('tool', tool);
+      var tool = this.config.jobType || formEl.querySelector('[name="tool"]')?.value || 'text2img';
+      var apiUrl = API_GENERATE;
+      var fd;
+      if (tool === 'consistency' && this.config.apiConsistency) {
+        fd = this.buildConsistencyFormData(formEl);
+        apiUrl = this.config.apiConsistency;
+      } else {
+        fd = new FormData(formEl);
+        fd.set('tool', tool);
+      }
 
       var submitBtn = formEl.querySelector('[type="submit"]');
       if (submitBtn) submitBtn.disabled = true;
@@ -259,7 +294,7 @@
           '</div>';
       }
 
-        fetch(API_GENERATE, {
+        fetch(apiUrl, {
         method: 'POST',
         body: fd,
         cache: 'no-store',
@@ -340,6 +375,34 @@
           if (!cnImg || !cnImg.files || !cnImg.files.length) {
             if (typeof kndToast !== 'undefined') kndToast('Control image required when ControlNet is enabled', 'error');
             else alert('Control image required when ControlNet is enabled');
+            return;
+          }
+        }
+        if (self.config.jobType === 'consistency') {
+          var refSource = form.querySelector('[name="reference_source"]:checked');
+          var refVal = refSource ? refSource.value : 'upload';
+          if (refVal === 'recent') {
+            var refJob = form.querySelector('[name="reference_job_id"]');
+            if (!refJob || !refJob.value || refJob.value === '') {
+              if (typeof kndToast !== 'undefined') kndToast('Select a reference job from recent.', 'error');
+              else alert('Select a reference job from recent.');
+              return;
+            }
+          } else {
+            var refFile = form.querySelector('[name="reference_image"]');
+            if (!refFile || !refFile.files || !refFile.files.length) {
+              if (typeof kndToast !== 'undefined') kndToast('Upload a reference image.', 'error');
+              else alert('Upload a reference image.');
+              return;
+            }
+          }
+          var baseP = form.querySelector('[name="base_prompt"]');
+          var sceneP = form.querySelector('[name="scene_prompt"]');
+          var baseVal = baseP ? (baseP.value || '').trim() : '';
+          var sceneVal = sceneP ? (sceneP.value || '').trim() : '';
+          if (!baseVal && !sceneVal) {
+            if (typeof kndToast !== 'undefined') kndToast('Base prompt or Scene prompt is required.', 'error');
+            else alert('Base prompt or Scene prompt is required.');
             return;
           }
         }

@@ -274,6 +274,8 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
           <div id="labs-result-actions" class="mt-3" style="display:none;">
             <a href="#" id="labs-download-btn" class="btn btn-success me-2" download><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
             <a href="/labs-upscale.php" id="labs-use-input-btn" class="btn btn-outline-primary me-2"><i class="fas fa-search-plus me-1"></i><?php echo t('labs.use_as_input', 'Use as input'); ?></a>
+            <a href="#" id="labs-use-style-btn" class="btn btn-outline-primary me-2"><i class="fas fa-palette me-1"></i><?php echo t('labs.consistency.use_style', 'Use as Style Reference'); ?></a>
+            <a href="#" id="labs-use-char-btn" class="btn btn-outline-primary me-2"><i class="fas fa-user me-1"></i><?php echo t('labs.consistency.use_char', 'Use as Character Reference'); ?></a>
             <button type="button" id="labs-regenerate-btn" class="btn btn-outline-primary me-2"><i class="fas fa-redo me-1"></i><?php echo t('labs.regenerate', 'Regenerate'); ?></button>
             <button type="button" id="labs-variations-btn" class="btn btn-outline-secondary"><i class="fas fa-images me-1"></i><?php echo t('labs.variations', 'Variations'); ?></button>
           </div>
@@ -351,6 +353,18 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
 <script src="/assets/js/kndlabs.js?v=<?php echo file_exists($kndlabsJs) ? filemtime($kndlabsJs) : time(); ?>"></script>
 <script>
 (function() {
+  var useStyleBtn = document.getElementById('labs-use-style-btn');
+  var useCharBtn = document.getElementById('labs-use-char-btn');
+  function goConsistency(mode) {
+    var img = document.querySelector('#labs-result-preview img[data-job-id]');
+    if (img) {
+      var jid = img.getAttribute('data-job-id');
+      if (jid) window.location.href = '/labs-consistency.php?reference_job_id=' + encodeURIComponent(jid) + '&mode=' + encodeURIComponent(mode);
+    }
+  }
+  if (useStyleBtn) useStyleBtn.addEventListener('click', function(e) { e.preventDefault(); goConsistency('style'); });
+  if (useCharBtn) useCharBtn.addEventListener('click', function(e) { e.preventDefault(); goConsistency('character'); });
+
   var form = document.getElementById('labs-comfy-form');
   if (form) {
     form.querySelectorAll('.preset-neg-btn').forEach(function(btn) {
