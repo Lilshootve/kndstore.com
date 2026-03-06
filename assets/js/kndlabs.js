@@ -593,6 +593,19 @@
 
     bindViewDetails: function() {
       var self = this;
+      var drawer = document.getElementById('labs-details-drawer');
+      var backdrop = document.getElementById('labs-details-backdrop');
+      var closeBtn = document.getElementById('labs-details-close');
+      function closeDrawer() {
+        if (drawer) drawer.classList.remove('is-open');
+        if (backdrop) backdrop.classList.remove('is-visible');
+      }
+      function openDrawer() {
+        if (drawer) drawer.classList.add('is-open');
+        if (backdrop) backdrop.classList.add('is-visible');
+      }
+      if (backdrop) backdrop.addEventListener('click', closeDrawer);
+      if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
       document.addEventListener('click', function(e) {
         var btn = e.target.closest('.labs-view-details');
         if (!btn) return;
@@ -604,29 +617,83 @@
           .then(function(d) {
             if (!d.ok || !d.data) return;
             var J = d.data;
-            var html = '<table class="table table-sm table-dark"><tbody>' +
-              '<tr><td class="text-white-50">Prompt</td><td class="text-white">' + (J.prompt ? J.prompt.substring(0, 200) + (J.prompt.length > 200 ? '...' : '') : '-') + '</td></tr>' +
-              '<tr><td class="text-white-50">Model</td><td class="text-white">' + (J.model || '-') + '</td></tr>' +
-              '<tr><td class="text-white-50">Seed</td><td class="text-white">' + (J.seed != null ? J.seed : '-') + '</td></tr>' +
-              '<tr><td class="text-white-50">Size</td><td class="text-white">' + (J.width || '') + '\u00D7' + (J.height || '') + '</td></tr>' +
-              '<tr><td class="text-white-50">Steps</td><td class="text-white">' + (J.steps || '-') + '</td></tr>' +
-              '<tr><td class="text-white-50">CFG</td><td class="text-white">' + (J.cfg || '-') + '</td></tr>' +
-              '<tr><td class="text-white-50">Sampler</td><td class="text-white">' + (J.sampler_name || '-') + '</td></tr>' +
-              '<tr><td class="text-white-50">Charged</td><td class="text-white">' + (J.cost_kp || 0) + ' KP</td></tr>' +
-              '<tr><td class="text-white-50">Provider</td><td class="text-white">' + (J.provider || 'Local') + '</td></tr>' +
-              '<tr><td class="text-white-50">Created</td><td class="text-white">' + (J.created_at || '-') + '</td></tr>' +
-              '</tbody></table>';
-            if (J.error_message) html += '<p class="text-danger small">' + J.error_message + '</p>';
-            var body = document.getElementById('labs-job-details-body');
-            if (body) body.innerHTML = html;
-            self.renderImageDetails(J);
-            var modal = document.getElementById('labs-job-details-modal');
-            if (modal && typeof bootstrap !== 'undefined') {
-              var m = bootstrap.Modal.getOrCreateInstance(modal);
-              m.show();
+            var imgUrl = J.image_url || (API_IMAGE + '?job_id=' + jid);
+            var sizeStr = (J.width && J.height) ? J.width + '\u00D7' + J.height : '';
+            var html = '';
+            html += '<div class="knd-details-block"><div class="knd-details-block__title">Config</div>';
+            html += '<p class="text-white-50 small mb-1"><strong class="text-white">Prompt:</strong><br>' + (J.prompt ? self.esc(J.prompt) : '-') + '</p>';
+            html += '<p class="text-white-50 small mb-1"><strong class="text-white">Negative:</strong><br>' + (J.negative_prompt ? self.esc(J.negative_prompt) : '-') + '</p>';
+            html += '<p class="text-white-50 small mb-0">Model: ' + (J.model || '-') + ' | Quality: ' + (J.cost_kp ? J.cost_kp + ' KP' : '-') + '</p>';
+            html += '<p class="text-white-50 small mb-0">Aspect: ' + (sizeStr || '-') + ' | Steps: ' + (J.steps || '-') + ' | CFG: ' + (J.cfg || '-') + ' | Sampler: ' + (J.sampler_name || '-') + '</p>';
+            html += '</div>';
+            html += '<div class="knd-details-block"><div class="knd-details-block__title">Result</div>';
+            html += '<div class="knd-details-preview">';
+            if (J.status === 'done' && imgUrl) {
+              html += '<img src="' + imgUrl.replace(/"/g, '&quot;') + '" alt="">';
+            } else {
+              html += '<span class="d-flex align-items-center justify-content-center text-white-50" style="min-height:200px;"><i class="fas fa-image fa-3x opacity-50"></i></span>';
             }
+            html += '</div>';
+            html += '<p class="text-white-50 small mb-0">' + (J.created_at || '-') + ' | ' + (J.status || '') + (J.cost_kp ? ' | ' + J.cost_kp + ' KP' : '') + '</p>';
+            if (J.error_message) html += '<p class="text-danger small mt-1">' + self.esc(J.error_message) + '</p>';
+            html += '</div>';
+            html += '<div class="knd-details-block"><div class="knd-details-block__title">Actions</div><div class="knd-details-actions">';
+            if (J.status === 'done' && (J.tool === 'text2img' || J.tool === 'consistency')) {
+              var mode = (J.tool === 'consistency' && J.mode) ? J.mode : 'style';
+              html += '<a href="/labs-upscale.php?source_job_id=' + jid + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-search-plus me-1"></i>Send to Upscale</a>';
+              html += '<a href="/labs-consistency.php?reference_job_id=' + jid + '&mode=' + mode + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-palette me-1"></i>Consistency</a>';
+              html += '<a href="/labs-consistency.php?reference_job_id=' + jid + '&mode=' + mode + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-images me-1"></i>Create Variations</a>';
+            }
+            if (J.status === 'done') {
+              html += '<a href="' + imgUrl.replace(/"/g, '&quot;') + '" class="btn btn-sm knd-btn-secondary" download><i class="fas fa-download me-1"></i>Download</a>';
+            }
+            html += '<button type="button" class="btn btn-sm knd-btn-secondary labs-details-reuse" data-job-id="' + jid + '"><i class="fas fa-copy me-1"></i>Reuse Settings</button>';
+            html += '</div></div>';
+            var body = document.getElementById('labs-details-body');
+            if (!body) return;
+            body.innerHTML = html;
+            body.querySelectorAll('.labs-details-reuse').forEach(function(b) {
+              b.addEventListener('click', function() {
+                self.reuseJobSettings(jid);
+                closeDrawer();
+              });
+            });
+            self.renderImageDetails(J);
+            openDrawer();
           });
       });
+    },
+
+    esc: function(s) {
+      if (s == null) return '';
+      var div = document.createElement('div');
+      div.textContent = String(s);
+      return div.innerHTML;
+    },
+
+    reuseJobSettings: function(jid) {
+      var self = this;
+      fetch(API_JOB + '?job_id=' + jid, { credentials: 'same-origin' })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (!d.ok || !d.data) return;
+          var J = d.data;
+          var form = document.getElementById(self.config.formId || 'labs-comfy-form');
+          if (!form) return;
+          var set = function(name, val) { var el = form.querySelector('[name="' + name + '"]'); if (el && val != null) el.value = val; };
+          set('prompt', J.prompt);
+          set('negative_prompt', J.negative_prompt);
+          set('model', J.model);
+          set('seed', J.seed);
+          set('steps', J.steps);
+          set('cfg', J.cfg);
+          set('width', J.width);
+          set('height', J.height);
+          set('sampler_name', J.sampler_name);
+          set('scheduler', J.scheduler);
+          if (self.updateCostLabel) self.updateCostLabel();
+          if (self.updateBalanceAfter) self.updateBalanceAfter();
+        });
     },
 
     bindRecentFilter: function() {

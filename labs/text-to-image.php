@@ -41,26 +41,26 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
         <form id="labs-comfy-form" class="labs-form" method="post" action="#" onsubmit="return false;">
             <input type="hidden" name="tool" value="text2img">
             <div class="mb-3">
-              <label class="form-label text-white-50"><?php echo t('ai.text2img.prompt'); ?></label>
-              <textarea name="prompt" class="form-control bg-dark text-white" id="labs-prompt-input" rows="3" maxlength="500" placeholder="Describe the image..."></textarea>
+              <label class="form-label text-white-50 knd-label"><?php echo t('ai.text2img.prompt'); ?></label>
+              <textarea name="prompt" class="knd-textarea form-control text-white" id="labs-prompt-input" rows="3" maxlength="500" placeholder="Describe the image..."></textarea>
               <button type="button" class="btn btn-link btn-sm text-white-50 p-0 mt-1" id="labs-use-last-prompt-btn" style="display:none;"><i class="fas fa-history me-1"></i><?php echo t('labs.use_last_prompt', 'Use last prompt'); ?></button>
               <div class="form-text text-white-50 small" id="labs-prompt-hint"></div>
               <div class="form-text text-white-50 small mt-1"><?php echo t('labs.presets'); ?></div>
-              <div class="d-flex flex-wrap gap-1 mt-2">
-                <button type="button" class="btn btn-outline-secondary btn-sm preset-btn" data-prompt="Game character concept, fantasy armor, portrait" data-negative="ugly, blurry, deformed" data-steps="25" data-cfg="7.5" data-sampler="dpmpp_2m" data-width="1024" data-height="1024"><?php echo t('labs.preset_game', 'Game concept'); ?></button>
-                <button type="button" class="btn btn-outline-secondary btn-sm preset-btn" data-prompt="Anime portrait, detailed face, soft lighting" data-negative="ugly, blurry, bad anatomy" data-steps="25" data-cfg="7.5" data-sampler="euler" data-width="1024" data-height="1024"><?php echo t('labs.preset_anime', 'Anime portrait'); ?></button>
-                <button type="button" class="btn btn-outline-secondary btn-sm preset-btn" data-prompt="Landscape, mountains, sunset, atmospheric" data-negative="ugly, blurry, people" data-steps="25" data-cfg="7" data-sampler="dpmpp_2m" data-width="1024" data-height="768"><?php echo t('labs.preset_landscape', 'Landscape'); ?></button>
+              <div class="d-flex flex-wrap gap-2 mt-2">
+                <button type="button" class="knd-chip preset-btn" data-prompt="Game character concept, fantasy armor, portrait" data-negative="ugly, blurry, deformed" data-steps="25" data-cfg="7.5" data-sampler="dpmpp_2m" data-width="1024" data-height="1024"><?php echo t('labs.preset_game', 'Game concept'); ?></button>
+                <button type="button" class="knd-chip preset-btn" data-prompt="Anime portrait, detailed face, soft lighting" data-negative="ugly, blurry, bad anatomy" data-steps="25" data-cfg="7.5" data-sampler="euler" data-width="1024" data-height="1024"><?php echo t('labs.preset_anime', 'Anime portrait'); ?></button>
+                <button type="button" class="knd-chip preset-btn" data-prompt="Landscape, mountains, sunset, atmospheric" data-negative="ugly, blurry, people" data-steps="25" data-cfg="7" data-sampler="dpmpp_2m" data-width="1024" data-height="768"><?php echo t('labs.preset_landscape', 'Landscape'); ?></button>
               </div>
               <div class="form-text text-white-50 small mt-1" id="labs-preset-summary"></div>
             </div>
             <div class="mb-3">
-              <label class="form-label text-white-50"><?php echo t('labs.negative_prompt', 'Negative prompt'); ?></label>
-              <input type="text" name="negative_prompt" class="form-control bg-dark text-white" id="labs-negative-input" maxlength="500" value="ugly, blurry, low quality" placeholder="ugly, blurry, low quality">
-              <div class="d-flex flex-wrap gap-1 mt-2" id="preset-neg-btns">
-                <button type="button" class="btn btn-outline-secondary btn-sm preset-neg-btn" data-value="ugly, blurry, low quality"><?php echo t('labs.neg_default', 'Default'); ?></button>
-                <button type="button" class="btn btn-outline-secondary btn-sm preset-neg-btn" data-value="text, watermark, signature"><?php echo t('labs.neg_text', 'No text'); ?></button>
-                <button type="button" class="btn btn-outline-secondary btn-sm preset-neg-btn" data-value="bad anatomy, extra limbs, mutated"><?php echo t('labs.neg_anatomy', 'Anatomy'); ?></button>
-                <button type="button" class="btn btn-outline-secondary btn-sm preset-neg-btn" data-value="disfigured, deformed, cartoon"><?php echo t('labs.neg_realistic', 'Realistic'); ?></button>
+              <label class="form-label text-white-50 knd-label"><?php echo t('labs.negative_prompt', 'Negative prompt'); ?></label>
+              <input type="text" name="negative_prompt" class="knd-input form-control text-white" id="labs-negative-input" maxlength="500" value="ugly, blurry, low quality" placeholder="ugly, blurry, low quality">
+              <div class="d-flex flex-wrap gap-2 mt-2" id="preset-neg-btns">
+                <button type="button" class="knd-chip preset-neg-btn" data-value="ugly, blurry, low quality"><?php echo t('labs.neg_default', 'Default'); ?></button>
+                <button type="button" class="knd-chip preset-neg-btn" data-value="text, watermark, signature"><?php echo t('labs.neg_text', 'No text'); ?></button>
+                <button type="button" class="knd-chip preset-neg-btn" data-value="bad anatomy, extra limbs, mutated"><?php echo t('labs.neg_anatomy', 'Anatomy'); ?></button>
+                <button type="button" class="knd-chip preset-neg-btn" data-value="disfigured, deformed, cartoon"><?php echo t('labs.neg_realistic', 'Realistic'); ?></button>
               </div>
             </div>
             <div class="mb-3">
@@ -72,26 +72,26 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               <div id="ipadapter-fields" class="ms-3 mb-2" style="display:none;">
                 <div class="mb-2">
                   <label class="form-label text-white-50 small"><?php echo t('labs.ref_image', 'Reference image'); ?></label>
-                  <input type="file" name="ipadapter_image" id="ipadapter-image" accept="image/jpeg,image/jpg,image/png,image/webp" class="form-control form-control-sm bg-dark text-white">
+                  <input type="file" name="ipadapter_image" id="ipadapter-image" accept="image/jpeg,image/jpg,image/png,image/webp" class="knd-input form-control form-control-sm text-white">
                   <div class="form-text text-white-50 small"><?php echo t('labs.ref_help', 'Required when enabled'); ?></div>
                 </div>
                 <div class="row g-2 mb-2">
                   <div class="col-4">
                     <label class="form-label text-white-50 small"><?php echo t('labs.weight', 'Weight'); ?></label>
-                    <input type="number" name="ipadapter_weight" class="form-control form-control-sm bg-dark text-white" value="0.70" min="0" max="1.20" step="0.05">
+                    <input type="number" name="ipadapter_weight" class="knd-input form-control form-control-sm text-white" value="0.70" min="0" max="1.20" step="0.05">
                   </div>
                   <div class="col-4">
                     <label class="form-label text-white-50 small">start_at</label>
-                    <input type="number" name="ipadapter_start_at" class="form-control form-control-sm bg-dark text-white" value="0" min="0" max="1" step="0.05">
+                    <input type="number" name="ipadapter_start_at" class="knd-input form-control form-control-sm text-white" value="0" min="0" max="1" step="0.05">
                   </div>
                   <div class="col-4">
                     <label class="form-label text-white-50 small">end_at</label>
-                    <input type="number" name="ipadapter_end_at" class="form-control form-control-sm bg-dark text-white" value="1" min="0" max="1" step="0.05">
+                    <input type="number" name="ipadapter_end_at" class="knd-input form-control form-control-sm text-white" value="1" min="0" max="1" step="0.05">
                   </div>
                 </div>
                 <div class="mb-2">
                   <label class="form-label text-white-50 small"><?php echo t('labs.mode', 'Mode'); ?></label>
-                  <select name="ipadapter_mode" id="ipadapter-mode" class="form-select form-select-sm bg-dark text-white">
+                  <select name="ipadapter_mode" id="ipadapter-mode" class="knd-select form-select form-select-sm text-white">
                     <option value="balanced" selected>Balanced</option>
                     <option value="style">Style</option>
                     <option value="composition">Composition</option>
@@ -105,26 +105,26 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               <div id="controlnet-fields" class="ms-3 mb-2" style="display:none;">
                 <div class="mb-2">
                   <label class="form-label text-white-50 small"><?php echo t('labs.control_image', 'Control image'); ?></label>
-                  <input type="file" name="controlnet_image" id="controlnet-image" accept="image/jpeg,image/jpg,image/png,image/webp" class="form-control form-control-sm bg-dark text-white">
+                  <input type="file" name="controlnet_image" id="controlnet-image" accept="image/jpeg,image/jpg,image/png,image/webp" class="knd-input form-control form-control-sm text-white">
                   <div class="form-text text-white-50 small"><?php echo t('labs.control_help', 'Required when enabled'); ?></div>
                 </div>
                 <div class="row g-2 mb-2">
                   <div class="col-4">
                     <label class="form-label text-white-50 small"><?php echo t('labs.strength', 'Strength'); ?></label>
-                    <input type="number" name="controlnet_strength" class="form-control form-control-sm bg-dark text-white" value="0.75" min="0" max="1.20" step="0.05">
+                    <input type="number" name="controlnet_strength" class="knd-input form-control form-control-sm text-white" value="0.75" min="0" max="1.20" step="0.05">
                   </div>
                   <div class="col-4">
                     <label class="form-label text-white-50 small">start_at</label>
-                    <input type="number" name="controlnet_start_at" class="form-control form-control-sm bg-dark text-white" value="0" min="0" max="1" step="0.05">
+                    <input type="number" name="controlnet_start_at" class="knd-input form-control form-control-sm text-white" value="0" min="0" max="1" step="0.05">
                   </div>
                   <div class="col-4">
                     <label class="form-label text-white-50 small">end_at</label>
-                    <input type="number" name="controlnet_end_at" class="form-control form-control-sm bg-dark text-white" value="0.80" min="0" max="1" step="0.05">
+                    <input type="number" name="controlnet_end_at" class="knd-input form-control form-control-sm text-white" value="0.80" min="0" max="1" step="0.05">
                   </div>
                 </div>
                 <div class="mb-2">
                   <label class="form-label text-white-50 small"><?php echo t('labs.control_mode', 'Control mode'); ?></label>
-                  <select name="controlnet_control_mode" id="controlnet-control-mode" class="form-select form-select-sm bg-dark text-white">
+                  <select name="controlnet_control_mode" id="controlnet-control-mode" class="knd-select form-select form-select-sm text-white">
                     <option value="balanced" selected>Balanced</option>
                     <option value="prompt_strict">Prompt strict</option>
                     <option value="control_strict">Control strict</option>
@@ -133,15 +133,15 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               </div>
             </div>
             <div class="mb-3">
-              <label class="form-label text-white-50"><?php echo t('ai.text2img.mode_label', 'Quality'); ?></label>
-              <select name="quality" id="labs-quality-select" class="form-select bg-dark text-white">
+              <label class="form-label text-white-50 knd-label"><?php echo t('ai.text2img.mode_label', 'Quality'); ?></label>
+              <select name="quality" id="labs-quality-select" class="knd-select form-select text-white">
                 <option value="standard" selected>Standard (3 KP)</option>
                 <option value="high">High (6 KP)</option>
               </select>
             </div>
             <div class="mb-3">
-              <label class="form-label text-white-50 small"><?php echo t('labs.model', 'Model'); ?></label>
-              <select name="model" id="labs-model-select" class="form-select form-select-sm bg-dark text-white">
+              <label class="form-label text-white-50 small knd-label"><?php echo t('labs.model', 'Model'); ?></label>
+              <select name="model" id="labs-model-select" class="knd-select form-select form-select-sm text-white">
                 <option value="sd_xl_base">SD XL Base 1.0</option>
                 <option value="sd_xl_refiner">SD XL Refiner 1.0</option>
                 <option value="juggernaut_ragnarok">Juggernaut XL Ragnarok</option>
@@ -161,21 +161,21 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             <div class="row g-2 mb-3">
               <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.seed', 'Seed'); ?></label>
-                <input type="number" name="seed" class="form-control form-control-sm bg-dark text-white" placeholder="Random">
+                <input type="number" name="seed" class="knd-input form-control form-control-sm text-white" placeholder="Random">
               </div>
               <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.steps', 'Steps'); ?></label>
-                <input type="number" name="steps" class="form-control form-control-sm bg-dark text-white" value="30" min="1" max="100">
+                <input type="number" name="steps" class="knd-input form-control form-control-sm text-white" value="30" min="1" max="100">
               </div>
               <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.cfg', 'CFG'); ?></label>
-                <input type="number" name="cfg" class="form-control form-control-sm bg-dark text-white" value="6" min="1" max="30" step="0.5">
+                <input type="number" name="cfg" class="knd-input form-control form-control-sm text-white" value="6" min="1" max="30" step="0.5">
               </div>
             </div>
             <div class="row g-2 mb-3">
               <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.sampler', 'Sampler'); ?></label>
-                <select name="sampler_name" class="form-select form-select-sm bg-dark text-white">
+                <select name="sampler_name" class="knd-select form-select form-select-sm text-white">
                   <option value="euler">Euler</option>
                   <option value="euler_ancestral">Euler Ancestral</option>
                   <option value="heun">Heun</option>
@@ -192,7 +192,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               </div>
               <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.scheduler', 'Scheduler'); ?></label>
-                <select name="scheduler" class="form-select form-select-sm bg-dark text-white">
+                <select name="scheduler" class="knd-select form-select form-select-sm text-white">
                   <option value="normal">Normal</option>
                   <option value="karras" selected>Karras</option>
                   <option value="exponential">Exponential</option>
@@ -202,13 +202,13 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               </div>
               <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.denoise', 'Denoise'); ?></label>
-                <input type="number" name="denoise" class="form-control form-control-sm bg-dark text-white" value="1" min="0.01" max="1" step="0.01">
+                <input type="number" name="denoise" class="knd-input form-control form-control-sm text-white" value="1" min="0.01" max="1" step="0.01">
               </div>
             </div>
             <div class="row g-2 mb-3">
               <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.width', 'Width'); ?></label>
-                <select name="width" id="labs-width-select" class="form-select form-select-sm bg-dark text-white">
+                <select name="width" id="labs-width-select" class="knd-select form-select form-select-sm text-white">
                   <option value="256">256</option>
                   <option value="512" selected>512</option>
                   <option value="768">768</option>
@@ -221,7 +221,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               </div>
               <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.height', 'Height'); ?></label>
-                <select name="height" id="labs-height-select" class="form-select form-select-sm bg-dark text-white">
+                <select name="height" id="labs-height-select" class="knd-select form-select form-select-sm text-white">
                   <option value="256">256</option>
                   <option value="512" selected>512</option>
                   <option value="768">768</option>
@@ -234,7 +234,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               </div>
               <div class="col-4">
                 <label class="form-label text-white-50 small"><?php echo t('labs.batch', 'Batch'); ?></label>
-                <select name="batch_size" class="form-select form-select-sm bg-dark text-white">
+                <select name="batch_size" class="knd-select form-select form-select-sm text-white">
                   <option value="1" selected>1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
@@ -251,8 +251,8 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
           </form>
       </aside>
 
-      <div class="d-flex flex-column">
-        <div class="knd-canvas knd-panel-soft flex-grow-1 mb-3" id="labs-result-wrapper">
+      <div class="d-flex flex-column flex-grow-1">
+        <div class="knd-canvas knd-panel-soft flex-grow-1 mb-0" id="labs-result-wrapper">
           <div id="labs-result-preview" class="labs-result-preview text-center py-5" style="min-height:320px;">
             <div id="labs-placeholder-tips" class="labs-placeholder-tips">
               <i class="fas fa-wand-magic-sparkles fa-3x mb-3" style="color:var(--knd-accent-soft);opacity:.4;"></i>
@@ -260,37 +260,39 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               <p class="text-white-50 mb-0 small"><?php echo t('labs.tip_example', 'e.g. "Warrior, oil painting, golden hour"'); ?></p>
             </div>
           </div>
-          <div class="text-center mt-3">
-            <button type="submit" form="labs-comfy-form" class="knd-btn-primary" id="generateBtn">
-              <i class="fas fa-bolt me-2"></i><?php echo t('ai.text2img.generate'); ?>
-            </button>
+        </div>
+        <div class="labs-gen-area text-center py-4">
+          <button type="submit" form="labs-comfy-form" class="labs-gen-btn" id="generateBtn">
+            <i class="fas fa-bolt me-2"></i><?php echo t('ai.text2img.generate'); ?>
+          </button>
+        </div>
+        <div id="labs-result-actions" class="mt-3 px-3" style="display:none;">
+          <a href="#" id="labs-download-btn" class="btn btn-success me-2 mb-1" download><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
+          <a href="#" id="labs-generate-variations-btn" class="btn btn-neon-primary me-2 mb-1"><i class="fas fa-images me-1"></i><?php echo t('labs.generate_variations', 'Generate Variations'); ?></a>
+          <a href="/labs-upscale.php" id="labs-use-input-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-search-plus me-1"></i><?php echo t('labs.use_as_input', 'Use as input'); ?></a>
+          <a href="#" id="labs-use-style-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-palette me-1"></i><?php echo t('labs.consistency.use_style', 'Use as Style Reference'); ?></a>
+          <a href="#" id="labs-use-char-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-user me-1"></i><?php echo t('labs.consistency.use_char', 'Use as Character Reference'); ?></a>
+          <button type="button" id="labs-regenerate-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-redo me-1"></i><?php echo t('labs.regenerate', 'Regenerate'); ?></button>
+          <button type="button" id="labs-variations-btn" class="btn btn-outline-secondary mb-1"><i class="fas fa-random me-1"></i><?php echo t('labs.variations', 'Variations'); ?></button>
+        </div>
+        <div id="labs-status-panel" class="mt-3 px-3" style="display:none;">
+          <div class="labs-stepper mb-2">
+            <span class="labs-stepper-dot" data-step="queued"></span>
+            <span class="labs-stepper-line"></span>
+            <span class="labs-stepper-dot" data-step="picked"></span>
+            <span class="labs-stepper-line"></span>
+            <span class="labs-stepper-dot" data-step="generating"></span>
+            <span class="labs-stepper-line"></span>
+            <span class="labs-stepper-dot" data-step="done"></span>
           </div>
-          <div id="labs-result-actions" class="mt-3" style="display:none;">
-            <a href="#" id="labs-download-btn" class="btn btn-success me-2 mb-1" download><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
-            <a href="#" id="labs-generate-variations-btn" class="btn btn-neon-primary me-2 mb-1"><i class="fas fa-images me-1"></i><?php echo t('labs.generate_variations', 'Generate Variations'); ?></a>
-            <a href="/labs-upscale.php" id="labs-use-input-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-search-plus me-1"></i><?php echo t('labs.use_as_input', 'Use as input'); ?></a>
-            <a href="#" id="labs-use-style-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-palette me-1"></i><?php echo t('labs.consistency.use_style', 'Use as Style Reference'); ?></a>
-            <a href="#" id="labs-use-char-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-user me-1"></i><?php echo t('labs.consistency.use_char', 'Use as Character Reference'); ?></a>
-            <button type="button" id="labs-regenerate-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-redo me-1"></i><?php echo t('labs.regenerate', 'Regenerate'); ?></button>
-            <button type="button" id="labs-variations-btn" class="btn btn-outline-secondary mb-1"><i class="fas fa-random me-1"></i><?php echo t('labs.variations', 'Variations'); ?></button>
+          <p class="text-white-50 small mb-1"><?php echo t('labs.queued_leave', 'Generation is queued. You can leave this page.'); ?></p>
+          <div class="d-flex align-items-center">
+            <div class="ai-spinner me-2"><i class="fas fa-cog fa-spin"></i></div>
+            <span id="labs-status-text"><?php echo t('ai.status.processing'); ?></span>
           </div>
-          <div id="labs-status-panel" class="mt-3" style="display:none;">
-            <div class="labs-stepper mb-2">
-              <span class="labs-stepper-dot" data-step="queued"></span>
-              <span class="labs-stepper-line"></span>
-              <span class="labs-stepper-dot" data-step="picked"></span>
-              <span class="labs-stepper-line"></span>
-              <span class="labs-stepper-dot" data-step="generating"></span>
-              <span class="labs-stepper-line"></span>
-              <span class="labs-stepper-dot" data-step="done"></span>
-            </div>
-            <p class="text-white-50 small mb-1"><?php echo t('labs.queued_leave', 'Generation is queued. You can leave this page.'); ?></p>
-            <div class="d-flex align-items-center">
-              <div class="ai-spinner me-2"><i class="fas fa-cog fa-spin"></i></div>
-              <span id="labs-status-text"><?php echo t('ai.status.processing'); ?></span>
-            </div>
-          </div>
-          <div id="labs-error-msg" class="alert alert-danger mt-3" style="display:none;"></div>
+        </div>
+        <div id="labs-error-msg" class="alert alert-danger mt-3 mx-3" style="display:none;"></div>
+        <div class="px-3">
           <?php require __DIR__ . '/partials/image_details_panel.php'; ?>
         </div>
       </div>
@@ -335,19 +337,53 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
         <?php endif; ?>
       </aside>
     </div>
+
+    <!-- Recent Creations - below workspace -->
+    <div class="labs-recent-creations mt-5">
+      <div class="knd-section-title mb-3"><?php echo t('labs.recent_creations', 'Recent Creations'); ?></div>
+      <div class="knd-card-grid" id="labs-recent-creations-grid">
+        <?php foreach (array_slice($historyJobs, 0, 8) as $j):
+          $jid = $j['id'] ?? 0;
+          $imgUrl = !empty($j['image_url']) ? $j['image_url'] : '/api/labs/image.php?job_id=' . $jid;
+          if (strpos($imgUrl, 'job_id=') === false && $jid) $imgUrl = '/api/labs/image.php?job_id=' . $jid;
+          $status = $j['status'] ?? 'pending';
+          $statusClass = $status === 'done' ? 'knd-badge-success' : ($status === 'failed' ? 'knd-badge--danger' : 'knd-badge--warning');
+        ?>
+        <div class="knd-showcase-card labs-creation-card" data-job-id="<?php echo (int)$jid; ?>">
+          <div class="knd-showcase-card__img">
+            <?php if (!empty($imgUrl) && $status === 'done'): ?>
+            <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+            <?php endif; ?>
+            <span class="knd-showcase-card__placeholder" style="<?php echo (!empty($imgUrl) && $status === 'done') ? 'display:none;' : ''; ?>"><i class="fas fa-image"></i></span>
+          </div>
+          <div class="knd-showcase-card__body">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="knd-showcase-card__title"><?php echo t('labs.canvas.title', 'Canvas'); ?></span>
+              <span class="knd-badge <?php echo $statusClass; ?>"><?php echo htmlspecialchars($status); ?></span>
+            </div>
+            <div class="knd-showcase-card__meta"><?php echo date('M j, H:i', strtotime($j['created_at'])); ?></div>
+            <button type="button" class="btn btn-sm knd-btn-secondary mt-2 w-100 labs-view-details" data-job-id="<?php echo (int)$jid; ?>">
+              <i class="fas fa-info-circle me-1"></i><?php echo t('labs.details', 'Details'); ?>
+            </button>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <?php if (empty($historyJobs)): ?>
+      <p class="knd-muted small mb-0"><?php echo t('labs.no_creations_yet', 'Generate your first image to see it here.'); ?></p>
+      <?php endif; ?>
+    </div>
   </div>
 </section>
 
-<div class="modal fade" id="labs-job-details-modal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content bg-dark border border-secondary">
-      <div class="modal-header border-secondary">
-        <h5 class="modal-title text-white"><?php echo t('labs.view_details', 'View details'); ?></h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body text-white-50" id="labs-job-details-body"></div>
-    </div>
+<!-- Details drawer - KND HUD style (replaces Bootstrap modal) -->
+<div class="knd-details-drawer__backdrop" id="labs-details-backdrop"></div>
+<div class="knd-details-drawer" id="labs-details-drawer" tabindex="-1">
+  <div class="knd-details-drawer__header d-flex justify-content-between align-items-center">
+    <h5 class="text-white mb-0"><?php echo t('labs.view_details', 'View details'); ?></h5>
+    <button type="button" class="btn btn-sm btn-link text-white-50 p-0" id="labs-details-close" aria-label="Close"><i class="fas fa-times"></i></button>
   </div>
+  <div class="knd-details-drawer__body" id="labs-details-body"></div>
 </div>
 
 <script src="/assets/js/navigation-extend.js"></script>

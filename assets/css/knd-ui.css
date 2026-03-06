@@ -537,6 +537,21 @@ body {
   opacity: 0.5;
 }
 
+.knd-showcase-card__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 120px;
+}
+
+.knd-showcase-card__placeholder i {
+  font-size: 2.5rem;
+  color: var(--knd-muted);
+  opacity: 0.5;
+}
+
 .knd-showcase-card__body {
   padding: 1rem;
 }
