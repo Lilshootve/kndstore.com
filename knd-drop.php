@@ -58,10 +58,31 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 $entryKp = defined('DROP_ENTRY_KP') ? DROP_ENTRY_KP : 420;
 
 $rarityColors = [
-    'common'    => ['bg' => 'rgba(160,174,192,.15)', 'border' => 'rgba(160,174,192,.4)', 'text' => '#a0aec0'],
-    'rare'      => ['bg' => 'rgba(66,153,225,.15)',   'border' => 'rgba(66,153,225,.4)',   'text' => '#4299e1'],
-    'epic'      => ['bg' => 'rgba(159,122,234,.15)',  'border' => 'rgba(159,122,234,.4)',  'text' => '#9f7aea'],
-    'legendary' => ['bg' => 'rgba(236,201,75,.15)',   'border' => 'rgba(236,201,75,.4)',   'text' => '#ecc94b'],
+  'common' => [
+    'bg' => 'rgba(160,174,192,.15)',
+    'border' => 'rgba(160,174,192,.35)',
+    'text' => '#a0aec0'
+  ],
+  'special' => [
+    'bg' => 'rgba(139,92,246,.15)',
+    'border' => 'rgba(139,92,246,.35)',
+    'text' => '#8b5cf6'
+  ],
+  'rare' => [
+    'bg' => 'rgba(66,153,225,.15)',
+    'border' => 'rgba(66,153,225,.35)',
+    'text' => '#4299e1'
+  ],
+  'epic' => [
+    'bg' => 'rgba(159,122,234,.15)',
+    'border' => 'rgba(159,122,234,.35)',
+    'text' => '#9f7aea'
+  ],
+  'legendary' => [
+    'bg' => 'rgba(236,201,75,.15)',
+    'border' => 'rgba(236,201,75,.35)',
+    'text' => '#ecc94b'
+  ],
 ];
 ?>
 
@@ -111,26 +132,43 @@ $rarityColors = [
         </div>
       </div>
 
-      <!-- Reward Table -->
-      <div class="glass-card-neon p-3 mb-4">
-        <h5 class="mb-3 text-center" style="font-size:.95rem;"><i class="fas fa-gem me-2" style="color:var(--knd-neon-blue,#00d4ff);"></i>Possible Rewards</h5>
-        <div class="row g-2 text-center">
-          <?php foreach ($rarityColors as $rarity => $colors):
-            $rewards = $configs[$rarity] ?? [];
-          ?>
-          <div class="col-6 col-md-3">
-            <div class="p-2 rounded" style="background:<?php echo $colors['bg']; ?>; border:1px solid <?php echo $colors['border']; ?>;">
-              <div class="fw-bold text-uppercase" style="font-size:.7rem; color:<?php echo $colors['text']; ?>; letter-spacing:.05em;"><?php echo $rarity; ?></div>
-              <div class="mt-1" style="font-size:.8rem;">
-                <?php if (empty($rewards)): ?>—<?php else: ?>
-                <?php echo implode(' / ', array_map(function($r) { return $r === 0 ? '<span class="text-white-50">0</span>' : number_format($r); }, $rewards)); ?> KP
-                <?php endif; ?>
-              </div>
-            </div>
-          </div>
-          <?php endforeach; ?>
+<!-- Reward Table -->
+<div class="glass-card-neon p-3 mb-4">
+  <h5 class="mb-3 text-center" style="font-size:.95rem;">
+    <i class="fas fa-gem me-2" style="color:var(--knd-neon-blue,#00d4ff);"></i>
+    Possible Rewards
+  </h5>
+
+  <?php
+    $rewardChances = [
+      'common' => 55,
+      'special' => 25,
+      'rare' => 12,
+      'epic' => 6,
+      'legendary' => 2,
+    ];
+  ?>
+
+  <div class="row g-2 text-center">
+    <?php foreach ($rarityColors as $rarity => $colors):
+      $chance = $rewardChances[$rarity] ?? 0;
+    ?>
+    <div class="col-6 col-md-3">
+      <div class="p-2 rounded" style="background:<?php echo $colors['bg']; ?>; border:1px solid <?php echo $colors['border']; ?>;">
+        <div class="fw-bold text-uppercase" style="font-size:.7rem; color:<?php echo $colors['text']; ?>; letter-spacing:.05em;">
+          <?php echo $rarity; ?>
+        </div>
+        <div class="mt-1" style="font-size:.8rem;">
+          Avatar Item
+        </div>
+        <div class="small text-white-50 mt-1">
+          <?php echo $chance; ?>% chance
         </div>
       </div>
+    </div>
+    <?php endforeach; ?>
+  </div>
+</div>
 
       <!-- Capsules Grid -->
       <div class="glass-card-neon p-4 mb-4">
