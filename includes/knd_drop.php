@@ -4,16 +4,40 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/support_credits.php';
 require_once __DIR__ . '/knd_xp.php';
+require_once __DIR__ . '/knd_badges.php';
 
 if (!defined('DROP_ENTRY_KP')) define('DROP_ENTRY_KP', 100);
 if (!defined('DROP_COOLDOWN_SEC')) define('DROP_COOLDOWN_SEC', 3);
 
 $DROP_XP_MAP = [
     'common'    => 2,
+    'special'   => 3,
     'rare'      => 4,
     'epic'      => 7,
     'legendary' => 12,
 ];
+
+// Fragment values for duplicate avatar items
+$FRAGMENT_VALUES = [
+    'common'    => 5,
+    'special'   => 15,
+    'rare'      => 30,
+    'epic'      => 75,
+    'legendary' => 200,
+];
+
+// Base rarity weights for avatar drops
+$RARITY_WEIGHTS = [
+    'common'    => 55,
+    'special'   => 25,
+    'rare'      => 12,
+    'epic'      => 6,
+    'legendary' => 2,
+];
+
+// Pity system constants
+define('PITY_BOOST_PER_DROP', 2);  // Add 2% to rare+ chance per drop
+define('PITY_MAX_BOOST', 30);      // Cap at 30% additional chance
 
 function get_active_drop_season(PDO $pdo): ?array {
     $pdo->prepare(
@@ -69,8 +93,152 @@ function pick_drop_config(PDO $pdo, int $seasonId): array {
     return $configs[count($configs) - 1];
 }
 
+/**
+ * Get or initialize user's pity counter
+ */
+function get_user_pity(PDO $pdo, int $userId): int {
+    $stmt = $pdo->prepare("SELECT drops_since_rare FROM knd_user_pity WHERE user_id = ?");
+    $stmt->execute([$userId]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$row) {
+        // Initialize pity counter
+        $pdo->prepare("INSERT INTO knd_user_pity (user_id, drops_since_rare) VALUES (?, 0)")->execute([$userId]);
+        return 0;
+    }
+    
+    return (int)$row['drops_since_rare'];
+}
+
+/**
+ * Update user's pity counter
+ */
+function update_user_pity(PDO $pdo, int $userId, string $rarity): void {
+    $isRarePlus = in_array($rarity, ['rare', 'epic', 'legendary']);
+    
+    if ($isRarePlus) {
+        // Reset pity counter
+        $pdo->prepare("UPDATE knd_user_pity SET drops_since_rare = 0 WHERE user_id = ?")->execute([$userId]);
+    } else {
+        // Increment pity counter
+        $pdo->prepare(
+            "INSERT INTO knd_user_pity (user_id, drops_since_rare) VALUES (?, 1)
+             ON DUPLICATE KEY UPDATE drops_since_rare = drops_since_rare + 1"
+        )->execute([$userId]);
+    }
+}
+
+/**
+ * Select rarity with weighted random selection and pity boost
+ */
+function select_rarity_with_pity(PDO $pdo, int $userId): array {
+    global $RARITY_WEIGHTS;
+    
+    $pityCounter = get_user_pity($pdo, $userId);
+    $pityBoost = min($pityCounter * PITY_BOOST_PER_DROP, PITY_MAX_BOOST);
+    
+    // Apply pity boost by reducing common/special and increasing rare+
+    $weights = $RARITY_WEIGHTS;
+    
+    if ($pityBoost > 0) {
+        // Calculate total rare+ weight
+        $rarePlusTotal = $weights['rare'] + $weights['epic'] + $weights['legendary'];
+        
+        // Reduce common and special proportionally
+        $reduction = $pityBoost;
+        $commonReduction = ($weights['common'] / ($weights['common'] + $weights['special'])) * $reduction;
+        $specialReduction = $reduction - $commonReduction;
+        
+        $weights['common'] = max(1, $weights['common'] - $commonReduction);
+        $weights['special'] = max(1, $weights['special'] - $specialReduction);
+        
+        // Distribute boost to rare+ proportionally
+        $weights['rare'] += ($weights['rare'] / $rarePlusTotal) * $reduction;
+        $weights['epic'] += ($weights['epic'] / $rarePlusTotal) * $reduction;
+        $weights['legendary'] += ($weights['legendary'] / $rarePlusTotal) * $reduction;
+    }
+    
+    // Weighted random selection
+    $totalWeight = array_sum($weights);
+    $roll = mt_rand(1, (int)$totalWeight);
+    
+    $cumulative = 0;
+    foreach ($weights as $rarity => $weight) {
+        $cumulative += $weight;
+        if ($roll <= $cumulative) {
+            return ['rarity' => $rarity, 'pity_boost' => $pityBoost];
+        }
+    }
+    
+    return ['rarity' => 'common', 'pity_boost' => $pityBoost];
+}
+
+/**
+ * Select random avatar item by rarity
+ */
+function select_avatar_item_by_rarity(PDO $pdo, string $rarity): ?array {
+    $stmt = $pdo->prepare(
+        "SELECT id, code, slot, name, rarity, asset_path 
+         FROM knd_avatar_items 
+         WHERE rarity = ? AND is_active = 1
+         ORDER BY RAND()
+         LIMIT 1"
+    );
+    $stmt->execute([$rarity]);
+    return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+}
+
+/**
+ * Check if user owns an avatar item
+ */
+function user_owns_avatar_item(PDO $pdo, int $userId, int $itemId): bool {
+    $stmt = $pdo->prepare("SELECT 1 FROM knd_user_avatar_inventory WHERE user_id = ? AND item_id = ?");
+    $stmt->execute([$userId, $itemId]);
+    return (bool)$stmt->fetch();
+}
+
+/**
+ * Grant avatar item to user
+ */
+function grant_avatar_item(PDO $pdo, int $userId, int $itemId): void {
+    $now = gmdate('Y-m-d H:i:s');
+    $pdo->prepare(
+        "INSERT IGNORE INTO knd_user_avatar_inventory (user_id, item_id, acquired_at) VALUES (?, ?, ?)"
+    )->execute([$userId, $itemId, $now]);
+}
+
+/**
+ * Award fragments to user for duplicate item
+ */
+function award_fragments(PDO $pdo, int $userId, int $amount): void {
+    $pdo->prepare(
+        "INSERT INTO knd_user_fragments (user_id, amount) VALUES (?, ?)
+         ON DUPLICATE KEY UPDATE amount = amount + ?"
+    )->execute([$userId, $amount, $amount]);
+}
+
+/**
+ * Get user's fragment balance
+ */
+function get_user_fragments(PDO $pdo, int $userId): int {
+    $stmt = $pdo->prepare("SELECT amount FROM knd_user_fragments WHERE user_id = ?");
+    $stmt->execute([$userId]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row ? (int)$row['amount'] : 0;
+}
+
+/**
+ * Record drop reward in knd_user_drop_rewards
+ */
+function record_drop_reward(PDO $pdo, int $userId, int $dropId, int $itemId, string $rarity, bool $wasDuplicate, int $fragmentsAwarded, int $pityBoost): void {
+    $pdo->prepare(
+        "INSERT INTO knd_user_drop_rewards (user_id, drop_id, reward_item_id, rarity, was_duplicate, fragments_awarded, pity_boost)
+         VALUES (?, ?, ?, ?, ?, ?, ?)"
+    )->execute([$userId, $dropId, $itemId, $rarity, $wasDuplicate ? 1 : 0, $fragmentsAwarded, $pityBoost]);
+}
+
 function drop_play(PDO $pdo, int $userId): array {
-    global $DROP_XP_MAP;
+    global $DROP_XP_MAP, $FRAGMENT_VALUES;
 
     $entryKp = DROP_ENTRY_KP;
 
@@ -105,25 +273,45 @@ function drop_play(PDO $pdo, int $userId): array {
              VALUES (?, 'drop_entry', 0, 'spend', 'spent', ?, NOW())"
         )->execute([$userId, -$entryKp]);
 
-        $config = pick_drop_config($pdo, (int)$season['id']);
-        $rarity = $config['rarity'];
-        $rewardKp = (int)$config['reward_kp'];
+        // Select rarity with pity system
+        $rarityResult = select_rarity_with_pity($pdo, $userId);
+        $rarity = $rarityResult['rarity'];
+        $pityBoost = $rarityResult['pity_boost'];
+        
+        // Select random avatar item of that rarity
+        $item = select_avatar_item_by_rarity($pdo, $rarity);
+        if (!$item) {
+            $pdo->rollBack();
+            return ['error' => 'NO_ITEMS', 'message' => "No avatar items available for rarity: {$rarity}"];
+        }
+        
+        $itemId = (int)$item['id'];
+        $wasDuplicate = user_owns_avatar_item($pdo, $userId, $itemId);
+        $fragmentsAwarded = 0;
+        
+        if ($wasDuplicate) {
+            // Convert duplicate to fragments
+            $fragmentsAwarded = $FRAGMENT_VALUES[$rarity] ?? 5;
+            award_fragments($pdo, $userId, $fragmentsAwarded);
+        } else {
+            // Grant new item
+            grant_avatar_item($pdo, $userId, $itemId);
+        }
+        
+        // Update pity counter
+        update_user_pity($pdo, $userId, $rarity);
+        
         $xp = $DROP_XP_MAP[$rarity] ?? 2;
 
-        // Credit reward if > 0
-        if ($rewardKp > 0) {
-            $pdo->prepare(
-                "INSERT INTO points_ledger (user_id, source_type, source_id, entry_type, status, points, available_at, expires_at, created_at)
-                 VALUES (?, 'drop_reward', 0, 'earn', 'available', ?, NOW(), DATE_ADD(NOW(), INTERVAL 12 MONTH), NOW())"
-            )->execute([$userId, $rewardKp]);
-        }
-
-        // Record drop first to get ID for audit
+        // Record drop (no reward_kp, set to 0)
         $pdo->prepare(
             "INSERT INTO knd_drops (user_id, season_id, entry_kp, rarity, reward_kp, config_id, xp_awarded, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, NOW())"
-        )->execute([$userId, (int)$season['id'], $entryKp, $rarity, $rewardKp, (int)$config['id'], $xp]);
+             VALUES (?, ?, ?, ?, 0, 0, ?, NOW())"
+        )->execute([$userId, (int)$season['id'], $entryKp, $rarity, $xp]);
         $dropId = (int) $pdo->lastInsertId();
+        
+        // Record reward details
+        record_drop_reward($pdo, $userId, $dropId, $itemId, $rarity, $wasDuplicate, $fragmentsAwarded, $pityBoost);
 
         $levelUp = null;
         if ($xp > 0) {
@@ -136,20 +324,61 @@ function drop_play(PDO $pdo, int $userId): array {
         $pdo->commit();
         unset($_SESSION['sc_badge_cache'], $_SESSION['xp_badge_cache']);
 
+        // Check and grant badges after transaction commit (non-blocking)
+        $newBadges = [];
+        try {
+            // Check drop milestone badges
+            $dropBadges = badges_check_and_grant($pdo, $userId, 'drop');
+            $newBadges = array_merge($newBadges, $dropBadges);
+            
+            // Check collector badges (new item acquired)
+            if (!$wasDuplicate) {
+                $collectorBadges = badges_check_and_grant($pdo, $userId, 'collector');
+                $newBadges = array_merge($newBadges, $collectorBadges);
+            }
+            
+            // Check legendary pull badge
+            if ($rarity === 'legendary') {
+                $legendaryBadges = badges_check_and_grant($pdo, $userId, 'legendary_pull');
+                $newBadges = array_merge($newBadges, $legendaryBadges);
+            }
+            
+            // Check level badges if level up occurred
+            if ($levelUp) {
+                $levelBadges = badges_check_and_grant($pdo, $userId, 'level');
+                $newBadges = array_merge($newBadges, $levelBadges);
+            }
+        } catch (\Throwable $e) {
+            // Log badge error but don't fail the drop
+            error_log('Badge check failed in drop_play: ' . $e->getMessage());
+        }
+
         $out = [
-            'ok'       => true,
-            'season'   => ['name' => $season['name'], 'ends_at' => $season['ends_at']],
-            'entry'    => $entryKp,
-            'rarity'   => $rarity,
-            'reward_kp'=> $rewardKp,
-            'xp_awarded'=> $xp,
-            'balance'  => get_available_points($pdo, $userId),
+            'ok'            => true,
+            'season'        => ['name' => $season['name'], 'ends_at' => $season['ends_at']],
+            'entry'         => $entryKp,
+            'rarity'        => $rarity,
+            'item'          => [
+                'id'        => $itemId,
+                'code'      => $item['code'],
+                'name'      => $item['name'],
+                'slot'      => $item['slot'],
+                'asset_path'=> $item['asset_path'],
+            ],
+            'was_duplicate' => $wasDuplicate,
+            'fragments_awarded' => $fragmentsAwarded,
+            'fragments_total'   => get_user_fragments($pdo, $userId),
+            'pity_boost'    => $pityBoost,
+            'xp_awarded'    => $xp,
+            'balance'       => get_available_points($pdo, $userId),
         ];
-        if ($xp > 0 && $xpRes) {
+        
+        if ($xp > 0 && isset($xpRes)) {
             $out['xp_delta'] = $xp;
             $out['xp_total'] = $xpRes['new_xp'] ?? 0;
             $out['level'] = $xpRes['new_level'];
         }
+        
         if ($levelUp) {
             $out['level_up'] = true;
             $out['old_level'] = $levelUp['old_level'];
@@ -157,6 +386,12 @@ function drop_play(PDO $pdo, int $userId): array {
         } else {
             $out['level_up'] = false;
         }
+        
+        // Include newly unlocked badges in response
+        if (!empty($newBadges)) {
+            $out['badges_unlocked'] = $newBadges;
+        }
+        
         return $out;
     } catch (\Throwable $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();

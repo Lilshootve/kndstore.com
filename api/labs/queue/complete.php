@@ -10,6 +10,7 @@ ini_set('display_errors', '0');
 
 require_once __DIR__ . '/../../../includes/config.php';
 require_once __DIR__ . '/../../../includes/worker_auth.php';
+require_once __DIR__ . '/../../../includes/knd_badges.php';
 
 $workerToken = get_worker_token();
 $headerToken = trim($_SERVER['HTTP_X_KND_WORKER_TOKEN'] ?? '');
@@ -72,6 +73,22 @@ try {
         http_response_code(404);
         echo json_encode(['ok' => false, 'error' => 'Job not found or not processing']);
         exit;
+    }
+
+    // Check and grant generator badges after successful job completion
+    try {
+        // Get user_id from the job
+        $stmt = $pdo->prepare("SELECT user_id FROM knd_labs_jobs WHERE id = ?");
+        $stmt->execute([$jobId]);
+        $job = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($job && isset($job['user_id'])) {
+            $userId = (int)$job['user_id'];
+            badges_check_and_grant($pdo, $userId, 'generator');
+        }
+    } catch (\Throwable $e) {
+        // Log badge error but don't fail the completion
+        error_log('Badge check failed in labs/queue/complete: ' . $e->getMessage());
     }
 
     echo json_encode(['ok' => true]);

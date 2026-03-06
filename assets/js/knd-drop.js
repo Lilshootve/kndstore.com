@@ -10,6 +10,7 @@
     var resultEl   = document.getElementById('drop-result');
     var historyEl  = document.getElementById('drop-history');
     var countdownEl = document.getElementById('drop-countdown');
+    var fragmentsEl = document.getElementById('drop-fragments');
     var capsules   = document.querySelectorAll('.drop-capsule');
 
     var _rawBalance = parseInt((balanceEl ? balanceEl.textContent : '0').replace(/\D/g, ''), 10) || 0;
@@ -17,6 +18,7 @@
 
     var rarityStyles = {
         common:    {bg:'rgba(160,174,192,.15)', border:'rgba(160,174,192,.4)', text:'#a0aec0'},
+        special:   {bg:'rgba(139,92,246,.15)',   border:'rgba(139,92,246,.4)',   text:'#8b5cf6'},
         rare:      {bg:'rgba(66,153,225,.15)',   border:'rgba(66,153,225,.4)',   text:'#4299e1'},
         epic:      {bg:'rgba(159,122,234,.15)',  border:'rgba(159,122,234,.4)',  text:'#9f7aea'},
         legendary: {bg:'rgba(236,201,75,.15)',   border:'rgba(236,201,75,.4)',   text:'#ecc94b'}
@@ -36,6 +38,12 @@
         }
     }
 
+    function updateFragments(val) {
+        if (fragmentsEl) {
+            fragmentsEl.textContent = parseInt(val, 10).toLocaleString();
+        }
+    }
+
     function setCapsules(enabled) {
         capsules.forEach(function (c) {
             if (enabled) c.classList.remove('disabled');
@@ -44,22 +52,51 @@
     }
 
     function resetCapsule(el) {
-        el.classList.remove('active', 'scanning', 'drop-rarity-common', 'drop-rarity-rare', 'drop-rarity-epic', 'drop-rarity-legendary');
+        el.classList.remove('active', 'scanning', 'drop-rarity-common', 'drop-rarity-special', 'drop-rarity-rare', 'drop-rarity-epic', 'drop-rarity-legendary');
         el.querySelector('.drop-capsule-inner').innerHTML = '<i class="fas fa-cube"></i>';
     }
 
     function showResult(data) {
         var rc = rarityStyles[data.rarity] || rarityStyles.common;
-        var isWin = data.reward_kp > 0;
-        var cls = isWin ? 'alert-success' : 'alert-secondary';
-        var icon = isWin ? 'fa-gem' : 'fa-box-open';
-        var rewardText = isWin ? '+' + data.reward_kp.toLocaleString() + ' KP' : 'No drop';
-        var html = '<div class="alert ' + cls + ' text-center mb-0">'
-            + '<span class="badge me-2" style="background:' + rc.bg + '; color:' + rc.text + '; border:1px solid ' + rc.border + '; font-size:.85rem;">' + data.rarity.toUpperCase() + '</span>'
-            + '<i class="fas ' + icon + ' me-1"></i>'
-            + '<strong>' + rewardText + '</strong>'
-            + ' <span class="text-muted small">(+' + data.xp_awarded + ' XP)</span>'
-            + '</div>';
+        var item = data.item || {};
+        var isDupe = data.was_duplicate;
+        var fragments = data.fragments_awarded || 0;
+        var badges = data.badges_unlocked || [];
+        
+        var html = '<div class="alert alert-info text-center mb-0" style="background:' + rc.bg + '; border:2px solid ' + rc.border + ';">';
+        
+        // Rarity badge
+        html += '<div class="mb-2"><span class="badge" style="background:' + rc.bg + '; color:' + rc.text + '; border:1px solid ' + rc.border + '; font-size:.95rem; padding:.5rem 1rem;">' + data.rarity.toUpperCase() + '</span></div>';
+        
+        // Item info
+        html += '<div class="mb-2"><strong style="font-size:1.1rem; color:' + rc.text + ';">' + (item.name || 'Avatar Item') + '</strong></div>';
+        html += '<div class="text-white-50 small mb-2">' + (item.slot ? item.slot.toUpperCase() : 'ITEM') + '</div>';
+        
+        // NEW or DUPLICATE
+        if (isDupe) {
+            html += '<div class="mb-2"><span class="badge bg-secondary"><i class="fas fa-copy me-1"></i>DUPLICATE</span></div>';
+            if (fragments > 0) {
+                html += '<div class="mb-2" style="color:#a78bfa;"><i class="fas fa-gem me-1"></i><strong>+' + fragments + ' Fragments</strong></div>';
+            }
+        } else {
+            html += '<div class="mb-2"><span class="badge bg-success"><i class="fas fa-star me-1"></i>NEW!</span></div>';
+        }
+        
+        // XP
+        html += '<div class="text-white-50 small">+' + data.xp_awarded + ' XP</div>';
+        
+        // Badges
+        if (badges.length > 0) {
+            html += '<div class="mt-3 pt-3" style="border-top:1px solid rgba(255,255,255,.1);">';
+            html += '<div class="text-warning mb-2"><i class="fas fa-award me-1"></i><strong>Badge' + (badges.length > 1 ? 's' : '') + ' Unlocked!</strong></div>';
+            badges.forEach(function(badge) {
+                html += '<div class="badge bg-warning text-dark me-1 mb-1">' + badge + '</div>';
+            });
+            html += '</div>';
+        }
+        
+        html += '</div>';
+        
         resultEl.innerHTML = html;
         resultEl.style.display = 'block';
     }
@@ -67,9 +104,15 @@
     function addHistoryRow(d) {
         var rc = rarityStyles[d.rarity] || rarityStyles.common;
         var tr = document.createElement('tr');
-        var rewardHtml = d.reward_kp > 0
-            ? '+' + d.reward_kp.toLocaleString() + ' KP'
-            : '<span class="text-white-50">No drop</span>';
+        var item = d.item || {};
+        var itemName = item.name || 'Avatar Item';
+        var isDupe = d.was_duplicate;
+        var fragments = d.fragments_awarded || 0;
+        
+        var rewardHtml = isDupe && fragments > 0
+            ? '<span class="text-muted">' + itemName + '</span> <span style="color:#a78bfa;">+' + fragments + ' frags</span>'
+            : '<span style="color:' + rc.text + ';">' + itemName + '</span>';
+        
         tr.innerHTML = '<td><span class="badge" style="background:' + rc.bg + '; color:' + rc.text + '; border:1px solid ' + rc.border + ';">' + d.rarity.charAt(0).toUpperCase() + d.rarity.slice(1) + '</span></td>'
             + '<td>' + rewardHtml + '</td>'
             + '<td>+' + d.xp_awarded + ' XP</td>'
@@ -115,9 +158,13 @@
 
                     if (d.ok) {
                         var dd = d.data;
+                        
+                        // Handle XP gain
                         if (dd.xp_delta > 0 && typeof showXpGain === 'function') {
                             setTimeout(function () { showXpGain(dd.xp_delta); }, remaining + 100);
                         }
+                        
+                        // Handle level up
                         if (dd.level_up && dd.old_level != null && dd.new_level != null) {
                             var oldLvl = Number(dd.old_level);
                             var newLvl = Number(dd.new_level);
@@ -133,13 +180,23 @@
                         } else if (dd.level && typeof updateNavLevelBadge === 'function') {
                             setTimeout(function () { updateNavLevelBadge(dd.level); }, remaining + 300);
                         }
+                        
+                        // Handle badges
+                        if (dd.badges_unlocked && dd.badges_unlocked.length > 0 && typeof kndToast === 'function') {
+                            setTimeout(function () {
+                                dd.badges_unlocked.forEach(function(badge) {
+                                    kndToast('success', '🏆 Badge Unlocked: ' + badge);
+                                });
+                            }, 1500);
+                        }
+                        
                         var rarity = dd.rarity;
                         capsuleEl.classList.add('drop-rarity-' + rarity);
                         var rc = rarityStyles[rarity] || rarityStyles.common;
-                        var rewardLabel = dd.reward_kp > 0 ? '+' + dd.reward_kp : '0';
+                        var itemName = (dd.item && dd.item.name) ? dd.item.name.substring(0, 12) : rarity;
                         capsuleEl.querySelector('.drop-capsule-inner').innerHTML =
                             '<div style="font-size:.55rem; text-transform:uppercase; color:' + rc.text + '; font-weight:700;">' + rarity + '</div>'
-                            + '<div style="font-size:.85rem; font-weight:900; color:#fff;">' + rewardLabel + '</div>';
+                            + '<div style="font-size:.7rem; font-weight:700; color:#fff;">' + itemName + '</div>';
 
                         if (rarity === 'legendary') {
                             if (typeof kndConfetti === 'function') kndConfetti();
@@ -148,13 +205,16 @@
 
                         showResult(dd);
                         updateBalance(dd.balance);
+                        if (dd.fragments_total !== undefined) {
+                            updateFragments(dd.fragments_total);
+                        }
                         addHistoryRow(dd);
 
                         setTimeout(function () {
                             resetCapsule(capsuleEl);
                             playing = false;
                             setCapsules(true);
-                        }, 2000);
+                        }, 3000);
                     } else {
                         resetCapsule(capsuleEl);
                         var errMsg = d.error && d.error.message || 'Error';
@@ -198,4 +258,14 @@
         tick();
         setInterval(tick, 1000);
     }
+    
+    // Load initial fragment balance
+    fetch('/api/avatar/fragments.php', {credentials: 'same-origin'})
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.ok && d.data && d.data.fragments !== undefined) {
+                updateFragments(d.data.fragments);
+            }
+        })
+        .catch(function() {});
 })();

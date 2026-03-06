@@ -93,7 +93,7 @@ $rarityColors = [
 
       <?php if ($season): ?>
 
-      <!-- Balance + Entry -->
+      <!-- Balance + Entry + Fragments -->
       <div class="glass-card-neon p-3 mb-4 text-center">
         <div class="d-flex justify-content-center align-items-center gap-4 flex-wrap">
           <div>
@@ -103,6 +103,10 @@ $rarityColors = [
           <div style="border-left:1px solid rgba(255,255,255,.1); padding-left:16px;">
             <span class="text-white-50 small">Entry Cost</span><br>
             <span style="font-size:1.4rem; font-weight:700; color:#fb923c;"><?php echo number_format($entryKp); ?> KP</span>
+          </div>
+          <div style="border-left:1px solid rgba(255,255,255,.1); padding-left:16px;">
+            <span class="text-white-50 small"><i class="fas fa-gem me-1"></i>Fragments</span><br>
+            <span id="drop-fragments" style="font-size:1.4rem; font-weight:700; color:#a78bfa;">—</span>
           </div>
         </div>
       </div>

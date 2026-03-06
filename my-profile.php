@@ -181,7 +181,8 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
       <div class="glass-card-neon p-4 mb-4">
         <div class="d-flex align-items-center justify-content-between mb-3">
           <h5 class="mb-0" style="font-size:1rem;"><i class="fas fa-user-astronaut me-2" style="color:#00d4ff;"></i><?php echo t('avatar.title', 'KND Avatar'); ?></h5>
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-3">
+            <span class="text-white-50 small"><i class="fas fa-gem me-1" style="color:#a78bfa;"></i><?php echo t('avatar.fragments', 'Fragments'); ?>: <strong id="profile-fragments" style="color:#a78bfa;">—</strong></span>
             <span class="text-white-50 small"><?php echo t('avatar.kp', 'KP'); ?>: <strong id="avatar-kp-balance" style="color:#00d4ff;">—</strong></span>
             <button type="button" id="avatar-btn-customize" class="btn btn-sm btn-neon-primary">
               <i class="fas fa-palette me-1"></i><?php echo t('profile.avatar_customize', 'Customize'); ?>
@@ -191,13 +192,20 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
         <div id="avatar-preview" class="avatar-stage"></div>
       </div>
 
-      <!-- Badges placeholder -->
-      <div class="glass-card-neon p-4 mb-4 profile-placeholder-card">
-        <div class="d-flex align-items-center mb-2">
-          <div class="profile-stat-icon" style="opacity:.6;"><i class="fas fa-award"></i></div>
-          <h5 class="mb-0 ms-2 text-white-50" style="font-size:1rem;"><?php echo t('profile.badges', 'Badges'); ?></h5>
+      <!-- Badges Section -->
+      <div class="glass-card-neon p-4 mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div class="d-flex align-items-center">
+            <div class="profile-stat-icon"><i class="fas fa-award"></i></div>
+            <h5 class="mb-0 ms-2" style="font-size:1rem;"><?php echo t('profile.badges', 'Badges'); ?></h5>
+          </div>
+          <span id="badge-count" class="text-white-50 small">—</span>
         </div>
-        <p class="text-white-50 small mb-0"><?php echo t('profile.coming_soon', 'Coming Soon'); ?></p>
+        <div id="badges-container">
+          <div class="text-center text-white-50 py-3">
+            <i class="fas fa-spinner fa-spin me-2"></i>Loading badges...
+          </div>
+        </div>
       </div>
 
       <!-- Avatar Customize Modal (KND HUD) -->
@@ -274,5 +282,88 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 <script>var CSRF = '<?php echo addslashes($csrfToken); ?>';</script>
 <script src="/assets/js/navigation-extend.js"></script>
 <script src="/assets/js/avatar.js" defer></script>
+<script>
+// Load fragments
+fetch('/api/avatar/fragments.php', {credentials: 'same-origin'})
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok && d.data) {
+      document.getElementById('profile-fragments').textContent = (d.data.fragments || 0).toLocaleString();
+    }
+  })
+  .catch(() => {});
+
+// Load badges
+fetch('/api/badges/user_badges.php', {credentials: 'same-origin'})
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok && d.data) {
+      const unlocked = d.data.unlocked_badges || [];
+      const progress = d.data.progress || [];
+      const milestones = d.data.milestones || {};
+      
+      const countEl = document.getElementById('badge-count');
+      const container = document.getElementById('badges-container');
+      
+      if (countEl) {
+        countEl.textContent = unlocked.length + ' / ' + progress.length + ' unlocked';
+      }
+      
+      if (container) {
+        if (unlocked.length === 0) {
+          container.innerHTML = '<div class="text-center text-white-50 py-3"><i class="fas fa-award me-2" style="opacity:.5;"></i>No badges unlocked yet. Keep playing to earn badges!</div>';
+        } else {
+          let html = '<div class="row g-3 mb-3">';
+          unlocked.forEach(badge => {
+            const rarityColors = {
+              generator: '#60a5fa',
+              drop: '#a78bfa',
+              collector: '#34d399',
+              legendary_pull: '#fbbf24',
+              level: '#f472b6'
+            };
+            const color = rarityColors[badge.unlock_type] || '#00d4ff';
+            html += '<div class="col-6 col-md-4 col-lg-3">';
+            html += '<div class="badge-card" style="background:rgba(0,212,255,.05); border:1px solid rgba(0,212,255,.2); border-radius:8px; padding:12px; text-align:center;">';
+            html += '<div style="font-size:2rem; margin-bottom:8px; color:' + color + ';"><i class="fas fa-award"></i></div>';
+            html += '<div style="font-size:.85rem; font-weight:600; color:#fff; margin-bottom:4px;">' + badge.name + '</div>';
+            html += '<div style="font-size:.7rem; color:rgba(255,255,255,.5);">' + badge.description + '</div>';
+            html += '<div style="font-size:.65rem; color:rgba(255,255,255,.4); margin-top:6px;">' + new Date(badge.unlocked_at).toLocaleDateString() + '</div>';
+            html += '</div></div>';
+          });
+          html += '</div>';
+          
+          // Show milestones
+          html += '<div class="mt-3 pt-3" style="border-top:1px solid rgba(255,255,255,.1);">';
+          html += '<div class="text-white-50 small mb-2"><i class="fas fa-chart-line me-1"></i>Your Progress</div>';
+          html += '<div class="row g-2 text-center">';
+          const milestoneLabels = {
+            generator: 'Images Generated',
+            drop: 'Drops Opened',
+            collector: 'Items Collected',
+            legendary_pull: 'Legendary Pulls',
+            level: 'Current Level'
+          };
+          Object.keys(milestones).forEach(key => {
+            html += '<div class="col-6 col-md-4">';
+            html += '<div style="background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:6px; padding:8px;">';
+            html += '<div style="font-size:.7rem; color:rgba(255,255,255,.5); margin-bottom:4px;">' + (milestoneLabels[key] || key) + '</div>';
+            html += '<div style="font-size:1.2rem; font-weight:700; color:#00d4ff;">' + milestones[key] + '</div>';
+            html += '</div></div>';
+          });
+          html += '</div></div>';
+          
+          container.innerHTML = html;
+        }
+      }
+    }
+  })
+  .catch(() => {
+    const container = document.getElementById('badges-container');
+    if (container) {
+      container.innerHTML = '<div class="text-center text-danger py-3"><i class="fas fa-exclamation-triangle me-2"></i>Failed to load badges</div>';
+    }
+  });
+</script>
 <?php echo generateFooter(); ?>
 <?php echo generateScripts(); ?>

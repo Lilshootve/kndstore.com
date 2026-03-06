@@ -4,6 +4,7 @@
 // Max level: 30. XP keeps accumulating at 30 for leaderboard.
 
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/knd_badges.php';
 
 define('XP_MAX_LEVEL', 30);
 
