@@ -2,61 +2,97 @@
 require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/auth.php';
+require_once __DIR__ . '/../../includes/csrf.php';
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=UTF-8');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
     echo json_encode(['ok' => false, 'error' => 'Invalid method']);
     exit;
 }
 
 if (!isLoggedIn()) {
+    http_response_code(401);
     echo json_encode(['ok' => false, 'error' => 'Not logged in']);
     exit;
 }
 
-$userId = (int)$_SESSION['dr_user_id'];
-$input = json_decode(file_get_contents('php://input'), true);
-$itemId = $input['item_id'] ?? null;
+$raw = file_get_contents('php://input');
+$input = json_decode($raw, true);
+
+if (!is_array($input)) {
+    http_response_code(400);
+    echo json_encode(['ok' => false, 'error' => 'Invalid JSON body']);
+    exit;
+}
+
+$csrf = $input['csrf_token'] ?? '';
+if (!csrf_validate($csrf)) {
+    http_response_code(419);
+    echo json_encode(['ok' => false, 'error' => 'Invalid CSRF token']);
+    exit;
+}
+
+$userId = (int) ($_SESSION['dr_user_id'] ?? 0);
+$itemId = isset($input['item_id']) ? (int) $input['item_id'] : 0;
 
 $pdo = getDBConnection();
 if (!$pdo) {
-    echo json_encode(['ok' => false, 'error' => 'DB error']);
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'DB connection error']);
     exit;
 }
 
 try {
-    // Ensure column exists
-    try {
-        $pdo->exec("ALTER TABLE users ADD COLUMN favorite_avatar_id INT NULL");
-        $pdo->exec("ALTER TABLE users ADD CONSTRAINT fk_user_fav_avatar FOREIGN KEY (favorite_avatar_id) REFERENCES knd_avatar_items(id) ON DELETE SET NULL");
-    } catch (\Throwable $e) {
-        // Ignore if already exists
-    }
-
-    if ($itemId === null) {
-        // Clear favorite
+    if ($itemId <= 0) {
         $stmt = $pdo->prepare("UPDATE users SET favorite_avatar_id = NULL WHERE id = ?");
         $stmt->execute([$userId]);
-        echo json_encode(['ok' => true]);
+
+        echo json_encode([
+            'ok' => true,
+            'message' => 'Favorite avatar cleared'
+        ]);
         exit;
     }
 
-    // Check if user owns the item
-    $stmt = $pdo->prepare("SELECT id FROM knd_user_avatar_inventory WHERE user_id = ? AND item_id = ?");
+    $stmt = $pdo->prepare("
+        SELECT ai.id, ai.name, ai.asset_path
+        FROM knd_user_avatar_inventory inv
+        INNER JOIN knd_avatar_items ai ON ai.id = inv.item_id
+        WHERE inv.user_id = ? AND inv.item_id = ?
+        LIMIT 1
+    ");
     $stmt->execute([$userId, $itemId]);
-    if (!$stmt->fetch()) {
-        echo json_encode(['ok' => false, 'error' => 'Item not owned']);
+    $ownedItem = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$ownedItem) {
+        http_response_code(403);
+        echo json_encode([
+            'ok' => false,
+            'error' => 'You do not own this avatar'
+        ]);
         exit;
     }
 
-    // Set favorite
     $stmt = $pdo->prepare("UPDATE users SET favorite_avatar_id = ? WHERE id = ?");
     $stmt->execute([$itemId, $userId]);
 
-    echo json_encode(['ok' => true]);
-
+    echo json_encode([
+        'ok' => true,
+        'favorite' => [
+            'id' => (int) $ownedItem['id'],
+            'name' => $ownedItem['name'],
+            'asset_path' => $ownedItem['asset_path'],
+        ]
+    ]);
 } catch (\Throwable $e) {
-    error_log($e->getMessage());
-    echo json_encode(['ok' => false, 'error' => 'Server error']);
+    error_log('[avatar/set_favorite] ' . $e->getMessage());
+    http_response_code(500);
+    echo json_encode([
+        'ok' => false,
+        'error' => $e->getMessage(),
+        'line' => $e->getLine(),
+        'file' => basename($e->getFile())
+    ]);
 }
