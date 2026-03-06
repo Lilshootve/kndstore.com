@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/_init.php';
+labs_perf_checkpoint('character_after_init');
+
 require_once __DIR__ . '/../includes/comfyui.php';
+labs_perf_checkpoint('character_after_comfyui');
 
 $toolName = t('ai.character.title', 'Character Lab');
 $jobType = 'character';
@@ -13,11 +16,13 @@ if ($pdo) {
     }
 }
 $historyJobs = array_filter($historyJobs, fn($j) => ($j['tool'] ?? '') === 'character');
+labs_perf_checkpoint('character_after_history_fetch');
 
 $aiCss = __DIR__ . '/../assets/css/ai-tools.css';
 $labsCss = __DIR__ . '/../assets/css/knd-labs.css';
 $extraCss = '<link rel="stylesheet" href="/assets/css/ai-tools.css?v=' . (file_exists($aiCss) ? filemtime($aiCss) : time()) . '">';
 $extraCss .= '<link rel="stylesheet" href="/assets/css/knd-labs.css?v=' . (file_exists($labsCss) ? filemtime($labsCss) : time()) . '">';
+labs_perf_checkpoint('character_before_header');
 echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $toolName]), t('labs.tool_page_desc', 'Create with AI'), $extraCss);
 ?>
 <div id="particles-bg"></div>
@@ -140,4 +145,4 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
 <script src="/assets/js/navigation-extend.js"></script>
 <script src="/assets/js/kndlabs.js"></script>
 <script>KNDLabs.init({ formId: 'labs-comfy-form', jobType: 'character', costLabelId: 'labs-cost-label', pricingKey: 'character', balanceEl: '#labs-balance' });</script>
-<?php echo generateFooter(); echo generateScripts(); ?>
+<?php echo generateFooter(); echo generateScripts(); echo labs_perf_comment(); labs_perf_log(); ?>

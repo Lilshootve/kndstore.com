@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/_init.php';
+labs_perf_checkpoint('t2i_after_init');
+
 require_once __DIR__ . '/../includes/comfyui.php';
+labs_perf_checkpoint('t2i_after_comfyui');
 
 $toolName = t('labs.canvas.title', 'Canvas');
 $jobType = 'text2img';
@@ -13,6 +16,7 @@ if ($pdo) {
         $historyJobs = [];
     }
 }
+labs_perf_checkpoint('t2i_after_history_fetch');
 $historyJobs = array_filter($historyJobs, fn($j) => ($j['tool'] ?? '') === 'text2img');
 if ($providerFilter === 'local') {
     $historyJobs = array_filter($historyJobs, fn($j) => ($j['provider'] ?? '') !== 'runpod');
@@ -26,6 +30,7 @@ $aiCss = __DIR__ . '/../assets/css/ai-tools.css';
 $labsCss = __DIR__ . '/../assets/css/knd-labs.css';
 $extraCss = '<link rel="stylesheet" href="/assets/css/ai-tools.css?v=' . (file_exists($aiCss) ? filemtime($aiCss) : time()) . '">';
 $extraCss .= '<link rel="stylesheet" href="/assets/css/knd-labs.css?v=' . (file_exists($labsCss) ? filemtime($labsCss) : time()) . '">';
+labs_perf_checkpoint('t2i_before_header');
 echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $toolName]), t('labs.tool_page_desc', 'Create with AI'), $extraCss);
 ?>
 <div id="particles-bg"></div>
@@ -467,4 +472,4 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
   }
 })();
 </script>
-<?php echo generateFooter(); echo generateScripts(); ?>
+<?php echo generateFooter(); echo generateScripts(); echo labs_perf_comment(); labs_perf_log(); ?>

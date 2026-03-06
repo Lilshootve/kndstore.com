@@ -1,7 +1,10 @@
 <?php
 require_once __DIR__ . '/_init.php';
+labs_perf_checkpoint('consistency_after_init');
+
 require_once __DIR__ . '/../includes/comfyui.php';
 require_once __DIR__ . '/../includes/labs_display_helper.php';
+labs_perf_checkpoint('consistency_after_comfyui');
 
 $toolName = t('labs.consistency.title', 'Consistency System');
 $jobType = 'consistency';
@@ -19,6 +22,7 @@ if ($pdo) {
         $refJobs = [];
     }
 }
+labs_perf_checkpoint('consistency_after_history_refjobs');
 
 $refJobId = isset($_GET['reference_job_id']) ? (int) $_GET['reference_job_id'] : 0;
 $preloadMode = trim($_GET['mode'] ?? '');
@@ -52,11 +56,13 @@ if ($refJobId > 0 && $pdo) {
         }
     }
 }
+labs_perf_checkpoint('consistency_after_preload');
 
 $aiCss = __DIR__ . '/../assets/css/ai-tools.css';
 $labsCss = __DIR__ . '/../assets/css/knd-labs.css';
 $extraCss = '<link rel="stylesheet" href="/assets/css/ai-tools.css?v=' . (file_exists($aiCss) ? filemtime($aiCss) : time()) . '">';
 $extraCss .= '<link rel="stylesheet" href="/assets/css/knd-labs.css?v=' . (file_exists($labsCss) ? filemtime($labsCss) : time()) . '">';
+labs_perf_checkpoint('consistency_before_header');
 echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $toolName]), t('labs.consistency.desc', 'Generate images with locked style or character consistency.'), $extraCss);
 ?>
 <div id="particles-bg"></div>
@@ -392,4 +398,4 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
   }
 })();
 </script>
-<?php echo generateFooter(); echo generateScripts(); ?>
+<?php echo generateFooter(); echo generateScripts(); echo labs_perf_comment(); labs_perf_log(); ?>
