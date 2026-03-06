@@ -237,41 +237,45 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
             <?php foreach ($inventory as $item):
               $isSelected = !empty($data['favorite_avatar']) && $data['favorite_avatar']['id'] == $item['id'];
             ?>
-            <div class="col-4 col-md-3 col-lg-2">
-              <div class="avatar-item-card<?php echo $isSelected ? ' avatar-item-card--selected' : ''; ?>" style="border-radius:8px; padding:10px; text-align:center; height:100%;">
-                <?php if ($isSelected): ?>
-                  <div class="avatar-item-selected-badge"><i class="fas fa-check-circle"></i></div>
-                <?php endif; ?>
-                <div style="height:60px; display:flex; align-items:center; justify-content:center; margin-bottom:10px;">
-                  <img src="<?php echo htmlspecialchars($item['asset_path']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" style="max-height:100%; max-width:100%; object-fit:contain; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));">
-                </div>
-                <div style="font-size:.7rem; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px;" title="<?php echo htmlspecialchars($item['name']); ?>">
-                  <?php echo htmlspecialchars($item['name']); ?>
-                </div>
-                <?php
-                  $rCls = 'profile-rarity-common';
-                  if ($item['rarity'] === 'special') $rCls = 'profile-rarity-special';
-                  elseif ($item['rarity'] === 'rare') $rCls = 'profile-rarity-rare';
-                  elseif ($item['rarity'] === 'epic') $rCls = 'profile-rarity-epic';
-                  elseif ($item['rarity'] === 'legendary') $rCls = 'profile-rarity-legendary';
-                ?>
-                <div style="font-size:.65rem; text-transform:uppercase;" class="<?php echo $rCls; ?>">
-                  <?php echo htmlspecialchars($item['rarity']); ?>
-                </div>
-                <div class="mt-2">
-                  <?php if ($isSelected): ?>
-                    <?php if ($isSelected): ?>
-  <button class="knd-btn-chip is-active" disabled>
-    <i class="fas fa-check-circle me-1"></i>Active
-  </button>
-<?php else: ?>
-  <button class="knd-btn-chip btn-set-favorite" data-id="<?php echo (int) $item['id']; ?>">
-    <i class="fas fa-sparkles me-1"></i>Set Favorite
-  </button>
-<?php endif; ?>
-                </div>
-              </div>
-            </div>
+<div class="col-4 col-md-3 col-lg-2">
+  <div class="avatar-item-card<?php echo $isSelected ? ' avatar-item-card--selected' : ''; ?>" style="border-radius:8px; padding:10px; text-align:center; height:100%;">
+    <?php if ($isSelected): ?>
+      <div class="avatar-item-selected-badge"><i class="fas fa-check-circle"></i></div>
+    <?php endif; ?>
+
+    <div style="height:60px; display:flex; align-items:center; justify-content:center; margin-bottom:10px;">
+      <img src="<?php echo htmlspecialchars($item['asset_path']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" style="max-height:100%; max-width:100%; object-fit:contain; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));">
+    </div>
+
+    <div style="font-size:.7rem; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px;" title="<?php echo htmlspecialchars($item['name']); ?>">
+      <?php echo htmlspecialchars($item['name']); ?>
+    </div>
+
+    <?php
+      $rCls = 'profile-rarity-common';
+      if ($item['rarity'] === 'special') $rCls = 'profile-rarity-special';
+      elseif ($item['rarity'] === 'rare') $rCls = 'profile-rarity-rare';
+      elseif ($item['rarity'] === 'epic') $rCls = 'profile-rarity-epic';
+      elseif ($item['rarity'] === 'legendary') $rCls = 'profile-rarity-legendary';
+    ?>
+
+    <div style="font-size:.65rem; text-transform:uppercase;" class="<?php echo $rCls; ?>">
+      <?php echo htmlspecialchars($item['rarity']); ?>
+    </div>
+
+    <div class="mt-2">
+      <?php if ($isSelected): ?>
+        <button class="knd-btn-chip is-active" disabled>
+          <i class="fas fa-check-circle me-1"></i>Active
+        </button>
+      <?php else: ?>
+        <button class="knd-btn-chip btn-set-favorite" data-id="<?php echo (int) $item['id']; ?>">
+          <i class="fas fa-sparkles me-1"></i>Set Favorite
+        </button>
+      <?php endif; ?>
+    </div>
+  </div>
+</div>
             <?php endforeach; ?>
           </div>
         <?php endif; ?>
