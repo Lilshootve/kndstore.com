@@ -3,7 +3,7 @@
 
     var CSRF     = window.DROP_CSRF || '';
     var ENDS_AT  = window.DROP_ENDS_AT;
-    var ENTRY    = window.DROP_ENTRY || 420;
+    var ENTRY = Number(window.DROP_ENTRY || 100);
     var SCAN_MS  = 2200;
 
     var balanceEl  = document.getElementById('drop-balance');
@@ -23,6 +23,13 @@
         epic:      {bg:'rgba(159,122,234,.15)',  border:'rgba(159,122,234,.4)',  text:'#9f7aea'},
         legendary: {bg:'rgba(236,201,75,.15)',   border:'rgba(236,201,75,.4)',   text:'#ecc94b'}
     };
+    
+    function formatBadgeLabel(badge) {
+        return String(badge)
+            .replace(/_/g, ' ')
+            .toLowerCase()
+            .replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+    }
 
     function updateBalance(val) {
         _rawBalance = parseInt(val, 10) || 0;
@@ -71,6 +78,13 @@
         // Item info
         html += '<div class="mb-2"><strong style="font-size:1.1rem; color:' + rc.text + ';">' + (item.name || 'Avatar Item') + '</strong></div>';
         html += '<div class="text-white-50 small mb-2">' + (item.slot ? item.slot.toUpperCase() : 'ITEM') + '</div>';
+        if (item.asset_path) {
+            html += '<div class="mb-3">'
+                 + '<img src="' + item.asset_path + '" alt="' + (item.name || 'Avatar Item') + '" '
+                 + 'style="max-width:160px; max-height:160px; width:auto; height:auto; border-radius:12px; '
+                 + 'border:1px solid ' + rc.border + '; box-shadow:0 0 18px rgba(0,0,0,.25); background:rgba(255,255,255,.03); padding:6px;">'
+                 + '</div>';
+        }
         
         // NEW or DUPLICATE
         if (isDupe) {
@@ -86,16 +100,23 @@
         html += '<div class="text-white-50 small">+' + data.xp_awarded + ' XP</div>';
         
         // Badges
-        if (badges.length > 0) {
-            html += '<div class="mt-3 pt-3" style="border-top:1px solid rgba(255,255,255,.1);">';
-            html += '<div class="text-warning mb-2"><i class="fas fa-award me-1"></i><strong>Badge' + (badges.length > 1 ? 's' : '') + ' Unlocked!</strong></div>';
-            badges.forEach(function(badge) {
-                html += '<div class="badge bg-warning text-dark me-1 mb-1">' + badge + '</div>';
-            });
-            html += '</div>';
-        }
-        
-        html += '</div>';
+if (badges.length > 0) {
+    function formatBadgeLabel(badge) {
+        return String(badge)
+            .replace(/_/g, ' ')
+            .toLowerCase()
+            .replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+    }
+
+    html += '<div class="mt-3 pt-3" style="border-top:1px solid rgba(255,255,255,.1);">';
+    html += '<div class="text-warning mb-2"><i class="fas fa-award me-1"></i><strong>Badge' + (badges.length > 1 ? 's' : '') + ' Unlocked!</strong></div>';
+
+    badges.forEach(function(badge) {
+        html += '<div class="badge bg-warning text-dark me-1 mb-1">' + formatBadgeLabel(badge) + '</div>';
+    });
+
+    html += '</div>';
+}
         
         resultEl.innerHTML = html;
         resultEl.style.display = 'block';
@@ -185,7 +206,7 @@
                         if (dd.badges_unlocked && dd.badges_unlocked.length > 0 && typeof kndToast === 'function') {
                             setTimeout(function () {
                                 dd.badges_unlocked.forEach(function(badge) {
-                                    kndToast('success', '🏆 Badge Unlocked: ' + badge);
+                                    kndToast('success', '🏆 Badge Unlocked: ' + String(badge).replace(/_/g, ' '));
                                 });
                             }, 1500);
                         }
@@ -217,7 +238,11 @@
                         }, 3000);
                     } else {
                         resetCapsule(capsuleEl);
-                        var errMsg = d.error && d.error.message || 'Error';
+                        var errMsg =
+    (d && d.message) ||
+    (d && d.error && d.error.message) ||
+    (d && d.error) ||
+    'Error';
                         resultEl.innerHTML = '<div class="alert alert-danger text-center mb-0"><i class="fas fa-exclamation-triangle me-2"></i>' + errMsg + '</div>';
                         resultEl.style.display = 'block';
                         if (typeof kndToast === 'function') kndToast('error', errMsg);
