@@ -579,14 +579,16 @@
 
 /* ========================================
    Labs - Atmospheric background
-   Applies to Canvas, Consistency System, Upscale (all use .labs-tool-section)
+   Applies to: knd-labs hub (.labs-hub-hero), Canvas, Consistency, Upscale (.labs-tool-section)
    ======================================== */
-.labs-tool-section {
+.labs-tool-section,
+.labs-hub-hero {
     position: relative;
     isolation: isolate;
 }
 
-.labs-tool-section::before {
+.labs-tool-section::before,
+.labs-hub-hero::before {
     content: '';
     position: fixed;
     inset: 0;
@@ -598,12 +600,13 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    opacity: 0.15;
-    z-index: -2;
+    opacity: 0.35;
+    z-index: 0;
     pointer-events: none;
 }
 
-.labs-tool-section::after {
+.labs-tool-section::after,
+.labs-hub-hero::after {
     content: '';
     position: fixed;
     inset: 0;
@@ -612,10 +615,17 @@
     right: 0;
     bottom: 0;
     background: linear-gradient(180deg,
-        rgba(6, 10, 18, 0.92) 0%,
-        rgba(6, 10, 18, 0.75) 25%,
-        rgba(6, 10, 18, 0.85) 50%,
-        rgba(6, 10, 18, 0.95) 100%);
-    z-index: -1;
+        rgba(6, 10, 18, 0.55) 0%,
+        rgba(6, 10, 18, 0.4) 30%,
+        rgba(6, 10, 18, 0.5) 60%,
+        rgba(6, 10, 18, 0.7) 100%);
+    z-index: 1;
     pointer-events: none;
+}
+
+/* Content above background layers */
+.labs-tool-section > .container,
+.labs-hub-hero > .container {
+    position: relative;
+    z-index: 2;
 }
