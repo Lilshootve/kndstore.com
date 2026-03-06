@@ -162,7 +162,7 @@ if (badges.length > 0) {
 
         capsuleEl.classList.add('active', 'scanning');
         capsuleEl.querySelector('.drop-capsule-inner').innerHTML =
-  '<i class="fas fa-search" style="animation:knd-spin 1s linear infinite; display:inline-block;"></i>';
+  '<i class="fas fa-search" style="display:inline-block; animation:knd-spin 1s linear infinite;"></i>'
 
         var fd = new FormData();
         fd.append('csrf_token', CSRF);

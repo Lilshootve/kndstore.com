@@ -3,14 +3,26 @@
  */
 (function () {
     'use strict';
-    window.showXpGain = function (xpDelta, anchorEl) {
-        if (!xpDelta || xpDelta <= 0) return;
+
+    window.showXpGain = function (xpDelta) {
+        xpDelta = Number(xpDelta || 0);
+        if (xpDelta <= 0) return;
+
+        var old = document.querySelector('.knd-xp-pop');
+        if (old && old.parentNode) {
+            old.parentNode.removeChild(old);
+        }
+
         var el = document.createElement('div');
         el.className = 'knd-xp-pop';
         el.textContent = '+' + xpDelta + ' XP';
         el.setAttribute('aria-live', 'polite');
+
         document.body.appendChild(el);
-        setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 1600);
+
+        setTimeout(function () {
+            if (el.parentNode) el.parentNode.removeChild(el);
+        }, 1600);
     };
 
     window.updateNavLevelBadge = function (level) {
