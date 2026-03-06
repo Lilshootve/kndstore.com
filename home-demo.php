@@ -182,4 +182,5 @@ echo generateHeader('KND — Build, Create & Launch', 'AI tools, digital service
     </div>
   </footer>
 </div>
+<script src="/assets/js/knd-demo-future.js?v=<?php echo file_exists(__DIR__ . '/assets/js/knd-demo-future.js') ? filemtime(__DIR__ . '/assets/js/knd-demo-future.js') : time(); ?>"></script>
 <?php echo generateFooter(); echo generateScripts(); ?>

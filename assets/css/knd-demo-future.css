@@ -446,3 +446,126 @@
   color: var(--knd-muted);
   text-align: center;
 }
+
+/* === Demo Header (coherente con footer, más contenido) === */
+body:has(.knd-demo-shell) .navbar {
+  background: linear-gradient(165deg,
+    rgba(6, 10, 18, 0.97) 0%,
+    rgba(11, 22, 40, 0.95) 50%,
+    rgba(6, 10, 18, 0.97) 100%) !important;
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid transparent;
+  box-shadow:
+    0 1px 0 0 rgba(103, 213, 255, 0.08),
+    0 4px 24px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  min-height: 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+body:has(.knd-demo-shell) .navbar::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(53, 194, 255, 0.25) 20%,
+    rgba(139, 92, 255, 0.2) 50%,
+    rgba(53, 194, 255, 0.25) 80%,
+    transparent 100%);
+  box-shadow: 0 0 12px rgba(53, 194, 255, 0.08);
+}
+
+body:has(.knd-demo-shell) .navbar::after {
+  display: none;
+}
+
+body:has(.knd-demo-shell) .navbar .container {
+  position: relative;
+  z-index: 2;
+}
+
+/* Grid sutil (red geométrica inspirada en footer) */
+body:has(.knd-demo-shell) .navbar {
+  background-image:
+    linear-gradient(165deg, rgba(6, 10, 18, 0.97) 0%, rgba(11, 22, 40, 0.95) 50%, rgba(6, 10, 18, 0.97) 100%),
+    linear-gradient(rgba(103, 213, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(103, 213, 255, 0.015) 1px, transparent 1px);
+  background-size: 100% 100%, 48px 48px, 48px 48px;
+}
+
+/* Nav links premium */
+body:has(.knd-demo-shell) .navbar-nav .nav-link {
+  color: var(--knd-text-alt) !important;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+body:has(.knd-demo-shell) .navbar-nav .nav-link:hover {
+  color: var(--knd-cyan-soft) !important;
+  background: rgba(53, 194, 255, 0.06);
+}
+
+body:has(.knd-demo-shell) .navbar-nav .nav-link.active {
+  color: var(--knd-cyan) !important;
+  background: rgba(53, 194, 255, 0.08);
+  font-weight: 600;
+  box-shadow: 0 0 0 1px rgba(53, 194, 255, 0.2);
+  text-shadow: none;
+  animation: none;
+}
+
+body:has(.knd-demo-shell) .navbar-nav .nav-link.active::before,
+body:has(.knd-demo-shell) .navbar-nav .nav-link.active::after {
+  display: none;
+}
+
+/* Logo más discreto en demo */
+body:has(.knd-demo-shell) .navbar-brand img {
+  filter: brightness(1) drop-shadow(0 0 8px rgba(53, 194, 255, 0.15));
+  transition: filter 0.2s ease;
+}
+
+body:has(.knd-demo-shell) .navbar-brand:hover img {
+  filter: brightness(1.1) drop-shadow(0 0 12px rgba(53, 194, 255, 0.25));
+}
+
+/* Toggler móvil */
+body:has(.knd-demo-shell) .navbar-toggler {
+  border-color: var(--knd-border);
+  color: var(--knd-text-alt);
+}
+
+body:has(.knd-demo-shell) .navbar-toggler:focus {
+  box-shadow: 0 0 0 2px rgba(53, 194, 255, 0.2);
+}
+
+/* Dropdown en demo */
+body:has(.knd-demo-shell) .knd-dropdown-menu {
+  background: rgba(14, 22, 40, 0.98);
+  border-color: rgba(103, 213, 255, 0.12);
+}
+
+body:has(.knd-demo-shell) .knd-dropdown-item:hover {
+  background: rgba(53, 194, 255, 0.08);
+  color: var(--knd-cyan-soft);
+}
+
+/* Partículas sobre header (contenedor inyectado por JS) */
+#particles-header-demo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.5;
+}
