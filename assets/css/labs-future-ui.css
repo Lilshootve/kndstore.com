@@ -24,7 +24,7 @@
 
 /* === Base === */
 .lfu {
-  background: var(--lfu-bg-main);
+  background: linear-gradient(180deg, rgba(11, 25, 45, 0.4) 0%, var(--lfu-bg-main) 25%, var(--lfu-bg-main) 100%);
   min-height: 100vh;
   color: var(--lfu-text);
   font-family: inherit;
@@ -121,17 +121,20 @@
   border-radius: 20px;
   cursor: pointer;
   transition: all var(--lfu-transition);
+  box-shadow: none;
 }
 
 .lfu .lfu-chip:hover {
   color: var(--lfu-cyan-soft);
-  border-color: rgba(53, 194, 255, 0.35);
+  border-color: rgba(53, 194, 255, 0.5);
+  box-shadow: 0 0 12px rgba(53, 194, 255, 0.15);
 }
 
 .lfu .lfu-chip.active {
   color: var(--lfu-cyan);
   border-color: var(--lfu-cyan);
-  background: rgba(53, 194, 255, 0.06);
+  background: rgba(53, 194, 255, 0.12);
+  box-shadow: 0 0 14px rgba(53, 194, 255, 0.2);
 }
 
 /* === Buttons === */
@@ -140,20 +143,22 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.95rem;
+  padding: 0.85rem 1.75rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #fff;
   background: linear-gradient(135deg, var(--lfu-cyan) 0%, var(--lfu-violet) 100%);
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  transition: opacity var(--lfu-transition), transform var(--lfu-transition);
+  box-shadow: 0 0 24px rgba(53, 194, 255, 0.2), 0 0 48px rgba(139, 92, 255, 0.08);
+  transition: opacity var(--lfu-transition), transform var(--lfu-transition), box-shadow var(--lfu-transition);
 }
 
 .lfu .lfu-btn-primary:hover {
-  opacity: 0.92;
-  transform: translateY(-1px);
+  opacity: 0.95;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(53, 194, 255, 0.25), 0 0 32px rgba(139, 92, 255, 0.12);
 }
 
 .lfu .lfu-btn-secondary {
@@ -233,18 +238,21 @@
 }
 
 .lfu .lfu-badge.completed {
-  background: rgba(34, 197, 94, 0.15);
-  color: #4ade80;
+  background: rgba(34, 197, 94, 0.22);
+  color: #6ee7b7;
+  border: 1px solid rgba(34, 197, 94, 0.35);
 }
 
 .lfu .lfu-badge.processing {
-  background: rgba(251, 191, 36, 0.15);
-  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.22);
+  color: #fcd34d;
+  border: 1px solid rgba(251, 191, 36, 0.4);
 }
 
 .lfu .lfu-badge.failed {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
+  background: rgba(239, 68, 68, 0.22);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
 }
 
 /* === Divider === */
@@ -272,9 +280,9 @@
 
 /* === Result Preview === */
 .lfu .lfu-result {
-  min-height: 320px;
-  background: var(--lfu-bg-secondary);
-  border: 1px solid var(--lfu-border);
+  min-height: 260px;
+  background: linear-gradient(165deg, rgba(14, 22, 40, 0.6) 0%, var(--lfu-bg-secondary) 100%);
+  border: 1px solid rgba(90, 180, 255, 0.22);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -286,14 +294,22 @@
   text-align: center;
   padding: 2rem;
   color: var(--lfu-text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
 }
 
 .lfu .lfu-result-placeholder i {
   display: block;
-  font-size: 2.5rem;
-  margin-bottom: 0.75rem;
-  opacity: 0.5;
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  color: var(--lfu-cyan-soft);
+  opacity: 0.4;
+}
+
+.lfu .lfu-result-placeholder p {
+  margin: 0;
+  font-weight: 500;
+  color: var(--lfu-text-secondary);
 }
 
 /* === Select === */
@@ -424,7 +440,11 @@
 /* === Responsive === */
 @media (max-width: 991px) {
   .lfu .lfu-result {
-    min-height: 240px;
+    min-height: 200px;
+  }
+
+  .lfu .lfu-result-placeholder i {
+    font-size: 2.75rem;
   }
 
   .lfu .lfu-sidebar {

@@ -32,8 +32,8 @@ echo generateHeader($toolName . ' (Demo) | KND Labs', 'Create Epic, Hyper-Realis
           <div class="lfu-panel mb-4">
             <div class="lfu-result" id="lfu-result">
               <div class="lfu-result-placeholder">
-                <i class="fas fa-image"></i>
-                <p>Describe your vision and generate</p>
+                <i class="fas fa-wand-magic-sparkles"></i>
+                <p>Describe your vision below and generate</p>
               </div>
             </div>
           </div>
@@ -189,7 +189,7 @@ echo generateHeader($toolName . ' (Demo) | KND Labs', 'Create Epic, Hyper-Realis
     var r = document.getElementById('lfu-result');
     if (r) r.innerHTML = '<div class="lfu-result-placeholder"><i class="fas fa-spinner fa-spin"></i><p>Generating...</p></div>';
     setTimeout(function() {
-      if (r) r.innerHTML = '<div class="lfu-result-placeholder"><i class="fas fa-image"></i><p>Describe your vision and generate</p></div>';
+      if (r) r.innerHTML = '<div class="lfu-result-placeholder"><i class="fas fa-wand-magic-sparkles"></i><p>Describe your vision below and generate</p></div>';
     }, 3000);
   });
 })();
