@@ -41,10 +41,23 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             <div class="mb-3">
               <label class="form-label text-white-50"><?php echo t('ai.upscale.scale'); ?></label>
               <select name="scale" id="labs-scale-select" class="form-select bg-dark text-white mb-2">
-                <option value="2" selected>2x (5 KP)</option>
-                <option value="4">4x (8 KP)</option>
+                <option value="2">2x (5 KP)</option>
+                <option value="4" selected>4x (8 KP)</option>
+              </select>
+              <div class="form-text text-white-50 small"><?php echo t('labs.upscale_scale_help', 'Higher scale = more detail, higher cost'); ?></div>
+            </div>
+            <div class="mb-3 collapse" id="labs-upscale-advanced">
+              <label class="form-label text-white-50 small"><?php echo t('labs.denoise', 'Denoise'); ?></label>
+              <input type="number" name="upscale_denoise" class="form-control form-control-sm bg-dark text-white" value="0.10" min="0" max="0.35" step="0.05" placeholder="0.10">
+              <div class="form-text text-white-50 small"><?php echo t('labs.upscale_denoise_help', '0–0.35. Lower = preserve detail'); ?></div>
+              <label class="form-label text-white-50 small mt-2"><?php echo t('labs.upscaler_model', 'Upscaler model'); ?></label>
+              <select name="upscale_model" class="form-select form-select-sm bg-dark text-white">
+                <option value="4x-UltraSharp.pth" selected>4x-UltraSharp</option>
               </select>
             </div>
+            <button type="button" class="btn btn-link btn-sm text-white-50 p-0 mb-2" data-bs-toggle="collapse" data-bs-target="#labs-upscale-advanced">
+              <i class="fas fa-cog me-1"></i><?php echo t('labs.advanced', 'Advanced'); ?>
+            </button>
             <div class="mb-3">
               <div class="ai-dropzone" id="labs-upscale-dropzone">
                 <input type="file" name="image" id="labs-upscale-file" accept="image/jpeg,image/jpg,image/png,image/webp" hidden>

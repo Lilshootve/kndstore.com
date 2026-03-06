@@ -325,6 +325,24 @@
             return;
           }
         }
+        var ipEn = form.querySelector('[name="ipadapter_enabled"]');
+        if (ipEn && ipEn.checked && self.config.jobType === 'text2img') {
+          var ipImg = form.querySelector('[name="ipadapter_image"]');
+          if (!ipImg || !ipImg.files || !ipImg.files.length) {
+            if (typeof kndToast !== 'undefined') kndToast('Reference image required when IPAdapter is enabled', 'error');
+            else alert('Reference image required when IPAdapter is enabled');
+            return;
+          }
+        }
+        var cnEn = form.querySelector('[name="controlnet_enabled"]');
+        if (cnEn && cnEn.checked && self.config.jobType === 'text2img') {
+          var cnImg = form.querySelector('[name="controlnet_image"]');
+          if (!cnImg || !cnImg.files || !cnImg.files.length) {
+            if (typeof kndToast !== 'undefined') kndToast('Control image required when ControlNet is enabled', 'error');
+            else alert('Control image required when ControlNet is enabled');
+            return;
+          }
+        }
         self.submitForm(form);
       });
     },

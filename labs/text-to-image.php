@@ -70,6 +70,75 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               </div>
             </div>
             <div class="mb-3">
+              <h6 class="text-white-50 mb-2 small"><?php echo t('labs.cond_section', 'Reference / Conditioning'); ?></h6>
+              <div class="form-check form-switch mb-2">
+                <input type="checkbox" name="ipadapter_enabled" id="ipadapter-enabled" class="form-check-input" value="1">
+                <label for="ipadapter-enabled" class="form-check-label text-white-50 small"><?php echo t('labs.ipadapter_toggle', 'Enable IPAdapter (style reference)'); ?></label>
+              </div>
+              <div id="ipadapter-fields" class="ms-3 mb-2" style="display:none;">
+                <div class="mb-2">
+                  <label class="form-label text-white-50 small"><?php echo t('labs.ref_image', 'Reference image'); ?></label>
+                  <input type="file" name="ipadapter_image" id="ipadapter-image" accept="image/jpeg,image/jpg,image/png,image/webp" class="form-control form-control-sm bg-dark text-white">
+                  <div class="form-text text-white-50 small"><?php echo t('labs.ref_help', 'Required when enabled'); ?></div>
+                </div>
+                <div class="row g-2 mb-2">
+                  <div class="col-4">
+                    <label class="form-label text-white-50 small"><?php echo t('labs.weight', 'Weight'); ?></label>
+                    <input type="number" name="ipadapter_weight" class="form-control form-control-sm bg-dark text-white" value="0.70" min="0" max="1.20" step="0.05">
+                  </div>
+                  <div class="col-4">
+                    <label class="form-label text-white-50 small">start_at</label>
+                    <input type="number" name="ipadapter_start_at" class="form-control form-control-sm bg-dark text-white" value="0" min="0" max="1" step="0.05">
+                  </div>
+                  <div class="col-4">
+                    <label class="form-label text-white-50 small">end_at</label>
+                    <input type="number" name="ipadapter_end_at" class="form-control form-control-sm bg-dark text-white" value="1" min="0" max="1" step="0.05">
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label text-white-50 small"><?php echo t('labs.mode', 'Mode'); ?></label>
+                  <select name="ipadapter_mode" id="ipadapter-mode" class="form-select form-select-sm bg-dark text-white">
+                    <option value="balanced" selected>Balanced</option>
+                    <option value="style">Style</option>
+                    <option value="composition">Composition</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-check form-switch mb-2">
+                <input type="checkbox" name="controlnet_enabled" id="controlnet-enabled" class="form-check-input" value="1">
+                <label for="controlnet-enabled" class="form-check-label text-white-50 small"><?php echo t('labs.controlnet_toggle', 'Enable ControlNet (pose/edges)'); ?></label>
+              </div>
+              <div id="controlnet-fields" class="ms-3 mb-2" style="display:none;">
+                <div class="mb-2">
+                  <label class="form-label text-white-50 small"><?php echo t('labs.control_image', 'Control image'); ?></label>
+                  <input type="file" name="controlnet_image" id="controlnet-image" accept="image/jpeg,image/jpg,image/png,image/webp" class="form-control form-control-sm bg-dark text-white">
+                  <div class="form-text text-white-50 small"><?php echo t('labs.control_help', 'Required when enabled'); ?></div>
+                </div>
+                <div class="row g-2 mb-2">
+                  <div class="col-4">
+                    <label class="form-label text-white-50 small"><?php echo t('labs.strength', 'Strength'); ?></label>
+                    <input type="number" name="controlnet_strength" class="form-control form-control-sm bg-dark text-white" value="0.75" min="0" max="1.20" step="0.05">
+                  </div>
+                  <div class="col-4">
+                    <label class="form-label text-white-50 small">start_at</label>
+                    <input type="number" name="controlnet_start_at" class="form-control form-control-sm bg-dark text-white" value="0" min="0" max="1" step="0.05">
+                  </div>
+                  <div class="col-4">
+                    <label class="form-label text-white-50 small">end_at</label>
+                    <input type="number" name="controlnet_end_at" class="form-control form-control-sm bg-dark text-white" value="0.80" min="0" max="1" step="0.05">
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label text-white-50 small"><?php echo t('labs.control_mode', 'Control mode'); ?></label>
+                  <select name="controlnet_control_mode" id="controlnet-control-mode" class="form-select form-select-sm bg-dark text-white">
+                    <option value="balanced" selected>Balanced</option>
+                    <option value="prompt_strict">Prompt strict</option>
+                    <option value="control_strict">Control strict</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="mb-3">
               <label class="form-label text-white-50"><?php echo t('ai.text2img.mode_label', 'Quality'); ?></label>
               <select name="quality" id="labs-quality-select" class="form-select bg-dark text-white">
                 <option value="standard" selected>Standard (3 KP)</option>
@@ -282,7 +351,6 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
 <script src="/assets/js/kndlabs.js?v=<?php echo file_exists($kndlabsJs) ? filemtime($kndlabsJs) : time(); ?>"></script>
 <script>
 (function() {
-  // Inline fix: negative presets (run before KNDLabs)
   var form = document.getElementById('labs-comfy-form');
   if (form) {
     form.querySelectorAll('.preset-neg-btn').forEach(function(btn) {
@@ -291,8 +359,33 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
         if (inp && btn.dataset.value) inp.value = btn.dataset.value;
       };
     });
+    var ipEn = document.getElementById('ipadapter-enabled');
+    var ipFields = document.getElementById('ipadapter-fields');
+    var ipMode = document.getElementById('ipadapter-mode');
+    var ipWeight = form.querySelector('[name="ipadapter_weight"]');
+    if (ipEn) ipEn.addEventListener('change', function() {
+      if (ipFields) ipFields.style.display = ipEn.checked ? 'block' : 'none';
+    });
+    if (ipMode && ipWeight) ipMode.addEventListener('change', function() {
+      if (ipMode.value === 'style') ipWeight.value = '0.85';
+      else if (ipMode.value === 'composition') ipWeight.value = '0.65';
+      else ipWeight.value = '0.70';
+    });
+    var cnEn = document.getElementById('controlnet-enabled');
+    var cnFields = document.getElementById('controlnet-fields');
+    var cnMode = document.getElementById('controlnet-control-mode');
+    var cnStrength = form.querySelector('[name="controlnet_strength"]');
+    var cnEnd = form.querySelector('[name="controlnet_end_at"]');
+    if (cnEn) cnEn.addEventListener('change', function() {
+      if (cnFields) cnFields.style.display = cnEn.checked ? 'block' : 'none';
+    });
+    if (cnMode && cnStrength && cnEnd) cnMode.addEventListener('change', function() {
+      if (cnMode.value === 'prompt_strict') { cnStrength.value = '0.60'; cnEnd.value = '0.80'; }
+      else if (cnMode.value === 'control_strict') { cnStrength.value = '0.90'; cnEnd.value = '1'; }
+      else { cnStrength.value = '0.75'; cnEnd.value = '0.80'; }
+    });
   }
-  // Init KNDLabs (handles submit, status, etc.)
+  // Init KNDLabs
   function run() {
     if (typeof KNDLabs !== 'undefined') {
       KNDLabs.init({ formId: 'labs-comfy-form', jobType: 'text2img', costLabelId: 'labs-cost-label', pricingKey: 'text2img', qualitySelectId: 'labs-quality-select', balanceEl: '#labs-balance' });

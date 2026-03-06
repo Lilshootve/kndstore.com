@@ -12,3 +12,6 @@ storage/logs/*.txt
 
 # Runtime logs
 logs/*.log
+
+# Worker debug output
+workers/_debug/

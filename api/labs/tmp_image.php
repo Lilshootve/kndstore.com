@@ -30,7 +30,7 @@ if (!$pdo) {
     exit('Database error');
 }
 
-$stmt = $pdo->prepare("SELECT id, tool FROM knd_labs_jobs WHERE id = ? AND tool = 'upscale' LIMIT 1");
+$stmt = $pdo->prepare("SELECT id, tool FROM knd_labs_jobs WHERE id = ? LIMIT 1");
 $stmt->execute([$jobId]);
 $job = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$job) {
@@ -38,7 +38,14 @@ if (!$job) {
     exit('Job not found');
 }
 
-$filename = 'job_' . $jobId . '_input.png';
+$slot = trim($_GET['slot'] ?? 'input');
+if ($slot === 'ref') {
+    $filename = 'job_' . $jobId . '_ref.png';
+} elseif ($slot === 'control') {
+    $filename = 'job_' . $jobId . '_control.png';
+} else {
+    $filename = 'job_' . $jobId . '_input.png';
+}
 $relPath = 'uploads/labs/tmp/' . $filename;
 $fullPath = storage_path($relPath);
 

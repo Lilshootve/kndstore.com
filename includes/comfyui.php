@@ -138,13 +138,56 @@ function comfyui_inject_workflow(array $params, string $tool = 'text2img'): arra
             $inputs['image'] = $params['image_filename'];
         }
         if ($ctype === 'UpscaleModelLoader' && $tool === 'upscale') {
-            $inputs['model_name'] = '4x-UltraSharp.pth';
+            $model = $params['upscale_model'] ?? '4x-UltraSharp.pth';
+            $inputs['model_name'] = comfyui_normalize_upscale_model((string) $model);
         }
         if ($ctype === 'SaveImage' && $tool === 'upscale' && isset($params['job_id'])) {
             $inputs['filename_prefix'] = 'knd_upscale/job_' . (int) $params['job_id'];
         }
     }
     return $wf;
+}
+
+/**
+ * Apply IPAdapter and ControlNet params to workflow. Only modifies node.inputs.
+ * Node mapping: 31=LoadImage (control), 32=LoadImage (ref), 15=ControlNetApplyAdvanced, 23=IPAdapterAdvanced.
+ * @param array $workflow Workflow by reference
+ * @param array $params Payload with ipadapter/controlnet objects when enabled
+ * @param string|null $controlImageFilename Filename in ComfyUI input (from upload). Required for node 31.
+ * @param string|null $refImageFilename Filename in ComfyUI input. Required for node 32.
+ */
+function comfyui_apply_ipadapter_controlnet(array &$workflow, array $params, ?string $controlImageFilename, ?string $refImageFilename): void {
+    $ip = $params['ipadapter'] ?? null;
+    $cn = $params['controlnet'] ?? null;
+    $ipEnabled = is_array($ip) && !empty($ip['enabled']);
+    $cnEnabled = is_array($cn) && !empty($cn['enabled']);
+
+    if (isset($workflow['31']) && is_array($workflow['31']['inputs'] ?? null)) {
+        $workflow['31']['inputs']['image'] = $controlImageFilename ?? 'placeholder_control.png';
+    }
+    if (isset($workflow['32']) && is_array($workflow['32']['inputs'] ?? null)) {
+        $workflow['32']['inputs']['image'] = $refImageFilename ?? 'placeholder_ref.png';
+    }
+
+    if (isset($workflow['15']) && is_array($workflow['15']['inputs'] ?? null)) {
+        $s = $cnEnabled ? (float) ($cn['strength'] ?? 0.75) : 0;
+        $s = max(0, min(1.20, $s));
+        $start = $cnEnabled ? (float) ($cn['start_at'] ?? 0) : 0;
+        $end = $cnEnabled ? (float) ($cn['end_at'] ?? 0.80) : 0;
+        $workflow['15']['inputs']['strength'] = $s;
+        $workflow['15']['inputs']['start_percent'] = max(0, min(1, $start));
+        $workflow['15']['inputs']['end_percent'] = max(0, min(1, $end));
+    }
+
+    if (isset($workflow['23']) && is_array($workflow['23']['inputs'] ?? null)) {
+        $w = $ipEnabled ? (float) ($ip['weight'] ?? 0.70) : 0;
+        $w = max(0, min(1.20, $w));
+        $start = $ipEnabled ? (float) ($ip['start_at'] ?? 0) : 0;
+        $end = $ipEnabled ? (float) ($ip['end_at'] ?? 1) : 0;
+        $workflow['23']['inputs']['weight'] = $w;
+        $workflow['23']['inputs']['start_at'] = max(0, min(1, $start));
+        $workflow['23']['inputs']['end_at'] = max(0, min(1, $end));
+    }
 }
 
 /**

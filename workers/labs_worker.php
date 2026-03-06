@@ -86,6 +86,21 @@ function workerDownloadFile(string $url, array $headers): ?string {
     return ($body !== false && $code >= 200 && $code < 300) ? $body : null;
 }
 
+function workerCreatePlaceholderImage(): string {
+    $tmp = tempnam(sys_get_temp_dir(), 'knd_ph');
+    if (!$tmp) throw new \RuntimeException('Could not create temp file');
+    $img = @imagecreatetruecolor(512, 512);
+    if (!$img) {
+        @unlink($tmp);
+        throw new \RuntimeException('Could not create placeholder image');
+    }
+    $gray = imagecolorallocate($img, 128, 128, 128);
+    imagefill($img, 0, 0, $gray);
+    imagepng($img, $tmp);
+    imagedestroy($img);
+    return $tmp;
+}
+
 function workerUploadToComfyui(string $filePath, string $baseUrl, string $token = ''): string {
     $mime = mime_content_type($filePath) ?: 'image/png';
     $cfile = new \CURLFile($filePath, $mime, basename($filePath));
@@ -228,6 +243,53 @@ do {
         $workflow = comfyui_inject_workflow($payload, $tool);
         if ($tool !== 'upscale') {
             comfyui_apply_checkpoint($workflow, $model, $refinerEnabled, $overrideCkpt);
+            $controlFilename = null;
+            $refFilename = null;
+            $ipEnabled = !empty($payload['ipadapter']['enabled']);
+            $cnEnabled = !empty($payload['controlnet']['enabled']);
+            if ($cnEnabled && !empty($payload['controlnet']['control_image_url'])) {
+                $imgData = workerDownloadFile($payload['controlnet']['control_image_url'], $headers);
+                if (!$imgData) throw new \RuntimeException('Could not download ControlNet control image.');
+                $tmp = tempnam(sys_get_temp_dir(), 'knd_ctrl');
+                if (!$tmp || file_put_contents($tmp, $imgData) === false) throw new \RuntimeException('Could not save control image.');
+                try {
+                    $controlFilename = workerUploadToComfyui($tmp, $comfyBase, $comfyToken);
+                } finally {
+                    @unlink($tmp);
+                }
+            }
+            if ($ipEnabled && !empty($payload['ipadapter']['ref_image_url'])) {
+                $imgData = workerDownloadFile($payload['ipadapter']['ref_image_url'], $headers);
+                if (!$imgData) throw new \RuntimeException('Could not download IPAdapter reference image.');
+                $tmp = tempnam(sys_get_temp_dir(), 'knd_ref');
+                if (!$tmp || file_put_contents($tmp, $imgData) === false) throw new \RuntimeException('Could not save reference image.');
+                try {
+                    $refFilename = workerUploadToComfyui($tmp, $comfyBase, $comfyToken);
+                } finally {
+                    @unlink($tmp);
+                }
+            }
+            if (!$controlFilename) {
+                $ph = workerCreatePlaceholderImage();
+                try {
+                    $controlFilename = workerUploadToComfyui($ph, $comfyBase, $comfyToken);
+                } finally {
+                    @unlink($ph);
+                }
+            }
+            if (!$refFilename) {
+                $ph = workerCreatePlaceholderImage();
+                try {
+                    $refFilename = workerUploadToComfyui($ph, $comfyBase, $comfyToken);
+                } finally {
+                    @unlink($ph);
+                }
+            }
+            comfyui_apply_ipadapter_controlnet($workflow, $payload, $controlFilename, $refFilename);
+        }
+        $debugDir = $projectRoot . '/workers/_debug';
+        if (is_dir($debugDir) || @mkdir($debugDir, 0755, true)) {
+            @file_put_contents($debugDir . '/last_workflow.json', json_encode($workflow, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         }
         $result = comfyui_run_prompt($workflow, $comfyBase, $comfyToken);
         $promptId = $result['prompt_id'];
