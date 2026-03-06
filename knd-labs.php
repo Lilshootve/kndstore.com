@@ -211,7 +211,7 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
             <input type="checkbox" id="labs-recent-private" <?php echo $labsRecentPrivate ? 'checked' : ''; ?>>
             <?php echo t('labs.show_only_mine', 'Only my jobs'); ?>
           </label>
-          <a href="/labs-jobs.php" class="btn btn-outline-neon btn-sm"><?php echo t('labs.view_all_jobs', 'View All Jobs'); ?></a>
+          <a href="/labs-jobs.php" class="btn btn-sm knd-btn-secondary"><?php echo t('labs.view_all_jobs', 'View All Jobs'); ?></a>
         </div>
       </div>
       <?php if (empty($recentJobs)): ?>
@@ -244,7 +244,7 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
               </div>
               <div class="text-white-50" style="font-size:.75rem;"><i class="fas fa-<?php echo $toolIcon; ?> me-1"></i><?php echo htmlspecialchars($toolLabel); ?></div>
               <?php if ($hasImage): ?>
-              <a href="<?php echo htmlspecialchars($downloadHref); ?>" class="btn btn-sm btn-success w-100 mt-1" download><i class="fas fa-download me-1"></i><?php echo t('ai.download', 'Download'); ?></a>
+              <a href="<?php echo htmlspecialchars($downloadHref); ?>" class="btn btn-sm knd-btn-secondary w-100 mt-1" download><i class="fas fa-download me-1"></i><?php echo t('ai.download', 'Download'); ?></a>
               <?php endif; ?>
             </div>
           </div>
