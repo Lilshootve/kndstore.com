@@ -8,7 +8,7 @@ require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 
-$extraCss = '<link rel="stylesheet" href="/assets/css/knd-demo-future.css?v=' . (file_exists(__DIR__ . '/assets/css/knd-demo-future.css') ? filemtime(__DIR__ . '/assets/css/knd-demo-future.css') : time()) . '">';
+$extraCss = '';
 echo generateHeader('Text → Image | KND Labs Demo', 'Create epic visuals with AI', $extraCss);
 ?>
 <?php echo generateNavigation(); ?>
@@ -17,7 +17,7 @@ echo generateHeader('Text → Image | KND Labs Demo', 'Create epic visuals with 
   <main class="py-5">
     <div class="container">
       <nav class="knd-muted small mb-2">
-        <a href="/home-demo.php" class="text-decoration-none" style="color:var(--knd-cyan-soft);">Home</a> / <a href="/knd-labs.php" class="text-decoration-none" style="color:var(--knd-cyan-soft);">Labs</a> / <span>Text → Image</span>
+        <a href="/index.php" class="text-decoration-none" style="color:var(--knd-accent-soft);">Home</a> / <a href="/knd-labs.php" class="text-decoration-none" style="color:var(--knd-accent-soft);">Labs</a> / <span>Text → Image</span>
       </nav>
       <h1 class="text-white mb-1" style="font-size:1.75rem;">Text → Image</h1>
       <p class="knd-muted mb-4">Create epic visuals from text prompts</p>
@@ -120,5 +120,4 @@ echo generateHeader('Text → Image | KND Labs Demo', 'Create epic visuals with 
   </main>
 </div>
 
-<script src="/assets/js/knd-demo-future.js?v=<?php echo file_exists(__DIR__ . '/assets/js/knd-demo-future.js') ? filemtime(__DIR__ . '/assets/js/knd-demo-future.js') : time(); ?>"></script>
 <?php echo generateFooter(); echo generateScripts(); ?>

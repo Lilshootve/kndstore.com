@@ -15,6 +15,7 @@ const urlsToCache = [
     '/terms.php',
     '/offline.html',
     '/assets/css/style.css',
+    '/assets/css/knd-ui.css',
     '/assets/css/mobile-optimization.css',
     '/assets/css/font-awesome-fix.css',
     '/assets/js/main.js',

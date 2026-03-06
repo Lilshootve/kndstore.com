@@ -15,6 +15,35 @@ function initApp() {
     initColorPanel();
     initMobileOptimizations();
     initAddToOrderButtons();
+    initKndChips();
+    initKndGenerateBtn();
+}
+
+// Chips: toggle is-active en click (Labs, demos)
+function initKndChips() {
+    document.querySelectorAll('.knd-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            var group = chip.closest('.d-flex');
+            if (group) {
+                group.querySelectorAll('.knd-chip').forEach(function (c) { c.classList.remove('is-active'); });
+            }
+            chip.classList.add('is-active');
+        });
+    });
+}
+
+// Generate button feedback (Labs workspace)
+function initKndGenerateBtn() {
+    var btn = document.getElementById('knd-gen-btn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating…';
+        setTimeout(function () {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-bolt me-2"></i>Generate';
+        }, 2500);
+    });
 }
 
 // Inicializar botones "Añadir al pedido"

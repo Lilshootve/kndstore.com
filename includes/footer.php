@@ -214,14 +214,22 @@ function generateScripts() {
     
     // Configuración de partículas para el footer
     $scripts .= '<script>' . "\n";
-    $scripts .= '// Configuración de partículas para el footer' . "\n";
+    $scripts .= '// Partículas footer + header' . "\n";
     $scripts .= 'function initParticles() {' . "\n";
     $scripts .= '  if (typeof particlesJS === "undefined") {' . "\n";
-    $scripts .= '    // Esperar a que particles.js se cargue' . "\n";
     $scripts .= '    setTimeout(initParticles, 100);' . "\n";
     $scripts .= '    return;' . "\n";
     $scripts .= '  }' . "\n";
-    $scripts .= '  ' . "\n";
+    $scripts .= '  var nav = document.querySelector(".navbar");' . "\n";
+    $scripts .= '  if (nav && !document.getElementById("particles-header")) {' . "\n";
+    $scripts .= '    var ph = document.createElement("div");' . "\n";
+    $scripts .= '    ph.id = "particles-header";' . "\n";
+    $scripts .= '    nav.insertBefore(ph, nav.firstChild);' . "\n";
+    $scripts .= '  }' . "\n";
+    $scripts .= '  var headerEl = document.getElementById("particles-header");' . "\n";
+    $scripts .= '  if (headerEl) {' . "\n";
+    $scripts .= '    particlesJS("particles-header",{particles:{number:{value:18,density:{enable:true,value_area:600}},color:{value:["#35C2FF","#8B5CFF"]},opacity:{value:0.12,random:true},size:{value:2,random:true},line_linked:{enable:true,distance:120,color:"rgba(103,213,255,0.1)",opacity:0.08,width:0.8},move:{enable:true,speed:2,direction:"none",out_mode:"out"}},interactivity:{detect_on:"canvas",events:{resize:true}},retina_detect:true});' . "\n";
+    $scripts .= '  }' . "\n";
     $scripts .= '  const particlesContainer = document.getElementById("particles-footer");' . "\n";
     $scripts .= '  if (!particlesContainer) {' . "\n";
     $scripts .= '    return;' . "\n";
@@ -237,7 +245,7 @@ function generateScripts() {
     $scripts .= '      }' . "\n";
     $scripts .= '    },' . "\n";
     $scripts .= '    color: {' . "\n";
-    $scripts .= '      value: ["#259cae", "#ae2565", "#00d4ff"]' . "\n";
+    $scripts .= '      value: ["#35C2FF", "#8B5CFF", "#67D5FF"]' . "\n";
     $scripts .= '    },' . "\n";
     $scripts .= '    shape: {' . "\n";
     $scripts .= '      type: "circle",' . "\n";
