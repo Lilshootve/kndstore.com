@@ -18,16 +18,7 @@ if (!isLoggedIn()) {
     exit;
 }
 
-$raw = file_get_contents('php://input');
-$input = json_decode($raw, true);
-
-if (!is_array($input)) {
-    http_response_code(400);
-    echo json_encode(['ok' => false, 'error' => 'Invalid JSON body']);
-    exit;
-}
-
-$csrf = $input['csrf_token'] ?? '';
+$csrf = $_POST['csrf_token'] ?? '';
 if (!csrf_validate($csrf)) {
     http_response_code(419);
     echo json_encode(['ok' => false, 'error' => 'Invalid CSRF token']);
@@ -35,7 +26,7 @@ if (!csrf_validate($csrf)) {
 }
 
 $userId = (int) ($_SESSION['dr_user_id'] ?? 0);
-$itemId = isset($input['item_id']) ? (int) $input['item_id'] : 0;
+$itemId = isset($_POST['item_id']) ? (int) $_POST['item_id'] : 0;
 
 $pdo = getDBConnection();
 if (!$pdo) {
