@@ -211,7 +211,7 @@ body {
 
 /* === Hero sections === */
 /* Solo aplicar gradiente por defecto; excluir las que tienen imagen de fondo propia */
-.hero-section:not(.hero-home-bg):not(.hero-catalog-bg):not(.hero-apparel-bg):not(.hero-contact-bg):not(.about-hero-bg):not(.hero-custom-design-bg) {
+.hero-section:not(.hero-home-bg):not(.hero-catalog-bg):not(.hero-apparel-bg):not(.hero-contact-bg):not(.about-hero-bg):not(.hero-custom-design-bg):not(.arena-hero) {
   background: linear-gradient(180deg, rgba(11, 25, 45, 0.6) 0%, transparent 60%) !important;
 }
 
