@@ -185,11 +185,7 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
           <h5 class="mb-0" style="font-size:1rem;"><i class="fas fa-user-astronaut me-2" style="color:#00d4ff;"></i><?php echo t('avatar.title', 'KND Avatar'); ?></h5>
           <div class="d-flex align-items-center gap-3">
             <span class="text-white-50 small"><i class="fas fa-gem me-1" style="color:#a78bfa;"></i><?php echo t('avatar.fragments', 'Fragments'); ?>: <strong id="profile-fragments" style="color:#a78bfa;">—</strong></span>
-            <span class="text-white-50 small"><?php echo t('avatar.kp', 'KP'); ?>: <strong id="avatar-kp-balance" style="color:#00d4ff;">—</strong></span>
-            <button type="button" id="avatar-btn-customize" class="btn btn-sm btn-neon-primary">
-              <i class="fas fa-palette me-1"></i><?php echo t('profile.avatar_customize', 'Customize'); ?>
-            </button>
-          </div>
+            <span class="text-white-50 small"><?php echo t('avatar.kp', 'KP'); ?>: <strong id="avatar-kp-balance" style="color:#00d4ff;">—</strong></span>          </div>
         </div>
         <?php if (!empty($data['favorite_avatar'])): ?>
   <div class="favorite-avatar-stage">
