@@ -160,6 +160,48 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
       </div>
     </div>
 
+    <!-- Creative Workflow -->
+    <div class="glass-card-neon p-4 mb-5" id="labs-creative-workflow">
+      <h3 class="text-white mb-2" style="font-size:1.15rem;"><i class="fas fa-project-diagram me-2" style="color:var(--knd-neon-cyan, #00d4ff);"></i><?php echo t('labs.creative_workflow', 'Creative Workflow'); ?></h3>
+      <p class="text-white-50 small mb-4"><?php echo t('labs.creative_workflow_desc', 'Move from generation to refinement using connected AI tools.'); ?></p>
+      <div class="labs-workflow-flow d-flex flex-wrap align-items-center justify-content-center gap-2 gap-md-3 py-3">
+        <a href="/labs-text-to-image.php" class="labs-workflow-node rounded-3 p-3 text-decoration-none" style="background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); min-width:120px; text-align:center;">
+          <i class="fas fa-font d-block mb-2" style="color:var(--knd-neon-cyan, #00d4ff); font-size:1.5rem;"></i>
+          <span class="text-white small fw-bold">Text → Image</span>
+          <p class="text-white-50 mb-0 mt-1" style="font-size:.7rem;"><?php echo t('labs.wf_text2img', 'Generate original images from prompts.'); ?></p>
+        </a>
+        <span class="d-none d-md-inline text-white-50" style="font-size:1rem;">→</span>
+        <span class="d-md-none text-white-50" style="font-size:1rem;">↓</span>
+        <a href="/labs-upscale.php" class="labs-workflow-node rounded-3 p-3 text-decoration-none" style="background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); min-width:120px; text-align:center;">
+          <i class="fas fa-search-plus d-block mb-2" style="color:var(--knd-neon-cyan, #00d4ff); font-size:1.5rem;"></i>
+          <span class="text-white small fw-bold">Upscale</span>
+          <p class="text-white-50 mb-0 mt-1" style="font-size:.7rem;"><?php echo t('labs.wf_upscale', 'Improve clarity and output resolution.'); ?></p>
+        </a>
+        <span class="d-none d-md-inline text-white-50" style="font-size:1rem;">→</span>
+        <span class="d-md-none text-white-50" style="font-size:1rem;">↓</span>
+        <a href="/labs-consistency.php" class="labs-workflow-node rounded-3 p-3 text-decoration-none" style="background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); min-width:120px; text-align:center;">
+          <i class="fas fa-lock d-block mb-2" style="color:var(--knd-neon-cyan, #00d4ff); font-size:1.5rem;"></i>
+          <span class="text-white small fw-bold">Consistency</span>
+          <p class="text-white-50 mb-0 mt-1" style="font-size:.7rem;"><?php echo t('labs.wf_consistency', 'Keep style or character continuity.'); ?></p>
+        </a>
+        <span class="d-none d-md-inline text-white-50" style="font-size:1rem;">→</span>
+        <span class="d-md-none text-white-50" style="font-size:1rem;">↓</span>
+        <a href="/labs-texture-lab.php" class="labs-workflow-node rounded-3 p-3 text-decoration-none" style="background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.2); min-width:120px; text-align:center; opacity:0.9;">
+          <i class="fas fa-border-all d-block mb-2 text-white-50" style="font-size:1.5rem;"></i>
+          <span class="text-white small fw-bold">Texture Lab</span>
+          <span class="badge bg-secondary mt-1" style="font-size:.6rem;"><?php echo t('labs.coming_soon', 'Soon'); ?></span>
+          <p class="text-white-50 mb-0 mt-1" style="font-size:.7rem;"><?php echo t('labs.wf_texture', 'Turn ideas into seamless texture assets.'); ?></p>
+        </a>
+        <span class="d-none d-md-inline text-white-50" style="font-size:1rem;">→</span>
+        <span class="d-md-none text-white-50" style="font-size:1rem;">↓</span>
+        <a href="/triposr-3d.php" class="labs-workflow-node rounded-3 p-3 text-decoration-none" style="background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.2); min-width:120px; text-align:center; opacity:0.9;">
+          <i class="fas fa-cube d-block mb-2 text-white-50" style="font-size:1.5rem;"></i>
+          <span class="text-white small fw-bold">Image → 3D</span>
+          <p class="text-white-50 mb-0 mt-1" style="font-size:.7rem;"><?php echo t('labs.wf_img23d', 'Convert images into 3D-ready assets.'); ?></p>
+        </a>
+      </div>
+    </div>
+
     <!-- Recent Jobs -->
     <div class="glass-card-neon p-4 mb-5" id="labs-recent-section">
       <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
@@ -180,8 +222,8 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
           $status = $j['status'] ?? 'pending';
           $statusClass = $status === 'done' ? 'success' : ($status === 'failed' ? 'danger' : 'warning');
           $tool = $j['tool'] ?? 'text2img';
-          $toolLabel = $tool === 'text2img' ? (t('ai.text2img.title', 'Text → Image')) : ($tool === 'upscale' ? t('ai.upscale.title', 'Upscale') : t('ai.character.title', 'Character Lab'));
-          $toolIcon = $tool === 'text2img' ? 'font' : ($tool === 'upscale' ? 'search-plus' : 'user-astronaut');
+          $toolLabel = $tool === 'text2img' ? (t('ai.text2img.title', 'Text → Image')) : ($tool === 'upscale' ? t('ai.upscale.title', 'Upscale') : ($tool === 'consistency' ? t('labs.consistency.title', 'Consistency System') : t('ai.character.title', 'Character Lab')));
+          $toolIcon = $tool === 'text2img' ? 'font' : ($tool === 'upscale' ? 'search-plus' : ($tool === 'consistency' ? 'lock' : 'user-astronaut'));
           $hasImage = ($status === 'done') && !empty($j['image_url']);
           $imgSrc = $hasImage ? ('/api/labs/image.php?job_id=' . (int)$j['id']) : '';
           $downloadHref = $hasImage ? ('/api/labs/image.php?job_id=' . (int)$j['id'] . '&download=1') : '#';

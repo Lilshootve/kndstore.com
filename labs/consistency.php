@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/_init.php';
 require_once __DIR__ . '/../includes/comfyui.php';
+require_once __DIR__ . '/../includes/labs_display_helper.php';
 
 $toolName = t('labs.consistency.title', 'Consistency System');
 $jobType = 'consistency';
@@ -22,6 +23,35 @@ if ($pdo) {
 $refJobId = isset($_GET['reference_job_id']) ? (int) $_GET['reference_job_id'] : 0;
 $preloadMode = trim($_GET['mode'] ?? '');
 if (!in_array($preloadMode, ['style', 'character', 'both'], true)) $preloadMode = 'style';
+
+$preloadFromJob = [];
+if ($refJobId > 0 && $pdo) {
+    $stmt = $pdo->prepare("SELECT * FROM knd_labs_jobs WHERE id = ? AND user_id = ? AND status = 'done' LIMIT 1");
+    if ($stmt && $stmt->execute([$refJobId, current_user_id()])) {
+        $refRow = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($refRow) {
+            $refPayload = json_decode($refRow['payload_json'] ?? '{}', true) ?: [];
+            $preloadFromJob = [
+                'base_prompt' => ($refRow['tool'] ?? '') === 'consistency'
+                    ? ($refPayload['base_prompt'] ?? '')
+                    : ($refRow['prompt'] ?? ''),
+                'negative_prompt' => $refRow['negative_prompt'] ?? ($refPayload['negative_prompt'] ?? 'ugly, blurry, low quality'),
+                'width' => $refPayload['width'] ?? 1024,
+                'height' => $refPayload['height'] ?? 1024,
+                'steps' => $refPayload['steps'] ?? 28,
+                'cfg' => $refPayload['cfg'] ?? 7,
+                'sampler' => $refPayload['sampler_name'] ?? ($refPayload['sampler'] ?? 'dpmpp_2m'),
+                'seed' => $refPayload['seed'] ?? '',
+            ];
+            if (($refRow['tool'] ?? '') === 'consistency') {
+                $preloadFromJob['scene_prompt'] = $refPayload['scene_prompt'] ?? '';
+                if (!empty($refPayload['mode']) && in_array($refPayload['mode'], ['style', 'character', 'both'], true)) $preloadMode = $refPayload['mode'];
+            } else {
+                $preloadFromJob['scene_prompt'] = '';
+            }
+        }
+    }
+}
 
 $aiCss = __DIR__ . '/../assets/css/ai-tools.css';
 $labsCss = __DIR__ . '/../assets/css/knd-labs.css';
@@ -90,17 +120,17 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
 
             <div class="mb-3">
               <label class="form-label text-white-50"><?php echo t('labs.consistency.base_prompt', 'Base Prompt'); ?></label>
-              <textarea name="base_prompt" id="labs-base-prompt" class="form-control bg-dark text-white" rows="2" maxlength="500" placeholder="Identity / style description (persistent)..."></textarea>
+              <textarea name="base_prompt" id="labs-base-prompt" class="form-control bg-dark text-white" rows="2" maxlength="500" placeholder="Identity / style description (persistent)..."><?php echo htmlspecialchars($preloadFromJob['base_prompt'] ?? ''); ?></textarea>
               <div class="form-text text-white-50 small"><?php echo t('labs.consistency.base_help', 'Persistent identity or style'); ?></div>
             </div>
             <div class="mb-3">
               <label class="form-label text-white-50"><?php echo t('labs.consistency.scene_prompt', 'Scene Prompt'); ?></label>
-              <textarea name="scene_prompt" id="labs-scene-prompt" class="form-control bg-dark text-white" rows="2" maxlength="500" placeholder="Scene / variation for this generation..."></textarea>
+              <textarea name="scene_prompt" id="labs-scene-prompt" class="form-control bg-dark text-white" rows="2" maxlength="500" placeholder="Scene / variation for this generation..."><?php echo htmlspecialchars($preloadFromJob['scene_prompt'] ?? ''); ?></textarea>
               <div class="form-text text-white-50 small"><?php echo t('labs.consistency.scene_help', 'What changes in this image'); ?></div>
             </div>
             <div class="mb-3">
               <label class="form-label text-white-50"><?php echo t('labs.negative_prompt', 'Negative Prompt'); ?></label>
-              <input type="text" name="negative_prompt" class="form-control bg-dark text-white" maxlength="500" value="ugly, blurry, low quality">
+              <input type="text" name="negative_prompt" class="form-control bg-dark text-white" maxlength="500" value="<?php echo htmlspecialchars($preloadFromJob['negative_prompt'] ?? 'ugly, blurry, low quality'); ?>">
             </div>
 
             <div class="mb-3">
@@ -132,34 +162,35 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               <div class="row g-2 mb-3">
                 <div class="col-4">
                   <label class="form-label text-white-50 small"><?php echo t('labs.width', 'Width'); ?></label>
-                  <input type="number" name="width" class="form-control form-control-sm bg-dark text-white" value="1024" min="256" max="2048" step="8">
+                  <input type="number" name="width" class="form-control form-control-sm bg-dark text-white" value="<?php echo (int)($preloadFromJob['width'] ?? 1024); ?>" min="256" max="2048" step="8">
                 </div>
                 <div class="col-4">
                   <label class="form-label text-white-50 small"><?php echo t('labs.height', 'Height'); ?></label>
-                  <input type="number" name="height" class="form-control form-control-sm bg-dark text-white" value="1024" min="256" max="2048" step="8">
+                  <input type="number" name="height" class="form-control form-control-sm bg-dark text-white" value="<?php echo (int)($preloadFromJob['height'] ?? 1024); ?>" min="256" max="2048" step="8">
                 </div>
                 <div class="col-4">
                   <label class="form-label text-white-50 small"><?php echo t('labs.seed', 'Seed'); ?></label>
-                  <input type="number" name="seed" class="form-control form-control-sm bg-dark text-white" placeholder="Random">
+                  <input type="number" name="seed" class="form-control form-control-sm bg-dark text-white" placeholder="Random" value="<?php echo isset($preloadFromJob['seed']) && $preloadFromJob['seed'] !== '' && $preloadFromJob['seed'] !== null ? (int)$preloadFromJob['seed'] : ''; ?>">
                 </div>
               </div>
               <div class="row g-2 mb-3">
                 <div class="col-4">
                   <label class="form-label text-white-50 small"><?php echo t('labs.steps', 'Steps'); ?></label>
-                  <input type="number" name="steps" class="form-control form-control-sm bg-dark text-white" value="28" min="1" max="100">
+                  <input type="number" name="steps" class="form-control form-control-sm bg-dark text-white" value="<?php echo (int)($preloadFromJob['steps'] ?? 28); ?>" min="1" max="100">
                 </div>
                 <div class="col-4">
                   <label class="form-label text-white-50 small"><?php echo t('labs.cfg', 'CFG'); ?></label>
-                  <input type="number" name="cfg" class="form-control form-control-sm bg-dark text-white" value="7" min="1" max="30" step="0.5">
+                  <input type="number" name="cfg" class="form-control form-control-sm bg-dark text-white" value="<?php echo (float)($preloadFromJob['cfg'] ?? 7); ?>" min="1" max="30" step="0.5">
                 </div>
                 <div class="col-4">
                   <label class="form-label text-white-50 small"><?php echo t('labs.sampler', 'Sampler'); ?></label>
                   <select name="sampler" class="form-select form-select-sm bg-dark text-white">
-                    <option value="dpmpp_2m" selected>DPM++ 2M</option>
-                    <option value="euler">Euler</option>
-                    <option value="euler_ancestral">Euler Ancestral</option>
-                    <option value="ddim">DDIM</option>
-                    <option value="lcm">LCM</option>
+                    <?php $preloadSampler = $preloadFromJob['sampler'] ?? 'dpmpp_2m'; ?>
+                    <option value="dpmpp_2m" <?php echo $preloadSampler === 'dpmpp_2m' ? 'selected' : ''; ?>>DPM++ 2M</option>
+                    <option value="euler" <?php echo $preloadSampler === 'euler' ? 'selected' : ''; ?>>Euler</option>
+                    <option value="euler_ancestral" <?php echo $preloadSampler === 'euler_ancestral' ? 'selected' : ''; ?>>Euler Ancestral</option>
+                    <option value="ddim" <?php echo $preloadSampler === 'ddim' ? 'selected' : ''; ?>>DDIM</option>
+                    <option value="lcm" <?php echo $preloadSampler === 'lcm' ? 'selected' : ''; ?>>LCM</option>
                   </select>
                 </div>
               </div>
@@ -191,10 +222,11 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             </div>
           </div>
           <div id="labs-result-actions" class="mt-3" style="display:none;">
-            <a href="#" id="labs-download-btn" class="btn btn-success me-2" download><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
-            <a href="#" id="labs-use-style-btn" class="btn btn-outline-primary me-2"><i class="fas fa-palette me-1"></i><?php echo t('labs.consistency.use_style', 'Use as Style Reference'); ?></a>
-            <a href="#" id="labs-use-char-btn" class="btn btn-outline-primary me-2"><i class="fas fa-user me-1"></i><?php echo t('labs.consistency.use_char', 'Use as Character Reference'); ?></a>
-            <a href="/labs-upscale.php" id="labs-use-input-btn" class="btn btn-outline-secondary me-2"><i class="fas fa-search-plus me-1"></i><?php echo t('labs.use_as_input', 'Use as input'); ?></a>
+            <a href="#" id="labs-download-btn" class="btn btn-success me-2 mb-1" download><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
+            <a href="#" id="labs-generate-variations-btn" class="btn btn-neon-primary me-2 mb-1"><i class="fas fa-images me-1"></i><?php echo t('labs.generate_variations', 'Generate Variations'); ?></a>
+            <a href="#" id="labs-use-style-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-palette me-1"></i><?php echo t('labs.consistency.use_style', 'Use as Style Reference'); ?></a>
+            <a href="#" id="labs-use-char-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-user me-1"></i><?php echo t('labs.consistency.use_char', 'Use as Character Reference'); ?></a>
+            <a href="/labs-upscale.php" id="labs-use-input-btn" class="btn btn-outline-secondary me-2 mb-1"><i class="fas fa-search-plus me-1"></i><?php echo t('labs.use_as_input', 'Use as input'); ?></a>
           </div>
           <div id="labs-status-panel" class="mt-3" style="display:none;">
             <div class="labs-stepper mb-2">
@@ -213,6 +245,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             </div>
           </div>
           <div id="labs-error-msg" class="alert alert-danger mt-3" style="display:none;"></div>
+          <?php require __DIR__ . '/partials/image_details_panel.php'; ?>
         </div>
 
         <?php if (!empty($historyJobs)): ?>
@@ -266,20 +299,18 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
 
   var useStyleBtn = document.getElementById('labs-use-style-btn');
   var useCharBtn = document.getElementById('labs-use-char-btn');
-  if (useStyleBtn) useStyleBtn.addEventListener('click', function() {
+  var genVarBtn = document.getElementById('labs-generate-variations-btn');
+  function goConsistency(mode) {
     var img = document.querySelector('#labs-result-preview img[data-job-id]');
     if (img) {
       var jid = img.getAttribute('data-job-id');
-      window.location.href = '/labs-consistency.php?reference_job_id=' + encodeURIComponent(jid) + '&mode=style';
+      var m = mode || img.getAttribute('data-job-mode') || 'style';
+      if (jid) window.location.href = '/labs-consistency.php?reference_job_id=' + encodeURIComponent(jid) + '&mode=' + encodeURIComponent(m);
     }
-  });
-  if (useCharBtn) useCharBtn.addEventListener('click', function() {
-    var img = document.querySelector('#labs-result-preview img[data-job-id]');
-    if (img) {
-      var jid = img.getAttribute('data-job-id');
-      window.location.href = '/labs-consistency.php?reference_job_id=' + encodeURIComponent(jid) + '&mode=character';
-    }
-  });
+  }
+  if (useStyleBtn) useStyleBtn.addEventListener('click', function(e) { e.preventDefault(); goConsistency('style'); });
+  if (useCharBtn) useCharBtn.addEventListener('click', function(e) { e.preventDefault(); goConsistency('character'); });
+  if (genVarBtn) genVarBtn.addEventListener('click', function(e) { e.preventDefault(); goConsistency(); });
 
   function run() {
     if (typeof KNDLabs !== 'undefined') {

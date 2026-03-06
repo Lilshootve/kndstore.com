@@ -33,19 +33,20 @@ try {
 
     $payload = json_decode($job['payload_json'] ?? '{}', true) ?: [];
 
+    $tool = $job['tool'] ?? '';
     $data = [
         'job_id' => (string) $job['id'],
-        'tool' => $job['tool'] ?? '',
+        'tool' => $tool,
         'status' => $job['status'] ?? '',
         'prompt' => $job['prompt'] ?? '',
         'negative_prompt' => $job['negative_prompt'] ?? ($payload['negative_prompt'] ?? ''),
-        'model' => $payload['model'] ?? 'juggernaut_v8',
+        'model' => $payload['model'] ?? ($payload['model_ckpt'] ?? 'juggernaut_v8'),
         'seed' => $payload['seed'] ?? null,
         'steps' => $payload['steps'] ?? 20,
         'cfg' => $payload['cfg'] ?? 7.5,
         'width' => $payload['width'] ?? 1024,
         'height' => $payload['height'] ?? 1024,
-        'sampler_name' => $payload['sampler_name'] ?? 'euler',
+        'sampler_name' => $payload['sampler_name'] ?? ($payload['sampler'] ?? 'euler'),
         'scheduler' => $payload['scheduler'] ?? 'normal',
         'cost_kp' => (int) ($job['cost_kp'] ?? 0),
         'provider' => $job['provider'] ?? null,
@@ -53,7 +54,15 @@ try {
         'finished_at' => $job['finished_at'] ?? null,
         'error_message' => $job['error_message'] ?? null,
         'image_url' => $job['image_url'] ?? null,
+        'output_path' => $job['output_path'] ?? null,
     ];
+    if ($tool === 'consistency') {
+        $data['mode'] = $payload['mode'] ?? 'style';
+        $data['reference_source'] = $payload['reference_source'] ?? '';
+        $data['reference_job_id'] = $payload['reference_job_id'] ?? null;
+        $data['base_prompt'] = $payload['base_prompt'] ?? '';
+        $data['scene_prompt'] = $payload['scene_prompt'] ?? '';
+    }
 
     json_success($data);
 } catch (\Throwable $e) {

@@ -50,6 +50,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             <div class="mb-3">
               <label class="form-label text-white-50"><?php echo t('ai.text2img.prompt'); ?></label>
               <textarea name="prompt" class="form-control bg-dark text-white" id="labs-prompt-input" rows="3" maxlength="500" placeholder="Describe the image..."></textarea>
+              <button type="button" class="btn btn-link btn-sm text-white-50 p-0 mt-1" id="labs-use-last-prompt-btn" style="display:none;"><i class="fas fa-history me-1"></i><?php echo t('labs.use_last_prompt', 'Use last prompt'); ?></button>
               <div class="form-text text-white-50 small" id="labs-prompt-hint"></div>
               <div class="form-text text-white-50 small mt-1"><?php echo t('labs.presets'); ?></div>
               <div class="d-flex flex-wrap gap-1 mt-2">
@@ -272,12 +273,13 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             </div>
           </div>
           <div id="labs-result-actions" class="mt-3" style="display:none;">
-            <a href="#" id="labs-download-btn" class="btn btn-success me-2" download><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
-            <a href="/labs-upscale.php" id="labs-use-input-btn" class="btn btn-outline-primary me-2"><i class="fas fa-search-plus me-1"></i><?php echo t('labs.use_as_input', 'Use as input'); ?></a>
-            <a href="#" id="labs-use-style-btn" class="btn btn-outline-primary me-2"><i class="fas fa-palette me-1"></i><?php echo t('labs.consistency.use_style', 'Use as Style Reference'); ?></a>
-            <a href="#" id="labs-use-char-btn" class="btn btn-outline-primary me-2"><i class="fas fa-user me-1"></i><?php echo t('labs.consistency.use_char', 'Use as Character Reference'); ?></a>
-            <button type="button" id="labs-regenerate-btn" class="btn btn-outline-primary me-2"><i class="fas fa-redo me-1"></i><?php echo t('labs.regenerate', 'Regenerate'); ?></button>
-            <button type="button" id="labs-variations-btn" class="btn btn-outline-secondary"><i class="fas fa-images me-1"></i><?php echo t('labs.variations', 'Variations'); ?></button>
+            <a href="#" id="labs-download-btn" class="btn btn-success me-2 mb-1" download><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
+            <a href="#" id="labs-generate-variations-btn" class="btn btn-neon-primary me-2 mb-1"><i class="fas fa-images me-1"></i><?php echo t('labs.generate_variations', 'Generate Variations'); ?></a>
+            <a href="/labs-upscale.php" id="labs-use-input-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-search-plus me-1"></i><?php echo t('labs.use_as_input', 'Use as input'); ?></a>
+            <a href="#" id="labs-use-style-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-palette me-1"></i><?php echo t('labs.consistency.use_style', 'Use as Style Reference'); ?></a>
+            <a href="#" id="labs-use-char-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-user me-1"></i><?php echo t('labs.consistency.use_char', 'Use as Character Reference'); ?></a>
+            <button type="button" id="labs-regenerate-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-redo me-1"></i><?php echo t('labs.regenerate', 'Regenerate'); ?></button>
+            <button type="button" id="labs-variations-btn" class="btn btn-outline-secondary mb-1"><i class="fas fa-random me-1"></i><?php echo t('labs.variations', 'Variations'); ?></button>
           </div>
           <div id="labs-status-panel" class="mt-3" style="display:none;">
             <div class="labs-stepper mb-2">
@@ -296,6 +298,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             </div>
           </div>
           <div id="labs-error-msg" class="alert alert-danger mt-3" style="display:none;"></div>
+          <?php require __DIR__ . '/partials/image_details_panel.php'; ?>
         </div>
 
         <?php if (!empty($historyJobs)): ?>
@@ -355,15 +358,18 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
 (function() {
   var useStyleBtn = document.getElementById('labs-use-style-btn');
   var useCharBtn = document.getElementById('labs-use-char-btn');
+  var genVarBtn = document.getElementById('labs-generate-variations-btn');
   function goConsistency(mode) {
     var img = document.querySelector('#labs-result-preview img[data-job-id]');
     if (img) {
       var jid = img.getAttribute('data-job-id');
-      if (jid) window.location.href = '/labs-consistency.php?reference_job_id=' + encodeURIComponent(jid) + '&mode=' + encodeURIComponent(mode);
+      var m = mode || img.getAttribute('data-job-mode') || 'style';
+      if (jid) window.location.href = '/labs-consistency.php?reference_job_id=' + encodeURIComponent(jid) + '&mode=' + encodeURIComponent(m);
     }
   }
   if (useStyleBtn) useStyleBtn.addEventListener('click', function(e) { e.preventDefault(); goConsistency('style'); });
   if (useCharBtn) useCharBtn.addEventListener('click', function(e) { e.preventDefault(); goConsistency('character'); });
+  if (genVarBtn) genVarBtn.addEventListener('click', function(e) { e.preventDefault(); goConsistency(); });
 
   var form = document.getElementById('labs-comfy-form');
   if (form) {

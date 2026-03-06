@@ -45,6 +45,7 @@
           self.bindViewDetails();
           self.bindRecentFilter();
           self.bindPrivateCheck();
+          self.bindUseLastPrompt();
           self.updateCostLabel();
           self.updateBalanceAfter();
           self.updateSubmitButton();
@@ -61,10 +62,26 @@
           self.bindViewDetails();
           self.bindRecentFilter();
           self.bindPrivateCheck();
+          self.bindUseLastPrompt();
           self.updateCostLabel();
           self.updateBalanceAfter();
           self.updateSubmitButton();
         });
+    },
+
+    bindUseLastPrompt: function() {
+      var self = this;
+      var btn = document.getElementById('labs-use-last-prompt-btn');
+      if (!btn) return;
+      btn.addEventListener('click', function() {
+        if (!self.lastJobPayload || !self.lastJobPayload.prompt) return;
+        var form = document.getElementById(self.config.formId || 'labs-comfy-form');
+        if (!form) return;
+        var promptEl = form.querySelector('[name="prompt"]');
+        var negEl = form.querySelector('[name="negative_prompt"]');
+        if (promptEl) promptEl.value = self.lastJobPayload.prompt || '';
+        if (negEl && self.lastJobPayload.negative_prompt) negEl.value = self.lastJobPayload.negative_prompt;
+      });
     },
 
     getCost: function() {
@@ -185,7 +202,9 @@
               var proxyDownload = API_IMAGE + '?job_id=' + encodeURIComponent(jobId) + '&download=1';
               var useInputUrl = '/labs-upscale.php?source_job_id=' + encodeURIComponent(jobId);
               if (preview) {
-                preview.innerHTML = '<img src="' + proxyPreview + '" alt="Result" class="img-fluid rounded" style="max-height:400px;" data-job-id="' + jobId + '">';
+                var tool = self.config.jobType || 'text2img';
+                var mode = 'style';
+                preview.innerHTML = '<img src="' + proxyPreview + '" alt="Result" class="img-fluid rounded" style="max-height:400px;" data-job-id="' + jobId + '" data-job-tool="' + tool + '" data-job-mode="' + mode + '">';
               }
               var dlBtn = document.getElementById('labs-download-btn');
               if (dlBtn) {
@@ -199,12 +218,20 @@
               self.updateBalanceAfter();
               self.currentJobId = null;
               self.lastJobId = jobId;
+              var imgEl = preview ? preview.querySelector('img[data-job-id]') : null;
               fetch(API_JOB + '?job_id=' + encodeURIComponent(jobId), { credentials: 'same-origin' })
                 .then(function(r) { return r.json(); })
-                .then(function(d) {
-                  if (d.ok && d.data) {
-                    self.lastJobSeed = d.data.seed;
-                    self.lastJobPayload = d.data;
+                .then(function(jobData) {
+                  if (jobData.ok && jobData.data) {
+                    self.lastJobSeed = jobData.data.seed;
+                    self.lastJobPayload = jobData.data;
+                    var useLastBtn = document.getElementById('labs-use-last-prompt-btn');
+                    if (useLastBtn && jobData.data.prompt) { useLastBtn.style.display = 'inline-block'; }
+                    if (imgEl && jobData.data.tool === 'consistency' && jobData.data.mode) {
+                      imgEl.setAttribute('data-job-mode', jobData.data.mode);
+                    }
+                    self.renderImageDetails(jobData.data);
+                    if (typeof self.onJobDone === 'function') self.onJobDone(jobId, jobData.data);
                   }
                 });
             }
@@ -313,7 +340,7 @@
           if (submitBtn) submitBtn.disabled = false;
             if (d.ok && d.data && d.data.job_id) {
             if (d.data.available_after !== undefined) self.updateBalance(d.data.available_after);
-            formEl.reset();
+            if (self.config.keepFormOnSuccess !== false) { /* keep form (prompt, etc.) for variations */ } else { formEl.reset(); }
             self.updateCostLabel();
             self.updateBalanceAfter();
             self.updateSubmitButton();
@@ -522,6 +549,48 @@
       });
     },
 
+    renderImageDetails: function(job) {
+      if (!job) return;
+      var panel = document.getElementById('labs-image-details-panel');
+      var rowsEl = document.getElementById('labs-details-rows');
+      var actionsEl = document.getElementById('labs-image-details-actions');
+      if (!panel || !rowsEl) return;
+      var rows = [];
+      function addRow(label, value) {
+        if (value != null && value !== '' && value !== '—') rows.push({ label: label, value: String(value) });
+      }
+      addRow('Tool', job.tool || '—');
+      addRow('Status', job.status || '—');
+      addRow('Model', job.model || '—');
+      addRow('Seed', job.seed);
+      addRow('Sampler', job.sampler_name || job.sampler || '—');
+      addRow('Steps', job.steps);
+      addRow('CFG', job.cfg);
+      addRow('Resolution', (job.width && job.height) ? job.width + '\u00D7' + job.height : null);
+      addRow('Created', job.created_at || '—');
+      addRow('Job ID', job.job_id || '—');
+      addRow('Cost', job.cost_kp ? job.cost_kp + ' KP' : null);
+      if (job.tool === 'consistency') {
+        addRow('Mode', job.mode || '—');
+        addRow('Reference', job.reference_source || '—');
+        addRow('Ref Job', job.reference_job_id);
+      }
+      rowsEl.innerHTML = rows.map(function(r) {
+        return '<div class="col-6 col-md-4"><span class="text-white-50">' + r.label + ':</span> <span class="text-white">' + (r.value.length > 40 ? r.value.substring(0, 37) + '...' : r.value) + '</span></div>';
+      }).join('');
+      if (actionsEl) {
+        var jid = job.job_id;
+        var mode = (job.tool === 'consistency' && job.mode) ? job.mode : 'style';
+        var actions = [];
+        if (jid && (job.tool === 'text2img' || job.tool === 'consistency')) {
+          actions.push('<a href="/labs-consistency.php?reference_job_id=' + jid + '&mode=' + mode + '" class="btn btn-sm btn-outline-primary">' + (typeof t === 'function' ? t('labs.generate_variations', 'Generate Variations') : 'Generate Variations') + '</a>');
+        }
+        if (jid) actions.push('<a href="/labs-upscale.php?source_job_id=' + jid + '" class="btn btn-sm btn-outline-secondary">Upscale</a>');
+        actionsEl.innerHTML = actions.join(' ');
+      }
+      panel.style.display = 'block';
+    },
+
     bindViewDetails: function() {
       var self = this;
       document.addEventListener('click', function(e) {
@@ -550,6 +619,7 @@
             if (J.error_message) html += '<p class="text-danger small">' + J.error_message + '</p>';
             var body = document.getElementById('labs-job-details-body');
             if (body) body.innerHTML = html;
+            self.renderImageDetails(J);
             var modal = document.getElementById('labs-job-details-modal');
             if (modal && typeof bootstrap !== 'undefined') {
               var m = bootstrap.Modal.getOrCreateInstance(modal);

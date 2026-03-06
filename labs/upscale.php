@@ -91,6 +91,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             <div class="d-flex align-items-center"><div class="ai-spinner me-2"><i class="fas fa-cog fa-spin"></i></div><span id="labs-status-text"><?php echo t('ai.status.processing'); ?></span></div>
           </div>
           <div id="labs-error-msg" class="alert alert-danger mt-3" style="display:none;"></div>
+          <?php require __DIR__ . '/partials/image_details_panel.php'; ?>
         </div>
 
         <?php if (!empty($historyJobs)): ?>
