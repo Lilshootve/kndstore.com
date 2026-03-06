@@ -10,6 +10,7 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 require_once __DIR__ . '/includes/knd_profile.php';
+require_once __DIR__ . '/includes/knd_avatar.php';
 require_once __DIR__ . '/includes/csrf.php';
 
 require_login();
@@ -24,6 +25,7 @@ if (!$pdo) {
 
 $userId = (int) $_SESSION['dr_user_id'];
 $data = profile_get_data($pdo, $userId);
+$inventory = avatar_get_inventory($pdo, $userId);
 
 $seoTitle = t('profile.title', 'My Profile') . ' | KND Arena';
 $seoDesc = 'Your KND Arena identity: Level, XP, stats for LastRoll, Insight, Drops, and seasonal progress.';
@@ -192,6 +194,48 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
         <div id="avatar-preview" class="avatar-stage"></div>
       </div>
 
+      <!-- Collected Avatars Section -->
+      <div class="glass-card-neon p-4 mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div class="d-flex align-items-center">
+            <div class="profile-stat-icon"><i class="fas fa-box-open"></i></div>
+            <h5 class="mb-0 ms-2" style="font-size:1rem;"><?php echo t('profile.collected_avatars', 'Collected Avatars'); ?></h5>
+          </div>
+          <span class="text-white-50 small"><?php echo count($inventory); ?> items</span>
+        </div>
+        
+        <?php if (empty($inventory)): ?>
+          <div class="text-center text-white-50 py-3">
+            <i class="fas fa-box-open me-2" style="opacity:.5;"></i>No avatars collected yet. Play KND Drop Chamber to earn avatars!
+          </div>
+        <?php else: ?>
+          <div class="row g-3">
+            <?php foreach ($inventory as $item): ?>
+            <div class="col-4 col-md-3 col-lg-2">
+              <div class="avatar-item-card" style="background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.05); border-radius:8px; padding:10px; text-align:center; height:100%;">
+                <div style="height:60px; display:flex; align-items:center; justify-content:center; margin-bottom:10px;">
+                  <img src="<?php echo htmlspecialchars($item['asset_path']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" style="max-height:100%; max-width:100%; object-fit:contain; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));">
+                </div>
+                <div style="font-size:.7rem; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px;" title="<?php echo htmlspecialchars($item['name']); ?>">
+                  <?php echo htmlspecialchars($item['name']); ?>
+                </div>
+                <?php
+                  $rCls = 'profile-rarity-common';
+                  if ($item['rarity'] === 'special') $rCls = 'profile-rarity-special';
+                  elseif ($item['rarity'] === 'rare') $rCls = 'profile-rarity-rare';
+                  elseif ($item['rarity'] === 'epic') $rCls = 'profile-rarity-epic';
+                  elseif ($item['rarity'] === 'legendary') $rCls = 'profile-rarity-legendary';
+                ?>
+                <div style="font-size:.65rem; text-transform:uppercase;" class="<?php echo $rCls; ?>">
+                  <?php echo htmlspecialchars($item['rarity']); ?>
+                </div>
+              </div>
+            </div>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+      </div>
+
       <!-- Badges Section -->
       <div class="glass-card-neon p-4 mb-4">
         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -275,7 +319,10 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 .profile-rarity-common { color: #9ca3af; }
 .profile-rarity-rare { color: #60a5fa; }
 .profile-rarity-epic { color: #a78bfa; }
+.profile-rarity-special { color: #8b5cf6; }
 .profile-rarity-legendary { color: #fbbf24; }
+.avatar-item-card { transition: transform 0.2s, box-shadow 0.2s; }
+.avatar-item-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); background: rgba(255,255,255,.05) !important; }
 </style>
 
 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
@@ -310,11 +357,12 @@ fetch('/api/badges/user_badges.php', {credentials: 'same-origin'})
       }
       
       if (container) {
-        if (unlocked.length === 0) {
-          container.innerHTML = '<div class="text-center text-white-50 py-3"><i class="fas fa-award me-2" style="opacity:.5;"></i>No badges unlocked yet. Keep playing to earn badges!</div>';
+        if (progress.length === 0) {
+          container.innerHTML = '<div class="text-center text-white-50 py-3"><i class="fas fa-award me-2" style="opacity:.5;"></i>No badges available.</div>';
         } else {
           let html = '<div class="row g-3 mb-3">';
-          unlocked.forEach(badge => {
+          progress.forEach(badge => {
+            const isUnlocked = badge.unlocked;
             const rarityColors = {
               generator: '#60a5fa',
               drop: '#a78bfa',
@@ -322,13 +370,32 @@ fetch('/api/badges/user_badges.php', {credentials: 'same-origin'})
               legendary_pull: '#fbbf24',
               level: '#f472b6'
             };
-            const color = rarityColors[badge.unlock_type] || '#00d4ff';
+            const color = isUnlocked ? (rarityColors[badge.unlock_type] || '#00d4ff') : 'rgba(255,255,255,0.2)';
+            const bgStr = isUnlocked ? 'background:rgba(0,212,255,.05); border:1px solid rgba(0,212,255,.2);' : 'background:rgba(255,255,255,.02); border:1px dashed rgba(255,255,255,.1);';
+            const nameColor = isUnlocked ? '#fff' : 'rgba(255,255,255,0.5)';
+            const descColor = isUnlocked ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,0.3)';
+            
+            // Get unlocked date if unlocked
+            let unlockedDateHtml = '';
+            if (isUnlocked) {
+               const uBadge = unlocked.find(u => u.code === badge.code);
+               if (uBadge) {
+                   unlockedDateHtml = '<div style="font-size:.65rem; color:rgba(255,255,255,.4); margin-top:6px;">' + new Date(uBadge.unlocked_at).toLocaleDateString() + '</div>';
+               }
+            } else {
+               unlockedDateHtml = '<div style="font-size:.65rem; color:rgba(255,255,255,.4); margin-top:6px;">' + badge.current + ' / ' + badge.threshold + '</div>';
+               unlockedDateHtml += '<div style="width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; margin-top:4px;"><div style="height:100%; background:' + (rarityColors[badge.unlock_type] || '#fff') + '; border-radius:2px; width:' + badge.progress_percent + '%;"></div></div>';
+            }
+            
             html += '<div class="col-6 col-md-4 col-lg-3">';
-            html += '<div class="badge-card" style="background:rgba(0,212,255,.05); border:1px solid rgba(0,212,255,.2); border-radius:8px; padding:12px; text-align:center;">';
-            html += '<div style="font-size:2rem; margin-bottom:8px; color:' + color + ';"><i class="fas fa-award"></i></div>';
-            html += '<div style="font-size:.85rem; font-weight:600; color:#fff; margin-bottom:4px;">' + badge.name + '</div>';
-            html += '<div style="font-size:.7rem; color:rgba(255,255,255,.5);">' + badge.description + '</div>';
-            html += '<div style="font-size:.65rem; color:rgba(255,255,255,.4); margin-top:6px;">' + new Date(badge.unlocked_at).toLocaleDateString() + '</div>';
+            html += '<div class="badge-card" style="' + bgStr + ' border-radius:8px; padding:12px; text-align:center; height:100%; position:relative;">';
+            if (!isUnlocked) {
+               html += '<div style="position:absolute; top:8px; right:8px; font-size:.6rem; color:rgba(255,255,255,.3);"><i class="fas fa-lock"></i></div>';
+            }
+            html += '<div style="font-size:2rem; margin-bottom:8px; color:' + color + '; transition: color 0.3s;"><i class="fas fa-award"></i></div>';
+            html += '<div style="font-size:.85rem; font-weight:600; color:' + nameColor + '; margin-bottom:4px;">' + badge.name + '</div>';
+            html += '<div style="font-size:.7rem; color:' + descColor + ';">' + badge.description + '</div>';
+            html += unlockedDateHtml;
             html += '</div></div>';
           });
           html += '</div>';
