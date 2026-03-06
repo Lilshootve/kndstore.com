@@ -22,6 +22,8 @@ $ogHead  .= '    <meta property="og:url" content="https://kndstore.com/arena">' 
 $ogHead  .= '    <meta name="twitter:card" content="summary_large_image">' . "\n";
 $ogHead  .= '    <meta name="twitter:title" content="' . htmlspecialchars($seoTitle) . '">' . "\n";
 $ogHead  .= '    <meta name="twitter:description" content="' . htmlspecialchars($seoDesc) . '">' . "\n";
+$arenaCss = __DIR__ . '/assets/css/knd-labs.css';
+$ogHead  .= '<link rel="stylesheet" href="/assets/css/knd-labs.css?v=' . (file_exists($arenaCss) ? filemtime($arenaCss) : time()) . '">';
 echo generateHeader($seoTitle, $seoDesc, $ogHead);
 ?>
 
@@ -29,7 +31,7 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 
 <?php echo generateNavigation(); ?>
 
-<section class="hero-section" style="min-height:100vh; padding-top:110px; padding-bottom:60px;">
+<section class="hero-section arena-hero" style="min-height:100vh; padding-top:110px; padding-bottom:60px;">
   <div class="container">
 
     <!-- Hero -->
