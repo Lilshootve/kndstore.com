@@ -57,13 +57,20 @@
 
 ---
 
+## Recent Jobs Optimization (follow-up)
+
+- Recent jobs: limit 5 items, loading skeleton "Loading recent jobs...", load after DOMContentLoaded
+- Timing logs: `performance.mark` / `performance.measure`, `console.log` for fetch+parse and render
+- On fetch failure: show "Could not load recent jobs. You can still generate."; tools remain usable
+- All images: `loading="lazy"` `decoding="async"`; no extra per-job API calls (single jobs list fetch)
+
 ## Modified Files
 
 - `includes/header.php` – LCP image attributes
 - `api/labs/jobs.php` – `tool` filter
 - `assets/js/kndlabs.js` – use `window.KND_PRICING` when present
-- `assets/js/labs-lazy-history.js` – new lazy-load script
-- `labs/text-to-image.php` – no history in PHP, inline pricing, lazy-load
+- `assets/js/labs-lazy-history.js` – lazy-load, limit 5, timing logs, fallback on error
+- `labs/text-to-image.php` – loading skeleton, limit 5
 - `labs/upscale.php` – same changes
 
 ---

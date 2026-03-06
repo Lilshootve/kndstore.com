@@ -99,7 +99,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
         <div class="knd-divider"></div>
         <div class="knd-section-title"><?php echo t('labs.tool_history', 'Recent'); ?></div>
         <div id="labs-history-sidebar-placeholder">
-          <p class="knd-muted small mb-0"><?php echo t('labs.no_result_yet', 'Submit to generate'); ?></p>
+          <p class="knd-muted small mb-0"><i class="fas fa-spinner fa-spin me-1"></i>Loading recent jobs...</p>
         </div>
         <ul class="list-unstyled mb-0" id="labs-recent-list" style="display:none;"></ul>
       </aside>
@@ -108,7 +108,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
     <div class="labs-recent-creations mt-5">
       <div class="knd-section-title mb-3"><?php echo t('labs.recent_creations', 'Recent Creations'); ?></div>
       <div class="knd-card-grid" id="labs-recent-creations-grid">
-        <p class="knd-muted small mb-0"><?php echo t('labs.no_creations_yet', 'Generate your first image to see it here.'); ?></p>
+        <p class="knd-muted small mb-0"><i class="fas fa-spinner fa-spin me-1"></i>Loading recent jobs...</p>
       </div>
     </div>
   </div>
@@ -166,7 +166,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
   function scheduleLazyHistory() {
     var fn = function() {
       if (window.LabsLazyHistory && window.LabsLazyHistory.load) {
-        window.LabsLazyHistory.load({ tool: 'upscale', limit: 10, toolLabel: 'Upscale', hasProviderFilter: false });
+        window.LabsLazyHistory.load({ tool: 'upscale', limit: 5, toolLabel: 'Upscale', hasProviderFilter: false });
       }
     };
     if (window.requestIdleCallback) requestIdleCallback(fn, { timeout: 1500 }); else setTimeout(fn, 100);

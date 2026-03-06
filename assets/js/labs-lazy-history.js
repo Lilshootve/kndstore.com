@@ -1,10 +1,13 @@
 /**
- * KND Labs - Lazy-load history and recent creations after first paint.
- * Call LabsLazyHistory.load({ tool: 'text2img', limit: 12, toolLabel: 'Canvas', hasProviderFilter: true })
- * or LabsLazyHistory.load({ tool: 'upscale', limit: 10, toolLabel: 'Upscale', hasProviderFilter: false })
+ * KND Labs - Lazy-load recent jobs after DOMContentLoaded.
+ * Call LabsLazyHistory.load({ tool: 'text2img', limit: 5, toolLabel: 'Canvas', hasProviderFilter: true })
+ * or LabsLazyHistory.load({ tool: 'upscale', limit: 5, toolLabel: 'Upscale', hasProviderFilter: false })
  */
 (function() {
   'use strict';
+
+  var RECENT_JOBS_LIMIT = 5;
+  var FALLBACK_MSG = 'Could not load recent jobs. You can still generate.';
 
   function formatDate(str) {
     try {
@@ -13,9 +16,15 @@
     } catch (e) { return ''; }
   }
 
+  function showFallback(placeholderEl, gridEl) {
+    var msg = '<p class="knd-muted small mb-0">' + FALLBACK_MSG + '</p>';
+    if (placeholderEl) { placeholderEl.style.display = ''; placeholderEl.innerHTML = msg; }
+    if (gridEl) gridEl.innerHTML = msg;
+  }
+
   function load(cfg) {
     var tool = cfg.tool || 'text2img';
-    var limit = Math.min(50, Math.max(1, parseInt(cfg.limit, 10) || 12));
+    var limit = Math.min(50, Math.max(1, parseInt(cfg.limit, 10) || RECENT_JOBS_LIMIT));
     var toolLabel = cfg.toolLabel || 'Canvas';
     var hasProviderFilter = !!cfg.hasProviderFilter;
     var provider = (typeof cfg.provider === 'string') ? cfg.provider : '';
@@ -23,9 +32,22 @@
     var url = '/api/labs/jobs.php?tool=' + encodeURIComponent(tool) + '&limit=' + limit;
     if (provider) url += '&provider=' + encodeURIComponent(provider);
 
+    var t0 = performance.now();
+    if (typeof performance !== 'undefined' && performance.mark) {
+      performance.mark('labs-recent-jobs-fetch-start');
+    }
+
     fetch(url, { credentials: 'same-origin' })
       .then(function(r) { return r.json(); })
       .then(function(d) {
+        var t1 = performance.now();
+        if (typeof performance !== 'undefined' && performance.mark) {
+          performance.mark('labs-recent-jobs-fetch-end');
+          try { performance.measure('labs-recent-jobs-query', 'labs-recent-jobs-fetch-start', 'labs-recent-jobs-fetch-end'); } catch (e) {}
+        }
+        if (typeof console !== 'undefined' && console.log) {
+          console.log('[Labs] recent jobs fetch+parse: ' + (t1 - t0).toFixed(0) + 'ms');
+        }
         if (!d.ok || !d.data || !d.data.jobs) return;
         var jobs = d.data.jobs;
 
@@ -37,7 +59,10 @@
 
         var placeholderEl = document.getElementById('labs-history-sidebar-placeholder');
         if (jobs.length === 0) {
-          if (placeholderEl) placeholderEl.style.display = '';
+          if (placeholderEl) {
+            placeholderEl.style.display = '';
+            placeholderEl.innerHTML = '<p class="knd-muted small mb-0">Submit to generate</p>';
+          }
           if (listEl) listEl.style.display = 'none';
           if (gridParent && gridEl) {
             gridEl.innerHTML = '<p class="knd-muted small mb-0">Generate your first image to see it here.</p>';
@@ -66,7 +91,7 @@
           var ul = document.createElement('ul');
           ul.className = 'list-unstyled mb-0';
           ul.id = 'labs-recent-list';
-          jobs.slice(0, 8).forEach(function(j) {
+          jobs.slice(0, RECENT_JOBS_LIMIT).forEach(function(j) {
             var jid = j.job_id || j.id;
             var imgUrl = j.image_url || ('/api/labs/image.php?job_id=' + jid);
             var status = j.status || 'pending';
@@ -93,8 +118,9 @@
         }
 
         if (gridEl && gridParent) {
+          var tRender0 = performance.now();
           gridEl.innerHTML = '';
-          jobs.slice(0, 8).forEach(function(j) {
+          jobs.slice(0, RECENT_JOBS_LIMIT).forEach(function(j) {
             var jid = j.job_id || j.id;
             var imgUrl = j.image_url || ('/api/labs/image.php?job_id=' + jid);
             var status = j.status || 'pending';
@@ -115,9 +141,21 @@
               '</div>';
             gridEl.appendChild(card);
           });
+          var tRender1 = performance.now();
+          if (typeof console !== 'undefined' && console.log) {
+            console.log('[Labs] recent jobs render: ' + (tRender1 - tRender0).toFixed(0) + 'ms, items: ' + jobs.length);
+          }
         }
       })
-      .catch(function() {});
+      .catch(function(err) {
+        var tErr = performance.now();
+        if (typeof console !== 'undefined' && console.warn) {
+          console.warn('[Labs] recent jobs failed:', (tErr - t0).toFixed(0) + 'ms', err);
+        }
+        var ph = document.getElementById('labs-history-sidebar-placeholder');
+        var gr = document.getElementById('labs-recent-creations-grid');
+        showFallback(ph, gr);
+      });
   }
 
   window.LabsLazyHistory = { load: load };
