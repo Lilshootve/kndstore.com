@@ -91,10 +91,32 @@ function profile_xp_progress(int $xp, int $level): array {
  */
 function profile_get_data(PDO $pdo, int $userId): array {
     $username = null;
-    $stmt = $pdo->prepare('SELECT username FROM users WHERE id = ? LIMIT 1');
-    $stmt->execute([$userId]);
-    $u = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($u) $username = $u['username'];
+    $favoriteAvatar = null;
+    try {
+        $stmt = $pdo->prepare('
+            SELECT u.username, u.favorite_avatar_id, i.asset_path as favorite_avatar_path 
+            FROM users u
+            LEFT JOIN knd_avatar_items i ON u.favorite_avatar_id = i.id 
+            WHERE u.id = ? LIMIT 1
+        ');
+        $stmt->execute([$userId]);
+        $u = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($u) {
+            $username = $u['username'];
+            if (!empty($u['favorite_avatar_id'])) {
+                $favoriteAvatar = [
+                    'id' => $u['favorite_avatar_id'],
+                    'asset_path' => $u['favorite_avatar_path']
+                ];
+            }
+        }
+    } catch (\Throwable $e) {
+        // Fallback if column doesn't exist yet
+        $stmt = $pdo->prepare('SELECT username FROM users WHERE id = ? LIMIT 1');
+        $stmt->execute([$userId]);
+        $u = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($u) $username = $u['username'];
+    }
 
     $xp = 0;
     $level = 1;
@@ -234,5 +256,6 @@ function profile_get_data(PDO $pdo, int $userId): array {
             'rank'     => $seasonRank,
         ] : null,
         'all_time_rank'=> $allTimeRank,
+        'favorite_avatar'=> $favoriteAvatar,
     ];
 }

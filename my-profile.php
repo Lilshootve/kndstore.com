@@ -191,7 +191,14 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
             </button>
           </div>
         </div>
-        <div id="avatar-preview" class="avatar-stage"></div>
+        <?php if (!empty($data['favorite_avatar'])): ?>
+          <div class="text-center py-3">
+            <img src="<?php echo htmlspecialchars($data['favorite_avatar']['asset_path']); ?>" alt="Favorite Avatar" style="max-height: 250px; max-width: 100%; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));">
+          </div>
+          <div id="avatar-preview" class="avatar-stage" style="display:none;"></div>
+        <?php else: ?>
+          <div id="avatar-preview" class="avatar-stage"></div>
+        <?php endif; ?>
       </div>
 
       <!-- Collected Avatars Section -->
@@ -228,6 +235,13 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                 ?>
                 <div style="font-size:.65rem; text-transform:uppercase;" class="<?php echo $rCls; ?>">
                   <?php echo htmlspecialchars($item['rarity']); ?>
+                </div>
+                <div class="mt-2">
+                  <?php if (!empty($data['favorite_avatar']) && $data['favorite_avatar']['id'] == $item['id']): ?>
+                    <button class="btn btn-sm btn-outline-success w-100" disabled style="font-size:.7rem; opacity: 1;"><i class="fas fa-star me-1"></i>Favorite</button>
+                  <?php else: ?>
+                    <button class="btn btn-sm btn-outline-info w-100 btn-set-favorite" data-id="<?php echo $item['id']; ?>" style="font-size:.7rem;"><i class="far fa-star me-1"></i>Set Favorite</button>
+                  <?php endif; ?>
                 </div>
               </div>
             </div>
@@ -330,6 +344,36 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 <script src="/assets/js/navigation-extend.js"></script>
 <script src="/assets/js/avatar.js" defer></script>
 <script>
+// Handle Set Favorite button
+document.querySelectorAll('.btn-set-favorite').forEach(btn => {
+  btn.addEventListener('click', async function() {
+    const itemId = this.dataset.id;
+    this.disabled = true;
+    this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
+    try {
+      const res = await fetch('/api/avatar/set_favorite.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ item_id: parseInt(itemId, 10) })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        window.location.reload();
+      } else {
+        alert(data.error || 'Error saving favorite');
+        this.disabled = false;
+        this.innerHTML = '<i class="far fa-star me-1"></i>Set Favorite';
+      }
+    } catch (e) {
+      alert('Error saving favorite');
+      this.disabled = false;
+      this.innerHTML = '<i class="far fa-star me-1"></i>Set Favorite';
+    }
+  });
+});
+
 // Load fragments
 fetch('/api/avatar/fragments.php', {credentials: 'same-origin'})
   .then(r => r.json())
