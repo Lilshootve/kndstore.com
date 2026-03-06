@@ -1303,6 +1303,17 @@ h1, h2, h3, h4, h5, h6 {
     z-index: 0;
 }
 
+.hero-home-bg .container {
+    position: relative;
+    z-index: 2;
+}
+
+@media (max-width: 768px) {
+    .hero-home-bg {
+        background-attachment: scroll;
+    }
+}
+
 /* Hero con imagen de fondo para Apparel */
 .hero-apparel-bg {
     background-image: url('/assets/images/hero-apparel-knd.webp');
