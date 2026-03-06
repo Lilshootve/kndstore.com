@@ -27,16 +27,10 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
   <div class="container">
     <?php labs_breadcrumb($toolName); ?>
 
-    <div class="row mt-4">
-      <div class="col-lg-5 order-lg-2 mb-4">
-        <div class="glass-card-neon p-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="text-white mb-0"><?php echo htmlspecialchars($toolName); ?></h4>
-            <span class="ai-balance-badge" id="labs-balance"><i class="fas fa-coins me-1"></i><?php echo number_format($balance); ?> KP</span>
-          </div>
-          <p class="text-white-50 small" id="labs-cost-label"><?php echo t('labs.cost_label', 'Cost: 5 KP'); ?></p>
-
-          <form id="labs-comfy-form" class="labs-form" method="post" action="#" onsubmit="return false;">
+    <div class="knd-workspace mt-4">
+      <aside class="knd-panel">
+        <div class="knd-section-title"><?php echo htmlspecialchars($toolName); ?></div>
+        <form id="labs-comfy-form" class="labs-form" method="post" action="#" onsubmit="return false;">
             <input type="hidden" name="tool" value="upscale">
             <div class="mb-3">
               <label class="form-label text-white-50"><?php echo t('ai.upscale.scale'); ?></label>
@@ -69,19 +63,21 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
                 <div id="labs-upscale-preview" style="display:none;"><img id="labs-upscale-preview-img" src="" alt="" style="max-height:120px;"></div>
               </div>
             </div>
-            <button type="submit" class="btn btn-neon-primary w-100" id="labs-submit-btn" disabled>
+          </form>
+      </aside>
+
+      <div class="d-flex flex-column">
+        <div class="knd-canvas knd-panel-soft flex-grow-1 mb-3">
+          <div id="labs-result-preview" class="labs-result-preview text-center py-5" style="min-height:320px;">
+            <div id="labs-upscale-empty" class="knd-canvas__empty">
+              <i class="fas fa-search-plus fa-3x mb-3" style="color:var(--knd-accent-soft);opacity:.4;"></i>
+              <p class="mb-0"><?php echo t('labs.no_result_yet', 'Submit to generate'); ?></p>
+            </div>
+          </div>
+          <div class="text-center mt-3">
+            <button type="submit" form="labs-comfy-form" class="knd-btn-primary" id="labs-submit-btn" disabled>
               <i class="fas fa-search-plus me-2"></i><?php echo t('ai.upscale.title'); ?>
             </button>
-          </form>
-        </div>
-      </div>
-
-      <div class="col-lg-7 order-lg-1">
-        <div class="glass-card-neon p-4">
-          <h5 class="text-white mb-3"><?php echo t('labs.result_area', 'Result'); ?></h5>
-          <div id="labs-result-preview" class="labs-result-preview text-center py-5">
-            <i class="fas fa-search-plus fa-3x text-white-50 mb-3"></i>
-            <p class="text-white-50 mb-0"><?php echo t('labs.no_result_yet', 'Submit to generate'); ?></p>
           </div>
           <div id="labs-result-actions" class="mt-3" style="display:none;">
             <a href="#" id="labs-download-btn" class="btn btn-success me-2" download><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
@@ -93,11 +89,17 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
           <div id="labs-error-msg" class="alert alert-danger mt-3" style="display:none;"></div>
           <?php require __DIR__ . '/partials/image_details_panel.php'; ?>
         </div>
+      </div>
 
+      <aside class="knd-panel">
+        <div class="knd-section-title"><?php echo t('labs.credits', 'Credits'); ?></div>
+        <p class="text-white mb-2"><strong id="labs-balance"><?php echo number_format($balance); ?></strong> KP</p>
+        <p class="knd-muted small mb-4" id="labs-cost-label"><?php echo t('labs.cost_label', 'Cost: 5 KP'); ?></p>
+        <a href="/support-credits.php" class="knd-btn-secondary w-100 mb-4">+ <?php echo t('labs.add_credits', 'Add Credits'); ?></a>
+        <div class="knd-divider"></div>
+        <div class="knd-section-title"><?php echo t('labs.tool_history', 'Recent'); ?></div>
         <?php if (!empty($historyJobs)): ?>
-        <div class="glass-card-neon p-4 mt-4">
-          <h6 class="text-white mb-3"><?php echo t('labs.tool_history', 'Recent'); ?></h6>
-          <ul class="list-unstyled mb-0">
+        <ul class="list-unstyled mb-0">
             <?php foreach (array_slice($historyJobs, 0, 5) as $j): ?>
             <li class="d-flex align-items-center justify-content-between py-2 border-bottom border-secondary flex-wrap gap-2">
               <span class="text-white-50 small"><?php echo date('M j, H:i', strtotime($j['created_at'])); ?></span>
@@ -107,10 +109,11 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               <?php endif; ?>
             </li>
             <?php endforeach; ?>
-          </ul>
-        </div>
+        </ul>
+        <?php else: ?>
+        <p class="knd-muted small mb-0"><?php echo t('labs.no_result_yet', 'Submit to generate'); ?></p>
         <?php endif; ?>
-      </div>
+      </aside>
     </div>
   </div>
 </section>

@@ -8,6 +8,11 @@
     font-size: 0.8rem;
 }
 
+.labs-tool-card-main {
+    border-color: rgba(53, 194, 255, 0.25);
+    box-shadow: 0 0 20px rgba(53, 194, 255, 0.08);
+}
+
 .labs-tool-section .breadcrumb {
     background: transparent;
 }

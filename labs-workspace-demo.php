@@ -9,7 +9,7 @@ require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 
 $extraCss = '';
-echo generateHeader('Text → Image | KND Labs Demo', 'Create epic visuals with AI', $extraCss);
+echo generateHeader('Canvas | KND Labs Demo', 'Main AI creation workspace', $extraCss);
 ?>
 <?php echo generateNavigation(); ?>
 
@@ -17,9 +17,9 @@ echo generateHeader('Text → Image | KND Labs Demo', 'Create epic visuals with 
   <main class="py-5">
     <div class="container">
       <nav class="knd-muted small mb-2">
-        <a href="/index.php" class="text-decoration-none" style="color:var(--knd-accent-soft);">Home</a> / <a href="/knd-labs.php" class="text-decoration-none" style="color:var(--knd-accent-soft);">Labs</a> / <span>Text → Image</span>
+        <a href="/index.php" class="text-decoration-none" style="color:var(--knd-accent-soft);">Home</a> / <a href="/knd-labs.php" class="text-decoration-none" style="color:var(--knd-accent-soft);">Labs</a> / <span>Canvas</span>
       </nav>
-      <h1 class="text-white mb-1" style="font-size:1.75rem;">Text → Image</h1>
+      <h1 class="text-white mb-1" style="font-size:1.75rem;">Canvas</h1>
       <p class="knd-muted mb-4">Create epic visuals from text prompts</p>
 
       <div class="knd-workspace">

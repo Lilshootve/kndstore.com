@@ -2,7 +2,7 @@
 require_once __DIR__ . '/_init.php';
 require_once __DIR__ . '/../includes/comfyui.php';
 
-$toolName = t('ai.text2img.title', 'Text → Image');
+$toolName = t('labs.canvas.title', 'Canvas');
 $jobType = 'text2img';
 $historyJobs = [];
 $providerFilter = trim($_GET['provider'] ?? '');
@@ -35,17 +35,10 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
   <div class="container">
     <?php labs_breadcrumb($toolName); ?>
 
-    <div class="row mt-4">
-      <div class="col-lg-5 order-lg-2 mb-4">
-        <div class="glass-card-neon p-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="text-white mb-0"><?php echo htmlspecialchars($toolName); ?></h4>
-            <span class="ai-balance-badge" id="labs-balance"><i class="fas fa-coins me-1"></i><?php echo number_format($balance); ?> KP</span>
-          </div>
-          <p class="text-white-50 small mb-1" id="labs-cost-label"><?php echo t('labs.cost_label', 'Cost: 3 KP'); ?></p>
-          <p class="text-white-50 small mb-3" id="labs-balance-after"></p>
-
-          <form id="labs-comfy-form" class="labs-form" method="post" action="#" onsubmit="return false;">
+    <div class="knd-workspace mt-4">
+      <aside class="knd-panel">
+        <div class="knd-section-title"><?php echo htmlspecialchars($toolName); ?></div>
+        <form id="labs-comfy-form" class="labs-form" method="post" action="#" onsubmit="return false;">
             <input type="hidden" name="tool" value="text2img">
             <div class="mb-3">
               <label class="form-label text-white-50"><?php echo t('ai.text2img.prompt'); ?></label>
@@ -255,22 +248,22 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
               <label for="labs-private-check" class="form-check-label text-white-50 small"><?php echo t('labs.private_toggle', 'Keep this generation private'); ?></label>
             </div>
             <p class="text-white-50 small mb-3" id="labs-microcopy-private"><?php echo t('labs.images_stored', 'Your images are private. Stored for 30 days.'); ?></p>
-            <button type="submit" class="btn btn-neon-primary w-100" id="generateBtn">
-              <i class="fas fa-magic me-2"></i><?php echo t('ai.text2img.generate'); ?>
-            </button>
           </form>
-        </div>
-      </div>
+      </aside>
 
-      <div class="col-lg-7 order-lg-1">
-        <div class="glass-card-neon p-4">
-          <h5 class="text-white mb-3"><?php echo t('labs.result_area', 'Result'); ?></h5>
-          <div id="labs-result-preview" class="labs-result-preview text-center py-5">
+      <div class="d-flex flex-column">
+        <div class="knd-canvas knd-panel-soft flex-grow-1 mb-3" id="labs-result-wrapper">
+          <div id="labs-result-preview" class="labs-result-preview text-center py-5" style="min-height:320px;">
             <div id="labs-placeholder-tips" class="labs-placeholder-tips">
-              <i class="fas fa-lightbulb fa-2x text-white-50 mb-2"></i>
+              <i class="fas fa-wand-magic-sparkles fa-3x mb-3" style="color:var(--knd-accent-soft);opacity:.4;"></i>
               <p class="text-white-50 mb-1 small"><?php echo t('labs.tip_prompt', 'Use 1 subject + 1 style + 1 lighting'); ?></p>
               <p class="text-white-50 mb-0 small"><?php echo t('labs.tip_example', 'e.g. "Warrior, oil painting, golden hour"'); ?></p>
             </div>
+          </div>
+          <div class="text-center mt-3">
+            <button type="submit" form="labs-comfy-form" class="knd-btn-primary" id="generateBtn">
+              <i class="fas fa-bolt me-2"></i><?php echo t('ai.text2img.generate'); ?>
+            </button>
           </div>
           <div id="labs-result-actions" class="mt-3" style="display:none;">
             <a href="#" id="labs-download-btn" class="btn btn-success me-2 mb-1" download><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
@@ -300,18 +293,23 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
           <div id="labs-error-msg" class="alert alert-danger mt-3" style="display:none;"></div>
           <?php require __DIR__ . '/partials/image_details_panel.php'; ?>
         </div>
+      </div>
 
+      <aside class="knd-panel">
+        <div class="knd-section-title"><?php echo t('labs.credits', 'Credits'); ?></div>
+        <p class="text-white mb-2"><strong id="labs-balance"><?php echo number_format($balance); ?></strong> KP</p>
+        <p class="knd-muted small mb-3" id="labs-cost-label"><?php echo t('labs.cost_label', 'Cost: 3 KP'); ?></p>
+        <p class="knd-muted small mb-4" id="labs-balance-after"></p>
+        <a href="/support-credits.php" class="knd-btn-secondary w-100 mb-4">+ <?php echo t('labs.add_credits', 'Add Credits'); ?></a>
+        <div class="knd-divider"></div>
+        <div class="knd-section-title"><?php echo t('labs.tool_history', 'Recent'); ?></div>
         <?php if (!empty($historyJobs)): ?>
-        <div class="glass-card-neon p-4 mt-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="text-white mb-0"><?php echo t('labs.tool_history', 'Recent'); ?></h6>
-            <select id="labs-recent-filter" class="form-select form-select-sm bg-dark text-white" style="width:auto;">
-              <option value="" <?php echo $providerFilter === '' ? 'selected' : ''; ?>><?php echo t('labs.all', 'All'); ?></option>
-              <option value="local" <?php echo $providerFilter === 'local' ? 'selected' : ''; ?>>Local</option>
-              <option value="runpod" <?php echo $providerFilter === 'runpod' ? 'selected' : ''; ?>>RunPod</option>
-              <option value="failed" <?php echo $providerFilter === 'failed' ? 'selected' : ''; ?>><?php echo t('labs.failed', 'Failed'); ?></option>
-            </select>
-          </div>
+          <select id="labs-recent-filter" class="knd-select form-select form-select-sm mb-3" style="width:100%;">
+            <option value="" <?php echo $providerFilter === '' ? 'selected' : ''; ?>><?php echo t('labs.all', 'All'); ?></option>
+            <option value="local" <?php echo $providerFilter === 'local' ? 'selected' : ''; ?>>Local</option>
+            <option value="runpod" <?php echo $providerFilter === 'runpod' ? 'selected' : ''; ?>>RunPod</option>
+            <option value="failed" <?php echo $providerFilter === 'failed' ? 'selected' : ''; ?>><?php echo t('labs.failed', 'Failed'); ?></option>
+          </select>
           <ul class="list-unstyled mb-0" id="labs-recent-list">
             <?php foreach (array_slice($historyJobs, 0, 8) as $j):
               $jid = $j['id'] ?? 0;
@@ -332,9 +330,10 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             </li>
             <?php endforeach; ?>
           </ul>
-        </div>
+        <?php else: ?>
+        <p class="knd-muted small mb-0"><?php echo t('labs.no_result_yet', 'Submit to generate'); ?></p>
         <?php endif; ?>
-      </div>
+      </aside>
     </div>
   </div>
 </section>

@@ -69,14 +69,14 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
 
     <!-- Tool Cards -->
     <div class="row g-4 justify-content-center mb-5">
-      <div class="col-12 col-sm-6 col-lg-4">
-        <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card labs-tool-card">
+      <div class="col-12 col-lg-6 col-xl-4">
+        <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card labs-tool-card labs-tool-card-main">
           <div class="d-flex align-items-start justify-content-between mb-3">
-            <div class="arena-card-icon"><i class="fas fa-font"></i></div>
-            <span class="badge bg-success px-2 py-1" style="font-size:.7rem;"><?php echo t('arena.live', 'LIVE'); ?></span>
+            <div class="arena-card-icon"><i class="fas fa-palette"></i></div>
+            <span class="badge bg-primary px-2 py-1" style="font-size:.7rem;"><?php echo t('labs.main_tool', 'MAIN'); ?></span>
           </div>
-          <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('ai.text2img.title'); ?></h3>
-          <p class="text-white-50 small flex-grow-1"><?php echo t('labs.card_text2img_desc', 'Generate images from text prompts.'); ?></p>
+          <h3 class="mb-2" style="font-size:1.35rem;"><?php echo t('labs.canvas.title', 'Canvas'); ?></h3>
+          <p class="text-white-50 small flex-grow-1"><?php echo t('labs.canvas.card_desc', 'Main AI creation workspace. Generate, refine and direct visual output.'); ?></p>
           <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 3]); ?> · <?php echo t('labs.avg_time', '~{time}', ['time' => '10s']); ?></div>
           <a href="/labs-text-to-image.php" class="btn btn-neon-primary w-100 mt-auto">
             <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>
@@ -166,9 +166,9 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
       <p class="text-white-50 small mb-4"><?php echo t('labs.creative_workflow_desc', 'Move from generation to refinement using connected AI tools.'); ?></p>
       <div class="labs-workflow-flow d-flex flex-wrap align-items-center justify-content-center gap-2 gap-md-3 py-3">
         <a href="/labs-text-to-image.php" class="labs-workflow-node rounded-3 p-3 text-decoration-none" style="background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); min-width:120px; text-align:center;">
-          <i class="fas fa-font d-block mb-2" style="color:var(--knd-neon-cyan, #00d4ff); font-size:1.5rem;"></i>
-          <span class="text-white small fw-bold">Text → Image</span>
-          <p class="text-white-50 mb-0 mt-1" style="font-size:.7rem;"><?php echo t('labs.wf_text2img', 'Generate original images from prompts.'); ?></p>
+          <i class="fas fa-palette d-block mb-2" style="color:var(--knd-accent, #35C2FF); font-size:1.5rem;"></i>
+          <span class="text-white small fw-bold"><?php echo t('labs.canvas.title', 'Canvas'); ?></span>
+          <p class="text-white-50 mb-0 mt-1" style="font-size:.7rem;"><?php echo t('labs.wf_canvas', 'Central hub for image creation workflows.'); ?></p>
         </a>
         <span class="d-none d-md-inline text-white-50" style="font-size:1rem;">→</span>
         <span class="d-md-none text-white-50" style="font-size:1rem;">↓</span>
@@ -222,7 +222,7 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
           $status = $j['status'] ?? 'pending';
           $statusClass = $status === 'done' ? 'success' : ($status === 'failed' ? 'danger' : 'warning');
           $tool = $j['tool'] ?? 'text2img';
-          $toolLabel = $tool === 'text2img' ? (t('ai.text2img.title', 'Text → Image')) : ($tool === 'upscale' ? t('ai.upscale.title', 'Upscale') : ($tool === 'consistency' ? t('labs.consistency.title', 'Consistency System') : t('ai.character.title', 'Character Lab')));
+          $toolLabel = $tool === 'text2img' ? (t('labs.canvas.title', 'Canvas')) : ($tool === 'upscale' ? t('ai.upscale.title', 'Upscale') : ($tool === 'consistency' ? t('labs.consistency.title', 'Consistency System') : t('ai.character.title', 'Character Lab')));
           $toolIcon = $tool === 'text2img' ? 'font' : ($tool === 'upscale' ? 'search-plus' : ($tool === 'consistency' ? 'lock' : 'user-astronaut'));
           $hasImage = ($status === 'done') && !empty($j['image_url']);
           $imgSrc = $hasImage ? ('/api/labs/image.php?job_id=' . (int)$j['id']) : '';
