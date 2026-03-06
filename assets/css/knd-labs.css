@@ -415,3 +415,206 @@
 .knd-details-actions .btn {
     font-size: 0.85rem;
 }
+
+/* ========================================
+   Canvas Result Actions - Premium hierarchy
+   ======================================== */
+.labs-result-actions-panel {
+    background: rgba(6, 12, 22, 0.6);
+    border: 1px solid var(--knd-border);
+    border-radius: var(--knd-radius);
+    padding: 1.25rem 1.5rem;
+    max-width: 100%;
+}
+
+.labs-result-actions__header {
+    margin-bottom: 1rem;
+}
+
+.labs-result-actions__title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--knd-muted);
+}
+
+.labs-result-actions__primary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.labs-result-actions__secondary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.labs-result-actions__more {
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--knd-border);
+}
+
+.labs-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: var(--knd-radius-sm);
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    background: transparent;
+    color: inherit;
+}
+
+.labs-action i {
+    font-size: 0.85em;
+    opacity: 0.9;
+}
+
+.labs-action--primary {
+    background: rgba(53, 194, 255, 0.12);
+    color: var(--knd-accent-soft);
+    border: 1px solid rgba(53, 194, 255, 0.25);
+}
+
+.labs-action--primary:hover {
+    background: rgba(53, 194, 255, 0.18);
+    border-color: rgba(53, 194, 255, 0.4);
+    color: var(--knd-accent-soft);
+    box-shadow: 0 0 12px rgba(53, 194, 255, 0.08);
+}
+
+.labs-action--secondary {
+    color: var(--knd-text-alt);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.labs-action--secondary:hover {
+    color: var(--knd-text);
+    border-color: var(--knd-border-mid);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.labs-action--more {
+    font-size: 0.8rem;
+    color: var(--knd-muted);
+    padding: 0.4rem 0.75rem;
+}
+
+.labs-action--more:hover {
+    color: var(--knd-text-alt);
+}
+
+.labs-result-actions__more .dropdown-menu {
+    background: var(--knd-surface);
+    border: 1px solid var(--knd-border);
+    border-radius: var(--knd-radius-sm);
+}
+
+.labs-result-actions__more .dropdown-item {
+    color: var(--knd-text-alt);
+}
+
+.labs-result-actions__more .dropdown-item:hover {
+    background: rgba(53, 194, 255, 0.08);
+    color: var(--knd-accent-soft);
+}
+
+@media (max-width: 576px) {
+    .labs-result-actions__primary {
+        flex-direction: column;
+    }
+    .labs-result-actions__primary .labs-action {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ========================================
+   Image Details - Premium metadata block
+   ======================================== */
+.labs-image-details-panel {
+    background: rgba(6, 12, 22, 0.5) !important;
+    border: 1px solid var(--knd-border) !important;
+    border-radius: var(--knd-radius) !important;
+    padding: 1rem 1.25rem !important;
+}
+
+.labs-image-details-panel .labs-metadata-header {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--knd-muted);
+    margin-bottom: 0.75rem;
+}
+
+.labs-metadata-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.5rem 1.25rem;
+}
+
+.labs-metadata-item {
+    font-size: 0.8rem;
+}
+
+.labs-metadata-item__label {
+    display: block;
+    color: var(--knd-muted);
+    margin-bottom: 0.15rem;
+}
+
+.labs-metadata-item__value {
+    color: var(--knd-text-alt);
+}
+
+/* ========================================
+   Labs/Canvas - Atmospheric background
+   ======================================== */
+.labs-tool-section {
+    position: relative;
+    isolation: isolate;
+}
+
+.labs-tool-section::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/assets/images/background-lab.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.15;
+    z-index: -2;
+    pointer-events: none;
+}
+
+.labs-tool-section::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg,
+        rgba(6, 10, 18, 0.92) 0%,
+        rgba(6, 10, 18, 0.75) 25%,
+        rgba(6, 10, 18, 0.85) 50%,
+        rgba(6, 10, 18, 0.95) 100%);
+    z-index: -1;
+    pointer-events: none;
+}

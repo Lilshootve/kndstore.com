@@ -266,14 +266,28 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
             <i class="fas fa-bolt me-2"></i><?php echo t('ai.text2img.generate'); ?>
           </button>
         </div>
-        <div id="labs-result-actions" class="mt-3 px-3" style="display:none;">
-          <a href="#" id="labs-download-btn" class="btn btn-success me-2 mb-1" download><i class="fas fa-download me-1"></i><?php echo t('ai.download'); ?></a>
-          <a href="#" id="labs-generate-variations-btn" class="btn btn-neon-primary me-2 mb-1"><i class="fas fa-images me-1"></i><?php echo t('labs.generate_variations', 'Generate Variations'); ?></a>
-          <a href="/labs-upscale.php" id="labs-use-input-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-search-plus me-1"></i><?php echo t('labs.use_as_input', 'Use as input'); ?></a>
-          <a href="#" id="labs-use-style-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-palette me-1"></i><?php echo t('labs.consistency.use_style', 'Use as Style Reference'); ?></a>
-          <a href="#" id="labs-use-char-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-user me-1"></i><?php echo t('labs.consistency.use_char', 'Use as Character Reference'); ?></a>
-          <button type="button" id="labs-regenerate-btn" class="btn btn-outline-primary me-2 mb-1"><i class="fas fa-redo me-1"></i><?php echo t('labs.regenerate', 'Regenerate'); ?></button>
-          <button type="button" id="labs-variations-btn" class="btn btn-outline-secondary mb-1"><i class="fas fa-random me-1"></i><?php echo t('labs.variations', 'Variations'); ?></button>
+        <div id="labs-result-actions" class="labs-result-actions-panel mt-4 px-3" style="display:none;">
+          <div class="labs-result-actions__header">
+            <span class="labs-result-actions__title"><?php echo t('labs.result_actions', 'Output Actions'); ?></span>
+          </div>
+          <div class="labs-result-actions__primary">
+            <a href="#" id="labs-download-btn" class="labs-action labs-action--primary" download><i class="fas fa-download"></i><?php echo t('ai.download'); ?></a>
+            <a href="#" id="labs-generate-variations-btn" class="labs-action labs-action--primary"><i class="fas fa-images"></i><?php echo t('labs.generate_variations', 'Generate Variations'); ?></a>
+            <a href="/labs-upscale.php" id="labs-use-input-btn" class="labs-action labs-action--primary"><i class="fas fa-search-plus"></i><?php echo t('labs.send_to_upscale', 'Send to Upscale'); ?></a>
+          </div>
+          <div class="labs-result-actions__secondary">
+            <a href="#" id="labs-use-style-btn" class="labs-action labs-action--secondary"><i class="fas fa-palette"></i><?php echo t('labs.consistency.use_style', 'Use as Style Reference'); ?></a>
+            <a href="#" id="labs-use-char-btn" class="labs-action labs-action--secondary"><i class="fas fa-user"></i><?php echo t('labs.consistency.use_char', 'Use as Character Reference'); ?></a>
+            <button type="button" id="labs-regenerate-btn" class="labs-action labs-action--secondary"><i class="fas fa-redo"></i><?php echo t('labs.regenerate', 'Regenerate'); ?></button>
+          </div>
+          <div class="labs-result-actions__more">
+            <div class="dropdown">
+              <button type="button" class="labs-action labs-action--more dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-ellipsis-h"></i><?php echo t('labs.more_actions', 'More'); ?></button>
+              <ul class="dropdown-menu dropdown-menu-dark">
+                <li><button type="button" class="dropdown-item" id="labs-variations-btn"><i class="fas fa-random me-2"></i><?php echo t('labs.variations', 'Variations'); ?></button></li>
+              </ul>
+            </div>
+          </div>
         </div>
         <div id="labs-status-panel" class="mt-3 px-3" style="display:none;">
           <div class="labs-stepper mb-2">

@@ -576,7 +576,8 @@
         addRow('Ref Job', job.reference_job_id);
       }
       rowsEl.innerHTML = rows.map(function(r) {
-        return '<div class="col-6 col-md-4"><span class="text-white-50">' + r.label + ':</span> <span class="text-white">' + (r.value.length > 40 ? r.value.substring(0, 37) + '...' : r.value) + '</span></div>';
+        var val = r.value.length > 40 ? r.value.substring(0, 37) + '...' : r.value;
+        return '<div class="labs-metadata-item"><span class="labs-metadata-item__label">' + r.label + '</span><span class="labs-metadata-item__value">' + val + '</span></div>';
       }).join('');
       if (actionsEl) {
         var jid = job.job_id;
