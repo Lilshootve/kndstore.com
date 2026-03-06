@@ -276,7 +276,7 @@
   },
   "27": {
     "inputs": {
-      "clip_name": "model.safetensors"
+      "clip_name": "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors"
     },
     "class_type": "CLIPVisionLoader",
     "_meta": {
@@ -284,7 +284,12 @@
     }
   },
   "28": {
-    "inputs": {},
+    "inputs": {
+      "images": [
+        "20",
+        0
+      ]
+    },
     "class_type": "PreviewImage",
     "_meta": {
       "title": "Preview Image"
