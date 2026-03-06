@@ -49,7 +49,7 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
       <div class="text-center mb-4">
         <span class="badge bg-success px-3 py-1 mb-2" style="font-size:.75rem;"><?php echo t('arena.live', 'LIVE'); ?></span>
         <h1 class="glow-text mb-2" style="font-size:2.2rem;">
-          <i class="fas fa-user-shield me-2"></i><?php echo t('profile.title', 'Profile'); ?>
+          <i class="fas fa-user-shield me-2"></i><?php echo t('profile.title', 'My Profile'); ?>
         </h1>
         <p class="text-white-50 mb-0"><?php echo t('profile.subtitle', 'KND Arena Identity'); ?></p>
       </div>
