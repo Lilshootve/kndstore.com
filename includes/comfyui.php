@@ -197,30 +197,55 @@ function comfyui_fetch_job_image_bytes(PDO $pdo, int $jobId, int $userId): ?stri
     return ($bin !== false && $code >= 200 && $code < 300) ? $bin : null;
 }
 
-/** Checkpoint models available in ComfyUI */
+/** SDXL-only checkpoint models (KND Labs). SD 1.5 and FLUX excluded. */
 const COMFYUI_CHECKPOINT_MAP = [
-    'cyberrealistic_final' => 'cyberrealistic_final.safetensors',
-    'flux_dev' => 'flux_dev.safetensors',
-    'iniverseMixSFWNSFW' => 'iniverseMixSFWNSFW_ponyRealGuofengV51.safetensors',
     'juggernaut_ragnarok' => 'juggernautXL_ragnarokBy.safetensors',
     'juggernaut_v8' => 'juggernautXL_v8Rundiffusion.safetensors',
-    'NSFW_master' => 'NSFW_master.safetensors',
     'pornmaster_asian' => 'pornmaster_asianSdxlV1VAE.safetensors',
-    'realisticVision' => 'realisticVisionV60B1_v51HyperVAE.safetensors',
     'sd_xl_base' => 'sd_xl_base_1.0.safetensors',
     'sd_xl_refiner' => 'sd_xl_refiner_1.0.safetensors',
-    'v1_5' => 'v1-5-pruned-emaonly.safetensors',
     'waiANINSFWPONY' => 'waiANINSFWPONYXL_v130.safetensors',
     'waiNSFW_v120' => 'waiNSFWIllustrious_v120.safetensors',
     'waiNSFW_v150' => 'waiNSFWIllustrious_v150.safetensors',
 ];
 const COMFYUI_REFINER = 'sd_xl_refiner_1.0.safetensors';
+const COMFYUI_DEFAULT_MODEL = 'juggernaut_v8';
 
-/** If $model ends with .safetensors, use as ckpt directly; else lookup in map */
+/** Allowed SDXL checkpoint filenames (guard). Must match COMFYUI_CHECKPOINT_MAP + refiner. */
+const COMFYUI_SDXL_ALLOWED = [
+    'juggernautXL_ragnarokBy.safetensors',
+    'juggernautXL_v8Rundiffusion.safetensors',
+    'pornmaster_asianSdxlV1VAE.safetensors',
+    'sd_xl_base_1.0.safetensors',
+    'sd_xl_refiner_1.0.safetensors',
+    'waiANINSFWPONYXL_v130.safetensors',
+    'waiNSFWIllustrious_v120.safetensors',
+    'waiNSFWIllustrious_v150.safetensors',
+];
+
+/** Throw if checkpoint is not in SDXL allowlist. */
+function comfyui_validate_sdxl_checkpoint(string $filename): void {
+    $f = trim($filename);
+    if ($f === '') return;
+    if (!in_array($f, COMFYUI_SDXL_ALLOWED, true)) {
+        throw new \InvalidArgumentException('Checkpoint "' . $f . '" is not allowed. KND Labs supports SDXL-only models.');
+    }
+}
+
+/** Resolve model key or filename to checkpoint. Validates SDXL-only. */
 function comfyui_resolve_checkpoint(string $model, ?string $overrideCkpt): string {
-    if ($overrideCkpt !== null && $overrideCkpt !== '') return $overrideCkpt;
-    if (substr(strtolower($model), -13) === '.safetensors') return $model;
-    return COMFYUI_CHECKPOINT_MAP[$model] ?? COMFYUI_CHECKPOINT_MAP['v1_5'];
+    $ckpt = null;
+    if ($overrideCkpt !== null && trim($overrideCkpt) !== '') {
+        $ckpt = trim($overrideCkpt);
+    } elseif (isset(COMFYUI_CHECKPOINT_MAP[$model])) {
+        $ckpt = COMFYUI_CHECKPOINT_MAP[$model];
+    } elseif (substr(strtolower($model), -13) === '.safetensors') {
+        $ckpt = $model;
+    } else {
+        $ckpt = COMFYUI_CHECKPOINT_MAP[COMFYUI_DEFAULT_MODEL];
+    }
+    comfyui_validate_sdxl_checkpoint($ckpt);
+    return $ckpt;
 }
 
 /**
@@ -230,7 +255,7 @@ function comfyui_resolve_checkpoint(string $model, ?string $overrideCkpt): strin
  * @param bool $refinerEnabled Use refiner for second checkpoint node
  * @param string|null $overrideCkpt If set (from settings), use this checkpoint for base model
  */
-function comfyui_apply_checkpoint(array &$workflow, string $model = 'v1_5', bool $refinerEnabled = false, ?string $overrideCkpt = null): void {
+function comfyui_apply_checkpoint(array &$workflow, string $model = 'juggernaut_v8', bool $refinerEnabled = false, ?string $overrideCkpt = null): void {
     $baseCkpt = comfyui_resolve_checkpoint($model, $overrideCkpt);
     $checkpointNodes = 0;
     foreach ($workflow as $nid => &$node) {

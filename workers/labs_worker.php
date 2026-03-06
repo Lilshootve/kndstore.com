@@ -183,7 +183,7 @@ do {
         continue;
     }
 
-    $model = $payload['model'] ?? 'v1_5';
+    $model = $payload['model'] ?? 'juggernaut_v8';
     $refinerEnabled = !empty($payload['refiner_enabled']);
     $overrideCkpt = $payload['override_ckpt'] ?? null;
 
@@ -235,7 +235,7 @@ do {
         $msg = $e->getMessage();
         logWorker("Job $jobId ComfyUI send failed: " . $msg);
         $failData = ['job_id' => $jobId, 'error_message' => $msg];
-        $isValidation = (stripos($msg, 'prompt_outputs_failed_validation') !== false || stripos($msg, '400') !== false || stripos($msg, 'Value not in list') !== false || stripos($msg, 'Workflow validation failed') !== false);
+        $isValidation = (stripos($msg, 'prompt_outputs_failed_validation') !== false || stripos($msg, '400') !== false || stripos($msg, 'Value not in list') !== false || stripos($msg, 'Workflow validation failed') !== false || stripos($msg, 'is not allowed') !== false || stripos($msg, 'SDXL-only') !== false);
         if ($isValidation) {
             $failData['no_retry'] = '1';
         }

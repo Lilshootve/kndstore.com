@@ -39,7 +39,7 @@ try {
         'status' => $job['status'] ?? '',
         'prompt' => $job['prompt'] ?? '',
         'negative_prompt' => $job['negative_prompt'] ?? ($payload['negative_prompt'] ?? ''),
-        'model' => $payload['model'] ?? 'v1_5',
+        'model' => $payload['model'] ?? 'juggernaut_v8',
         'seed' => $payload['seed'] ?? null,
         'steps' => $payload['steps'] ?? 20,
         'cfg' => $payload['cfg'] ?? 7.5,

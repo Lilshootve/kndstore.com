@@ -66,10 +66,10 @@ try {
     $width = (int) ($_POST['width'] ?? 512);
     $height = (int) ($_POST['height'] ?? 512);
 
-    $model = trim($_POST['model'] ?? 'v1_5');
+    $model = trim($_POST['model'] ?? COMFYUI_DEFAULT_MODEL);
     $modelKeys = array_keys(COMFYUI_CHECKPOINT_MAP);
     if (!in_array($model, $modelKeys, true) && substr(strtolower($model), -13) !== '.safetensors') {
-        $model = 'v1_5';
+        $model = COMFYUI_DEFAULT_MODEL;
     }
     $refinerEnabled = !empty($_POST['refiner_enabled']);
 
