@@ -214,10 +214,13 @@ function generateScripts() {
     
     // Partículas footer (único canvas, deferred para no bloquear render)
     $scripts .= '<script>' . "\n";
+    $scripts .= 'var _particlesInited = false;' . "\n";
     $scripts .= 'function initParticles() {' . "\n";
+    $scripts .= '  if (_particlesInited) return;' . "\n";
     $scripts .= '  if (typeof particlesJS === "undefined") { setTimeout(initParticles, 150); return; }' . "\n";
     $scripts .= '  var el = document.getElementById("particles-footer");' . "\n";
     $scripts .= '  if (!el) return;' . "\n";
+    $scripts .= '  _particlesInited = true;' . "\n";
     $scripts .= '  ' . "\n";
     $scripts .= '  particlesJS("particles-footer", {' . "\n";
     $scripts .= '  particles: {' . "\n";
@@ -233,8 +236,7 @@ function generateScripts() {
     $scripts .= '        nb_sides: 5' . "\n";
     $scripts .= '      }' . "\n";
     $scripts .= '    },' . "\n";
-    $scripts .= '    opacity: {' . "\n";
-    $scripts .= '      value: 0.5,' . "\n";
+    $scripts .= '    opacity: { value: 0.65,' . "\n";
     $scripts .= '      random: false,' . "\n";
     $scripts .= '      anim: {' . "\n";
     $scripts .= '        enable: false,' . "\n";
@@ -253,7 +255,7 @@ function generateScripts() {
     $scripts .= '        sync: false' . "\n";
     $scripts .= '      }' . "\n";
     $scripts .= '    },' . "\n";
-    $scripts .= '    line_linked: { enable: true, distance: 140, color: "rgba(53,194,255,0.5)", opacity: 0.5, width: 0.8 },' . "\n";
+    $scripts .= '    line_linked: { enable: true, distance: 130, color: "#35C2FF", opacity: 0.6, width: 1 },' . "\n";
     $scripts .= '    move: { enable: true, speed: 4,' . "\n";
     $scripts .= '      direction: "none",' . "\n";
     $scripts .= '      random: false,' . "\n";
@@ -271,10 +273,16 @@ function generateScripts() {
     $scripts .= '  retina_detect: true });' . "\n";
     $scripts .= '}' . "\n";
     $scripts .= 'function scheduleParticles() {' . "\n";
-    $scripts .= '  if ("requestIdleCallback" in window) {' . "\n";
-    $scripts .= '    requestIdleCallback(function() { initParticles(); }, { timeout: 2500 });' . "\n";
+    $scripts .= '  var el = document.getElementById("particles-footer");' . "\n";
+    $scripts .= '  if (!el) return;' . "\n";
+    $scripts .= '  if ("IntersectionObserver" in window) {' . "\n";
+    $scripts .= '    var io = new IntersectionObserver(function(entries) {' . "\n";
+    $scripts .= '      if (entries[0].isIntersecting) { initParticles(); io.disconnect(); }' . "\n";
+    $scripts .= '    }, { rootMargin: "100px", threshold: 0 });' . "\n";
+    $scripts .= '    io.observe(el);' . "\n";
+    $scripts .= '    setTimeout(function() { if (typeof initParticles === "function") initParticles(); io.disconnect(); }, 3000);' . "\n";
     $scripts .= '  } else {' . "\n";
-    $scripts .= '    window.addEventListener("load", function() { setTimeout(initParticles, 300); });' . "\n";
+    $scripts .= '    window.addEventListener("load", function() { setTimeout(initParticles, 400); });' . "\n";
     $scripts .= '  }' . "\n";
     $scripts .= '}' . "\n";
     $scripts .= 'if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", scheduleParticles); }' . "\n";

@@ -73,21 +73,16 @@
         toggle.setAttribute('aria-expanded', 'false');
     }
 
-    // 1) Toggle click — stopPropagation prevents document handler from closing it
+    // 1) Toggle click
     document.addEventListener('click', function(e) {
         var toggle = getToggle();
         var menu   = getMenu();
         if (!toggle || !menu) return;
-
-        // Clicked on toggle or any child of toggle
         if (toggle === e.target || toggle.contains(e.target)) {
             e.preventDefault();
             e.stopPropagation();
-            if (isOpen()) {
-                closeDropdown();
-            } else {
-                openDropdown();
-            }
+            if (isOpen()) closeDropdown();
+            else openDropdown();
             return;
         }
 
@@ -111,7 +106,19 @@
         if (!menu.contains(e.target)) {
             closeDropdown();
         }
-    }, true);  // useCapture = true so toggle handler fires first
+    }, true);
+
+    // 1b) Touch support for mobile (click can be delayed or not fire on touch)
+    document.addEventListener('touchend', function(e) {
+        var toggle = getToggle();
+        var menu   = getMenu();
+        if (!toggle || !menu) return;
+        if (toggle !== e.target && !toggle.contains(e.target)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (isOpen()) closeDropdown();
+        else openDropdown();
+    }, { passive: false });
 
     // 2) Escape key
     document.addEventListener('keydown', function(e) {

@@ -180,8 +180,9 @@ body {
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
+  min-height: 200px !important;
   z-index: 1 !important;
-  opacity: 0.7 !important;
+  opacity: 0.85 !important;
   pointer-events: none !important;
 }
 #particles-footer canvas {
@@ -190,6 +191,7 @@ body {
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
+  display: block !important;
 }
 
 .footer h5 {

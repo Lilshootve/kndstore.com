@@ -3711,6 +3711,8 @@ body.about-page,
     align-items: center;
     white-space: nowrap;
     padding: 6px 10px;
+    touch-action: manipulation;
+    cursor: pointer;
 }
 .knd-user-badges {
     display: flex;
