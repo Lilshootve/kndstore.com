@@ -126,9 +126,9 @@ try {
         json_error('INSUFFICIENT_POINTS', 'Insufficient KP. Need ' . CONSISTENCY_COST_KP . '.', 400);
     }
 
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM knd_labs_jobs WHERE user_id = ? AND status IN ('queued','processing')");
-    if ($stmt && $stmt->execute([$userId]) && (int) $stmt->fetchColumn() >= 2) {
-        json_error('RATE_LIMIT', 'Too many active jobs.', 429);
+    $active = labs_count_active_jobs($pdo, $userId);
+    if ($active >= 2) {
+        json_error('RATE_LIMIT', 'Too many active jobs. Wait for current ones to finish.', 429);
     }
 
     $providerUsed = 'local';

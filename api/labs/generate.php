@@ -54,13 +54,10 @@ try {
 
     $userId = current_user_id();
 
-    // Rate limit: max 2 active (queued + processing) per user
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM knd_labs_jobs WHERE user_id = ? AND status IN ('queued','processing')");
-    if ($stmt && $stmt->execute([$userId])) {
-        $active = (int) $stmt->fetchColumn();
-        if ($active >= 2) {
-            json_error('RATE_LIMIT', 'Too many active jobs. Wait for current ones to finish.', 429);
-        }
+    // Rate limit: max 2 active (queued + processing) per user. Stale processing jobs are auto-cleaned.
+    $active = labs_count_active_jobs($pdo, $userId);
+    if ($active >= 2) {
+        json_error('RATE_LIMIT', 'Too many active jobs. Wait for current ones to finish.', 429);
     }
 
     $seed = !empty($_POST['seed']) ? (int) $_POST['seed'] : random_int(0, 2147483647);

@@ -16,6 +16,7 @@ require_once __DIR__ . '/../../includes/json.php';
 require_once __DIR__ . '/../../includes/comfyui.php';
 require_once __DIR__ . '/../../includes/comfyui_provider.php';
 require_once __DIR__ . '/../../includes/settings.php';
+require_once __DIR__ . '/../../includes/labs_image_helper.php';
 
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5MB
 const MAX_DIMENSION = 2048;
@@ -53,11 +54,9 @@ try {
         json_error('INSUFFICIENT_POINTS', 'Insufficient KP. Need ' . $costKp . '.', 400);
     }
 
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM knd_labs_jobs WHERE user_id = ? AND status IN ('queued','processing')");
-    if ($stmt && $stmt->execute([$userId])) {
-        if ((int) $stmt->fetchColumn() >= 2) {
-            json_error('RATE_LIMIT', 'Too many active jobs.', 429);
-        }
+    $active = labs_count_active_jobs($pdo, $userId);
+    if ($active >= 2) {
+        json_error('RATE_LIMIT', 'Too many active jobs. Wait for current ones to finish.', 429);
     }
 
     $tmpPath = null;
