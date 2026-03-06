@@ -479,17 +479,18 @@ document.querySelectorAll('.btn-set-favorite').forEach(btn => {
     this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
 
     try {
+      const body = new URLSearchParams();
+      body.append('item_id', itemId);
+      body.append('csrf_token', CSRF);
+
       const res = await fetch('/api/avatar/set_favorite.php', {
         method: 'POST',
         credentials: 'same-origin',
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
         },
-        body: JSON.stringify({
-          item_id: itemId,
-          csrf_token: CSRF
-        })
+        body: body.toString()
       });
 
       const data = await res.json();
