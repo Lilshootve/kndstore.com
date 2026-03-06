@@ -103,11 +103,11 @@ function profile_get_data(PDO $pdo, int $userId): array {
         $u = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($u) {
             $username = $u['username'];
-            if (!empty($u['favorite_avatar_id'])) {
+            if (!empty($u['favorite_avatar_id']) && !empty($u['favorite_avatar_path'])) {
                 $favoriteAvatar = [
-                    'id'         => $u['favorite_avatar_id'],
+                    'id'         => (int) $u['favorite_avatar_id'],
                     'asset_path' => $u['favorite_avatar_path'],
-                    'name'       => $u['favorite_avatar_name'],
+                    'name'       => $u['favorite_avatar_name'] ?? 'KND Avatar',
                 ];
             }
         }
