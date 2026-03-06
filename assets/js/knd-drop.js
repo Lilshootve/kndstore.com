@@ -162,7 +162,11 @@ if (badges.length > 0) {
 
         capsuleEl.classList.add('active', 'scanning');
         capsuleEl.querySelector('.drop-capsule-inner').innerHTML =
-  '<i class="fas fa-search" style="display:inline-block; animation:knd-spin 1s linear infinite;"></i>'
+  '<div class="knd-drop-scanner" aria-hidden="true">' +
+    '<div class="knd-drop-scanner-ring"></div>' +
+    '<div class="knd-drop-scanner-ring knd-drop-scanner-ring--delay"></div>' +
+    '<div class="knd-drop-scanner-core"></div>' +
+  '</div>';
 
         var fd = new FormData();
         fd.append('csrf_token', CSRF);
