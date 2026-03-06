@@ -578,7 +578,8 @@
 }
 
 /* ========================================
-   Labs/Canvas - Atmospheric background
+   Labs - Atmospheric background
+   Applies to Canvas, Consistency System, Upscale (all use .labs-tool-section)
    ======================================== */
 .labs-tool-section {
     position: relative;
