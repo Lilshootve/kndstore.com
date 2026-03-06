@@ -193,7 +193,7 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
         </div>
         <?php if (!empty($data['favorite_avatar'])): ?>
           <div class="text-center py-3">
-            <img src="<?php echo htmlspecialchars($data['favorite_avatar']['asset_path']); ?>" alt="Favorite Avatar" style="max-height: 250px; max-width: 100%; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));">
+            <img src="<?php echo htmlspecialchars($data['favorite_avatar']['asset_path']); ?>" alt="<?php echo htmlspecialchars($data['favorite_avatar']['name'] ?? 'KND Avatar'); ?>" style="max-height: 250px; max-width: 100%; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));">
           </div>
           <div id="avatar-preview" class="avatar-stage" style="display:none;"></div>
         <?php else: ?>
@@ -217,9 +217,14 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
           </div>
         <?php else: ?>
           <div class="row g-3">
-            <?php foreach ($inventory as $item): ?>
+            <?php foreach ($inventory as $item):
+              $isSelected = !empty($data['favorite_avatar']) && $data['favorite_avatar']['id'] == $item['id'];
+            ?>
             <div class="col-4 col-md-3 col-lg-2">
-              <div class="avatar-item-card" style="background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.05); border-radius:8px; padding:10px; text-align:center; height:100%;">
+              <div class="avatar-item-card<?php echo $isSelected ? ' avatar-item-card--selected' : ''; ?>" style="border-radius:8px; padding:10px; text-align:center; height:100%;">
+                <?php if ($isSelected): ?>
+                  <div class="avatar-item-selected-badge"><i class="fas fa-check-circle"></i></div>
+                <?php endif; ?>
                 <div style="height:60px; display:flex; align-items:center; justify-content:center; margin-bottom:10px;">
                   <img src="<?php echo htmlspecialchars($item['asset_path']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" style="max-height:100%; max-width:100%; object-fit:contain; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));">
                 </div>
@@ -237,10 +242,10 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                   <?php echo htmlspecialchars($item['rarity']); ?>
                 </div>
                 <div class="mt-2">
-                  <?php if (!empty($data['favorite_avatar']) && $data['favorite_avatar']['id'] == $item['id']): ?>
-                    <button class="btn btn-sm btn-outline-success w-100" disabled style="font-size:.7rem; opacity: 1;"><i class="fas fa-star me-1"></i>Favorite</button>
+                  <?php if ($isSelected): ?>
+                    <button class="btn btn-sm btn-avatar-selected w-100" disabled style="font-size:.7rem;"><i class="fas fa-check me-1"></i>Selected</button>
                   <?php else: ?>
-                    <button class="btn btn-sm btn-outline-info w-100 btn-set-favorite" data-id="<?php echo $item['id']; ?>" style="font-size:.7rem;"><i class="far fa-star me-1"></i>Set Favorite</button>
+                    <button class="btn btn-sm btn-avatar-use w-100 btn-set-favorite" data-id="<?php echo $item['id']; ?>" style="font-size:.7rem;"><i class="fas fa-user-check me-1"></i>Use Avatar</button>
                   <?php endif; ?>
                 </div>
               </div>
@@ -335,8 +340,43 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 .profile-rarity-epic { color: #a78bfa; }
 .profile-rarity-special { color: #8b5cf6; }
 .profile-rarity-legendary { color: #fbbf24; }
-.avatar-item-card { transition: transform 0.2s, box-shadow 0.2s; }
+.avatar-item-card {
+  position: relative;
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
 .avatar-item-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); background: rgba(255,255,255,.05) !important; }
+.avatar-item-card--selected {
+  background: rgba(0,212,255,.06) !important;
+  border: 1px solid rgba(0,212,255,.4) !important;
+  box-shadow: 0 0 12px rgba(0,212,255,.15);
+}
+.avatar-item-selected-badge {
+  position: absolute;
+  top: 6px; right: 6px;
+  font-size: .75rem;
+  color: #00d4ff;
+  line-height: 1;
+}
+.btn-avatar-selected {
+  background: rgba(0,212,255,.12);
+  border: 1px solid rgba(0,212,255,.4);
+  color: #00d4ff;
+  cursor: default;
+}
+.btn-avatar-selected:disabled { opacity: 1; color: #00d4ff; }
+.btn-avatar-use {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.2);
+  color: rgba(255,255,255,.7);
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.btn-avatar-use:hover {
+  border-color: rgba(0,212,255,.5);
+  color: #00d4ff;
+  background: rgba(0,212,255,.08);
+}
 </style>
 
 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
@@ -362,14 +402,14 @@ document.querySelectorAll('.btn-set-favorite').forEach(btn => {
       if (data.ok) {
         window.location.reload();
       } else {
-        alert(data.error || 'Error saving favorite');
+        alert(data.error || 'Error saving avatar');
         this.disabled = false;
-        this.innerHTML = '<i class="far fa-star me-1"></i>Set Favorite';
+        this.innerHTML = '<i class="fas fa-user-check me-1"></i>Use Avatar';
       }
     } catch (e) {
-      alert('Error saving favorite');
+      alert('Error saving avatar');
       this.disabled = false;
-      this.innerHTML = '<i class="far fa-star me-1"></i>Set Favorite';
+      this.innerHTML = '<i class="fas fa-user-check me-1"></i>Use Avatar';
     }
   });
 });

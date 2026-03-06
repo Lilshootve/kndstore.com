@@ -94,9 +94,9 @@ function profile_get_data(PDO $pdo, int $userId): array {
     $favoriteAvatar = null;
     try {
         $stmt = $pdo->prepare('
-            SELECT u.username, u.favorite_avatar_id, i.asset_path as favorite_avatar_path 
+            SELECT u.username, u.favorite_avatar_id, i.asset_path AS favorite_avatar_path, i.name AS favorite_avatar_name
             FROM users u
-            LEFT JOIN knd_avatar_items i ON u.favorite_avatar_id = i.id 
+            LEFT JOIN knd_avatar_items i ON u.favorite_avatar_id = i.id
             WHERE u.id = ? LIMIT 1
         ');
         $stmt->execute([$userId]);
@@ -105,8 +105,9 @@ function profile_get_data(PDO $pdo, int $userId): array {
             $username = $u['username'];
             if (!empty($u['favorite_avatar_id'])) {
                 $favoriteAvatar = [
-                    'id' => $u['favorite_avatar_id'],
-                    'asset_path' => $u['favorite_avatar_path']
+                    'id'         => $u['favorite_avatar_id'],
+                    'asset_path' => $u['favorite_avatar_path'],
+                    'name'       => $u['favorite_avatar_name'],
                 ];
             }
         }
