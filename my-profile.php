@@ -192,13 +192,30 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
           </div>
         </div>
         <?php if (!empty($data['favorite_avatar'])): ?>
-          <div class="text-center py-3">
-            <img src="<?php echo htmlspecialchars($data['favorite_avatar']['asset_path']); ?>" alt="<?php echo htmlspecialchars($data['favorite_avatar']['name'] ?? 'KND Avatar'); ?>" style="max-height: 250px; max-width: 100%; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));">
-          </div>
-          <div id="avatar-preview" class="avatar-stage" style="display:none;"></div>
-        <?php else: ?>
-          <div id="avatar-preview" class="avatar-stage"></div>
-        <?php endif; ?>
+  <div class="favorite-avatar-stage">
+    <div class="favorite-avatar-frame">
+      <img
+        id="favorite-avatar-image"
+        src="<?php echo htmlspecialchars($data['favorite_avatar']['asset_path']); ?>"
+        alt="<?php echo htmlspecialchars($data['favorite_avatar']['name'] ?? 'KND Avatar'); ?>"
+        class="favorite-avatar-image"
+      >
+    </div>
+
+    <div class="favorite-avatar-meta">
+      <div class="favorite-avatar-name">
+        <?php echo htmlspecialchars($data['favorite_avatar']['name'] ?? 'Favorite Avatar'); ?>
+      </div>
+      <div class="favorite-avatar-subtitle text-white-50">
+        Active favorite avatar
+      </div>
+    </div>
+  </div>
+
+  <div id="avatar-preview" class="avatar-stage d-none"></div>
+<?php else: ?>
+  <div id="avatar-preview" class="avatar-stage"></div>
+<?php endif; ?>
       </div>
 
       <!-- Collected Avatars Section -->
@@ -243,10 +260,15 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
                 </div>
                 <div class="mt-2">
                   <?php if ($isSelected): ?>
-                    <button class="btn btn-sm btn-avatar-selected w-100" disabled style="font-size:.7rem;"><i class="fas fa-check me-1"></i>Selected</button>
-                  <?php else: ?>
-                    <button class="btn btn-sm btn-avatar-use w-100 btn-set-favorite" data-id="<?php echo $item['id']; ?>" style="font-size:.7rem;"><i class="fas fa-user-check me-1"></i>Use Avatar</button>
-                  <?php endif; ?>
+                    <?php if ($isSelected): ?>
+  <button class="knd-btn-chip is-active" disabled>
+    <i class="fas fa-check-circle me-1"></i>Active
+  </button>
+<?php else: ?>
+  <button class="knd-btn-chip btn-set-favorite" data-id="<?php echo (int) $item['id']; ?>">
+    <i class="fas fa-sparkles me-1"></i>Set Favorite
+  </button>
+<?php endif; ?>
                 </div>
               </div>
             </div>
@@ -318,6 +340,83 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 </section>
 
 <style>
+  .favorite-avatar-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 0 8px;
+}
+
+.favorite-avatar-frame {
+  width: min(100%, 320px);
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top, rgba(0,212,255,.10), transparent 55%),
+    linear-gradient(180deg, rgba(8,18,40,.92), rgba(10,16,34,.96));
+  border: 1px solid rgba(0,212,255,.20);
+  box-shadow:
+    inset 0 0 25px rgba(0,212,255,.06),
+    0 0 30px rgba(0,212,255,.10);
+}
+
+.favorite-avatar-image {
+  max-width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 24px rgba(0,0,0,.45));
+}
+
+.favorite-avatar-meta {
+  text-align: center;
+}
+
+.favorite-avatar-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: .95rem;
+  font-weight: 700;
+  color: #eaf6ff;
+  letter-spacing: .04em;
+}
+
+.knd-btn-chip {
+  width: 100%;
+  border: 1px solid rgba(0,212,255,.22);
+  background:
+    linear-gradient(135deg, rgba(0,212,255,.14), rgba(167,139,250,.14));
+  color: #dff7ff;
+  border-radius: 12px;
+  min-height: 38px;
+  font-size: .76rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  transition: .2s ease;
+  box-shadow: 0 8px 18px rgba(0,0,0,.22);
+}
+
+.knd-btn-chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0,212,255,.45);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(0,212,255,.10), 0 10px 20px rgba(0,212,255,.14);
+}
+
+.knd-btn-chip:disabled {
+  opacity: .7;
+  cursor: not-allowed;
+}
+
+.knd-btn-chip.is-active {
+  background: linear-gradient(135deg, rgba(0,212,255,.22), rgba(89,214,255,.18));
+  border-color: rgba(0,212,255,.55);
+  color: #00d4ff;
+  box-shadow: inset 0 0 18px rgba(0,212,255,.08), 0 0 16px rgba(0,212,255,.10);
+}
 .profile-page .profile-hud-card { border: 1px solid rgba(0,212,255,.2); }
 .profile-level-badge {
   display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
@@ -359,24 +458,7 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
   color: #00d4ff;
   line-height: 1;
 }
-.btn-avatar-selected {
-  background: rgba(0,212,255,.12);
-  border: 1px solid rgba(0,212,255,.4);
-  color: #00d4ff;
-  cursor: default;
-}
-.btn-avatar-selected:disabled { opacity: 1; color: #00d4ff; }
-.btn-avatar-use {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,.2);
-  color: rgba(255,255,255,.7);
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
-}
-.btn-avatar-use:hover {
-  border-color: rgba(0,212,255,.5);
-  color: #00d4ff;
-  background: rgba(0,212,255,.08);
-}
+
 </style>
 
 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
@@ -384,32 +466,39 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 <script src="/assets/js/navigation-extend.js"></script>
 <script src="/assets/js/avatar.js" defer></script>
 <script>
-// Handle Set Favorite button
 document.querySelectorAll('.btn-set-favorite').forEach(btn => {
-  btn.addEventListener('click', async function() {
-    const itemId = this.dataset.id;
+  btn.addEventListener('click', async function () {
+    const itemId = parseInt(this.dataset.id, 10);
+    const originalHtml = this.innerHTML;
+
     this.disabled = true;
     this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
+
     try {
       const res = await fetch('/api/avatar/set_favorite.php', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify({ item_id: parseInt(itemId, 10) })
+        body: JSON.stringify({
+          item_id: itemId,
+          csrf_token: CSRF
+        })
       });
+
       const data = await res.json();
-      if (data.ok) {
-        window.location.reload();
-      } else {
-        alert(data.error || 'Error saving avatar');
-        this.disabled = false;
-        this.innerHTML = '<i class="fas fa-user-check me-1"></i>Use Avatar';
+
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || 'Error saving avatar');
       }
+
+      window.location.reload();
     } catch (e) {
-      alert('Error saving avatar');
+      alert(e.message || 'Error saving avatar');
       this.disabled = false;
-      this.innerHTML = '<i class="fas fa-user-check me-1"></i>Use Avatar';
+      this.innerHTML = originalHtml;
     }
   });
 });
