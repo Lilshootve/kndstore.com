@@ -87,10 +87,10 @@ echo generateHeader(t('labs.meta.title', 'KND Labs | KND Store'), t('labs.meta.d
       <div class="col-12 col-sm-6 col-lg-4">
         <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card">
           <div class="d-flex align-items-start justify-content-between mb-3"><div class="arena-card-icon"><i class="fas fa-cube"></i></div><span class="badge bg-success px-2 py-1" style="font-size:.7rem;">LIVE</span></div>
-          <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('ai.img23d.link'); ?></h3>
-          <p class="text-white-50 small flex-grow-1"><?php echo t('labs.card_img23d_desc', 'Upload an image and generate a 3D model.'); ?></p>
-          <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 8]); ?> &middot; ~2m</div>
-          <a href="/triposr-3d.php" class="btn btn-neon-primary w-100 mt-auto"><i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?></a>
+          <h3 class="mb-2" style="font-size:1.25rem;">3D Lab</h3>
+          <p class="text-white-50 small flex-grow-1">Create optimized 3D models from text, images, or both. Clean GLB output.</p>
+          <div class="labs-card-meta text-white-50 small mb-2">30 KP &middot; ~2m</div>
+          <a href="/labs-3d-lab.php" class="btn btn-neon-primary w-100 mt-auto"><i class="fas fa-play me-2"></i>Open 3D Lab</a>
         </div>
       </div>
     </div>

@@ -117,14 +117,14 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
       <div class="col-12 col-sm-6 col-lg-4">
         <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card labs-tool-card">
           <div class="d-flex align-items-start justify-content-between mb-3">
-            <div class="arena-card-icon"><i class="fas fa-user-astronaut"></i></div>
+            <div class="arena-card-icon"><i class="fas fa-cube"></i></div>
             <span class="badge bg-success px-2 py-1" style="font-size:.7rem;"><?php echo t('arena.live', 'LIVE'); ?></span>
           </div>
-          <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('ai.character.title'); ?></h3>
-          <p class="text-white-50 small flex-grow-1"><?php echo t('labs.card_character_desc', 'Create game/anime/realistic characters.'); ?></p>
-          <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 15]); ?> · <?php echo t('labs.avg_time', '~{time}', ['time' => '30s']); ?></div>
-          <a href="/labs-character-lab.php" class="btn btn-neon-primary w-100 mt-auto">
-            <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>
+          <h3 class="mb-2" style="font-size:1.25rem;">3D Lab</h3>
+          <p class="text-white-50 small flex-grow-1">Create optimized 3D models from text, images, or both. Generate clean GLB previews with smart presets, advanced controls, and a dedicated 3D pipeline.</p>
+          <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 30]); ?> · <?php echo t('labs.avg_time', '~{time}', ['time' => '2m']); ?></div>
+          <a href="/labs-3d-lab.php" class="btn btn-neon-primary w-100 mt-auto">
+            <i class="fas fa-play me-2"></i>Open 3D Lab
           </a>
         </div>
       </div>
@@ -144,20 +144,6 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
         </div>
       </div>
 
-      <div class="col-12 col-sm-6 col-lg-4">
-        <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card labs-tool-card">
-          <div class="d-flex align-items-start justify-content-between mb-3">
-            <div class="arena-card-icon"><i class="fas fa-cube"></i></div>
-            <span class="badge bg-success px-2 py-1" style="font-size:.7rem;"><?php echo t('arena.live', 'LIVE'); ?></span>
-          </div>
-          <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('ai.img23d.link'); ?></h3>
-          <p class="text-white-50 small flex-grow-1"><?php echo t('labs.card_img23d_desc', 'Upload an image and generate a 3D model (GLB/OBJ).'); ?></p>
-          <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 8]); ?> · <?php echo t('labs.avg_time', '~{time}', ['time' => '2m']); ?></div>
-          <a href="/triposr-3d.php" class="btn btn-neon-primary w-100 mt-auto">
-            <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>
-          </a>
-        </div>
-      </div>
     </div>
 
     <!-- Creative Workflow -->
@@ -194,10 +180,10 @@ echo generateHeader($seoTitle, $seoDesc, $extraCss);
         </a>
         <span class="d-none d-md-inline text-white-50" style="font-size:1rem;">→</span>
         <span class="d-md-none text-white-50" style="font-size:1rem;">↓</span>
-        <a href="/triposr-3d.php" class="labs-workflow-node rounded-3 p-3 text-decoration-none" style="background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.2); min-width:120px; text-align:center; opacity:0.9;">
-          <i class="fas fa-cube d-block mb-2 text-white-50" style="font-size:1.5rem;"></i>
-          <span class="text-white small fw-bold">Image → 3D</span>
-          <p class="text-white-50 mb-0 mt-1" style="font-size:.7rem;"><?php echo t('labs.wf_img23d', 'Convert images into 3D-ready assets.'); ?></p>
+        <a href="/labs-3d-lab.php" class="labs-workflow-node rounded-3 p-3 text-decoration-none" style="background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); min-width:120px; text-align:center;">
+          <i class="fas fa-cube d-block mb-2" style="color:var(--knd-neon-cyan, #00d4ff); font-size:1.5rem;"></i>
+          <span class="text-white small fw-bold">3D Lab</span>
+          <p class="text-white-50 mb-0 mt-1" style="font-size:.7rem;">Text, image or both → clean GLB.</p>
         </a>
       </div>
     </div>

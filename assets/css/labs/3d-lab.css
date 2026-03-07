@@ -1,0 +1,13 @@
+/**
+ * 3D Lab - Page styles
+ */
+.labs-3d-hero .badge { font-size: 0.75rem; }
+.labs-3d-dropzone { cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+.labs-3d-dropzone:hover, .labs-3d-dropzone.is-dragover {
+  border-color: var(--knd-neon-cyan, #00d4ff) !important;
+  background: rgba(0, 212, 255, 0.05);
+}
+#l3d-model-viewer { background: #1a1a2e; }
+#l3d-viewer-toolbar .btn { font-size: 0.8rem; }
+.labs-3d-recent-card { border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 0.5rem; overflow: hidden; }
+.labs-3d-recent-card.selected { border-color: var(--knd-neon-cyan); }

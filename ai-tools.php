@@ -154,10 +154,10 @@ echo generateHeader(t('ai.meta.title'), t('ai.hero.desc'), $extraCss);
             </form>
         </div>
 
-        <!-- Image → 3D link -->
+        <!-- 3D Lab link -->
         <div class="glass-card-neon ai-tool-card p-4 mb-4">
-            <h4 class="text-white mb-3"><i class="fas fa-cube me-2" style="color: var(--knd-neon-blue);"></i><?php echo t('ai.img23d.link'); ?></h4>
-            <a href="/triposr-3d.php" class="btn btn-outline-primary"><?php echo t('triposr.upload.btn', 'Generate 3D Model'); ?></a>
+            <h4 class="text-white mb-3"><i class="fas fa-cube me-2" style="color: var(--knd-neon-blue);"></i>3D Lab</h4>
+            <a href="/labs-3d-lab.php" class="btn btn-outline-primary">Generate 3D Model</a>
         </div>
 
         <!-- Status panel -->

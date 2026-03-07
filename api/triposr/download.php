@@ -16,7 +16,7 @@ require_once __DIR__ . '/../../includes/triposr.php';
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-        header('Location: /triposr-3d.php');
+        header('Location: /labs-3d-lab.php');
         exit;
     }
 
@@ -24,35 +24,35 @@ try {
 
     $jobId = trim($_GET['job_id'] ?? '');
     if ($jobId === '') {
-        header('Location: /triposr-3d.php?error=missing');
+        header('Location: /labs-3d-lab.php?error=missing');
         exit;
     }
 
     $pdo = getDBConnection();
     if (!$pdo) {
-        header('Location: /triposr-3d.php?error=db');
+        header('Location: /labs-3d-lab.php?error=db');
         exit;
     }
 
     $job = get_triposr_job($pdo, $jobId);
     if (!$job) {
-        header('Location: /triposr-3d.php?error=not_found');
+        header('Location: /labs-3d-lab.php?error=not_found');
         exit;
     }
 
     if ((int) $job['user_id'] !== (int) current_user_id()) {
-        header('Location: /triposr-3d.php?error=forbidden');
+        header('Location: /labs-3d-lab.php?error=forbidden');
         exit;
     }
 
     if ($job['status'] !== 'completed' || empty($job['output_path'])) {
-        header('Location: /triposr-3d.php?error=not_ready');
+        header('Location: /labs-3d-lab.php?error=not_ready');
         exit;
     }
 
     $fullPath = storage_path($job['output_path']);
     if (!is_file($fullPath) || !is_readable($fullPath)) {
-        header('Location: /triposr-3d.php?error=file_missing');
+        header('Location: /labs-3d-lab.php?error=file_missing');
         exit;
     }
 
@@ -67,6 +67,6 @@ try {
     exit;
 } catch (\Throwable $e) {
     error_log('instantmesh/download: ' . $e->getMessage());
-    header('Location: /triposr-3d.php?error=server');
+    header('Location: /labs-3d-lab.php?error=server');
     exit;
 }
