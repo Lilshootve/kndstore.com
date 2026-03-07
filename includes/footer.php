@@ -197,6 +197,8 @@ function generateScripts() {
     // Particles.js con preload
     $scripts .= '<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>' . "\n";
     
+    // Header dinámico (scroll: ocultar/mostrar, estado scrolled)
+    $scripts .= '<script src="/assets/js/header-dynamic.js" defer></script>' . "\n";
     // Custom JS optimizado
     $scripts .= '<script src="assets/js/main.js" defer></script>' . "\n";
     

@@ -28,6 +28,7 @@ function generateHeader($title = 'KND Store - Tienda Galáctica', $description =
     $header .= '    <link rel="stylesheet" href="/assets/css/style.css?v=' . @filemtime(__DIR__ . '/../assets/css/style.css') . '">' . "\n";
     $header .= '    <link rel="stylesheet" href="/assets/css/knd-ui.css?v=' . (file_exists(__DIR__ . '/../assets/css/knd-ui.css') ? filemtime(__DIR__ . '/../assets/css/knd-ui.css') : 0) . '">' . "\n";
     $header .= '    <link rel="stylesheet" href="/assets/css/mobile-optimization.css">' . "\n";
+    $header .= '    <link rel="stylesheet" href="/assets/css/header-dynamic.css?v=' . (file_exists(__DIR__ . '/../assets/css/header-dynamic.css') ? filemtime(__DIR__ . '/../assets/css/header-dynamic.css') : 0) . '">' . "\n";
     $header .= '    <link rel="manifest" href="/assets/images/site.webmanifest">' . "\n";
     $header .= '    <link rel="preload" href="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" as="script">' . "\n";
     $header .= '    <script src="/assets/js/knd-toast.js" defer></script>' . "\n";
@@ -40,7 +41,7 @@ function generateHeader($title = 'KND Store - Tienda Galáctica', $description =
 function generateNavigation() {
     $current_page = basename($_SERVER['PHP_SELF']);
 
-    $nav = '<nav class="navbar navbar-expand-lg navbar-dark bg-transparent fixed-top">' . "\n";
+    $nav = '<nav class="navbar navbar-expand-lg navbar-dark bg-transparent fixed-top site-header" id="site-header" role="banner">' . "\n";
     $nav .= '    <div class="container">' . "\n";
     $nav .= '        <a class="navbar-brand d-flex align-items-center" href="/index.php">' . "\n";
     $nav .= '            <img src="/assets/images/logo.png" alt="KND Store" width="100" height="100" decoding="async" fetchpriority="high" class="me-2">' . "\n";
