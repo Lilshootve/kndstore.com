@@ -377,6 +377,18 @@ html.home-fullpage-active {
     justify-content: center;
 }
 
+/* Rest of page: one snap point so user can scroll past KND Games, then scroll normally inside */
+.home-section-rest {
+    display: block;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding-top: 80px;
+    padding-bottom: 3rem;
+}
+.home-section-rest > .container {
+    max-width: 100%;
+}
+
 /* Reveal genérico para secciones que usan .home-reveal */
 .home-reveal {
     opacity: 0;

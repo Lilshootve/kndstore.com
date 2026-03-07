@@ -58,8 +58,8 @@ $homeGalleryImages = array_slice($homeGalleryImages, 0, $galleryPreviewCount);
 $homeCss = __DIR__ . '/assets/css/home-sections.css';
 $homeJs = __DIR__ . '/assets/js/home-sections.js';
 $homeAssetV = ($isLocal ?? false) ? time() : (file_exists($homeCss) ? filemtime($homeCss) : time());
-$extraHead = '<link rel="stylesheet" href="assets/css/home-sections.css?v=' . $homeAssetV . '">';
-$extraHead .= '<script src="assets/js/home-sections.js?v=' . $homeAssetV . '" defer></script>';
+$extraHead = '<link rel="stylesheet" href="/assets/css/home-sections.css?v=' . $homeAssetV . '">';
+$extraHead .= '<script src="/assets/js/home-sections.js?v=' . $homeAssetV . '" defer></script>';
 
 // Iniciar timer de rendimiento
 $startTime = startPerformanceTimer();
@@ -226,6 +226,9 @@ setCacheHeaders('html');
     </div>
 </section>
 
+<!-- Rest of home (one more snap point so scroll can continue past KND Games) -->
+<section class="home-section-full home-section-rest" id="home-rest">
+
 <!-- How KND Games Works -->
 <section class="py-5" id="knd-games-how">
     <div class="container">
@@ -365,6 +368,8 @@ setCacheHeaders('html');
         </div>
     </div>
 </section>
+
+</section><!-- /#home-rest -->
 
 <script src="/assets/js/navigation-extend.js"></script>
 

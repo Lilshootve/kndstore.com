@@ -1058,36 +1058,34 @@ h1, h2, h3, h4, h5, h6 {
     backdrop-filter: blur(18px);
 }
 
+/* Base: overridden by knd-ui.css minimal sci-fi buttons */
 .btn-neon-primary {
-    background: linear-gradient(135deg, #259cae 0%, #ae2565 100%);
-    border: none;
-    color: #ffffff;
-    box-shadow:
-        0 0 15px rgba(37, 156, 174, 0.6),
-        0 0 25px rgba(174, 37, 101, 0.5);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    border: 1px solid rgba(53, 194, 255, 0.5);
+    color: #67D5FF;
+    background: rgba(53, 194, 255, 0.12);
+    font-weight: 500;
+    letter-spacing: 0.04em;
 }
 
 .btn-neon-primary:hover,
 .btn-neon-primary:focus {
-    filter: brightness(1.1);
-    box-shadow:
-        0 0 25px rgba(37, 156, 174, 0.8),
-        0 0 35px rgba(174, 37, 101, 0.7);
+    background: rgba(53, 194, 255, 0.18);
+    border-color: #35C2FF;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(53, 194, 255, 0.15);
 }
 
 .btn-outline-neon {
-    border-color: rgba(37, 156, 174, 0.8);
-    color: #ffffff;
-    box-shadow: 0 0 10px rgba(37, 156, 174, 0.4);
+    border: 1px solid rgba(103, 213, 255, 0.25);
+    color: #67D5FF;
+    background: transparent;
 }
 
 .btn-outline-neon:hover,
 .btn-outline-neon:focus {
-    background: rgba(37, 156, 174, 0.1);
-    box-shadow: 0 0 18px rgba(37, 156, 174, 0.7);
+    background: rgba(53, 194, 255, 0.06);
+    border-color: rgba(53, 194, 255, 0.5);
+    box-shadow: 0 0 16px rgba(53, 194, 255, 0.08);
 }
 
 @media (max-width: 576px) {
@@ -1757,28 +1755,28 @@ body.about-page,
 }
 
 .btn-primary {
-    background: linear-gradient(45deg, var(--knd-neon-blue), var(--knd-electric-purple));
-    border: none;
-    color: var(--knd-white);
-    box-shadow: 0 4px 15px rgba(37, 156, 174, 0.3);
+    background: rgba(53, 194, 255, 0.12);
+    border: 1px solid rgba(53, 194, 255, 0.5);
+    color: #67D5FF;
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(37, 156, 174, 0.4);
-    color: var(--knd-white);
+    background: rgba(53, 194, 255, 0.18);
+    border-color: var(--knd-neon-blue);
+    color: #fff;
+    box-shadow: 0 0 20px rgba(53, 194, 255, 0.15);
 }
 
 .btn-outline-light {
-    border: 2px solid var(--knd-white);
-    color: var(--knd-white);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.9);
     background: transparent;
 }
 
 .btn-outline-light:hover {
-    background: var(--knd-white);
-    color: var(--knd-black);
-    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
 }
 
 /* My Rooms button: force black text on hover for readability */
@@ -2385,45 +2383,26 @@ body.about-page,
     width: 100%;
 }
 
-/* Botones de redes sociales en footer */
+/* Botones outline neon (footer / global): minimal sci-fi */
 .btn-outline-neon {
-    border: 2px solid var(--knd-neon-blue);
-    color: var(--knd-neon-blue);
+    border: 1px solid var(--knd-border-mid, rgba(103, 213, 255, 0.25));
+    color: var(--knd-accent-soft, #67D5FF);
     background: transparent;
-    transition: all 0.3s ease;
-    animation: buttonBlink 2s infinite;
-}
-
-@keyframes buttonBlink {
-    0%, 50% {
-        opacity: 1;
-        box-shadow: 0 0 10px rgba(37, 156, 174, 0.3);
-    }
-    25%, 75% {
-        opacity: 0.8;
-        box-shadow: 0 0 20px rgba(37, 156, 174, 0.6);
-    }
-    100% {
-        opacity: 1;
-        box-shadow: 0 0 10px rgba(37, 156, 174, 0.3);
-    }
+    transition: all 0.2s ease;
 }
 
 .btn-outline-neon:hover {
-    background: var(--knd-neon-blue);
-    color: var(--knd-black);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(37, 156, 174, 0.4);
-    animation: none;
+    border-color: rgba(53, 194, 255, 0.5);
+    background: rgba(53, 194, 255, 0.06);
+    color: var(--knd-accent-soft, #67D5FF);
+    box-shadow: 0 0 16px rgba(53, 194, 255, 0.08);
 }
 
 .btn-outline-neon.btn-icon:hover {
-    background: transparent;
+    background: rgba(53, 194, 255, 0.08);
+    border-color: rgba(53, 194, 255, 0.5);
     color: #fff;
-    border-color: #00d4ff;
-    box-shadow: 0 0 18px rgba(0,212,255,.55), 0 0 6px rgba(0,212,255,.3) inset;
-    transform: translateY(-2px);
-    animation: none;
+    box-shadow: 0 0 16px rgba(53, 194, 255, 0.12);
 }
 
 /* Efecto glow para el título del footer */
@@ -2615,37 +2594,6 @@ body.about-page,
 .product-actions .btn {
     flex: 1;
     min-width: 120px;
-}
-
-.btn-outline-neon {
-    border: 2px solid var(--knd-neon-blue);
-    color: var(--knd-neon-blue);
-    background: transparent;
-    transition: all 0.3s ease;
-    animation: buttonBlink 2s infinite;
-}
-
-@keyframes buttonBlink {
-    0%, 50% {
-        opacity: 1;
-        box-shadow: 0 0 10px rgba(37, 156, 174, 0.3);
-    }
-    25%, 75% {
-        opacity: 0.8;
-        box-shadow: 0 0 20px rgba(37, 156, 174, 0.6);
-    }
-    100% {
-        opacity: 1;
-        box-shadow: 0 0 10px rgba(37, 156, 174, 0.3);
-    }
-}
-
-.btn-outline-neon:hover {
-    background: var(--knd-neon-blue);
-    color: var(--knd-black);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(37, 156, 174, 0.4);
-    animation: none;
 }
 
 /* Categorías */
@@ -3936,9 +3884,9 @@ body.about-page,
 .contact-section .btn-primary,
 .faq-section .btn-primary,
 .cta-section .btn-primary {
-    background: linear-gradient(135deg, var(--knd-neon-blue) 0%, var(--knd-electric-purple) 100%) !important;
-    border: none !important;
-    color: var(--knd-white) !important;
+    background: rgba(53, 194, 255, 0.12) !important;
+    border: 1px solid rgba(53, 194, 255, 0.5) !important;
+    color: var(--knd-accent-soft, #67D5FF) !important;
 }
 
 .navbar .btn-outline-light,
@@ -3949,8 +3897,8 @@ body.about-page,
 .faq-section .btn-outline-light,
 .cta-section .btn-outline-light {
     background: transparent;
-    border: 2px solid var(--knd-white);
-    color: var(--knd-white);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .navbar .btn-outline-light:hover,
@@ -3960,8 +3908,9 @@ body.about-page,
 .contact-section .btn-outline-light:hover,
 .faq-section .btn-outline-light:hover,
 .cta-section .btn-outline-light:hover {
-    background: var(--knd-white);
-    color: var(--knd-dark);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.6);
+    color: #fff;
 }
 
 /* Formularios con especificidad para evitar conflictos con Bootstrap */
