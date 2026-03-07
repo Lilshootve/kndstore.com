@@ -278,11 +278,15 @@ body.knd-labs-next {
   flex: 1;
   min-height: 0;
   overflow: auto;
+  width: 100%;
+  max-width: none;
 }
 
 .ln-editor-layout {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: none;
 }
 
 .ln-editor {
@@ -292,6 +296,14 @@ body.knd-labs-next {
   margin: 0 auto;
   width: 100%;
   position: relative;
+}
+
+/* Text2Img workspace: use full width from sidebar to right edge */
+.ln-editor:has(.ln-t2i-workspace),
+.ln-tool-content-wrap:has(.ln-t2i-workspace) {
+  max-width: none;
+  margin: 0;
+  width: 100%;
 }
 
 /* Central glow behind editor (aura) */
@@ -831,9 +843,10 @@ body.knd-labs-next {
 
 .ln-t2i-grid {
   display: grid;
-  grid-template-columns: 1fr 360px;
+  grid-template-columns: minmax(0, 1fr) 360px;
   gap: 28px;
   width: 100%;
+  max-width: none;
   align-items: start;
 }
 
