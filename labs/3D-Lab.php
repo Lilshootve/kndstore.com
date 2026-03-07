@@ -51,14 +51,14 @@ echo generateHeader($toolName . ' | KND Labs', 'Create optimized 3D models from 
       <aside class="knd-panel">
         <div class="knd-section-title">3D Lab</div>
         <form id="labs-3d-form" class="labs-form" method="post" action="#" onsubmit="return false;" enctype="multipart/form-data">
-          <input type="hidden" name="mode" id="l3d-mode" value="text">
+          <input type="hidden" name="mode" id="l3d-mode" value="image">
           <input type="hidden" name="source_recent_job_id" id="l3d-source-id" value="">
           <input type="hidden" name="source_recent_type" id="l3d-source-type" value="3d_lab">
 
           <div class="btn-group w-100 mb-3" role="group">
-            <input type="radio" class="btn-check" name="mode-radio" id="l3d-mode-text" value="text" checked>
-            <label class="btn btn-outline-secondary btn-sm" for="l3d-mode-text">Text</label>
-            <input type="radio" class="btn-check" name="mode-radio" id="l3d-mode-image" value="image">
+            <input type="radio" class="btn-check" name="mode-radio" id="l3d-mode-text" value="text" disabled>
+            <label class="btn btn-outline-secondary btn-sm opacity-75" for="l3d-mode-text" title="Coming soon">Text <span class="badge bg-secondary ms-1">Soon</span></label>
+            <input type="radio" class="btn-check" name="mode-radio" id="l3d-mode-image" value="image" checked>
             <label class="btn btn-outline-secondary btn-sm" for="l3d-mode-image">Image</label>
             <input type="radio" class="btn-check" name="mode-radio" id="l3d-mode-text-image" value="text_image">
             <label class="btn btn-outline-secondary btn-sm" for="l3d-mode-text-image">Text+Image</label>
@@ -158,9 +158,25 @@ echo generateHeader($toolName . ' | KND Labs', 'Create optimized 3D models from 
       <div class="d-flex flex-column flex-grow-1">
         <div class="knd-canvas knd-panel-soft flex-grow-1 mb-0" id="l3d-result-wrapper">
           <div id="l3d-placeholder" class="labs-result-preview text-center py-5" style="min-height:320px;">
-            <i class="fas fa-cube fa-4x mb-3" style="color:var(--knd-accent-soft);opacity:.4;"></i>
-            <p class="text-white-50 mb-1">3D Lab – Text, image, or both</p>
-            <p class="text-white-50 small mb-0">Generate a clean GLB model. Single subject works best.</p>
+            <div id="l3d-placeholder-empty" class="labs-placeholder-tips knd-canvas__empty">
+              <i class="fas fa-cube fa-4x mb-3" style="color:var(--knd-accent-soft);opacity:.4;"></i>
+              <p class="text-white-50 mb-1">3D Lab – Image or Text+Image</p>
+              <p class="text-white-50 small mb-0">Generate a clean GLB model. Single subject works best.</p>
+            </div>
+            <div id="l3d-placeholder-loading" class="d-none">
+              <div class="labs-stepper mb-2">
+                <span class="labs-stepper-dot" data-step="queued"></span>
+                <span class="labs-stepper-line"></span>
+                <span class="labs-stepper-dot" data-step="picked"></span>
+                <span class="labs-stepper-line"></span>
+                <span class="labs-stepper-dot" data-step="generating"></span>
+                <span class="labs-stepper-line"></span>
+                <span class="labs-stepper-dot" data-step="done"></span>
+              </div>
+              <p class="text-white-50 small mb-2">Generation is queued. You can leave this page.</p>
+              <div class="ai-spinner mb-2"><i class="fas fa-cog fa-spin fa-2x"></i></div>
+              <p class="text-white-50 mb-0" id="l3d-placeholder-status-text">Processing...</p>
+            </div>
           </div>
           <div id="l3d-viewer-wrap" style="display:none; min-height:320px;">
             <model-viewer id="l3d-model-viewer" camera-controls auto-rotate interaction-prompt="none" style="width:100%; height:320px;"></model-viewer>

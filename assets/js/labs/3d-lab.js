@@ -3,7 +3,7 @@
 
     var cfg = window.KND_3D_LAB || {};
     var ep = cfg.endpoints || {};
-    var state = { mode: 'text', file: null, selectedRecent: null, pollTimer: null, currentJobId: null };
+    var state = { mode: 'image', file: null, selectedRecent: null, pollTimer: null, currentJobId: null };
 
     var el = {
         form: document.getElementById('labs-3d-form'),
@@ -42,9 +42,32 @@
         else if (type === 'error') alert(msg);
     }
 
+    var emptyEl = document.getElementById('l3d-placeholder-empty');
+    var loadingEl = document.getElementById('l3d-placeholder-loading');
+    var placeholderStatusEl = document.getElementById('l3d-placeholder-status-text');
+
+    function updateStepper(step) {
+        var dots = document.querySelectorAll('#l3d-placeholder-loading .labs-stepper-dot');
+        var steps = ['queued', 'picked', 'generating', 'done'];
+        dots.forEach(function (d, i) {
+            d.classList.remove('active', 'current');
+            if (steps[i] === step) d.classList.add('current');
+            else if (steps.indexOf(step) > i) d.classList.add('active');
+        });
+    }
+
     function setStatus(s, text) {
         if (el.statusPanel) el.statusPanel.style.display = s ? 'block' : 'none';
         if (el.statusText) el.statusText.textContent = text || (s ? 'Processing...' : '');
+        if (el.placeholder) el.placeholder.style.display = 'block';
+        if (s && el.viewerWrap) el.viewerWrap.style.display = 'none';
+        if (emptyEl) emptyEl.classList.toggle('d-none', !!s);
+        if (loadingEl) loadingEl.classList.toggle('d-none', !s);
+        if (placeholderStatusEl && s) placeholderStatusEl.textContent = text || 'Processing...';
+        if (s) {
+            var step = (text || '').toLowerCase().indexOf('queued') >= 0 ? 'queued' : ((text || '').toLowerCase().indexOf('processing') >= 0 ? 'generating' : 'picked');
+            updateStepper(step);
+        }
     }
 
     function showError(msg) {
@@ -93,14 +116,15 @@
     }
 
     function canSubmit() {
-        if (state.mode === 'text' || state.mode === 'text_image') {
+        if (state.mode === 'text') return false;
+        if (state.mode === 'text_image') {
             var p = document.getElementById('l3d-prompt');
-            if (p && state.mode === 'text' && !p.value.trim()) return false;
-            if (p && state.mode === 'text_image' && !p.value.trim()) return false;
+            if (p && !p.value.trim()) return false;
+            return !!state.file;
         }
-        if (state.mode === 'image' || state.mode === 'text_image') return !!state.file;
+        if (state.mode === 'image') return !!state.file;
         if (state.mode === 'recent') return !!state.selectedRecent;
-        return true;
+        return false;
     }
 
     function loadRecentForPick() {
@@ -197,6 +221,7 @@
                 setStatus(true, job.status === 'queued' ? 'Queued...' : (job.status === 'processing' ? 'Processing...' : job.status));
 
                 if (job.status === 'failed') {
+                    setStatus(false);
                     showError(job.error_message || 'Generation failed');
                     stopPolling();
                 } else if (job.status === 'completed') {
@@ -273,6 +298,7 @@
         el.modeRadios.forEach(function (id, i) {
             var r = document.getElementById(id);
             if (!r) return;
+            if (r.disabled) return;
             r.addEventListener('change', function () {
                 state.mode = ['text', 'image', 'text_image', 'recent'][i];
                 if (el.modeInput) el.modeInput.value = state.mode;
