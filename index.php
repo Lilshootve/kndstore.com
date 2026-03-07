@@ -54,11 +54,12 @@ if ($totalGallery > $galleryPreviewCount) {
 }
 $homeGalleryImages = array_slice($homeGalleryImages, 0, $galleryPreviewCount);
 
-// CSS/JS del home fullscreen y secciones
+// CSS/JS del home fullscreen y secciones (rutas relativas para subdirectorios; cache buster fuerte en local)
 $homeCss = __DIR__ . '/assets/css/home-sections.css';
 $homeJs = __DIR__ . '/assets/js/home-sections.js';
-$extraHead = '<link rel="stylesheet" href="/assets/css/home-sections.css?v=' . (file_exists($homeCss) ? filemtime($homeCss) : time()) . '">';
-$extraHead .= '<script src="/assets/js/home-sections.js?v=' . (file_exists($homeJs) ? filemtime($homeJs) : time()) . '" defer></script>';
+$homeAssetV = ($isLocal ?? false) ? time() : (file_exists($homeCss) ? filemtime($homeCss) : time());
+$extraHead = '<link rel="stylesheet" href="assets/css/home-sections.css?v=' . $homeAssetV . '">';
+$extraHead .= '<script src="assets/js/home-sections.js?v=' . $homeAssetV . '" defer></script>';
 
 // Iniciar timer de rendimiento
 $startTime = startPerformanceTimer();
