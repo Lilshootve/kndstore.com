@@ -26,28 +26,7 @@ import sys
 import time
 from pathlib import Path
 
-
-def _import_db_driver():
-    try:
-        import pymysql  # type: ignore
-        return pymysql
-    except Exception as exc:  # pragma: no cover
-        raise RuntimeError(
-            "pymysql is required. Install with: pip install pymysql"
-        ) from exc
-
-
-def _db_connect(pymysql_module):
-    return pymysql_module.connect(
-        host=os.getenv("KND_DB_HOST", "127.0.0.1"),
-        port=int(os.getenv("KND_DB_PORT", "3306")),
-        user=os.getenv("KND_DB_USER", ""),
-        password=os.getenv("KND_DB_PASS", ""),
-        database=os.getenv("KND_DB_NAME", ""),
-        autocommit=False,
-        charset="utf8mb4",
-        cursorclass=pymysql_module.cursors.DictCursor,
-    )
+from _db_common import db_connect, ensure_connection, import_db_driver, to_rel_storage
 
 
 def lease_next_job(conn):
@@ -79,14 +58,9 @@ def lease_next_job(conn):
         return row
 
 
-def _to_rel_storage(path: str, project_root: Path) -> str:
-    p = Path(path).resolve()
-    storage_root = (project_root / "storage").resolve()
-    rel = p.relative_to(storage_root)
-    return str(rel).replace("\\", "/")
 
 
-def process_job(conn, job: dict, project_root: Path):
+def process_job(conn, job: dict, project_root: Path, pymysql_mod):
     run_script = project_root / "workers" / "run_instantmesh_job.py"
     input_abs = (project_root / "storage" / str(job["source_image_path"])).resolve()
 
@@ -107,6 +81,8 @@ def process_job(conn, job: dict, project_root: Path):
         check=False,
     )
 
+    conn = ensure_connection(conn, pymysql_mod)
+
     if proc.returncode != 0:
         err = (proc.stderr or proc.stdout or "InstantMesh runner failed").strip()
         with conn.cursor() as cur:
@@ -119,7 +95,7 @@ def process_job(conn, job: dict, project_root: Path):
                 (err[:65535], job["id"]),
             )
         conn.commit()
-        return
+        return conn
 
     try:
         result = json.loads(proc.stdout.strip() or "{}")
@@ -138,11 +114,11 @@ def process_job(conn, job: dict, project_root: Path):
                 (err[:65535], job["id"]),
             )
         conn.commit()
-        return
+        return conn
 
-    preview_rel = _to_rel_storage(result["preview_path"], project_root) if result.get("preview_path") else None
-    glb_rel = _to_rel_storage(result["glb_path"], project_root) if result.get("glb_path") else None
-    obj_rel = _to_rel_storage(result["obj_path"], project_root) if result.get("obj_path") else None
+    preview_rel = to_rel_storage(result["preview_path"], project_root) if result.get("preview_path") else None
+    glb_rel = to_rel_storage(result["glb_path"], project_root) if result.get("glb_path") else None
+    obj_rel = to_rel_storage(result["obj_path"], project_root) if result.get("obj_path") else None
 
     with conn.cursor() as cur:
         cur.execute(
@@ -159,14 +135,15 @@ def process_job(conn, job: dict, project_root: Path):
             (preview_rel, glb_rel, obj_rel, job["id"]),
         )
     conn.commit()
+    return conn
 
 
 def main() -> int:
     sleep_seconds = max(1, int(os.getenv("WORKER_SLEEP_SECONDS", "3")))
     project_root = Path(__file__).resolve().parents[1]
 
-    pymysql_mod = _import_db_driver()
-    conn = _db_connect(pymysql_mod)
+    pymysql_mod = import_db_driver()
+    conn = db_connect(pymysql_mod)
 
     print("[instantmesh-worker] started")
     while True:
@@ -177,7 +154,8 @@ def main() -> int:
                 continue
 
             print(f"[instantmesh-worker] processing job #{job['id']} ({job['public_id']})")
-            process_job(conn, job, project_root)
+            conn = ensure_connection(conn, pymysql_mod)
+            conn = process_job(conn, job, project_root, pymysql_mod)
         except KeyboardInterrupt:
             print("\n[instantmesh-worker] stopped")
             break

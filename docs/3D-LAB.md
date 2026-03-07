@@ -52,6 +52,7 @@ python workers/labs_3d_worker.py
 | PUBLIC_SITE_BASE_URL | https://kndstore.com | Base URL for input download |
 | STORAGE_PUBLIC_PREFIX | /storage | Prefix (optional, for path-based URL) |
 | LABS_3D_INPUT_URL_TEMPLATE | {base}/api/labs/3d-lab/input.php?id={public_id} | URL template for input download |
+| LABS_3D_STALE_MINUTES | 30 | Jobs in `processing` longer = abandoned (marked failed on worker start) |
 
 ## Architecture
 

@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
 """
 3D Lab queue worker (DB polling).
-Polls knd_labs_3d_jobs, runs run_labs_3d_job.py (ComfyUI 3D integration).
+Follows the same architecture as instantmesh_worker.py.
+
+Pipeline:
+- Lease job from knd_labs_3d_jobs
+- Run run_labs_3d_job.py (downloads input from web, ComfyUI 3D, copies GLB to storage + staging)
+- Update status, paths, meta
+
+Env: KND_DB_HOST, KND_DB_PORT, KND_DB_NAME, KND_DB_USER, KND_DB_PASS
+      WORKER_SLEEP_SECONDS (default 5)
+      LABS_3D_STALE_MINUTES (default 30, jobs in processing longer = abandoned)
 """
 from __future__ import annotations
 
@@ -12,75 +21,99 @@ import sys
 import time
 from pathlib import Path
 
+from _db_common import db_connect, ensure_connection, import_db_driver, to_rel_storage
 
-def _import_db():
-    try:
-        import pymysql
-        return pymysql
-    except Exception as e:
-        raise RuntimeError("pip install pymysql") from e
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+STALE_MINUTES = max(5, int(os.getenv("LABS_3D_STALE_MINUTES", "30")))
 
 
-def _connect(pym):
-    return pym.connect(
-        host=os.getenv("KND_DB_HOST", "127.0.0.1"),
-        port=int(os.getenv("KND_DB_PORT", "3306")),
-        user=os.getenv("KND_DB_USER", ""),
-        password=os.getenv("KND_DB_PASS", ""),
-        database=os.getenv("KND_DB_NAME", ""),
-        autocommit=False,
-        charset="utf8mb4",
-        cursorclass=pym.cursors.DictCursor,
-    )
+def _log(msg: str) -> None:
+    print(f"[labs-3d-worker] {msg}")
 
 
-def lease(conn):
-    with conn.cursor() as c:
-        c.execute(
-            """SELECT id, public_id, input_image_path, quality, advanced_params_json, mode
-               FROM knd_labs_3d_jobs
-               WHERE status = 'queued' ORDER BY created_at ASC LIMIT 1 FOR UPDATE"""
+def recover_stale_jobs(conn) -> int:
+    """Reset jobs stuck in 'processing' for too long. Returns count reset."""
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE knd_labs_3d_jobs
+            SET status = 'failed',
+                error_message = COALESCE(error_message, 'Job abandoned (worker timeout)'),
+                completed_at = NOW(),
+                updated_at = NOW()
+            WHERE status = 'processing'
+              AND processing_started_at < DATE_SUB(NOW(), INTERVAL %s MINUTE)
+            """,
+            (STALE_MINUTES,),
         )
-        row = c.fetchone()
+        n = cur.rowcount
+        conn.commit()
+    if n > 0:
+        _log(f"recovered {n} stale job(s) (processing > {STALE_MINUTES} min)")
+    return n
+
+
+def lease_next_job(conn):
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT id, public_id, input_image_path, quality, advanced_params_json, mode
+            FROM knd_labs_3d_jobs
+            WHERE status = 'queued'
+            ORDER BY created_at ASC
+            LIMIT 1
+            FOR UPDATE
+            """
+        )
+        row = cur.fetchone()
         if not row:
             conn.rollback()
             return None
-        c.execute(
-            "UPDATE knd_labs_3d_jobs SET status = 'processing', processing_started_at = NOW() WHERE id = %s",
+
+        cur.execute(
+            """
+            UPDATE knd_labs_3d_jobs
+            SET status = 'processing', processing_started_at = NOW(), updated_at = NOW()
+            WHERE id = %s
+            """,
             (row["id"],),
         )
         conn.commit()
         return row
 
 
-def process(conn, job, root):
-    if not job.get("input_image_path"):
-        with conn.cursor() as c:
-            c.execute(
-                "UPDATE knd_labs_3d_jobs SET status = 'failed', error_message = 'Image-to-3D mode required; text-only not supported yet', completed_at = NOW() WHERE id = %s",
-                (job["id"],),
-            )
-        conn.commit()
-        return
+def _mark_failed(conn, job_id, err_msg: str):
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE knd_labs_3d_jobs
+            SET status = 'failed', error_message = %s, completed_at = NOW(), updated_at = NOW()
+            WHERE id = %s
+            """,
+            (err_msg[:65535], job_id),
+        )
+    conn.commit()
 
-    run = root / "workers" / "run_labs_3d_job.py"
-    if not run.exists():
-        with conn.cursor() as c:
-            c.execute(
-                "UPDATE knd_labs_3d_jobs SET status = 'failed', error_message = 'Worker script missing', completed_at = NOW() WHERE id = %s",
-                (job["id"],),
-            )
-        conn.commit()
-        return
+
+def process_job(conn, job: dict):
+    if not job.get("input_image_path"):
+        _mark_failed(conn, job["id"], "Image-to-3D mode required; text-only not supported yet")
+        return conn
+
+    run_script = PROJECT_ROOT / "workers" / "run_labs_3d_job.py"
+    if not run_script.exists():
+        _mark_failed(conn, job["id"], "Worker script missing")
+        return conn
 
     seed = None
     if job.get("advanced_params_json"):
         try:
             adv = json.loads(job["advanced_params_json"])
-            if isinstance(adv, dict) and "seed" in adv:
-                seed = int(adv["seed"]) if adv["seed"] else None
+            if isinstance(adv, dict) and adv.get("seed"):
+                seed = int(adv["seed"])
         except (json.JSONDecodeError, TypeError, ValueError):
             pass
+
     payload = {
         "job_id": job["id"],
         "public_id": job["public_id"],
@@ -88,50 +121,44 @@ def process(conn, job, root):
         "quality": job.get("quality") or "Standard",
         "seed": seed,
     }
+
     proc = subprocess.run(
-        [sys.executable, str(run), "--payload", json.dumps(payload)],
+        [sys.executable, str(run_script), "--payload", json.dumps(payload)],
         capture_output=True,
         text=True,
-        cwd=str(root),
+        cwd=str(PROJECT_ROOT),
+        check=False,
     )
 
+    conn = ensure_connection(conn, _pym)
+
     if proc.returncode != 0:
-        err = (proc.stderr or proc.stdout or "Failed").strip()[:65535]
-        with conn.cursor() as c:
-            c.execute(
-                "UPDATE knd_labs_3d_jobs SET status = 'failed', error_message = %s, completed_at = NOW() WHERE id = %s",
-                (err, job["id"]),
-            )
-        conn.commit()
-        return
+        err = (proc.stderr or proc.stdout or "3D Lab runner failed").strip()
+        _mark_failed(conn, job["id"], err)
+        return conn
 
     try:
         out = json.loads(proc.stdout.strip() or "{}")
     except json.JSONDecodeError:
-        out = {"ok": False}
+        _mark_failed(conn, job["id"], "Invalid runner JSON output")
+        return conn
 
     if not out.get("ok"):
-        with conn.cursor() as c:
-            c.execute(
-                "UPDATE knd_labs_3d_jobs SET status = 'failed', error_message = %s, completed_at = NOW() WHERE id = %s",
-                (str(out.get("error", "Unknown"))[:65535], job["id"]),
-            )
-        conn.commit()
-        return
+        err = str(out.get("error", "Unknown"))
+        _mark_failed(conn, job["id"], err)
+        return conn
 
     glb_rel = out.get("glb_path_rel")
     prev_rel = out.get("preview_path_rel")
     if not glb_rel and out.get("glb_path"):
-        storage = root / "storage"
         try:
-            glb_rel = str(Path(out["glb_path"]).resolve().relative_to(storage)).replace("\\", "/")
-        except ValueError:
+            glb_rel = to_rel_storage(out["glb_path"], PROJECT_ROOT)
+        except Exception:
             pass
     if not prev_rel and out.get("preview_path"):
-        storage = root / "storage"
         try:
-            prev_rel = str(Path(out["preview_path"]).resolve().relative_to(storage)).replace("\\", "/")
-        except ValueError:
+            prev_rel = to_rel_storage(out["preview_path"], PROJECT_ROOT)
+        except Exception:
             pass
 
     meta_json = None
@@ -141,39 +168,67 @@ def process(conn, job, root):
         except (TypeError, ValueError):
             pass
 
-    with conn.cursor() as c:
-        c.execute(
-            """UPDATE knd_labs_3d_jobs
-               SET status = 'completed',
-                   glb_path = COALESCE(%s, glb_path),
-                   preview_path = COALESCE(%s, preview_path),
-                   meta_json = COALESCE(%s, meta_json),
-                   completed_at = NOW()
-               WHERE id = %s""",
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE knd_labs_3d_jobs
+            SET status = 'completed',
+                glb_path = COALESCE(%s, glb_path),
+                preview_path = COALESCE(%s, preview_path),
+                meta_json = COALESCE(%s, meta_json),
+                completed_at = NOW(),
+                updated_at = NOW()
+            WHERE id = %s
+            """,
             (glb_rel, prev_rel, meta_json, job["id"]),
         )
     conn.commit()
+    return conn
 
 
-def main():
-    sleep_s = max(1, int(os.getenv("WORKER_SLEEP_SECONDS", "5")))
-    root = Path(__file__).resolve().parents[1]
-    pym = _import_db()
-    conn = _connect(pym)
-    print("[labs-3d-worker] started")
+def main() -> int:
+    global _pym
+    _pym = import_db_driver()
+    sleep_seconds = max(1, int(os.getenv("WORKER_SLEEP_SECONDS", "5")))
+
+    conn = db_connect(_pym)
+
+    _log("started")
+    recover_stale_jobs(conn)
+
     try:
         while True:
-            job = lease(conn)
-            if job:
-                print(f"[labs-3d-worker] job #{job['id']}")
-                process(conn, job, root)
-            else:
-                time.sleep(sleep_s)
-    except KeyboardInterrupt:
-        print("\n[labs-3d-worker] stopped")
-    finally:
-        conn.close()
+            try:
+                conn = ensure_connection(conn, _pym)
+                job = lease_next_job(conn)
+                if not job:
+                    time.sleep(sleep_seconds)
+                    continue
 
+                _log(f"processing job #{job['id']} ({job['public_id']})")
+                conn = process_job(conn, job)
+
+            except KeyboardInterrupt:
+                _log("stopped")
+                break
+            except Exception as exc:
+                _log(f"error: {exc}")
+                try:
+                    conn = ensure_connection(conn, _pym)
+                except Exception:
+                    conn = db_connect(_pym)
+                time.sleep(sleep_seconds)
+
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+    return 0
+
+
+_pym = None
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
