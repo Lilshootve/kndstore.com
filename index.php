@@ -23,6 +23,43 @@ require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/footer.php';
 require_once __DIR__ . '/includes/products-data.php';
 
+// Galería: selección curada para el preview del home (desde assets/images/gallery)
+$galleryDir = __DIR__ . '/assets/images/gallery';
+$allowedExt = ['jpg', 'jpeg', 'png', 'webp'];
+$homeGalleryImages = [];
+if (is_dir($galleryDir) && is_readable($galleryDir)) {
+    $files = @scandir($galleryDir);
+    if ($files !== false) {
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') continue;
+            $path = $galleryDir . DIRECTORY_SEPARATOR . $file;
+            if (!is_file($path)) continue;
+            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            if (in_array($ext, $allowedExt, true)) {
+                $homeGalleryImages[] = '/assets/images/gallery/' . rawurlencode($file);
+            }
+        }
+    }
+}
+sort($homeGalleryImages);
+$totalGallery = count($homeGalleryImages);
+$galleryPreviewCount = 12;
+if ($totalGallery > $galleryPreviewCount) {
+    $step = max(1, (int) floor($totalGallery / $galleryPreviewCount));
+    $indices = range(0, $totalGallery - 1, $step);
+    $homeGalleryImages = array_values(array_map(function ($i) use ($homeGalleryImages) {
+        return $homeGalleryImages[$i] ?? null;
+    }, array_slice($indices, 0, $galleryPreviewCount)));
+    $homeGalleryImages = array_filter($homeGalleryImages);
+}
+$homeGalleryImages = array_slice($homeGalleryImages, 0, $galleryPreviewCount);
+
+// CSS/JS del home fullscreen y secciones
+$homeCss = __DIR__ . '/assets/css/home-sections.css';
+$homeJs = __DIR__ . '/assets/js/home-sections.js';
+$extraHead = '<link rel="stylesheet" href="/assets/css/home-sections.css?v=' . (file_exists($homeCss) ? filemtime($homeCss) : time()) . '">';
+$extraHead .= '<script src="/assets/js/home-sections.js?v=' . (file_exists($homeJs) ? filemtime($homeJs) : time()) . '" defer></script>';
+
 // Iniciar timer de rendimiento
 $startTime = startPerformanceTimer();
 
@@ -30,15 +67,15 @@ $startTime = startPerformanceTimer();
 setCacheHeaders('html');
 ?>
 
-<?php echo generateHeader(t('nav.home'), t('meta.default_description')); ?>
+<?php echo generateHeader(t('nav.home'), t('meta.default_description'), $extraHead); ?>
 
 <!-- Particles Background -->
 <div id="particles-bg"></div>
 
 <?php echo generateNavigation(); ?>
 
-<!-- Hero Section -->
-<section class="hero-section hero-home-bg">
+<!-- Hero Section - Fullscreen -->
+<section id="home-fullpage" class="hero-section hero-home-bg home-section-full">
     <div class="container">
         <div class="row align-items-center min-vh-100">
             <div class="col-lg-6">
@@ -69,8 +106,77 @@ setCacheHeaders('html');
     </div>
 </section>
 
-<!-- KND Games Promo -->
-<section class="py-5" id="lastroll-promo">
+<!-- KND Labs - Sección protagonista fullscreen -->
+<section class="home-section-full home-labs-section py-5" id="labs">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <p class="home-labs-eyebrow"><?php echo t('nav.labs', 'KND Labs'); ?></p>
+                <h2 class="home-labs-headline">
+                    <span class="glow-text"><?php echo t('labs.title', 'KND Labs'); ?></span><br>
+                    <span class="text-white-50" style="font-size: 0.75em; font-weight: 600;"><?php echo t('labs.subtitle', 'AI-powered asset creation.'); ?></span>
+                </h2>
+                <p class="home-labs-desc">
+                    <?php echo t('labs.meta.desc', 'Generate images, upscale, create characters and textures, or turn images into 3D — all powered by AI. Fast, creative, and built for makers.'); ?>
+                </p>
+                <div class="home-labs-ctas">
+                    <a href="/labs" class="btn btn-neon-primary btn-lg">
+                        <i class="fas fa-microscope me-2"></i><?php echo t('arena.enter', 'Enter'); ?> KND Labs
+                    </a>
+                    <a href="/gallery.php" class="btn btn-outline-neon btn-lg">
+                        <i class="fas fa-images me-2"></i><?php echo t('home.gallery.view_gallery', 'View Gallery'); ?>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="home-labs-visual">
+                    <div class="home-labs-visual-inner">
+                        <div class="home-labs-visual-glow" aria-hidden="true"></div>
+                        <div class="home-labs-visual-icon">
+                            <i class="fas fa-microscope" aria-hidden="true"></i>
+                        </div>
+                        <div class="home-labs-visual-card">
+                            <strong>Text-to-Image</strong> · Upscale · Character Lab · Texture Lab · <strong>3D Lab</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Gallery Preview - Showcase fullscreen -->
+<section class="home-section-full home-gallery-preview-section py-5" id="gallery-preview">
+    <div class="container-fluid">
+        <div class="home-gallery-preview-header">
+            <p class="home-gallery-eyebrow"><?php echo t('home.gallery.eyebrow', 'Visual Showcase'); ?></p>
+            <h2 class="home-gallery-preview-title"><?php echo t('home.gallery.title', 'Curated visuals'); ?></h2>
+            <p class="home-gallery-preview-desc"><?php echo t('home.gallery.desc', 'A selection of visuals from the KND ecosystem. Explore the full gallery for wallpapers and assets.'); ?></p>
+            <div class="home-gallery-preview-cta mb-4">
+                <a href="/gallery.php" class="btn btn-outline-neon">
+                    <i class="fas fa-th-large me-2"></i><?php echo t('home.gallery.cta', 'Open full gallery'); ?>
+                </a>
+            </div>
+        </div>
+        <?php if (!empty($homeGalleryImages)): ?>
+            <div class="home-gallery-preview-grid">
+                <?php foreach (array_slice($homeGalleryImages, 0, 12) as $imgSrc):
+                    $srcEsc = htmlspecialchars($imgSrc, ENT_QUOTES, 'UTF-8');
+                    $alt = basename(parse_url($imgSrc, PHP_URL_PATH));
+                    $alt = pathinfo($alt, PATHINFO_FILENAME);
+                    $alt = htmlspecialchars(preg_replace('/[-_]/', ' ', $alt), ENT_QUOTES, 'UTF-8');
+                ?>
+                    <a href="/gallery.php" class="home-gallery-preview-item" aria-label="<?php echo $alt; ?>">
+                        <img src="<?php echo $srcEsc; ?>" alt="<?php echo $alt; ?>" loading="lazy">
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</section>
+
+<!-- KND Games Promo (Arena) - Fullscreen -->
+<section class="py-5 home-section-full" id="lastroll-promo">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-10">
