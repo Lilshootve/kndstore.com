@@ -3,7 +3,7 @@
 
     var cfg = window.KND_3D_LAB || {};
     var ep = cfg.endpoints || {};
-    var state = { mode: 'image', file: null, selectedRecent: null, pollTimer: null, currentJobId: null };
+    var state = { mode: 'image', file: null, selectedRecent: null, pollTimer: null, currentJobId: null, glbBlobUrl: null };
 
     var el = {
         form: document.getElementById('labs-3d-form'),
@@ -88,13 +88,20 @@
     }
 
     function setFile(file) {
-        if (!file) return;
+        if (!file || !file.type || !file.type.startsWith('image/')) return;
         state.file = file;
         state.selectedRecent = null;
         if (el.preview && el.previewWrap && el.dropzoneContent) {
-            el.preview.src = URL.createObjectURL(file);
-            el.previewWrap.style.display = 'block';
-            el.dropzoneContent.style.display = 'none';
+            el.preview.onerror = function () { el.preview.alt = 'Preview failed'; };
+            var reader = new FileReader();
+            reader.onload = function () {
+                el.preview.onerror = null;
+                el.preview.src = reader.result;
+                el.preview.alt = 'Preview';
+                el.previewWrap.style.display = 'block';
+                el.dropzoneContent.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
         }
         if (el.sourceId) el.sourceId.value = '';
     }
@@ -102,7 +109,7 @@
     function resetFile() {
         state.file = null;
         if (el.fileInput) el.fileInput.value = '';
-        if (el.preview) el.preview.src = '';
+        if (el.preview) { el.preview.src = ''; el.preview.alt = 'Preview'; }
         if (el.previewWrap) el.previewWrap.style.display = 'none';
         if (el.dropzoneContent) el.dropzoneContent.style.display = 'block';
     }
@@ -139,10 +146,12 @@
                     el.recentGrid.innerHTML = '<p class="text-white-50 small mb-0">No completed creations yet.</p>';
                     return;
                 }
+                var base = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
                 var html = jobs.map(function (j) {
                     var sel = state.selectedRecent && state.selectedRecent.id === j.id ? ' selected' : '';
+                    var prevSrc = j.preview_url ? (j.preview_url.indexOf('/') === 0 ? base + j.preview_url : j.preview_url) : '';
                     return '<div class="col-4 col-md-3"><div class="labs-3d-recent-card p-1' + sel + '" data-id="' + j.id + '" style="cursor:pointer; aspect-ratio:1;">' +
-                        (j.preview_url ? '<img src="' + j.preview_url + '" alt="" class="w-100 h-100" style="object-fit:cover;">' : '<div class="w-100 h-100 bg-dark d-flex align-items-center justify-content-center"><i class="fas fa-cube text-white-50"></i></div>') +
+                        (prevSrc ? '<img src="' + prevSrc + '" alt="" class="w-100 h-100" style="object-fit:cover;" loading="lazy">' : '<div class="w-100 h-100 bg-dark d-flex align-items-center justify-content-center"><i class="fas fa-cube text-white-50"></i></div>') +
                         '</div><small class="text-white-50 d-block text-truncate">' + (j.title || '') + '</small></div>';
                 }).join('');
                 el.recentGrid.innerHTML = html;
@@ -177,7 +186,8 @@
                     } else {
                         var base = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
                         el.recentCreationsGrid.innerHTML = jobs.map(function (j) {
-                            var prev = j.preview_url ? '<img src="' + j.preview_url + '" alt="" class="w-100 h-100" style="object-fit:cover;">' : '<div class="w-100 h-100 d-flex align-items-center justify-content-center"><i class="fas fa-cube fa-2x text-white-50"></i></div>';
+                            var prevSrc = j.preview_url ? (j.preview_url.indexOf('/') === 0 ? base + j.preview_url : j.preview_url) : '';
+                            var prev = prevSrc ? '<img src="' + prevSrc + '" alt="" class="w-100 h-100" style="object-fit:cover;" loading="lazy">' : '<div class="w-100 h-100 d-flex align-items-center justify-content-center"><i class="fas fa-cube fa-2x text-white-50"></i></div>';
                             var dlHref = j.glb_url ? (base + (j.glb_url.indexOf('/') === 0 ? j.glb_url : '/' + j.glb_url)) : '';
                             var dlAttrs = dlHref ? ' href="' + dlHref + '" download="3d-lab-' + (j.public_id || '') + '.glb"' : ' class="btn btn-sm btn-success disabled" aria-disabled="true"';
                             var dlBtn = dlHref ? '<a ' + dlAttrs + ' class="btn btn-sm btn-success">Download</a>' : '<span class="btn btn-sm btn-secondary disabled">Download</span>';
@@ -204,12 +214,24 @@
 
     function renderViewer(job) {
         if (!job.has_glb) return;
-        var glbUrl = (ep.download || '/api/labs/3d-lab/download.php') + '?id=' + encodeURIComponent(job.public_id) + '&format=glb&inline=1';
-        var dlUrl = (ep.download || '/api/labs/3d-lab/download.php') + '?id=' + encodeURIComponent(job.public_id) + '&format=glb';
+        var base = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+        var glbPath = (ep.download || '/api/labs/3d-lab/download.php') + '?id=' + encodeURIComponent(job.public_id) + '&format=glb&inline=1';
+        var glbUrl = glbPath.indexOf('/') === 0 ? base + glbPath : glbPath;
+        var dlPath = (ep.download || '/api/labs/3d-lab/download.php') + '?id=' + encodeURIComponent(job.public_id) + '&format=glb';
+        var dlUrl = dlPath.indexOf('/') === 0 ? base + dlPath : dlPath;
         if (el.placeholder) el.placeholder.style.display = 'none';
         if (el.viewerWrap) el.viewerWrap.style.display = 'block';
         if (el.modelViewer) {
-            el.modelViewer.setAttribute('src', glbUrl);
+            if (state.glbBlobUrl) { URL.revokeObjectURL(state.glbBlobUrl); state.glbBlobUrl = null; }
+            fetch(glbUrl, { credentials: 'same-origin' })
+                .then(function (r) { return r.ok ? r.blob() : Promise.reject(new Error('Failed to load GLB')); })
+                .then(function (blob) {
+                    state.glbBlobUrl = URL.createObjectURL(blob);
+                    el.modelViewer.setAttribute('src', state.glbBlobUrl);
+                })
+                .catch(function () {
+                    el.modelViewer.setAttribute('src', glbUrl);
+                });
         }
         if (el.resultActions) { el.resultActions.style.display = 'block'; }
         if (el.downloadBtn) { el.downloadBtn.href = dlUrl; el.downloadBtn.classList.remove('disabled'); }
