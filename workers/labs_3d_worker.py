@@ -6,11 +6,14 @@ Follows the same architecture as instantmesh_worker.py.
 Pipeline:
 - Lease job from knd_labs_3d_jobs
 - Run run_labs_3d_job.py (downloads input from web, ComfyUI 3D, copies GLB to storage + staging)
+- Upload GLB and preview to hosting (web on hosting, worker local)
 - Update status, paths, meta
 
 Env: KND_DB_HOST, KND_DB_PORT, KND_DB_NAME, KND_DB_USER, KND_DB_PASS
       WORKER_SLEEP_SECONDS (default 5)
-      LABS_3D_STALE_MINUTES (default 30, jobs in processing longer = abandoned)
+      LABS_3D_STALE_MINUTES (default 30)
+      KND_WORKER_TOKEN (required for upload to hosting)
+      PUBLIC_SITE_BASE_URL (default https://kndstore.com)
 """
 from __future__ import annotations
 
@@ -21,9 +24,13 @@ import sys
 import time
 from pathlib import Path
 
+import requests
+
 from _db_common import db_connect, ensure_connection, import_db_driver, to_rel_storage
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+UPLOAD_BASE = os.getenv("PUBLIC_SITE_BASE_URL", "https://kndstore.com").rstrip("/")
+WORKER_TOKEN = os.getenv("KND_WORKER_TOKEN", "").strip()
 STALE_MINUTES = max(5, int(os.getenv("LABS_3D_STALE_MINUTES", "30")))
 
 
@@ -95,6 +102,42 @@ def _mark_failed(conn, job_id, err_msg: str):
     conn.commit()
 
 
+def _upload_output_to_hosting(public_id: str, glb_path: Path, preview_path: Path | None) -> str | None:
+    """Upload GLB and preview to hosting. Returns error message or None on success."""
+    if not WORKER_TOKEN:
+        return "KND_WORKER_TOKEN not set (required for upload to hosting)"
+    glb_path = Path(glb_path)
+    if not glb_path.is_file():
+        return f"GLB file not found: {glb_path}"
+    url = f"{UPLOAD_BASE}/api/labs/3d-lab/upload-output.php"
+    headers = {"X-KND-WORKER-TOKEN": WORKER_TOKEN}
+    fds = []
+    try:
+        files = [
+            ("public_id", (None, public_id)),
+            ("glb", (f"{public_id}.glb", open(glb_path, "rb"), "model/gltf-binary")),
+        ]
+        fds.append(files[1][1][1])
+        if preview_path and Path(preview_path).is_file():
+            ext = Path(preview_path).suffix or ".webp"
+            mime = "image/webp" if ext == ".webp" else ("image/png" if ext == ".png" else "image/jpeg")
+            fo = open(preview_path, "rb")
+            fds.append(fo)
+            files.append(("preview", (f"{public_id}{ext}", fo, mime)))
+        r = requests.post(url, headers=headers, files=files, timeout=120)
+        r.raise_for_status()
+        data = r.json()
+        return None if data.get("ok") else data.get("error", "Upload failed")
+    except Exception as e:
+        return str(e)
+    finally:
+        for fd in fds:
+            try:
+                fd.close()
+            except Exception:
+                pass
+
+
 def process_job(conn, job: dict):
     if not job.get("input_image_path"):
         _mark_failed(conn, job["id"], "Image-to-3D mode required; text-only not supported yet")
@@ -147,6 +190,15 @@ def process_job(conn, job: dict):
         err = str(out.get("error", "Unknown"))
         _mark_failed(conn, job["id"], err)
         return conn
+
+    glb_abs = out.get("glb_path")
+    prev_abs = out.get("preview_path")
+    if glb_abs and WORKER_TOKEN:
+        err = _upload_output_to_hosting(job["public_id"], Path(glb_abs), Path(prev_abs) if prev_abs else None)
+        if err:
+            _log(f"upload to hosting failed: {err}")
+            _mark_failed(conn, job["id"], f"Generated but upload to hosting failed: {err}")
+            return conn
 
     glb_rel = out.get("glb_path_rel")
     prev_rel = out.get("preview_path_rel")

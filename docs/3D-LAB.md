@@ -53,11 +53,12 @@ python workers/labs_3d_worker.py
 | STORAGE_PUBLIC_PREFIX | /storage | Prefix (optional, for path-based URL) |
 | LABS_3D_INPUT_URL_TEMPLATE | {base}/api/labs/3d-lab/input.php?id={public_id} | URL template for input download |
 | LABS_3D_STALE_MINUTES | 30 | Jobs in `processing` longer = abandoned (marked failed on worker start) |
+| **KND_WORKER_TOKEN** | - | **Required** when web on hosting + worker local. Same as `config/worker_secrets.local.php` on server. Used to upload GLB/preview to hosting. |
 
 ## Architecture
 
 - **Web** (hosting) – 3D Lab page, create/status/history/download API. Input images stored in storage.
-- **Worker** (local PC) – Polls DB, downloads input from `input.php`, runs `run_labs_3d_job.py`
+- **Worker** (local PC) – Polls DB, downloads input from `input.php`, runs `run_labs_3d_job.py`, **uploads** GLB+preview to hosting
 - **ComfyUI 3D** (local PC) – Hunyuan 3D 2.1, port 8190
 - **Staging** – `F:\KND\output` (local). Not the public URL. For future publish step.
 
@@ -72,13 +73,25 @@ python workers/labs_3d_worker.py
    - POSTs to ComfyUI /prompt
    - Polls /history until done
    - Locates GLB in ComfyUI output
-   - Copies to storage (for download) and staging (F:\KND\output)
-4. Worker updates job: status, glb_path, preview_path, meta_json
+   - Copies to storage (local) and staging (F:\KND\output)
+4. Worker **uploads** GLB and preview to `POST /api/labs/3d-lab/upload-output.php` (X-KND-WORKER-TOKEN)
+5. Worker updates job: status, glb_path, preview_path, meta_json
 
 ## Workflows
 
 - **generate fast 3d.json** – Image→3D, Hy3D21ExportMesh, outputs `3D/Hy3D_xxxxx_.glb`
 - **3d premium.json** – Remesh + texture; current JSON has no ExportMesh. Use fast until premium is updated.
+
+## Backfill (jobs completed before upload-to-hosting)
+
+For jobs that completed when the worker did not yet upload to hosting, run:
+
+```bash
+set KND_WORKER_TOKEN=your_token_from_worker_secrets
+python workers/upload_3d_output_backfill.py c772774c-cc9e-5ddf-cdbc-5a3b5af43c07 631ecbdc-21c1-5350-9755-3dfcbd817f2e
+```
+
+Ensure `config/worker_secrets.local.php` exists on the server with the same token.
 
 ## TODO
 
