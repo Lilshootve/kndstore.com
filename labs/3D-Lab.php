@@ -149,9 +149,14 @@ echo generateHeader($toolName . ' | KND Labs', 'Create optimized 3D models from 
             </div>
           </div>
 
-          <button type="submit" class="labs-gen-btn w-100" id="l3d-submit">
-            <i class="fas fa-cube me-2"></i>Generate 3D
-          </button>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary flex-grow-1" id="l3d-view-image" style="display:none;">
+              <i class="fas fa-image me-2"></i>View in viewer
+            </button>
+            <button type="submit" class="labs-gen-btn flex-grow-1" id="l3d-submit">
+              <i class="fas fa-cube me-2"></i>Generate 3D
+            </button>
+          </div>
         </form>
       </aside>
 
@@ -179,6 +184,9 @@ echo generateHeader($toolName . ' | KND Labs', 'Create optimized 3D models from 
             </div>
           </div>
           <div id="l3d-viewer-wrap" style="display:none; min-height:320px;">
+            <div id="l3d-image-preview-wrap" class="d-none d-flex align-items-center justify-content-center" style="min-height:320px; background:#1a1a2e;">
+              <img id="l3d-viewer-image" alt="Preview" class="img-fluid" style="max-height:320px; max-width:100%; object-fit:contain;">
+            </div>
             <model-viewer id="l3d-model-viewer" camera-controls auto-rotate interaction-prompt="none" style="width:100%; height:320px;"></model-viewer>
             <div id="l3d-viewer-toolbar" class="d-flex flex-wrap gap-2 mt-2">
               <button type="button" id="l3d-wireframe" class="btn btn-sm btn-outline-secondary">Wireframe</button>

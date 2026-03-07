@@ -35,6 +35,9 @@
         historyPlaceholder: document.getElementById('l3d-history-placeholder'),
         historyList: document.getElementById('l3d-history-list'),
         recentCreationsGrid: document.getElementById('l3d-recent-creations-grid'),
+        viewerImageWrap: document.getElementById('l3d-image-preview-wrap'),
+        viewerImage: document.getElementById('l3d-viewer-image'),
+        viewImageBtn: document.getElementById('l3d-view-image'),
     };
 
     function toast(msg, type) {
@@ -85,6 +88,7 @@
         if (el.uploadWrap) el.uploadWrap.style.display = (m === 'image' || m === 'text_image') ? 'block' : 'none';
         if (el.recentWrap) el.recentWrap.style.display = (m === 'recent') ? 'block' : 'none';
         if (m === 'recent') loadRecentForPick();
+        updateViewImageButton();
     }
 
     function setFile(file) {
@@ -104,6 +108,7 @@
             reader.readAsDataURL(file);
         }
         if (el.sourceId) el.sourceId.value = '';
+        updateViewImageButton();
     }
 
     function resetFile() {
@@ -112,14 +117,16 @@
         if (el.preview) { el.preview.src = ''; el.preview.alt = 'Preview'; }
         if (el.previewWrap) el.previewWrap.style.display = 'none';
         if (el.dropzoneContent) el.dropzoneContent.style.display = 'block';
+        updateViewImageButton();
     }
 
-    function selectRecent(id) {
-        state.selectedRecent = { id: id };
+    function selectRecent(id, previewUrl) {
+        state.selectedRecent = { id: id, preview_url: previewUrl || null };
         state.file = null;
         resetFile();
         if (el.sourceId) el.sourceId.value = String(id);
         if (el.sourceType) el.sourceType.value = '3d_lab';
+        updateViewImageButton();
     }
 
     function canSubmit() {
@@ -132,6 +139,41 @@
         if (state.mode === 'image') return !!state.file;
         if (state.mode === 'recent') return !!state.selectedRecent;
         return false;
+    }
+
+    function canViewImage() {
+        if (state.file) return true;
+        if (state.selectedRecent && state.selectedRecent.preview_url) return true;
+        return false;
+    }
+
+    function getImageUrlForViewer() {
+        if (state.file && el.preview && el.preview.src) return el.preview.src;
+        if (state.selectedRecent && state.selectedRecent.preview_url) {
+            var base = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+            var url = state.selectedRecent.preview_url;
+            return url.indexOf('/') === 0 ? base + url : url;
+        }
+        return null;
+    }
+
+    function updateViewImageButton() {
+        if (el.viewImageBtn) {
+            el.viewImageBtn.style.display = canViewImage() ? 'inline-block' : 'none';
+        }
+    }
+
+    function showImageInViewer() {
+        var url = getImageUrlForViewer();
+        if (!url || !el.viewerWrap || !el.viewerImageWrap || !el.viewerImage) return;
+        if (el.placeholder) el.placeholder.style.display = 'none';
+        el.viewerWrap.style.display = 'block';
+        el.viewerImage.src = url;
+        el.viewerImageWrap.classList.remove('d-none');
+        el.viewerImageWrap.classList.add('d-flex');
+        if (el.modelViewer) { el.modelViewer.style.display = 'none'; el.modelViewer.removeAttribute('src'); }
+        if (el.resultActions) el.resultActions.style.display = 'none';
+        el.viewerWrap.querySelectorAll('.l3d-viewer-err').forEach(function (n) { n.remove(); });
     }
 
     function loadRecentForPick() {
@@ -150,14 +192,18 @@
                 var html = jobs.map(function (j) {
                     var sel = state.selectedRecent && state.selectedRecent.id === j.id ? ' selected' : '';
                     var prevSrc = j.preview_url ? (j.preview_url.indexOf('/') === 0 ? base + j.preview_url : j.preview_url) : '';
-                    return '<div class="col-4 col-md-3"><div class="labs-3d-recent-card p-1' + sel + '" data-id="' + j.id + '" style="cursor:pointer; aspect-ratio:1;">' +
+                    var fullPreview = j.preview_url ? (j.preview_url.indexOf('/') === 0 ? base + j.preview_url : j.preview_url) : '';
+                    var dataPreview = fullPreview ? (' data-preview-url="' + fullPreview.replace(/"/g, '&quot;') + '"') : '';
+                    return '<div class="col-4 col-md-3"><div class="labs-3d-recent-card p-1' + sel + '" data-id="' + j.id + '"' + dataPreview + ' style="cursor:pointer; aspect-ratio:1;">' +
                         (prevSrc ? '<img src="' + prevSrc + '" alt="" class="w-100 h-100" style="object-fit:cover;" loading="lazy">' : '<div class="w-100 h-100 bg-dark d-flex align-items-center justify-content-center"><i class="fas fa-cube text-white-50"></i></div>') +
                         '</div><small class="text-white-50 d-block text-truncate">' + (j.title || '') + '</small></div>';
                 }).join('');
                 el.recentGrid.innerHTML = html;
                 el.recentGrid.querySelectorAll('.labs-3d-recent-card').forEach(function (n) {
                     n.addEventListener('click', function () {
-                        selectRecent(parseInt(n.getAttribute('data-id'), 10));
+                        var id = parseInt(n.getAttribute('data-id'), 10);
+                        var prevUrl = n.getAttribute('data-preview-url') || '';
+                        selectRecent(id, prevUrl);
                         el.recentGrid.querySelectorAll('.labs-3d-recent-card').forEach(function (x) { x.classList.remove('selected'); });
                         n.classList.add('selected');
                     });
@@ -221,6 +267,8 @@
         var dlUrl = dlPath.indexOf('/') === 0 ? base + dlPath : dlPath;
         if (el.placeholder) el.placeholder.style.display = 'none';
         if (el.viewerWrap) el.viewerWrap.style.display = 'block';
+        if (el.viewerImageWrap) { el.viewerImageWrap.classList.add('d-none'); el.viewerImageWrap.classList.remove('d-flex'); }
+        if (el.modelViewer) el.modelViewer.style.display = 'block';
         if (el.resultActions) { el.resultActions.style.display = 'block'; }
         if (el.downloadBtn) { el.downloadBtn.href = dlUrl; el.downloadBtn.classList.remove('disabled'); }
         if (!el.modelViewer) return;
@@ -397,14 +445,17 @@
 
         el.form.addEventListener('submit', function (e) { e.preventDefault(); onSubmit(); });
         if (el.submit) el.submit.addEventListener('click', function (e) { e.preventDefault(); onSubmit(); });
+        if (el.viewImageBtn) el.viewImageBtn.addEventListener('click', function (e) { e.preventDefault(); showImageInViewer(); });
 
         var fsBtn = document.getElementById('l3d-fullscreen');
-        if (fsBtn && el.modelViewer) fsBtn.addEventListener('click', function () {
-            if (el.modelViewer.requestFullscreen) el.modelViewer.requestFullscreen();
+        if (fsBtn) fsBtn.addEventListener('click', function () {
+            var target = (el.viewerImageWrap && !el.viewerImageWrap.classList.contains('d-none')) ? el.viewerImageWrap : el.modelViewer;
+            if (target && target.requestFullscreen) target.requestFullscreen();
         });
     }
 
     bindEvents();
     toggleModeUI();
     loadHistory();
+    updateViewImageButton();
 })();
