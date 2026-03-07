@@ -7,7 +7,7 @@ set "KND_DB_PASS=Ce140501."
 set "KND_DB_NAME=u354862096_kndstore"
 
 set COMFYUI_3D_URL=http://127.0.0.1:8190
-set COMFYUI_3D_OUTPUT_ROOT=C:\AI\Comfyui3d\Comfyui3d\ComfyUI_windows_portable\ComfyUI\output
+set COMFYUI_3D_OUTPUT_ROOT=F:\KND\output
 set COMFYUI_3D_INPUT_ROOT=C:\AI\Comfyui3d\Comfyui3d\ComfyUI_windows_portable\ComfyUI\input
 set LOCAL_3D_STAGING_DIR=F:\KND\output
 set COMFYUI_3D_WORKFLOW_FAST=E:\repo\kndstore\workflows\generate fast 3d.json

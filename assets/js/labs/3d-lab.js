@@ -3,11 +3,11 @@
 
     var cfg = window.KND_3D_LAB || {};
     var ep = cfg.endpoints || {};
-    var state = { mode: 'image', file: null, selectedRecent: null, pollTimer: null, currentJobId: null, glbBlobUrl: null, viewerErrorHandler: null };
+    var state = { mode: 'image', file: null, selectedRecent: null, pollTimer: null, currentJobId: null, glbBlobUrl: null, viewerErrorHandler: null, uploadedGlbFile: null };
 
     var el = {
         form: document.getElementById('labs-3d-form'),
-        modeRadios: ['l3d-mode-text', 'l3d-mode-image', 'l3d-mode-text-image', 'l3d-mode-recent'],
+        modeSelect: document.getElementById('l3d-mode-select'),
         modeInput: document.getElementById('l3d-mode'),
         promptWrap: document.getElementById('l3d-prompt-wrap'),
         negativeWrap: document.getElementById('l3d-negative-wrap'),
@@ -83,6 +83,7 @@
 
     function toggleModeUI() {
         var m = state.mode;
+        if (m === 'text') m = 'image';
         if (el.promptWrap) el.promptWrap.style.display = (m === 'image') ? 'none' : 'block';
         if (el.negativeWrap) el.negativeWrap.style.display = (m === 'image') ? 'none' : 'block';
         if (el.uploadWrap) el.uploadWrap.style.display = (m === 'image' || m === 'text_image') ? 'block' : 'none';
@@ -92,29 +93,70 @@
     }
 
     function setFile(file) {
-        if (!file || !file.type || !file.type.startsWith('image/')) return;
-        state.file = file;
+        if (!file || !file.type) return;
+        var isImage = file.type.startsWith('image/');
+        var isGlb = file.type === 'model/gltf-binary' || (file.name && file.name.toLowerCase().endsWith('.glb'));
+        if (!isImage && !isGlb) return;
+        state.file = isImage ? file : null;
+        state.uploadedGlbFile = isGlb ? file : null;
         state.selectedRecent = null;
-        if (el.preview && el.previewWrap && el.dropzoneContent) {
-            el.preview.onerror = function () { el.preview.alt = 'Preview failed'; };
-            var reader = new FileReader();
-            reader.onload = function () {
-                el.preview.onerror = null;
-                el.preview.src = reader.result;
-                el.preview.alt = 'Preview';
+        if (isGlb) {
+            if (el.previewWrap && el.dropzoneContent) {
                 el.previewWrap.style.display = 'block';
                 el.dropzoneContent.style.display = 'none';
-            };
-            reader.readAsDataURL(file);
+                if (el.preview) el.preview.style.display = 'none';
+                var glbLabel = el.previewWrap.querySelector('.l3d-file-label');
+                if (!glbLabel) {
+                    glbLabel = document.createElement('span');
+                    glbLabel.className = 'l3d-file-label text-white-50 small d-block mb-2';
+                    el.previewWrap.insertBefore(glbLabel, el.previewWrap.firstChild);
+                }
+                glbLabel.textContent = file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)';
+                glbLabel.style.display = 'block';
+            }
+            showGlbInViewer(file);
+        } else {
+            if (el.preview && el.previewWrap && el.dropzoneContent) {
+                el.preview.style.display = 'block';
+                var glbLabel = el.previewWrap.querySelector('.l3d-file-label');
+                if (glbLabel) glbLabel.style.display = 'none';
+                el.preview.onerror = function () { el.preview.alt = 'Preview failed'; };
+                var reader = new FileReader();
+                reader.onload = function () {
+                    el.preview.onerror = null;
+                    el.preview.src = reader.result;
+                    el.preview.alt = 'Preview';
+                    el.previewWrap.style.display = 'block';
+                    el.dropzoneContent.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
         }
         if (el.sourceId) el.sourceId.value = '';
         updateViewImageButton();
     }
 
+    function showGlbInViewer(file) {
+        if (!file || !el.modelViewer || !el.viewerWrap) return;
+        var url = URL.createObjectURL(file);
+        if (state.glbBlobUrl) URL.revokeObjectURL(state.glbBlobUrl);
+        state.glbBlobUrl = url;
+        if (el.placeholder) el.placeholder.style.display = 'none';
+        el.viewerWrap.style.display = 'block';
+        if (el.viewerImageWrap) { el.viewerImageWrap.classList.add('d-none'); el.viewerImageWrap.classList.remove('d-flex'); }
+        if (el.modelViewer) { el.modelViewer.style.display = 'block'; el.modelViewer.setAttribute('src', url); }
+        if (el.resultActions) el.resultActions.style.display = 'none';
+        el.viewerWrap.querySelectorAll('.l3d-viewer-err').forEach(function (n) { n.remove(); });
+    }
+
     function resetFile() {
         state.file = null;
+        state.uploadedGlbFile = null;
+        if (state.glbBlobUrl) { URL.revokeObjectURL(state.glbBlobUrl); state.glbBlobUrl = null; }
         if (el.fileInput) el.fileInput.value = '';
-        if (el.preview) { el.preview.src = ''; el.preview.alt = 'Preview'; }
+        if (el.preview) { el.preview.src = ''; el.preview.alt = 'Preview'; el.preview.style.display = 'block'; }
+        var glbLabel = el.previewWrap && el.previewWrap.querySelector('.l3d-file-label');
+        if (glbLabel) glbLabel.style.display = 'none';
         if (el.previewWrap) el.previewWrap.style.display = 'none';
         if (el.dropzoneContent) el.dropzoneContent.style.display = 'block';
         updateViewImageButton();
@@ -143,11 +185,13 @@
 
     function canViewImage() {
         if (state.file) return true;
+        if (state.uploadedGlbFile) return true;
         if (state.selectedRecent && state.selectedRecent.preview_url) return true;
         return false;
     }
 
     function getImageUrlForViewer() {
+        if (state.uploadedGlbFile) return null;
         if (state.file && el.preview && el.preview.src) return el.preview.src;
         if (state.selectedRecent && state.selectedRecent.preview_url) {
             var base = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
@@ -164,6 +208,7 @@
     }
 
     function showImageInViewer() {
+        if (state.uploadedGlbFile) { showGlbInViewer(state.uploadedGlbFile); return; }
         var url = getImageUrlForViewer();
         if (!url || !el.viewerWrap || !el.viewerImageWrap || !el.viewerImage) return;
         if (el.placeholder) el.placeholder.style.display = 'none';
@@ -236,8 +281,8 @@
                             var prev = prevSrc ? '<img src="' + prevSrc + '" alt="" class="w-100 h-100" style="object-fit:cover;" loading="lazy">' : '<div class="w-100 h-100 d-flex align-items-center justify-content-center"><i class="fas fa-cube fa-2x text-white-50"></i></div>';
                             var dlHref = j.glb_url ? (base + (j.glb_url.indexOf('/') === 0 ? j.glb_url : '/' + j.glb_url)) : '';
                             var dlAttrs = dlHref ? ' href="' + dlHref + '" download="3d-lab-' + (j.public_id || '') + '.glb"' : ' class="btn btn-sm btn-success disabled" aria-disabled="true"';
-                            var dlBtn = dlHref ? '<a ' + dlAttrs + ' class="btn btn-sm btn-success">Download</a>' : '<span class="btn btn-sm btn-secondary disabled">Download</span>';
-                            return '<div class="knd-showcase-card" data-job-id="' + j.public_id + '"><div class="knd-showcase-card__img" style="aspect-ratio:1;">' + prev + '</div><div class="knd-showcase-card__body p-2"><div class="small text-white-50">' + (j.title || '') + '</div><div class="d-flex gap-1 mt-1"><a href="#" class="btn btn-sm btn-outline-light l3d-view-job" data-id="' + j.public_id + '">View</a>' + dlBtn + '</div></div></div>';
+                            var dlBtn = dlHref ? '<a ' + dlAttrs + ' class="btn btn-sm btn-outline-success l3d-dl-job"><i class="fas fa-download me-1"></i>Download GLB</a>' : '<span class="btn btn-sm btn-outline-secondary disabled">Download</span>';
+                            return '<div class="knd-showcase-card" data-job-id="' + j.public_id + '"><div class="knd-showcase-card__img" style="aspect-ratio:1;">' + prev + '</div><div class="knd-showcase-card__body p-2"><div class="small text-white-50 text-truncate">' + (j.title || '') + '</div><div class="d-flex flex-wrap gap-1 mt-2"><a href="#" class="btn btn-sm btn-outline-light l3d-view-job" data-id="' + j.public_id + '"><i class="fas fa-eye me-1"></i>View in viewer</a>' + dlBtn + '</div></div></div>';
                         }).join('');
                     }
                 }
@@ -415,16 +460,15 @@
     function bindEvents() {
         if (!el.form) return;
 
-        el.modeRadios.forEach(function (id, i) {
-            var r = document.getElementById(id);
-            if (!r) return;
-            if (r.disabled) return;
-            r.addEventListener('change', function () {
-                state.mode = ['text', 'image', 'text_image', 'recent'][i];
+        if (el.modeSelect) {
+            el.modeSelect.addEventListener('change', function () {
+                var val = el.modeSelect.value;
+                if (val === 'text') return;
+                state.mode = val;
                 if (el.modeInput) el.modeInput.value = state.mode;
                 toggleModeUI();
             });
-        });
+        }
 
         if (el.dropzone) {
             el.dropzone.addEventListener('click', function () { if (el.fileInput) el.fileInput.click(); });
@@ -434,12 +478,18 @@
                 e.preventDefault();
                 el.dropzone.classList.remove('is-dragover');
                 var f = e.dataTransfer && e.dataTransfer.files ? e.dataTransfer.files[0] : null;
-                if (f && /^image\/(jpeg|jpg|png|webp)$/i.test(f.type)) setFile(f);
+                if (f) {
+                    var ok = /^image\/(jpeg|jpg|png|webp)$/i.test(f.type) || f.type === 'model/gltf-binary' || (f.name && f.name.toLowerCase().endsWith('.glb'));
+                    if (ok) setFile(f);
+                }
             });
         }
         if (el.fileInput) el.fileInput.addEventListener('change', function () {
             var f = el.fileInput.files && el.fileInput.files[0];
-            if (f) setFile(f);
+            if (f) {
+                var ok = /^image\/(jpeg|jpg|png|webp)$/i.test(f.type) || f.type === 'model/gltf-binary' || (f.name && f.name.toLowerCase().endsWith('.glb'));
+                if (ok) setFile(f);
+            }
         });
         if (el.removeImg) el.removeImg.addEventListener('click', function (e) { e.stopPropagation(); resetFile(); });
 

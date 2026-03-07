@@ -38,13 +38,12 @@ echo generateHeader($toolName . ' | KND Labs', 'Create optimized 3D models from 
     <div class="labs-3d-hero glass-card-neon p-4 mt-4 mb-4">
       <h2 class="text-white mb-2"><i class="fas fa-cube me-2"></i>3D Lab</h2>
       <p class="text-white-50 mb-2">Create optimized 3D models from text, images, or both. Generate clean GLB previews with smart presets and a dedicated 3D pipeline.</p>
-      <div class="d-flex flex-wrap gap-2 mb-2">
+      <div class="d-flex flex-wrap gap-2 mb-0">
         <span class="badge bg-success">Safe mode only</span>
         <span class="badge bg-secondary">No celebrity likeness</span>
         <span class="badge bg-secondary">No copyrighted content</span>
         <span class="badge bg-secondary">Single subject preferred</span>
       </div>
-      <p class="text-white-50 small mb-0">Best results: single subject, clean images, transparent background when possible. Tool optimizes for usable GLB output, not AAA production assets.</p>
     </div>
 
     <div class="knd-workspace mt-4">
@@ -55,15 +54,14 @@ echo generateHeader($toolName . ' | KND Labs', 'Create optimized 3D models from 
           <input type="hidden" name="source_recent_job_id" id="l3d-source-id" value="">
           <input type="hidden" name="source_recent_type" id="l3d-source-type" value="3d_lab">
 
-          <div class="btn-group w-100 mb-3" role="group">
-            <input type="radio" class="btn-check" name="mode-radio" id="l3d-mode-text" value="text" disabled>
-            <label class="btn btn-outline-secondary btn-sm opacity-75" for="l3d-mode-text" title="Coming soon">Text <span class="badge bg-secondary ms-1">Soon</span></label>
-            <input type="radio" class="btn-check" name="mode-radio" id="l3d-mode-image" value="image" checked>
-            <label class="btn btn-outline-secondary btn-sm" for="l3d-mode-image">Image</label>
-            <input type="radio" class="btn-check" name="mode-radio" id="l3d-mode-text-image" value="text_image">
-            <label class="btn btn-outline-secondary btn-sm" for="l3d-mode-text-image">Text+Image</label>
-            <input type="radio" class="btn-check" name="mode-radio" id="l3d-mode-recent" value="recent">
-            <label class="btn btn-outline-secondary btn-sm" for="l3d-mode-recent">Recent</label>
+          <div class="mb-3">
+            <label class="form-label text-white-50 knd-label">Input mode</label>
+            <select id="l3d-mode-select" class="form-select knd-select text-white">
+              <option value="image" selected>Image</option>
+              <option value="text_image">Text + Image</option>
+              <option value="recent">Recent jobs</option>
+              <option value="text" disabled>Text only (coming soon)</option>
+            </select>
           </div>
 
           <div id="l3d-prompt-wrap" class="mb-3">
@@ -76,13 +74,13 @@ echo generateHeader($toolName . ' | KND Labs', 'Create optimized 3D models from 
           </div>
 
           <div id="l3d-upload-wrap" class="mb-3" style="display:none;">
-            <label class="form-label text-white-50 knd-label">Image upload</label>
+            <label class="form-label text-white-50 knd-label">Image or GLB upload</label>
             <div id="l3d-dropzone" class="labs-3d-dropzone rounded border border-secondary p-4 text-center">
-              <input type="file" id="l3d-file" name="image" accept="image/jpeg,image/jpg,image/png,image/webp" hidden>
+              <input type="file" id="l3d-file" name="image" accept="image/jpeg,image/jpg,image/png,image/webp,.glb,model/gltf-binary" hidden>
               <div id="l3d-dropzone-content">
                 <i class="fas fa-cloud-upload-alt fa-2x text-white-50 mb-2"></i>
-                <p class="mb-1 text-white-50">Drop image or click</p>
-                <small class="text-white-50">JPG, PNG, WEBP · max 10MB · transparent background recommended</small>
+                <p class="mb-1 text-white-50">Drop image or GLB, or click</p>
+                <small class="text-white-50">Images: JPG, PNG, WEBP · 3D: GLB · max 10MB</small>
               </div>
               <div id="l3d-preview-wrap" style="display:none;">
                 <img id="l3d-preview" alt="Preview" class="img-fluid rounded" style="max-height:160px;">
@@ -149,11 +147,11 @@ echo generateHeader($toolName . ' | KND Labs', 'Create optimized 3D models from 
             </div>
           </div>
 
-          <div class="d-flex gap-2">
-            <button type="button" class="btn btn-outline-secondary flex-grow-1" id="l3d-view-image" style="display:none;">
-              <i class="fas fa-image me-2"></i>View in viewer
+          <div class="d-flex flex-column gap-2">
+            <button type="button" class="btn btn-outline-light btn-sm" id="l3d-view-image" style="display:none;">
+              <i class="fas fa-eye me-2"></i>View in viewer
             </button>
-            <button type="submit" class="labs-gen-btn flex-grow-1" id="l3d-submit">
+            <button type="submit" class="labs-gen-btn w-100" id="l3d-submit">
               <i class="fas fa-cube me-2"></i>Generate 3D
             </button>
           </div>
@@ -230,6 +228,7 @@ echo generateHeader($toolName . ' | KND Labs', 'Create optimized 3D models from 
       <div class="knd-card-grid" id="l3d-recent-creations-grid">
         <p class="knd-muted small mb-0"><i class="fas fa-spinner fa-spin me-1"></i>Loading...</p>
       </div>
+      <p class="text-white-50 small mt-3 mb-0" style="opacity:0.85;">Best results: single subject, clean images, transparent background when possible. Tool optimizes for usable GLB output, not AAA production assets.</p>
     </div>
   </div>
 </section>

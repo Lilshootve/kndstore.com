@@ -2,6 +2,8 @@
  * 3D Lab - Page styles
  */
 .labs-3d-hero .badge { font-size: 0.75rem; }
+#l3d-mode-select { min-width: 100%; }
+.knd-showcase-card .btn { font-size: 0.8rem; white-space: nowrap; }
 .labs-3d-dropzone { cursor: pointer; transition: border-color 0.2s, background 0.2s; }
 .labs-3d-dropzone:hover, .labs-3d-dropzone.is-dragover {
   border-color: var(--knd-neon-cyan, #00d4ff) !important;
