@@ -20,30 +20,46 @@ function labs_3d_fail(): void {
 }
 
 /**
- * Normalize path from DB: may be relative (labs/3d-lab/...) or absolute/weird from worker.
- * Always return a relative path with forward slashes for storage_path().
+ * Normalize path from DB for storage_path().
+ * For format=glb: only labs/3d-lab/output/*.glb
+ * For format=preview: only labs/3d-lab/preview/*.(webp|png|jpg|jpeg)
+ * Rejects mismatched directories and wrong extensions; returns canonical fallback if path untrusted.
  */
 function labs_3d_normalize_storage_path(string $path, string $publicId, string $format): string {
     $path = trim(str_replace('\\', '/', $path));
-    if ($path === '') {
-        return $format === 'glb'
-            ? (LABS_3D_STORAGE_OUTPUT . '/' . $publicId . '.glb')
-            : (LABS_3D_STORAGE_PREVIEW . '/' . $publicId . '.webp');
+
+    if ($format === 'glb') {
+        $allowedDir = LABS_3D_STORAGE_OUTPUT;
+        $fallback = $allowedDir . '/' . $publicId . '.glb';
+        if ($path === '') {
+            return $fallback;
+        }
+        // Exact relative path: labs/3d-lab/output/<name>.glb
+        if (preg_match('#^labs/3d-lab/output/[^\s\\\\/]+\.glb$#i', $path)) {
+            return $path;
+        }
+        // Absolute or prefixed: extract output/<name>.glb
+        if (preg_match('#labs/3d-lab/output/([^\s\\\\/]+\.glb)$#i', $path, $m)) {
+            return $allowedDir . '/' . $m[1];
+        }
+        return $fallback;
     }
-    // If path already looks like our relative storage path, use it
-    if (preg_match('#^labs/3d-lab/(output|preview)/[^\s\\\\/]+\.(glb|webp|png|jpe?g)$#i', $path)) {
+
+    // format === 'preview'
+    $allowedDir = LABS_3D_STORAGE_PREVIEW;
+    $fallback = $allowedDir . '/' . $publicId . '.webp';
+    if ($path === '') {
+        return $fallback;
+    }
+    // Exact relative path: labs/3d-lab/preview/<name>.(webp|png|jpg|jpeg)
+    if (preg_match('#^labs/3d-lab/preview/[^\s\\\\/]+\.(webp|png|jpe?g)$#i', $path)) {
         return $path;
     }
-    // Extract relative part if DB stored absolute or path with prefix
-    if (preg_match('#(labs/3d-lab/(?:output|preview)/[^\s\\\\/]+\.(?:glb|webp|png|jpe?g))$#i', $path, $m)) {
-        return $m[1];
+    // Absolute or prefixed: extract preview/<name>.(webp|png|jpg|jpeg)
+    if (preg_match('#labs/3d-lab/preview/([^\s\\\\/]+\.(webp|png|jpe?g))$#i', $path, $m)) {
+        return $allowedDir . '/' . $m[1];
     }
-    // Fallback: only filename or uuid — build canonical path
-    $base = basename($path);
-    if ($format === 'glb') {
-        return LABS_3D_STORAGE_OUTPUT . '/' . (pathinfo($base, PATHINFO_EXTENSION) === 'glb' ? $base : $publicId . '.glb');
-    }
-    return LABS_3D_STORAGE_PREVIEW . '/' . (pathinfo($base, PATHINFO_EXTENSION) ? $base : $publicId . '.webp');
+    return $fallback;
 }
 
 try {
@@ -81,14 +97,24 @@ try {
         labs_3d_fail();
     }
 
-    $rawPath = $format === 'glb' ? ($job['glb_path'] ?? null) : ($job['preview_path'] ?? $job['glb_path'] ?? null);
-    if (!$rawPath && $format === 'preview') {
-        $rawPath = null;
+    $rawPath = $format === 'glb'
+        ? ($job['glb_path'] ?? null)
+        : ($job['preview_path'] ?? null);
+
+    if ($format === 'preview' && empty($rawPath)) {
+        labs_3d_fail();
     }
+
     $path = labs_3d_normalize_storage_path($rawPath ?? '', $job['public_id'], $format);
     $abs = storage_path($path);
     if (!is_file($abs) || !is_readable($abs)) {
-        error_log('api/labs/3d-lab/download: file not found path=' . $path . ' abs=' . $abs . ' job_id=' . $jobId);
+        error_log(
+            '3D download missing file: job=' . $jobId .
+            ' format=' . $format .
+            ' raw=' . ($rawPath ?? 'NULL') .
+            ' normalized=' . $path .
+            ' abs=' . $abs
+        );
         labs_3d_fail();
     }
 
