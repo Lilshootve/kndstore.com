@@ -8,7 +8,9 @@
   var app = document.getElementById('ln-app');
   if (!app) return;
 
-  if (document.body) document.body.classList.add('ln-page');
+  if (document.body) {
+    document.body.classList.add('ln-page', 'knd-labs-next');
+  }
 
   var sidebar = document.getElementById('ln-sidebar');
   var editorLayout = document.getElementById('ln-editor-layout');
