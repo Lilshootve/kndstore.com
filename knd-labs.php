@@ -1,272 +1,230 @@
 <?php
+/**
+ * KND Labs - App shell (new UI). Replaces hub at /labs.
+ * Sidebar + dynamic tool content + recent jobs. Real integration with existing tools.
+ */
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 header('Expires: 0');
 
 try {
-require_once __DIR__ . '/includes/session.php';
-require_once __DIR__ . '/includes/config.php';
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/support_credits.php';
-require_once __DIR__ . '/includes/ai.php';
-require_once __DIR__ . '/includes/comfyui.php';
-require_once __DIR__ . '/includes/header.php';
-require_once __DIR__ . '/includes/footer.php';
+    require_once __DIR__ . '/includes/session.php';
+    require_once __DIR__ . '/includes/config.php';
+    require_once __DIR__ . '/includes/auth.php';
+    require_once __DIR__ . '/includes/support_credits.php';
+    require_once __DIR__ . '/includes/ai.php';
+    require_once __DIR__ . '/includes/comfyui.php';
+    require_once __DIR__ . '/includes/header.php';
+    require_once __DIR__ . '/includes/footer.php';
 
-require_login();
+    require_login();
 
-$pdo = getDBConnection();
-$balance = 0;
-$recentJobs = [];
-$labsRecentPrivate = false;
-if ($pdo) {
-    $userId = current_user_id();
-    release_available_points_if_due($pdo, $userId);
-    expire_points_if_due($pdo, $userId);
-    $balance = get_available_points($pdo, $userId);
-    $labsRecentPrivate = comfyui_user_prefers_private_recent($pdo, $userId);
-    try {
-        $recentJobs = $labsRecentPrivate
-            ? comfyui_get_user_jobs($pdo, $userId, 8)
-            : comfyui_get_recent_jobs_public($pdo, 24);
-    } catch (\Throwable $e) {
-        $recentJobs = [];
+    $pdo = getDBConnection();
+    $balance = 0;
+    $recentJobs = [];
+    $labsRecentPrivate = false;
+    if ($pdo) {
+        $userId = current_user_id();
+        release_available_points_if_due($pdo, $userId);
+        expire_points_if_due($pdo, $userId);
+        $balance = get_available_points($pdo, $userId);
+        $labsRecentPrivate = comfyui_user_prefers_private_recent($pdo, $userId);
+        try {
+            $recentJobs = $labsRecentPrivate
+                ? comfyui_get_user_jobs($pdo, $userId, 16)
+                : comfyui_get_recent_jobs_public($pdo, 20);
+        } catch (\Throwable $e) {
+            $recentJobs = [];
+        }
     }
-}
 
-$aiCss = __DIR__ . '/assets/css/ai-tools.css';
-$labsCss = __DIR__ . '/assets/css/knd-labs.css';
-$extraCss = '<link rel="stylesheet" href="/assets/css/ai-tools.css?v=' . (file_exists($aiCss) ? filemtime($aiCss) : time()) . '">';
-$extraCss .= '<link rel="stylesheet" href="/assets/css/knd-labs.css?v=' . (file_exists($labsCss) ? filemtime($labsCss) : time()) . '">';
-$seoTitle = t('labs.meta.title', 'KND Labs | KND Store');
-$seoDesc = t('labs.meta.desc', 'AI-powered asset creation: Text to Image, Upscale, Character Lab, Texture Lab, Image→3D.');
-echo generateHeader($seoTitle, $seoDesc, $extraCss);
+    $currentTool = isset($_GET['tool']) ? trim($_GET['tool']) : 'text2img';
+    $allowedTools = ['text2img', 'upscale', 'consistency', 'texture', '3d', 'character'];
+    if (!in_array($currentTool, $allowedTools, true)) {
+        $currentTool = 'text2img';
+    }
+
+    if ($currentTool === 'consistency') {
+        require_once __DIR__ . '/includes/labs_display_helper.php';
+        $refJobId = isset($_GET['reference_job_id']) ? (int) $_GET['reference_job_id'] : 0;
+        $preloadMode = trim($_GET['mode'] ?? '');
+        if (!in_array($preloadMode, ['style', 'character', 'both'], true)) $preloadMode = 'style';
+        $preloadFromJob = [];
+        $refJobs = [];
+        if ($pdo) {
+            try {
+                $uid = current_user_id();
+                $refJobs = comfyui_get_user_jobs($pdo, $uid, 20);
+                $refJobs = array_filter($refJobs, fn($j) => ($j['status'] ?? '') === 'done');
+            } catch (\Throwable $e) {
+                $refJobs = [];
+            }
+            if ($refJobId > 0) {
+                $stmt = $pdo->prepare("SELECT * FROM knd_labs_jobs WHERE id = ? AND user_id = ? AND status = 'done' LIMIT 1");
+                if ($stmt && $stmt->execute([$refJobId, $uid])) {
+                    $refRow = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if ($refRow) {
+                        $refPayload = json_decode($refRow['payload_json'] ?? '{}', true) ?: [];
+                        $preloadFromJob = [
+                            'base_prompt' => ($refRow['tool'] ?? '') === 'consistency'
+                                ? ($refPayload['base_prompt'] ?? '')
+                                : ($refRow['prompt'] ?? ''),
+                            'negative_prompt' => $refRow['negative_prompt'] ?? ($refPayload['negative_prompt'] ?? 'ugly, blurry, low quality'),
+                            'width' => $refPayload['width'] ?? 1024,
+                            'height' => $refPayload['height'] ?? 1024,
+                            'steps' => $refPayload['steps'] ?? 28,
+                            'cfg' => $refPayload['cfg'] ?? 7,
+                            'sampler' => $refPayload['sampler_name'] ?? ($refPayload['sampler'] ?? 'dpmpp_2m'),
+                            'seed' => $refPayload['seed'] ?? '',
+                        ];
+                        if (($refRow['tool'] ?? '') === 'consistency') {
+                            $preloadFromJob['scene_prompt'] = $refPayload['scene_prompt'] ?? '';
+                            if (!empty($refPayload['mode']) && in_array($refPayload['mode'], ['style', 'character', 'both'], true)) $preloadMode = $refPayload['mode'];
+                        } else {
+                            $preloadFromJob['scene_prompt'] = '';
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    $providerFilter = ($currentTool === 'text2img' && isset($_GET['provider'])) ? trim($_GET['provider']) : '';
+
+    $labsNextCss = __DIR__ . '/assets/css/labs-next.css';
+    $aiCss = __DIR__ . '/assets/css/ai-tools.css';
+    $labsCss = __DIR__ . '/assets/css/knd-labs.css';
+    $extraHead = '<script>window.KND_PRICING={"text2img":{"standard":3,"high":6},"upscale":{"2x":5,"4x":8},"character":{"base":15},"consistency":{"base":5}};</script>';
+    $extraHead .= '<link rel="stylesheet" href="/assets/css/labs-next.css?v=' . (file_exists($labsNextCss) ? filemtime($labsNextCss) : time()) . '">';
+    $extraHead .= '<link rel="stylesheet" href="/assets/css/ai-tools.css?v=' . (file_exists($aiCss) ? filemtime($aiCss) : time()) . '">';
+    $extraHead .= '<link rel="stylesheet" href="/assets/css/knd-labs.css?v=' . (file_exists($labsCss) ? filemtime($labsCss) : time()) . '">';
+
+    $seoTitle = t('labs.meta.title', 'KND Labs | KND Store');
+    $seoDesc = t('labs.meta.desc', 'AI-powered asset creation: Text to Image, Upscale, Character Lab, Texture Lab, Image→3D.');
+    echo generateHeader($seoTitle, $seoDesc, $extraHead);
 ?>
-
+<script>document.body.classList.add('ln-page', 'knd-labs-next');</script>
 <div id="particles-bg"></div>
 <?php echo generateNavigation(); ?>
 
-<section class="hero-section labs-hub-hero" style="min-height:auto; padding-top:110px; padding-bottom:50px;">
-  <div class="container">
+<div class="ln-app" id="ln-app">
+  <aside class="ln-sidebar" id="ln-sidebar">
+    <div class="ln-sidebar-head">
+      <a href="/labs" class="ln-brand" aria-label="KND Labs">
+        <span class="ln-brand-icon"><i class="fas fa-microscope"></i></span>
+        <span class="ln-brand-text">KND Labs</span>
+      </a>
+    </div>
+    <nav class="ln-nav" aria-label="Tools">
+      <ul class="ln-tools-list">
+        <li><a href="/labs?tool=text2img" class="ln-tool<?php echo $currentTool === 'text2img' ? ' ln-tool-active' : ''; ?>"<?php echo $currentTool === 'text2img' ? ' aria-current="page"' : ''; ?>><i class="fas fa-palette"></i><span>Text2Img</span></a></li>
+        <li><a href="/labs?tool=upscale" class="ln-tool<?php echo $currentTool === 'upscale' ? ' ln-tool-active' : ''; ?>"<?php echo $currentTool === 'upscale' ? ' aria-current="page"' : ''; ?>><i class="fas fa-search-plus"></i><span>Upscale</span></a></li>
+        <li><a href="/labs?tool=consistency" class="ln-tool<?php echo $currentTool === 'consistency' ? ' ln-tool-active' : ''; ?>"<?php echo $currentTool === 'consistency' ? ' aria-current="page"' : ''; ?>><i class="fas fa-lock"></i><span>Consistency</span></a></li>
+        <li><a href="/labs?tool=texture" class="ln-tool<?php echo $currentTool === 'texture' ? ' ln-tool-active' : ''; ?>"<?php echo $currentTool === 'texture' ? ' aria-current="page"' : ''; ?>><i class="fas fa-border-all"></i><span>Texture Lab</span></a></li>
+        <li><a href="/labs?tool=3d" class="ln-tool<?php echo $currentTool === '3d' ? ' ln-tool-active' : ''; ?>"<?php echo $currentTool === '3d' ? ' aria-current="page"' : ''; ?>><i class="fas fa-cube"></i><span>3D Lab</span></a></li>
+        <li><a href="/labs?tool=character" class="ln-tool<?php echo $currentTool === 'character' ? ' ln-tool-active' : ''; ?>"<?php echo $currentTool === 'character' ? ' aria-current="page"' : ''; ?>><i class="fas fa-user-astronaut"></i><span>Character Lab</span></a></li>
+      </ul>
+    </nav>
+    <div class="ln-sidebar-sep" aria-hidden="true"></div>
+    <ul class="ln-secondary-list">
+      <li><a href="/labs-jobs.php" class="ln-sec-item"><i class="fas fa-folder-open"></i><span>My Jobs</span></a></li>
+      <li><a href="/labs-legacy" class="ln-sec-item"><i class="fas fa-box-archive"></i><span>Legacy hub</span></a></li>
+      <li><button type="button" class="ln-sec-item ln-sec-settings" aria-label="Settings"><i class="fas fa-cog"></i><span>Settings</span></button></li>
+    </ul>
+    <div class="ln-credits-card">
+      <div class="ln-credits-label">Balance</div>
+      <div class="ln-credits-value" id="ln-balance"><?php echo number_format($balance); ?> <span class="ln-kp">KP</span></div>
+      <a href="/support-credits.php" class="ln-credits-link">Get credits</a>
+    </div>
+  </aside>
 
-    <div class="text-center mb-5">
-      <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
-        <span class="badge bg-warning text-dark fw-bold px-3 py-2" style="font-size:.85rem; letter-spacing:.05em;">
-          <i class="fas fa-flask me-1"></i>BETA
-        </span>
-      </div>
-      <h1 class="glow-text mb-3" style="font-size:2.8rem;">
-        <i class="fas fa-microscope me-2"></i><?php echo t('labs.title', 'KND Labs'); ?>
-      </h1>
-      <p class="text-white-50 mx-auto mb-3" style="max-width:600px; font-size:1.1rem;">
-        <?php echo t('labs.subtitle', 'AI-powered asset creation. Text to Image, Upscale, Character Lab, Texture Lab, and more.'); ?>
-      </p>
-      <div class="ai-balance-badge">
-        <i class="fas fa-coins me-2"></i>
-        <span id="ai-kp-balance"><?php echo t('ai.balance', 'Balance: {kp} KP', ['kp' => number_format($balance)]); ?></span>
+  <main class="ln-body">
+    <div class="ln-main ln-editor-layout">
+      <div class="ln-editor ln-tool-content-wrap">
+        <?php
+        $partial = __DIR__ . '/labs/partials/shell-' . $currentTool . '.php';
+        if (file_exists($partial)) {
+            include $partial;
+        } else {
+            echo '<div class="ln-editor-header"><h1 class="ln-editor-title">' . htmlspecialchars($currentTool) . '</h1><p class="ln-editor-subtitle">Tool not found. <a href="/labs?tool=text2img">Go to Text2Img</a>.</p></div>';
+        }
+        ?>
       </div>
     </div>
 
-    <!-- Tool Cards -->
-    <div class="row g-4 justify-content-center mb-5">
-      <div class="col-12 col-lg-6 col-xl-4">
-        <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card labs-tool-card labs-tool-card-main">
-          <div class="d-flex align-items-start justify-content-between mb-3">
-            <div class="arena-card-icon"><i class="fas fa-palette"></i></div>
-            <span class="badge bg-primary px-2 py-1" style="font-size:.7rem;"><?php echo t('labs.main_tool', 'MAIN'); ?></span>
-          </div>
-          <h3 class="mb-2" style="font-size:1.35rem;"><?php echo t('labs.canvas.title', 'Canvas'); ?></h3>
-          <p class="text-white-50 small flex-grow-1"><?php echo t('labs.canvas.card_desc', 'Main AI creation workspace. Generate, refine and direct visual output.'); ?></p>
-          <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 3]); ?> · <?php echo t('labs.avg_time', '~{time}', ['time' => '10s']); ?></div>
-          <a href="/labs-text-to-image.php" class="btn btn-neon-primary w-100 mt-auto">
-            <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>
-          </a>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card labs-tool-card">
-          <div class="d-flex align-items-start justify-content-between mb-3">
-            <div class="arena-card-icon"><i class="fas fa-search-plus"></i></div>
-            <span class="badge bg-success px-2 py-1" style="font-size:.7rem;"><?php echo t('arena.live', 'LIVE'); ?></span>
-          </div>
-          <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('ai.upscale.title'); ?></h3>
-          <p class="text-white-50 small flex-grow-1"><?php echo t('labs.card_upscale_desc', 'Upscale images 2x or 4x.'); ?></p>
-          <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 5]); ?> · <?php echo t('labs.avg_time', '~{time}', ['time' => '40s']); ?></div>
-          <a href="/labs-upscale.php" class="btn btn-neon-primary w-100 mt-auto">
-            <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>
-          </a>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card labs-tool-card">
-          <div class="d-flex align-items-start justify-content-between mb-3">
-            <div class="arena-card-icon"><i class="fas fa-lock"></i></div>
-            <span class="badge bg-success px-2 py-1" style="font-size:.7rem;"><?php echo t('arena.live', 'LIVE'); ?></span>
-          </div>
-          <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('labs.consistency.title', 'Consistency System'); ?></h3>
-          <p class="text-white-50 small flex-grow-1"><?php echo t('labs.consistency.card_desc', 'Generate images with locked style or character consistency.'); ?></p>
-          <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 5]); ?> · <?php echo t('labs.avg_time', '~{time}', ['time' => '30s']); ?></div>
-          <a href="/labs-consistency.php" class="btn btn-neon-primary w-100 mt-auto">
-            <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>
-          </a>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card labs-tool-card">
-          <div class="d-flex align-items-start justify-content-between mb-3">
-            <div class="arena-card-icon"><i class="fas fa-cube"></i></div>
-            <span class="badge bg-success px-2 py-1" style="font-size:.7rem;"><?php echo t('arena.live', 'LIVE'); ?></span>
-          </div>
-          <h3 class="mb-2" style="font-size:1.25rem;">3D Lab</h3>
-          <p class="text-white-50 small flex-grow-1">Create optimized 3D models from text, images, or both. Generate clean GLB previews with smart presets, advanced controls, and a dedicated 3D pipeline.</p>
-          <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 30]); ?> · <?php echo t('labs.avg_time', '~{time}', ['time' => '2m']); ?></div>
-          <a href="/labs-3d-lab.php" class="btn btn-neon-primary w-100 mt-auto">
-            <i class="fas fa-play me-2"></i>Open 3D Lab
-          </a>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-lg-4">
-        <div class="glass-card-neon p-4 h-100 d-flex flex-column arena-card labs-tool-card">
-          <div class="d-flex align-items-start justify-content-between mb-3">
-            <div class="arena-card-icon"><i class="fas fa-border-all"></i></div>
-            <span class="badge bg-success px-2 py-1" style="font-size:.7rem;"><?php echo t('arena.live', 'LIVE'); ?></span>
-          </div>
-          <h3 class="mb-2" style="font-size:1.25rem;"><?php echo t('ai.texture.title'); ?></h3>
-          <p class="text-white-50 small flex-grow-1"><?php echo t('labs.card_texture_desc', 'Generate seamless textures for 3D/games.'); ?></p>
-          <div class="labs-card-meta text-white-50 small mb-2"><?php echo t('labs.from_kp', 'From {kp} KP', ['kp' => 4]); ?> · <?php echo t('labs.avg_time', '~{time}', ['time' => '15s']); ?></div>
-          <a href="/labs-texture-lab.php" class="btn btn-neon-primary w-100 mt-auto">
-            <i class="fas fa-play me-2"></i><?php echo t('arena.enter', 'Enter'); ?>
-          </a>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Creative Workflow -->
-    <div class="glass-card-neon p-4 mb-5" id="labs-creative-workflow">
-      <h3 class="text-white mb-2" style="font-size:1.15rem;"><i class="fas fa-project-diagram me-2" style="color:var(--knd-neon-cyan, #00d4ff);"></i><?php echo t('labs.creative_workflow', 'Creative Workflow'); ?></h3>
-      <p class="text-white-50 small mb-4"><?php echo t('labs.creative_workflow_desc', 'Move from generation to refinement using connected AI tools.'); ?></p>
-      <div class="labs-workflow-flow d-flex flex-wrap align-items-center justify-content-center gap-2 gap-md-3 py-3">
-        <a href="/labs-text-to-image.php" class="labs-workflow-node rounded-3 p-3 text-decoration-none" style="background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); min-width:120px; text-align:center;">
-          <i class="fas fa-palette d-block mb-2" style="color:var(--knd-accent, #35C2FF); font-size:1.5rem;"></i>
-          <span class="text-white small fw-bold"><?php echo t('labs.canvas.title', 'Canvas'); ?></span>
-          <p class="text-white-50 mb-0 mt-1" style="font-size:.7rem;"><?php echo t('labs.wf_canvas', 'Central hub for image creation workflows.'); ?></p>
-        </a>
-        <span class="d-none d-md-inline text-white-50" style="font-size:1rem;">→</span>
-        <span class="d-md-none text-white-50" style="font-size:1rem;">↓</span>
-        <a href="/labs-upscale.php" class="labs-workflow-node rounded-3 p-3 text-decoration-none" style="background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); min-width:120px; text-align:center;">
-          <i class="fas fa-search-plus d-block mb-2" style="color:var(--knd-neon-cyan, #00d4ff); font-size:1.5rem;"></i>
-          <span class="text-white small fw-bold">Upscale</span>
-          <p class="text-white-50 mb-0 mt-1" style="font-size:.7rem;"><?php echo t('labs.wf_upscale', 'Improve clarity and output resolution.'); ?></p>
-        </a>
-        <span class="d-none d-md-inline text-white-50" style="font-size:1rem;">→</span>
-        <span class="d-md-none text-white-50" style="font-size:1rem;">↓</span>
-        <a href="/labs-consistency.php" class="labs-workflow-node rounded-3 p-3 text-decoration-none" style="background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); min-width:120px; text-align:center;">
-          <i class="fas fa-lock d-block mb-2" style="color:var(--knd-neon-cyan, #00d4ff); font-size:1.5rem;"></i>
-          <span class="text-white small fw-bold">Consistency</span>
-          <p class="text-white-50 mb-0 mt-1" style="font-size:.7rem;"><?php echo t('labs.wf_consistency', 'Keep style or character continuity.'); ?></p>
-        </a>
-        <span class="d-none d-md-inline text-white-50" style="font-size:1rem;">→</span>
-        <span class="d-md-none text-white-50" style="font-size:1rem;">↓</span>
-        <a href="/labs-texture-lab.php" class="labs-workflow-node rounded-3 p-3 text-decoration-none" style="background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.2); min-width:120px; text-align:center; opacity:0.9;">
-          <i class="fas fa-border-all d-block mb-2 text-white-50" style="font-size:1.5rem;"></i>
-          <span class="text-white small fw-bold">Texture Lab</span>
-          <span class="badge bg-secondary mt-1" style="font-size:.6rem;"><?php echo t('labs.coming_soon', 'Soon'); ?></span>
-          <p class="text-white-50 mb-0 mt-1" style="font-size:.7rem;"><?php echo t('labs.wf_texture', 'Turn ideas into seamless texture assets.'); ?></p>
-        </a>
-        <span class="d-none d-md-inline text-white-50" style="font-size:1rem;">→</span>
-        <span class="d-md-none text-white-50" style="font-size:1rem;">↓</span>
-        <a href="/labs-3d-lab.php" class="labs-workflow-node rounded-3 p-3 text-decoration-none" style="background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); min-width:120px; text-align:center;">
-          <i class="fas fa-cube d-block mb-2" style="color:var(--knd-neon-cyan, #00d4ff); font-size:1.5rem;"></i>
-          <span class="text-white small fw-bold">3D Lab</span>
-          <p class="text-white-50 mb-0 mt-1" style="font-size:.7rem;">Text, image or both → clean GLB.</p>
-        </a>
-      </div>
-    </div>
-
-    <!-- Recent Jobs -->
-    <div class="glass-card-neon p-4 mb-5" id="labs-recent-section">
-      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-        <h3 class="mb-0" style="font-size:1.15rem;"><i class="fas fa-history me-2" style="color:var(--knd-neon-blue);"></i><?php echo t('labs.recent_jobs', 'Recent Jobs'); ?></h3>
+    <section class="ln-recent" aria-label="Recent jobs">
+      <div class="ln-recent-head">
+        <h2 class="ln-recent-title">Recent</h2>
         <div class="d-flex align-items-center gap-2">
           <label class="d-flex align-items-center gap-2 text-white-50 small mb-0">
             <input type="checkbox" id="labs-recent-private" <?php echo $labsRecentPrivate ? 'checked' : ''; ?>>
             <?php echo t('labs.show_only_mine', 'Only my jobs'); ?>
           </label>
-          <a href="/labs-jobs.php" class="btn btn-neon-primary btn-sm"><?php echo t('labs.view_all_jobs', 'View All Jobs'); ?></a>
+          <a href="/labs-jobs.php" class="ln-recent-link">View all</a>
         </div>
       </div>
-      <?php if (empty($recentJobs)): ?>
-      <p class="text-white-50 small mb-0" id="labs-recent-empty"><?php echo $labsRecentPrivate ? t('labs.no_recent_jobs', 'No jobs yet. Start with any tool above.') : t('labs.no_public_jobs', 'No public creations yet. Be the first!'); ?></p>
-      <?php else: ?>
-      <div class="row g-3" id="labs-recent-grid">
-        <?php foreach ($recentJobs as $j):
-          $status = $j['status'] ?? 'pending';
-          $statusClass = $status === 'done' ? 'success' : ($status === 'failed' ? 'danger' : 'warning');
-          $tool = $j['tool'] ?? 'text2img';
-          $toolLabel = $tool === 'text2img' ? (t('labs.canvas.title', 'Canvas')) : ($tool === 'upscale' ? t('ai.upscale.title', 'Upscale') : ($tool === 'consistency' ? t('labs.consistency.title', 'Consistency System') : t('ai.character.title', 'Character Lab')));
-          $toolIcon = $tool === 'text2img' ? 'font' : ($tool === 'upscale' ? 'search-plus' : ($tool === 'consistency' ? 'lock' : 'user-astronaut'));
-          $hasImage = ($status === 'done') && !empty($j['image_url']);
-          $imgSrc = $hasImage ? ('/api/labs/image.php?job_id=' . (int)$j['id']) : '';
-          $downloadHref = $hasImage ? ('/api/labs/image.php?job_id=' . (int)$j['id'] . '&download=1') : '#';
-        ?>
-        <div class="col-6 col-md-4 col-lg-3">
-          <div class="labs-recent-job-card rounded overflow-hidden bg-dark" style="border:1px solid rgba(0,212,255,0.2);">
-            <div class="d-flex align-items-center justify-content-center bg-black" style="aspect-ratio:1; min-height:100px;">
-              <?php if ($hasImage): ?>
-              <img src="<?php echo htmlspecialchars($imgSrc); ?>" alt="" class="img-fluid" style="object-fit:cover; width:100%; height:100%;">
-              <?php else: ?>
-              <i class="fas fa-<?php echo $toolIcon; ?> fa-2x text-white-50"></i>
-              <?php endif; ?>
-            </div>
-            <div class="p-2 small">
-              <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
-                <span class="text-white-50"><?php echo date('M j, H:i', strtotime($j['created_at'])); ?></span>
-                <span class="badge bg-<?php echo $statusClass; ?>" style="font-size:.7rem;"><?php echo htmlspecialchars($status); ?></span>
-              </div>
-              <div class="text-white-50" style="font-size:.75rem;"><i class="fas fa-<?php echo $toolIcon; ?> me-1"></i><?php echo htmlspecialchars($toolLabel); ?></div>
-              <?php if ($hasImage): ?>
-              <a href="<?php echo htmlspecialchars($downloadHref); ?>" class="btn btn-neon-primary btn-sm w-100 mt-1" download><i class="fas fa-download me-1"></i><?php echo t('ai.download', 'Download'); ?></a>
-              <?php endif; ?>
-            </div>
+      <div class="ln-recent-track" id="ln-recent-track">
+        <?php if (empty($recentJobs)): ?>
+          <div class="ln-recent-empty">
+            <i class="fas fa-history"></i>
+            <p>No jobs yet</p>
+            <span>Use any tool above to create</span>
           </div>
-        </div>
-        <?php endforeach; ?>
+        <?php else: ?>
+          <?php foreach ($recentJobs as $j):
+            $status = $j['status'] ?? 'pending';
+            $tool = $j['tool'] ?? 'text2img';
+            $toolIcon = $tool === 'text2img' ? 'palette' : ($tool === 'upscale' ? 'search-plus' : ($tool === 'consistency' ? 'lock' : 'user-astronaut'));
+            $hasImage = ($status === 'done') && !empty($j['image_url']);
+            $imgSrc = $hasImage ? ('/api/labs/image.php?job_id=' . (int)$j['id']) : '';
+          ?>
+          <a href="/labs-job.php?job_id=<?php echo (int)($j['id'] ?? 0); ?>" class="ln-job-card" data-status="<?php echo htmlspecialchars($status); ?>">
+            <div class="ln-job-card-thumb">
+              <?php if ($hasImage): ?>
+                <img src="<?php echo htmlspecialchars($imgSrc); ?>" alt="" loading="lazy">
+              <?php else: ?>
+                <span class="ln-job-card-icon"><i class="fas fa-<?php echo $toolIcon; ?>"></i></span>
+              <?php endif; ?>
+            </div>
+            <div class="ln-job-card-meta">
+              <span class="ln-job-card-date"><?php echo date('M j, H:i', strtotime($j['created_at'])); ?></span>
+              <span class="ln-job-card-status"><?php echo htmlspecialchars($status); ?></span>
+            </div>
+          </a>
+          <?php endforeach; ?>
+        <?php endif; ?>
       </div>
-      <?php endif; ?>
-    </div>
+    </section>
+  </main>
+</div>
 
-    <div class="text-center">
-      <p class="text-white-50 small mb-1" style="opacity:.6;">
-        <i class="fas fa-info-circle me-1"></i><?php echo t('labs.disclaimer', 'BETA: AI tools may have rate limits. Uses KND Points (KP).'); ?>
-      </p>
-    </div>
+<div class="knd-details-drawer__backdrop" id="labs-details-backdrop"></div>
+<div class="knd-details-drawer" id="labs-details-drawer" tabindex="-1">
+  <div class="knd-details-drawer__header d-flex justify-content-between align-items-center">
+    <h5 class="text-white mb-0"><?php echo t('labs.view_details', 'View details'); ?></h5>
+    <button type="button" class="btn btn-sm btn-link text-white-50 p-0" id="labs-details-close" aria-label="Close"><i class="fas fa-times"></i></button>
   </div>
-</section>
+  <div class="knd-details-drawer__body" id="labs-details-body"></div>
+</div>
 
 <script src="/assets/js/navigation-extend.js"></script>
 <script>
 (function() {
   var cb = document.getElementById('labs-recent-private');
-  if (!cb) return;
-  cb.addEventListener('change', function() {
+  if (cb) cb.addEventListener('change', function() {
     var fd = new FormData();
     fd.set('private', cb.checked ? '1' : '0');
     fetch('/api/labs/preference.php', { method: 'POST', body: fd, credentials: 'same-origin' })
       .then(function(r) { return r.json(); })
-      .then(function(d) {
-        if (d.ok) location.reload();
-      });
+      .then(function(d) { if (d.ok) window.location.reload(); });
   });
 })();
 </script>
-<?php echo generateFooter(); ?>
-<?php echo generateScripts(); ?>
-<?php } catch (\Throwable $e) {
+<?php
+    echo generateFooter();
+    echo generateScripts();
+} catch (\Throwable $e) {
     if (!headers_sent()) header('Content-Type: text/html; charset=utf-8');
-    echo '<h1>KND Labs - Error</h1><p>' . htmlspecialchars($e->getMessage()) . '</p><p><a href="/">Volver al inicio</a></p>';
-} ?>
+    echo '<h1>KND Labs – Error</h1><p>' . htmlspecialchars($e->getMessage()) . '</p><p><a href="/labs">Back to Labs</a></p>';
+}
+?>

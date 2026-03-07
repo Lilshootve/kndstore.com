@@ -131,7 +131,8 @@
     # KND Labs Next (experimental app-style UI)
     RewriteRule ^labs-next/?$ /labs-next.php [L]
 
-    # KND Labs: HUB y tool pages
+    # KND Labs: app shell (new UI) + legacy hub backup
+    RewriteRule ^labs-legacy/?$ /knd-labs-legacy.php [L]
     RewriteRule ^labs/?$ /knd-labs.php [L]
     RewriteRule ^knd-labs/?$ /knd-labs.php [L]
     RewriteRule ^labs/text-to-image\.php$ /labs-text-to-image.php [L]
