@@ -3,7 +3,7 @@
 
     var cfg = window.KND_3D_LAB || {};
     var ep = cfg.endpoints || {};
-    var state = { mode: 'image', file: null, selectedRecent: null, pollTimer: null, currentJobId: null, glbBlobUrl: null };
+    var state = { mode: 'image', file: null, selectedRecent: null, pollTimer: null, currentJobId: null, glbBlobUrl: null, viewerErrorHandler: null };
 
     var el = {
         form: document.getElementById('labs-3d-form'),
@@ -221,20 +221,49 @@
         var dlUrl = dlPath.indexOf('/') === 0 ? base + dlPath : dlPath;
         if (el.placeholder) el.placeholder.style.display = 'none';
         if (el.viewerWrap) el.viewerWrap.style.display = 'block';
-        if (el.modelViewer) {
-            if (state.glbBlobUrl) { URL.revokeObjectURL(state.glbBlobUrl); state.glbBlobUrl = null; }
-            fetch(glbUrl, { credentials: 'same-origin' })
-                .then(function (r) { return r.ok ? r.blob() : Promise.reject(new Error('Failed to load GLB')); })
-                .then(function (blob) {
-                    state.glbBlobUrl = URL.createObjectURL(blob);
-                    el.modelViewer.setAttribute('src', state.glbBlobUrl);
-                })
-                .catch(function () {
-                    el.modelViewer.setAttribute('src', glbUrl);
-                });
-        }
         if (el.resultActions) { el.resultActions.style.display = 'block'; }
         if (el.downloadBtn) { el.downloadBtn.href = dlUrl; el.downloadBtn.classList.remove('disabled'); }
+        if (!el.modelViewer) return;
+
+        function setModelSrc(url) {
+            var mv = el.modelViewer;
+            function apply() {
+                mv.removeAttribute('src');
+                setTimeout(function () { mv.setAttribute('src', url); }, 0);
+            }
+            if (typeof customElements !== 'undefined' && customElements.whenDefined) {
+                customElements.whenDefined('model-viewer').then(apply);
+            } else {
+                apply();
+            }
+        }
+
+        function onViewerError() {
+            if (el.viewerWrap && !el.viewerWrap.querySelector('.l3d-viewer-err')) {
+                var msg = document.createElement('p');
+                msg.className = 'text-warning small mt-2 l3d-viewer-err';
+                msg.textContent = 'Could not load 3D model. Try downloading the GLB.';
+                el.viewerWrap.appendChild(msg);
+            }
+        }
+
+        if (state.glbBlobUrl) { URL.revokeObjectURL(state.glbBlobUrl); state.glbBlobUrl = null; }
+        if (state.viewerErrorHandler) {
+            el.modelViewer.removeEventListener('error', state.viewerErrorHandler);
+        }
+        state.viewerErrorHandler = onViewerError;
+        el.modelViewer.addEventListener('error', state.viewerErrorHandler);
+        el.viewerWrap.querySelectorAll('.l3d-viewer-err').forEach(function (n) { n.remove(); });
+
+        fetch(glbUrl, { credentials: 'same-origin' })
+            .then(function (r) { return r.ok ? r.blob() : Promise.reject(new Error('Failed to load GLB')); })
+            .then(function (blob) {
+                state.glbBlobUrl = URL.createObjectURL(blob);
+                setModelSrc(state.glbBlobUrl);
+            })
+            .catch(function () {
+                setModelSrc(glbUrl);
+            });
     }
 
     function pollStatus() {
