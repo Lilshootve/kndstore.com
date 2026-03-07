@@ -4,27 +4,40 @@
  * Route: /labs-next
  */
 
-/* Hide particles background on this page so deep dark dominates */
-body.ln-page #particles-bg {
+/* Hide particles background on this page so lab image dominates */
+body.ln-page #particles-bg,
+body.knd-labs-next #particles-bg {
   opacity: 0;
   pointer-events: none;
 }
 
-/* Global background: lab image + overlay for entire Labs experience (shell + recent jobs) */
+/* Ensure full height so .ln-app background fills viewport */
+html, body {
+  min-height: 100%;
+}
 body.knd-labs-next {
   min-height: 100vh;
-  background:
-    linear-gradient(rgba(5, 7, 15, 0.78), rgba(5, 7, 15, 0.90)),
-    url('/assets/images/background-lab.webp') center/cover no-repeat fixed;
-  background-color: #05070f;
+  background: #05070f;
 }
-body.knd-labs-next .ln-app,
+
+/* Global background on .ln-app (primary Labs container) so image is visible across whole shell */
+.ln-app {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  background:
+    linear-gradient(rgba(5, 7, 15, 0.55), rgba(5, 7, 15, 0.78)),
+    url('/assets/images/background-lab.webp') center center / cover no-repeat fixed;
+}
+
+/* Prevent inner wrappers from hiding the background (override any solid fills) */
 body.knd-labs-next .ln-body,
 body.knd-labs-next .ln-main,
 body.knd-labs-next .ln-editor,
-body.knd-labs-next .ln-recent {
-  background: transparent;
+body.knd-labs-next .ln-tool-content-wrap {
+  background: transparent !important;
 }
+/* .ln-recent stays a translucent panel (see .ln-recent below) */
 
 /* ---- Variables ---- */
 .ln-app {
@@ -53,20 +66,19 @@ body.knd-labs-next .ln-recent {
   --ln-nav-offset: 56px;
   min-height: calc(100vh - var(--ln-nav-offset, 56px));
   margin-top: var(--ln-nav-offset, 56px);
-  background: transparent;
   color: var(--ln-text);
   display: flex;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-/* ---- Sidebar (glass dark) ---- */
+/* ---- Sidebar (glass dark, translucent over background) ---- */
 .ln-sidebar {
   width: var(--ln-sidebar-w);
   min-width: var(--ln-sidebar-w);
-  background: rgba(8, 12, 25, 0.55);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(8, 12, 24, 0.58);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -228,7 +240,7 @@ body.knd-labs-next .ln-recent {
 .ln-credits-card {
   margin: 0.75rem 1rem 1rem;
   padding: 1rem;
-  background: rgba(15, 20, 40, 0.38);
+  background: rgba(8, 12, 24, 0.58);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -669,10 +681,11 @@ body.knd-labs-next .ln-recent {
 /* ---- Recent Jobs ---- */
 .ln-recent {
   flex-shrink: 0;
-  background: rgba(8, 12, 25, 0.5);
+  background: rgba(8, 12, 24, 0.58);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   padding: 1rem 2rem 1.25rem;
 }
 
@@ -939,7 +952,7 @@ body.knd-labs-next .ln-recent {
 
 /* Params panel (right column) */
 .ln-t2i-params-panel {
-  background: rgba(15, 20, 40, 0.38);
+  background: rgba(8, 12, 24, 0.58);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -980,7 +993,9 @@ body.knd-labs-next .ln-recent {
   border-radius: var(--ln-radius-glass);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(8, 12, 25, 0.5);
+  background: rgba(8, 12, 24, 0.58);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.03);
   width: 100%;
 }
@@ -1170,6 +1185,13 @@ body.knd-labs-next .ln-recent {
 
   .ln-editor {
     padding: 1.5rem 1.25rem;
+  }
+}
+
+/* Mobile: scroll background to avoid fixed-attachment jank */
+@media (max-width: 768px) {
+  .ln-app {
+    background-attachment: scroll;
   }
 }
 
