@@ -88,11 +88,11 @@ function labs_3d_validate_quality(string $q): string {
  *
  * @param \PDO $pdo
  * @param int $userId
- * @param int $processingMinutes Jobs in 'processing' longer than this = abandoned (default 30)
- * @param int $queuedMinutes Jobs in 'queued' longer than this = abandoned (default 120)
+ * @param int $processingMinutes Jobs in 'processing' longer than this = abandoned (default 15)
+ * @param int $queuedMinutes Jobs in 'queued' longer than this = abandoned (default 15)
  * @return int Number of jobs marked as failed
  */
-function labs_3d_cleanup_stale_jobs(\PDO $pdo, int $userId, int $processingMinutes = 30, int $queuedMinutes = 120): int {
+function labs_3d_cleanup_stale_jobs(\PDO $pdo, int $userId, int $processingMinutes = 15, int $queuedMinutes = 15): int {
     $stmt = $pdo->prepare(
         "UPDATE knd_labs_3d_jobs SET
             status = 'failed',

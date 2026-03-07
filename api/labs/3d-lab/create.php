@@ -29,7 +29,17 @@ try {
         json_error('DB_CONNECTION_FAILED', 'Database connection failed.', 500);
     }
 
-    labs_3d_cleanup_stale_jobs($pdo, $userId);
+    $cancelPrevious = !empty($_POST['cancel_previous']);
+    if ($cancelPrevious) {
+        $stmtCancel = $pdo->prepare(
+            "UPDATE knd_labs_3d_jobs SET status = 'failed', error_message = 'Cancelled by user', completed_at = NOW() WHERE user_id = ? AND status IN ('queued','processing')"
+        );
+        if ($stmtCancel) {
+            $stmtCancel->execute([$userId]);
+        }
+    } else {
+        labs_3d_cleanup_stale_jobs($pdo, $userId);
+    }
 
     $stmtActive = $pdo->prepare(
         "SELECT COUNT(*) FROM knd_labs_3d_jobs WHERE user_id = ? AND status IN ('queued','processing')"

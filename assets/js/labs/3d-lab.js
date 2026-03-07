@@ -251,12 +251,13 @@
         if (state.pollTimer) { clearInterval(state.pollTimer); state.pollTimer = null; }
     }
 
-    function onSubmit() {
+    function onSubmit(cancelPrevious) {
         if (!canSubmit()) {
             toast('Please fill required fields.', 'error');
             return;
         }
         clearError();
+        var delegatedRetry = false;
         var fd = new FormData();
         fd.append('mode', state.mode);
         fd.append('category', (document.getElementById('l3d-category') || {}).value || 'Stylized Asset');
@@ -264,6 +265,7 @@
         fd.append('quality', (document.getElementById('l3d-quality') || {}).value || 'Standard');
         fd.append('prompt', (document.getElementById('l3d-prompt') || {}).value || '');
         fd.append('negative_prompt', (document.getElementById('l3d-negative') || {}).value || '');
+        if (cancelPrevious) fd.append('cancel_previous', '1');
         if (state.mode === 'image' || state.mode === 'text_image') fd.append('image', state.file);
         if (state.mode === 'recent' && state.selectedRecent) {
             fd.append('source_recent_job_id', String(state.selectedRecent.id));
@@ -271,12 +273,27 @@
         }
 
         if (el.submit) el.submit.disabled = true;
-        setStatus(true, 'Queuing...');
+        setStatus(true, cancelPrevious ? 'Cancelling previous job...' : 'Queuing...');
 
         fetch(ep.create || '/api/labs/3d-lab/create.php', { method: 'POST', body: fd, credentials: 'same-origin' })
             .then(function (r) { return r.json(); })
             .then(function (res) {
-                if (!res.ok || !res.data) throw new Error((res.error && res.error.message) || 'Could not create job');
+                if (!res.ok) {
+                    var code = (res.error && res.error.code) || '';
+                    var msg = (res.error && res.error.message) || 'Could not create job';
+                    if (code === 'ACTIVE_JOB_EXISTS' && !cancelPrevious) {
+                        if (confirm(msg + '\n\nCancel previous job and start a new one?')) {
+                            delegatedRetry = true;
+                            onSubmit(true);
+                            return;
+                        }
+                        setStatus(false);
+                        showError(msg);
+                        return;
+                    }
+                    throw new Error(msg);
+                }
+                if (!res.data) throw new Error('Could not create job');
                 var job = res.data;
                 state.currentJobId = job.public_id;
                 resetFile();
@@ -292,7 +309,7 @@
                 toast(err.message, 'error');
             })
             .finally(function () {
-                if (el.submit) el.submit.disabled = false;
+                if (!delegatedRetry && el.submit) el.submit.disabled = false;
             });
     }
 
