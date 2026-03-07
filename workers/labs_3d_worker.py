@@ -34,6 +34,12 @@ WORKER_TOKEN = os.getenv("KND_WORKER_TOKEN", "").strip()
 STALE_MINUTES = max(5, int(os.getenv("LABS_3D_STALE_MINUTES", "30")))
 
 
+def _is_remote_site() -> bool:
+    """True if web is on hosting (not localhost); then GLB must be uploaded for download to work."""
+    base = UPLOAD_BASE.lower()
+    return "localhost" not in base and "127.0.0.1" not in base
+
+
 def _log(msg: str) -> None:
     print(f"[labs-3d-worker] {msg}")
 
@@ -193,12 +199,20 @@ def process_job(conn, job: dict):
 
     glb_abs = out.get("glb_path")
     prev_abs = out.get("preview_path")
-    if glb_abs and WORKER_TOKEN:
-        err = _upload_output_to_hosting(job["public_id"], Path(glb_abs), Path(prev_abs) if prev_abs else None)
-        if err:
-            _log(f"upload to hosting failed: {err}")
-            _mark_failed(conn, job["id"], f"Generated but upload to hosting failed: {err}")
+    if glb_abs:
+        if _is_remote_site() and not WORKER_TOKEN:
+            _mark_failed(
+                conn,
+                job["id"],
+                "Worker upload required. Set KND_WORKER_TOKEN so results are uploaded to the server (download will work).",
+            )
             return conn
+        if WORKER_TOKEN:
+            err = _upload_output_to_hosting(job["public_id"], Path(glb_abs), Path(prev_abs) if prev_abs else None)
+            if err:
+                _log(f"upload to hosting failed: {err}")
+                _mark_failed(conn, job["id"], f"Generated but upload to hosting failed: {err}")
+                return conn
 
     glb_rel = out.get("glb_path_rel")
     prev_rel = out.get("preview_path_rel")

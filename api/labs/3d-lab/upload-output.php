@@ -77,6 +77,20 @@ try {
     }
 
     $glbRel = LABS_3D_STORAGE_OUTPUT . '/' . $publicId . '.glb';
+
+    // Persist paths in DB so download works even if worker fails after upload
+    $pdo = getDBConnection();
+    if ($pdo) {
+        try {
+            $stmt = $pdo->prepare(
+                "UPDATE knd_labs_3d_jobs SET glb_path = ?, preview_path = COALESCE(?, preview_path), updated_at = NOW() WHERE public_id = ?"
+            );
+            $stmt->execute([$glbRel, $previewRel, $publicId]);
+        } catch (\Throwable $dbEx) {
+            error_log('api/labs/3d-lab/upload-output: DB update paths: ' . $dbEx->getMessage());
+        }
+    }
+
     echo json_encode(['ok' => true, 'glb_path' => $glbRel, 'preview_path' => $previewRel]);
 } catch (\Throwable $e) {
     error_log('api/labs/3d-lab/upload-output: ' . $e->getMessage());

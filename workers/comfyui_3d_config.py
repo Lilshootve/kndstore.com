@@ -10,6 +10,7 @@ from pathlib import Path
 _ROOT = Path(__file__).resolve().parents[1]
 
 COMFYUI_3D_URL = os.getenv("COMFYUI_3D_URL", "http://127.0.0.1:8190")
+# Output folder for GLB (e.g. F:\KND\output\3D with Hy3D_00006_.glb); may be symlinked from ComfyUI output
 COMFYUI_3D_OUTPUT_ROOT = os.getenv(
     "COMFYUI_3D_OUTPUT_ROOT",
     r"F:\KND\output",
