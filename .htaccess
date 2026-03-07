@@ -128,6 +128,9 @@
     # Character Lab (standalone route)
     RewriteRule ^character-lab/?$ /labs-character-lab.php [L]
 
+    # KND Labs Next (experimental app-style UI)
+    RewriteRule ^labs-next/?$ /labs-next.php [L]
+
     # KND Labs: HUB y tool pages
     RewriteRule ^labs/?$ /knd-labs.php [L]
     RewriteRule ^knd-labs/?$ /knd-labs.php [L]
