@@ -125,6 +125,9 @@
     # How KND Arena Works
     RewriteRule ^how-knd-arena-works/?$ /how-knd-arena-works.php [L]
 
+    # Character Lab (standalone route)
+    RewriteRule ^character-lab/?$ /labs-character-lab.php [L]
+
     # KND Labs: HUB y tool pages
     RewriteRule ^labs/?$ /knd-labs.php [L]
     RewriteRule ^knd-labs/?$ /knd-labs.php [L]
