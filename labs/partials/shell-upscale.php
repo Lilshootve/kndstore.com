@@ -61,6 +61,7 @@ $balance = isset($balance) ? (int) $balance : 0;
         </div>
       </div>
       <aside class="ln-t2i-params-col">
+        <?php require __DIR__ . '/credits-card.php'; ?>
         <div class="ln-t2i-params-panel">
           <div class="ln-t2i-param-group">
             <label class="ln-t2i-param-label"><?php echo t('ai.upscale.scale'); ?></label>

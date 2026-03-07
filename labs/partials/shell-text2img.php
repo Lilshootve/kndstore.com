@@ -79,6 +79,7 @@ $providerFilter = isset($providerFilter) ? $providerFilter : '';
         </div>
       </div>
       <aside class="ln-t2i-params-col">
+        <?php require __DIR__ . '/credits-card.php'; ?>
         <?php require __DIR__ . '/shell-text2img-form-params.php'; ?>
       </aside>
     </div>

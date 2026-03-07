@@ -157,11 +157,6 @@ try {
       <li><a href="/labs-legacy" class="ln-sec-item"><i class="fas fa-box-archive"></i><span>Legacy hub</span></a></li>
       <li><button type="button" class="ln-sec-item ln-sec-settings" aria-label="Settings"><i class="fas fa-cog"></i><span>Settings</span></button></li>
     </ul>
-    <div class="ln-credits-card">
-      <div class="ln-credits-label">Balance</div>
-      <div class="ln-credits-value" id="ln-balance"><?php echo number_format($balance); ?> <span class="ln-kp">KP</span></div>
-      <a href="/support-credits.php" class="ln-credits-link">Get credits</a>
-    </div>
   </aside>
 
   <main class="ln-body">
@@ -204,7 +199,7 @@ try {
             $hasImage = ($status === 'done') && !empty($j['image_url']);
             $imgSrc = $hasImage ? ('/api/labs/image.php?job_id=' . (int)$j['id']) : '';
           ?>
-          <a href="/labs-job.php?job_id=<?php echo (int)($j['id'] ?? 0); ?>" class="ln-job-card" data-status="<?php echo htmlspecialchars($status); ?>">
+          <a href="#" class="ln-job-card labs-view-details" data-job-id="<?php echo (int)($j['id'] ?? 0); ?>" data-status="<?php echo htmlspecialchars($status); ?>" data-tool="<?php echo htmlspecialchars($tool); ?>" aria-label="View job details">
             <div class="ln-job-card-thumb">
               <?php if ($hasImage): ?>
                 <img src="<?php echo htmlspecialchars($imgSrc); ?>" alt="" loading="lazy">
@@ -234,7 +229,18 @@ try {
 </div>
 
 <script src="/assets/js/navigation-extend.js"></script>
+<?php $kndlabsJs = __DIR__ . '/assets/js/kndlabs.js'; ?>
+<script src="/assets/js/kndlabs.js?v=<?php echo file_exists($kndlabsJs) ? filemtime($kndlabsJs) : time(); ?>"></script>
 <script>
+(function() {
+  function run() {
+    if (typeof KNDLabs !== 'undefined' && !window.__labsShellViewBound) {
+      window.__labsShellViewBound = true;
+      KNDLabs.init({});
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+})();
 (function() {
   var cb = document.getElementById('labs-recent-private');
   if (cb) cb.addEventListener('change', function() {

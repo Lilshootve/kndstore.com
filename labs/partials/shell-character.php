@@ -36,6 +36,7 @@ $kpCostCharacter = isset($kpCostCharacter) ? (int) $kpCostCharacter : 15;
       </div>
     </div>
     <aside class="ln-t2i-params-col">
+      <?php require __DIR__ . '/credits-card.php'; ?>
       <div class="ln-t2i-params-panel">
         <?php require __DIR__ . '/../../components/character-lab/form.php'; ?>
       </div>

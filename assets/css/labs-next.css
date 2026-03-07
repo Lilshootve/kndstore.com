@@ -10,15 +10,20 @@ body.ln-page #particles-bg {
   pointer-events: none;
 }
 
-/* Global background: lab image + overlay for entire Labs experience */
+/* Global background: lab image + overlay for entire Labs experience (shell + recent jobs) */
 body.knd-labs-next {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top center, rgba(80, 120, 255, 0.06), transparent 45%),
-    linear-gradient(rgba(5, 7, 15, 0.82), rgba(5, 7, 15, 0.92)),
-    url('/assets/images/background-lab.webp') center/cover no-repeat;
-  background-attachment: fixed;
+    linear-gradient(rgba(5, 7, 15, 0.78), rgba(5, 7, 15, 0.90)),
+    url('/assets/images/background-lab.webp') center/cover no-repeat fixed;
   background-color: #05070f;
+}
+body.knd-labs-next .ln-app,
+body.knd-labs-next .ln-body,
+body.knd-labs-next .ln-main,
+body.knd-labs-next .ln-editor,
+body.knd-labs-next .ln-recent {
+  background: transparent;
 }
 
 /* ---- Variables ---- */
@@ -229,6 +234,11 @@ body.knd-labs-next {
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
   border-radius: var(--ln-radius-glass);
+}
+
+.ln-t2i-params-col .ln-credits-card-above-params {
+  margin: 0 0 1rem 0;
+  flex-shrink: 0;
 }
 
 .ln-credits-label {
@@ -1120,8 +1130,6 @@ body.knd-labs-next {
   .ln-brand-text,
   .ln-tool span,
   .ln-sec-item span,
-  .ln-credits-card .ln-credits-value,
-  .ln-credits-card .ln-credits-link,
   .ln-sidebar-sep {
     display: none;
   }
@@ -1152,14 +1160,8 @@ body.knd-labs-next {
     padding: 0.75rem;
   }
 
-  .ln-credits-card {
-    margin: 0.5rem;
-    padding: 0.75rem;
-    text-align: center;
-  }
-
-  .ln-credits-label {
-    display: block;
+  .ln-t2i-params-col .ln-credits-card-above-params {
+    margin: 0 0 1rem 0;
   }
 
   .ln-character-layout {

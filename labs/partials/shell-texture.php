@@ -57,6 +57,7 @@ $cost = 4;
         </div>
       </div>
       <aside class="ln-t2i-params-col">
+        <?php require __DIR__ . '/credits-card.php'; ?>
         <div class="ln-t2i-params-panel">
           <div class="ln-t2i-param-group">
             <p class="text-white-50 small mb-0"><?php echo t('labs.cost_fixed', '{cost} KP', ['cost' => $cost]); ?> per generation.</p>
