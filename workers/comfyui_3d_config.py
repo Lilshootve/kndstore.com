@@ -12,7 +12,7 @@ _ROOT = Path(__file__).resolve().parents[1]
 COMFYUI_3D_URL = os.getenv("COMFYUI_3D_URL", "http://127.0.0.1:8190")
 COMFYUI_3D_OUTPUT_ROOT = os.getenv(
     "COMFYUI_3D_OUTPUT_ROOT",
-    r"C:\AI\Comfyui3d\Comfyui3d\ComfyUI_windows_portable\ComfyUI\output",
+    r"F:\KND\output",
 )
 COMFYUI_3D_INPUT_ROOT = os.getenv(
     "COMFYUI_3D_INPUT_ROOT",
