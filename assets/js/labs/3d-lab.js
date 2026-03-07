@@ -175,9 +175,13 @@
                     if (!jobs.length) {
                         el.recentCreationsGrid.innerHTML = '<p class="knd-muted small mb-0">No 3D creations yet.</p>';
                     } else {
+                        var base = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
                         el.recentCreationsGrid.innerHTML = jobs.map(function (j) {
                             var prev = j.preview_url ? '<img src="' + j.preview_url + '" alt="" class="w-100 h-100" style="object-fit:cover;">' : '<div class="w-100 h-100 d-flex align-items-center justify-content-center"><i class="fas fa-cube fa-2x text-white-50"></i></div>';
-                            return '<div class="knd-showcase-card" data-job-id="' + j.public_id + '"><div class="knd-showcase-card__img" style="aspect-ratio:1;">' + prev + '</div><div class="knd-showcase-card__body p-2"><div class="small text-white-50">' + (j.title || '') + '</div><div class="d-flex gap-1 mt-1"><a href="#" class="btn btn-sm btn-outline-light l3d-view-job" data-id="' + j.public_id + '">View</a><a href="' + (j.glb_url || '#') + '" class="btn btn-sm btn-success" download>Download</a></div></div></div>';
+                            var dlHref = j.glb_url ? (base + (j.glb_url.indexOf('/') === 0 ? j.glb_url : '/' + j.glb_url)) : '';
+                            var dlAttrs = dlHref ? ' href="' + dlHref + '" download="3d-lab-' + (j.public_id || '') + '.glb"' : ' class="btn btn-sm btn-success disabled" aria-disabled="true"';
+                            var dlBtn = dlHref ? '<a ' + dlAttrs + ' class="btn btn-sm btn-success">Download</a>' : '<span class="btn btn-sm btn-secondary disabled">Download</span>';
+                            return '<div class="knd-showcase-card" data-job-id="' + j.public_id + '"><div class="knd-showcase-card__img" style="aspect-ratio:1;">' + prev + '</div><div class="knd-showcase-card__body p-2"><div class="small text-white-50">' + (j.title || '') + '</div><div class="d-flex gap-1 mt-1"><a href="#" class="btn btn-sm btn-outline-light l3d-view-job" data-id="' + j.public_id + '">View</a>' + dlBtn + '</div></div></div>';
                         }).join('');
                     }
                 }
