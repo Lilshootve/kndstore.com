@@ -6,7 +6,7 @@ Use for jobs that completed before the worker had upload-to-hosting.
 Usage:
   python workers/upload_3d_output_backfill.py <public_id> [public_id2 ...]
 
-Env: KND_WORKER_TOKEN (required), PUBLIC_SITE_BASE_URL (default https://kndstore.com)
+Env: KND_3D_UPLOAD_TOKEN (required), PUBLIC_SITE_BASE_URL (default https://kndstore.com)
 """
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 STORAGE_OUTPUT = "labs/3d-lab/output"
 STORAGE_PREVIEW = "labs/3d-lab/preview"
 UPLOAD_BASE = os.getenv("PUBLIC_SITE_BASE_URL", "https://kndstore.com").rstrip("/")
-WORKER_TOKEN = os.getenv("KND_WORKER_TOKEN", "").strip()
+WORKER_3D_UPLOAD_TOKEN = os.getenv("KND_3D_UPLOAD_TOKEN", "").strip()
 
 
 def upload_one(public_id: str) -> bool:
@@ -35,9 +35,10 @@ def upload_one(public_id: str) -> bool:
             preview_path = p
             break
     url = f"{UPLOAD_BASE}/api/labs/3d-lab/upload-output.php"
-    headers = {"X-KND-WORKER-TOKEN": WORKER_TOKEN}
+    headers = {"X-KND-3D-WORKER-TOKEN": WORKER_3D_UPLOAD_TOKEN}
     files = [
         ("public_id", (None, public_id)),
+        ("_worker_3d_token", (None, WORKER_3D_UPLOAD_TOKEN)),
         ("glb", (f"{public_id}.glb", open(glb_path, "rb"), "model/gltf-binary")),
     ]
     fds = [files[1][1][1]]
@@ -68,8 +69,8 @@ def upload_one(public_id: str) -> bool:
 
 
 def main() -> int:
-    if not WORKER_TOKEN:
-        print("ERROR: Set KND_WORKER_TOKEN (same as config/worker_secrets.local.php)")
+    if not WORKER_3D_UPLOAD_TOKEN:
+        print("ERROR: Set KND_3D_UPLOAD_TOKEN (same as WORKER_3D_UPLOAD_TOKEN in config/worker_secrets.local.php)")
         return 1
     ids = [a for a in sys.argv[1:] if a.strip()]
     if not ids:

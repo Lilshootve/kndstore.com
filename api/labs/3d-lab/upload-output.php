@@ -2,7 +2,7 @@
 /**
  * 3D Lab - Worker uploads GLB and preview to hosting storage.
  * POST /api/labs/3d-lab/upload-output.php
- * Auth: X-KND-WORKER-TOKEN (same as queue)
+ * Auth: X-KND-3D-WORKER-TOKEN (3D upload token only; separate from Text2Img queue token).
  * Body: multipart with public_id, glb (file), preview (file, optional)
  *
  * Worker runs locally, web on hosting. Files are created on worker,
@@ -13,7 +13,7 @@ header('Content-Type: application/json');
 ini_set('display_errors', '0');
 
 require_once __DIR__ . '/../../../includes/config.php';
-require_once __DIR__ . '/../../../includes/worker_auth.php';
+require_once __DIR__ . '/../../../includes/worker_3d_upload_auth.php';
 require_once __DIR__ . '/../../../includes/storage.php';
 require_once __DIR__ . '/../../../includes/labs_3d_helpers.php';
 
@@ -23,9 +23,11 @@ function json_fail(string $msg, int $code = 400): void {
     exit;
 }
 
-$workerToken = get_worker_token();
-$headerToken = trim($_SERVER['HTTP_X_KND_WORKER_TOKEN'] ?? '');
-if ($workerToken === '' || $headerToken === '' || !hash_equals($workerToken, $headerToken)) {
+$workerToken = get_worker_3d_upload_token();
+$headerToken = trim((string) ($_SERVER['HTTP_X_KND_3D_WORKER_TOKEN'] ?? ''));
+$postToken = trim((string) ($_POST['_worker_3d_token'] ?? ''));
+$token = $headerToken !== '' ? $headerToken : $postToken;
+if ($workerToken === '' || $token === '' || !hash_equals($workerToken, $token)) {
     json_fail('Unauthorized', 401);
 }
 

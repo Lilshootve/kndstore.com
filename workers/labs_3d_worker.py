@@ -12,7 +12,7 @@ Pipeline:
 Env: KND_DB_HOST, KND_DB_PORT, KND_DB_NAME, KND_DB_USER, KND_DB_PASS
       WORKER_SLEEP_SECONDS (default 5)
       LABS_3D_STALE_MINUTES (default 30)
-      KND_WORKER_TOKEN (required for upload to hosting)
+      KND_3D_UPLOAD_TOKEN (required for upload to hosting; 3D-only, separate from Text2Img)
       PUBLIC_SITE_BASE_URL (default https://kndstore.com)
 """
 from __future__ import annotations
@@ -30,7 +30,7 @@ from _db_common import db_connect, ensure_connection, import_db_driver, to_rel_s
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 UPLOAD_BASE = os.getenv("PUBLIC_SITE_BASE_URL", "https://kndstore.com").rstrip("/")
-WORKER_TOKEN = os.getenv("KND_WORKER_TOKEN", "").strip()
+WORKER_3D_UPLOAD_TOKEN = os.getenv("KND_3D_UPLOAD_TOKEN", "").strip()
 STALE_MINUTES = max(5, int(os.getenv("LABS_3D_STALE_MINUTES", "30")))
 
 
@@ -110,17 +110,18 @@ def _mark_failed(conn, job_id, err_msg: str):
 
 def _upload_output_to_hosting(public_id: str, glb_path: Path, preview_path: Path | None) -> str | None:
     """Upload GLB and preview to hosting. Returns error message or None on success."""
-    if not WORKER_TOKEN:
-        return "KND_WORKER_TOKEN not set (required for upload to hosting)"
+    if not WORKER_3D_UPLOAD_TOKEN:
+        return "KND_3D_UPLOAD_TOKEN not set (required for upload to hosting)"
     glb_path = Path(glb_path)
     if not glb_path.is_file():
         return f"GLB file not found: {glb_path}"
     url = f"{UPLOAD_BASE}/api/labs/3d-lab/upload-output.php"
-    headers = {"X-KND-WORKER-TOKEN": WORKER_TOKEN}
+    headers = {"X-KND-3D-WORKER-TOKEN": WORKER_3D_UPLOAD_TOKEN}
     fds = []
     try:
         files = [
             ("public_id", (None, public_id)),
+            ("_worker_3d_token", (None, WORKER_3D_UPLOAD_TOKEN)),
             ("glb", (f"{public_id}.glb", open(glb_path, "rb"), "model/gltf-binary")),
         ]
         fds.append(files[1][1][1])
@@ -200,14 +201,14 @@ def process_job(conn, job: dict):
     glb_abs = out.get("glb_path")
     prev_abs = out.get("preview_path")
     if glb_abs:
-        if _is_remote_site() and not WORKER_TOKEN:
+        if _is_remote_site() and not WORKER_3D_UPLOAD_TOKEN:
             _mark_failed(
                 conn,
                 job["id"],
-                "Worker upload required. Set KND_WORKER_TOKEN so results are uploaded to the server (download will work).",
+                "Worker upload required. Set KND_3D_UPLOAD_TOKEN so results are uploaded to the server (download will work).",
             )
             return conn
-        if WORKER_TOKEN:
+        if WORKER_3D_UPLOAD_TOKEN:
             err = _upload_output_to_hosting(job["public_id"], Path(glb_abs), Path(prev_abs) if prev_abs else None)
             if err:
                 _log(f"upload to hosting failed: {err}")

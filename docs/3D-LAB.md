@@ -53,7 +53,7 @@ python workers/labs_3d_worker.py
 | STORAGE_PUBLIC_PREFIX | /storage | Prefix (optional, for path-based URL) |
 | LABS_3D_INPUT_URL_TEMPLATE | {base}/api/labs/3d-lab/input.php?id={public_id} | URL template for input download |
 | LABS_3D_STALE_MINUTES | 30 | Jobs in `processing` longer = abandoned (marked failed on worker start) |
-| **KND_WORKER_TOKEN** | - | **Required** when web on hosting + worker local. Same as `config/worker_secrets.local.php` on server. Used to upload GLB/preview to hosting. |
+| **KND_3D_UPLOAD_TOKEN** | - | **Required** when web on hosting + worker local. Same as `WORKER_3D_UPLOAD_TOKEN` in `config/worker_secrets.local.php` on server. Used only for 3D upload endpoint (separate from Text2Img queue token). |
 
 ## Architecture
 
@@ -74,7 +74,7 @@ python workers/labs_3d_worker.py
    - Polls /history until done
    - Locates GLB in ComfyUI output
    - Copies to storage (local) and staging (F:\KND\output)
-4. Worker **uploads** GLB and preview to `POST /api/labs/3d-lab/upload-output.php` (X-KND-WORKER-TOKEN)
+4. Worker **uploads** GLB and preview to `POST /api/labs/3d-lab/upload-output.php` (X-KND-3D-WORKER-TOKEN)
 5. Worker updates job: status, glb_path, preview_path, meta_json
 
 ## Workflows
@@ -87,11 +87,11 @@ python workers/labs_3d_worker.py
 For jobs that completed when the worker did not yet upload to hosting, run:
 
 ```bash
-set KND_WORKER_TOKEN=your_token_from_worker_secrets
+set KND_3D_UPLOAD_TOKEN=your_3d_upload_token_from_worker_secrets
 python workers/upload_3d_output_backfill.py c772774c-cc9e-5ddf-cdbc-5a3b5af43c07 631ecbdc-21c1-5350-9755-3dfcbd817f2e
 ```
 
-Ensure `config/worker_secrets.local.php` exists on the server with the same token.
+Ensure `config/worker_secrets.local.php` on the server has `WORKER_3D_UPLOAD_TOKEN` set to the same value.
 
 ## TODO
 
