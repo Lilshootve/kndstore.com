@@ -192,7 +192,7 @@
               self.updateStepper('done');
               var proxyPreview = API_IMAGE + '?job_id=' + encodeURIComponent(jobId);
               var proxyDownload = API_IMAGE + '?job_id=' + encodeURIComponent(jobId) + '&download=1';
-              var useInputUrl = '/labs-upscale.php?source_job_id=' + encodeURIComponent(jobId);
+              var useInputUrl = '/labs?tool=upscale&source_job_id=' + encodeURIComponent(jobId);
               if (preview) {
                 var tool = self.config.jobType || 'text2img';
                 var mode = 'style';
@@ -576,9 +576,9 @@
         var mode = (job.tool === 'consistency' && job.mode) ? job.mode : 'style';
         var actions = [];
         if (jid && (job.tool === 'text2img' || job.tool === 'consistency')) {
-          actions.push('<a href="/labs-consistency.php?reference_job_id=' + jid + '&mode=' + mode + '" class="btn btn-sm btn-outline-primary">' + (typeof t === 'function' ? t('labs.generate_variations', 'Generate Variations') : 'Generate Variations') + '</a>');
+          actions.push('<a href="/labs?tool=consistency&reference_job_id=' + jid + '&mode=' + mode + '" class="btn btn-sm btn-outline-primary">' + (typeof t === 'function' ? t('labs.generate_variations', 'Generate Variations') : 'Generate Variations') + '</a>');
         }
-        if (jid) actions.push('<a href="/labs-upscale.php?source_job_id=' + jid + '" class="btn btn-sm btn-outline-secondary">Upscale</a>');
+        if (jid) actions.push('<a href="/labs?tool=upscale&source_job_id=' + jid + '" class="btn btn-sm btn-outline-secondary">Upscale</a>');
         actionsEl.innerHTML = actions.join(' ');
       }
       panel.style.display = 'block';
@@ -643,12 +643,12 @@
             html += '<div class="knd-details-block"><div class="knd-details-block__title">Actions</div><div class="knd-details-actions">';
             if (J.status === 'done' && (J.tool === 'text2img' || J.tool === 'consistency')) {
               var mode = (J.tool === 'consistency' && J.mode) ? J.mode : 'style';
-              html += '<a href="/labs-upscale.php?source_job_id=' + jid + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-search-plus me-1"></i>Send to Upscale</a>';
-              html += '<a href="/labs-consistency.php?reference_job_id=' + jid + '&mode=' + mode + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-palette me-1"></i>Consistency</a>';
-              html += '<a href="/labs-consistency.php?reference_job_id=' + jid + '&mode=' + mode + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-images me-1"></i>Create Variations</a>';
+              html += '<a href="/labs?tool=upscale&source_job_id=' + jid + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-search-plus me-1"></i>Send to Upscale</a>';
+              html += '<a href="/labs?tool=consistency&reference_job_id=' + jid + '&mode=' + mode + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-palette me-1"></i>Consistency</a>';
+              html += '<a href="/labs?tool=consistency&reference_job_id=' + jid + '&mode=' + mode + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-images me-1"></i>Create Variations</a>';
             }
             if (J.status === 'done' && J.tool === 'upscale') {
-              html += '<a href="/labs-upscale.php?source_job_id=' + jid + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-search-plus me-1"></i>Use as input</a>';
+              html += '<a href="/labs?tool=upscale&source_job_id=' + jid + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-search-plus me-1"></i>Use as input</a>';
             }
             if (J.status === 'done') {
               html += '<a href="' + imgUrl.replace(/"/g, '&quot;') + '" class="btn btn-sm knd-btn-secondary" download><i class="fas fa-download me-1"></i>Download</a>';

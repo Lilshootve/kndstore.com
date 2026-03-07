@@ -89,6 +89,22 @@ try {
         }
     }
 
+    if ($currentTool === '3d') {
+        require_once __DIR__ . '/includes/labs_3d_helpers.php';
+        $balance = $pdo ? get_available_points($pdo, current_user_id()) : 0;
+        $kpCost3d = labs_3d_kp_cost();
+        $categories3d = LABS_3D_CATEGORIES;
+        $styles3d = LABS_3D_STYLES;
+        $qualities3d = LABS_3D_QUALITY;
+    }
+
+    if ($currentTool === 'character') {
+        require_once __DIR__ . '/includes/character_lab_helpers.php';
+        require_once __DIR__ . '/includes/character_lab_policy.php';
+        $balanceCharacter = $pdo ? get_available_points($pdo, current_user_id()) : 0;
+        $kpCostCharacter = character_lab_kp_cost();
+    }
+
     $providerFilter = ($currentTool === 'text2img' && isset($_GET['provider'])) ? trim($_GET['provider']) : '';
 
     $labsNextCss = __DIR__ . '/assets/css/labs-next.css';
@@ -98,6 +114,16 @@ try {
     $extraHead .= '<link rel="stylesheet" href="/assets/css/labs-next.css?v=' . (file_exists($labsNextCss) ? filemtime($labsNextCss) : time()) . '">';
     $extraHead .= '<link rel="stylesheet" href="/assets/css/ai-tools.css?v=' . (file_exists($aiCss) ? filemtime($aiCss) : time()) . '">';
     $extraHead .= '<link rel="stylesheet" href="/assets/css/knd-labs.css?v=' . (file_exists($labsCss) ? filemtime($labsCss) : time()) . '">';
+    if ($currentTool === '3d') {
+        $tdCss = __DIR__ . '/assets/css/labs/3d-lab.css';
+        $extraHead .= '<link rel="stylesheet" href="/assets/css/labs/3d-lab.css?v=' . (file_exists($tdCss) ? filemtime($tdCss) : time()) . '">';
+        $extraHead .= '<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>';
+    }
+    if ($currentTool === 'character') {
+        $clCss = __DIR__ . '/assets/css/character-lab.css';
+        $extraHead .= '<link rel="stylesheet" href="/assets/css/character-lab.css?v=' . (file_exists($clCss) ? filemtime($clCss) : time()) . '">';
+        $extraHead .= '<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>';
+    }
 
     $seoTitle = t('labs.meta.title', 'KND Labs | KND Store');
     $seoDesc = t('labs.meta.desc', 'AI-powered asset creation: Text to Image, Upscale, Character Lab, Texture Lab, Image→3D.');
