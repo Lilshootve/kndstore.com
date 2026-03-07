@@ -282,7 +282,7 @@
                             var dlHref = j.glb_url ? (base + (j.glb_url.indexOf('/') === 0 ? j.glb_url : '/' + j.glb_url)) : '';
                             var dlAttrs = dlHref ? ' href="' + dlHref + '" download="3d-lab-' + (j.public_id || '') + '.glb"' : ' class="btn btn-sm btn-success disabled" aria-disabled="true"';
                             var dlBtn = dlHref ? '<a ' + dlAttrs + ' class="btn btn-sm btn-outline-success l3d-dl-job"><i class="fas fa-download me-1"></i>Download GLB</a>' : '<span class="btn btn-sm btn-outline-secondary disabled">Download</span>';
-                            return '<div class="knd-showcase-card" data-job-id="' + j.public_id + '"><div class="knd-showcase-card__img" style="aspect-ratio:1;">' + prev + '</div><div class="knd-showcase-card__body p-2"><div class="small text-white-50 text-truncate">' + (j.title || '') + '</div><div class="d-flex flex-wrap gap-1 mt-2"><a href="#" class="btn btn-sm btn-outline-light l3d-view-job" data-id="' + j.public_id + '"><i class="fas fa-eye me-1"></i>View in viewer</a>' + dlBtn + '</div></div></div>';
+                            return '<div class="knd-showcase-card" data-job-id="' + j.public_id + '"><div class="knd-showcase-card__img" style="aspect-ratio:1;">' + prev + '</div><div class="knd-showcase-card__body p-2"><div class="small text-white-50 text-truncate">' + (j.title || '') + '</div><div class="d-flex flex-wrap gap-1 mt-2"><a href="#" class="btn btn-sm btn-outline-light l3d-view-job labs-view-details" data-id="' + j.public_id + '" data-job-id="' + j.public_id + '" data-tool="3d"><i class="fas fa-eye me-1"></i>View in viewer</a>' + dlBtn + '</div></div></div>';
                         }).join('');
                     }
                 }
@@ -290,7 +290,16 @@
                     a.addEventListener('click', function (e) { e.preventDefault(); openJob(a.getAttribute('data-id')); });
                 });
                 document.querySelectorAll('.l3d-view-job').forEach(function (a) {
-                    a.addEventListener('click', function (e) { e.preventDefault(); openJob(a.getAttribute('data-id')); });
+                    a.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        var id = a.getAttribute('data-id') || a.getAttribute('data-job-id');
+                        if (document.getElementById('labs-details-drawer') && window.KNDLabs && typeof window.KNDLabs.openJobViewer === 'function') {
+                            e.stopPropagation();
+                            window.KNDLabs.openJobViewer(id, '3d');
+                            return;
+                        }
+                        openJob(id);
+                    });
                 });
             })
             .catch(function () {

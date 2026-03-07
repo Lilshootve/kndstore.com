@@ -16,6 +16,8 @@
   var API_PREFERENCE = '/api/labs/preference.php';
   var API_3D_STATUS = '/api/labs/3d-lab/status.php';
   var API_3D_DOWNLOAD = '/api/labs/3d-lab/download.php';
+  var API_CHARACTER_STATUS = '/api/character-lab/status.php';
+  var API_CHARACTER_DOWNLOAD = '/api/character-lab/download.php';
   var BASE_URL = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
 
   var KNDLabs = {
@@ -609,6 +611,10 @@
         if (!jobId || typeof jobId !== 'string') return false;
         return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jobId.trim());
       }
+      function isCharacterJob(jobId, tool) {
+        if (tool === 'character') return true;
+        return false;
+      }
 
       function onEscape(e) {
         if (e.key === 'Escape' && drawer && drawer.classList.contains('is-open')) {
@@ -619,6 +625,52 @@
       if (backdrop) backdrop.addEventListener('click', closeDrawer);
       if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
       document.addEventListener('keydown', onEscape);
+
+      this._drawer = drawer;
+      this._backdrop = backdrop;
+      this._setDrawerTitle = function(t) { if (drawerTitle) drawerTitle.textContent = t || ''; };
+      this.openJobViewer = function(jobId, toolType) {
+        var body = document.getElementById('labs-details-body');
+        if (!body) return;
+        var jid = String(jobId || '');
+        var tool = String(toolType || '').toLowerCase();
+        if (!jid) return;
+        body.innerHTML = '<div class="labs-job-viewer-loading"><i class="fas fa-spinner fa-spin fa-2x text-white-50"></i><p class="text-white-50 small mt-2 mb-0">Loading job…</p></div>';
+        if (self._drawer) self._drawer.classList.add('is-open');
+        if (self._backdrop) self._backdrop.classList.add('is-visible');
+        self._setDrawerTitle('View details');
+        if (is3dJob(jid, tool)) {
+          fetch(API_3D_STATUS + '?id=' + encodeURIComponent(jid), { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+              if (!d.ok || !d.data) { body.innerHTML = '<p class="text-white-50">Job not found.</p>'; return; }
+              self.render3dJobInDrawer(body, d.data, jid, closeDrawer);
+              self._setDrawerTitle('3D Lab');
+            })
+            .catch(function() { body.innerHTML = '<p class="text-danger small">Could not load job.</p>'; });
+          return;
+        }
+        if (isCharacterJob(jid, tool)) {
+          fetch(API_CHARACTER_STATUS + '?id=' + encodeURIComponent(jid), { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+              if (!d.ok || !d.data) { body.innerHTML = '<p class="text-white-50">Job not found.</p>'; return; }
+              self.renderCharacterJobInDrawer(body, d.data, jid, closeDrawer);
+              self._setDrawerTitle('Character Lab');
+            })
+            .catch(function() { body.innerHTML = '<p class="text-danger small">Could not load job.</p>'; });
+          return;
+        }
+        fetch(API_JOB + '?job_id=' + encodeURIComponent(jid), { credentials: 'same-origin' })
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            if (!d.ok || !d.data) { body.innerHTML = '<p class="text-white-50">Job not found.</p>'; return; }
+            self.renderComfyJobInDrawer(body, d.data, jid, closeDrawer);
+            var toolLabel = (d.data.tool === 'text2img' ? 'Text2Img' : d.data.tool === 'upscale' ? 'Upscale' : d.data.tool === 'consistency' ? 'Consistency' : d.data.tool === 'texture_seamless' ? 'Texture Lab' : d.data.tool || 'Job');
+            self._setDrawerTitle(toolLabel);
+          })
+          .catch(function() { body.innerHTML = '<p class="text-danger small">Could not load job.</p>'; });
+      };
 
       document.addEventListener('click', function(e) {
         var btn = e.target.closest('.labs-view-details') || e.target.closest('.ln-job-card');
@@ -645,17 +697,63 @@
             .catch(function() { body.innerHTML = '<p class="text-danger small">Could not load job.</p>'; });
           return;
         }
+        if (isCharacterJob(jid, tool)) {
+          fetch(API_CHARACTER_STATUS + '?id=' + encodeURIComponent(jid), { credentials: 'same-origin' })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+              if (!d.ok || !d.data) { body.innerHTML = '<p class="text-white-50">Job not found.</p>'; return; }
+              self.renderCharacterJobInDrawer(body, d.data, jid, closeDrawer);
+              openDrawer('Character Lab');
+            })
+            .catch(function() { body.innerHTML = '<p class="text-danger small">Could not load job.</p>'; });
+          return;
+        }
 
         fetch(API_JOB + '?job_id=' + encodeURIComponent(jid), { credentials: 'same-origin' })
           .then(function(r) { return r.json(); })
           .then(function(d) {
             if (!d.ok || !d.data) { body.innerHTML = '<p class="text-white-50">Job not found.</p>'; return; }
             self.renderComfyJobInDrawer(body, d.data, jid, closeDrawer);
-            var toolLabel = (d.data.tool === 'text2img' ? 'Text2Img' : d.data.tool === 'upscale' ? 'Upscale' : d.data.tool === 'consistency' ? 'Consistency' : d.data.tool || 'Job');
+            var toolLabel = (d.data.tool === 'text2img' ? 'Text2Img' : d.data.tool === 'upscale' ? 'Upscale' : d.data.tool === 'consistency' ? 'Consistency' : d.data.tool === 'texture_seamless' ? 'Texture Lab' : d.data.tool || 'Job');
             openDrawer(toolLabel);
           })
           .catch(function() { body.innerHTML = '<p class="text-danger small">Could not load job.</p>'; });
       });
+    },
+
+    renderCharacterJobInDrawer: function(body, J, jid, closeDrawer) {
+      var self = this;
+      var previewUrl = (J.preview_url && J.preview_url.indexOf('/') === 0) ? (BASE_URL + J.preview_url) : J.preview_url;
+      var conceptUrl = (J.concept_url && J.concept_url.indexOf('/') === 0) ? (BASE_URL + J.concept_url) : J.concept_url;
+      var glbUrl = J.has_glb ? (BASE_URL + API_CHARACTER_DOWNLOAD + '?id=' + encodeURIComponent(jid) + '&format=glb') : null;
+
+      var html = '';
+      html += '<div class="labs-job-viewer-preview knd-details-preview">';
+      if (previewUrl || conceptUrl) {
+        var imgSrc = previewUrl || conceptUrl;
+        html += '<img src="' + self.esc(imgSrc) + '" alt="Preview" class="labs-job-viewer-img" style="width:100%;height:100%;object-fit:contain;">';
+      } else {
+        html += '<div class="d-flex align-items-center justify-content-center text-white-50" style="min-height:200px;"><i class="fas fa-user-astronaut fa-3x opacity-50"></i><span class="ms-2">No preview</span></div>';
+      }
+      html += '</div>';
+
+      html += '<div class="knd-details-block"><div class="knd-details-block__title">Details</div>';
+      html += '<div class="labs-job-viewer-meta">';
+      html += '<div class="labs-job-viewer-meta__row"><span class="labs-job-viewer-meta__label">Tool</span><span class="labs-job-viewer-meta__value">Character Lab</span></div>';
+      html += '<div class="labs-job-viewer-meta__row"><span class="labs-job-viewer-meta__label">Status</span><span class="labs-job-viewer-meta__value">' + self.esc(J.status || '') + '</span></div>';
+      html += '<div class="labs-job-viewer-meta__row"><span class="labs-job-viewer-meta__label">Created</span><span class="labs-job-viewer-meta__value">' + self.esc(J.created_at || '') + '</span></div>';
+      if (J.kp_cost) html += '<div class="labs-job-viewer-meta__row"><span class="labs-job-viewer-meta__label">Cost</span><span class="labs-job-viewer-meta__value">' + J.kp_cost + ' KP</span></div>';
+      if (J.mode) html += '<div class="labs-job-viewer-meta__row"><span class="labs-job-viewer-meta__label">Mode</span><span class="labs-job-viewer-meta__value">' + self.esc(J.mode) + '</span></div>';
+      if (J.error_message) html += '<div class="labs-job-viewer-meta__row"><span class="labs-job-viewer-meta__label">Error</span><span class="text-danger small">' + self.esc(J.error_message) + '</span></div>';
+      html += '</div></div>';
+
+      html += '<div class="knd-details-block"><div class="knd-details-block__title">Actions</div><div class="knd-details-actions">';
+      if (glbUrl && J.has_glb) html += '<a href="' + self.esc(glbUrl) + '" class="btn btn-sm knd-btn-secondary" download="character-' + self.esc(jid) + '.glb"><i class="fas fa-download me-1"></i>Download GLB</a>';
+      if (conceptUrl) html += '<a href="' + self.esc(conceptUrl) + '" class="btn btn-sm knd-btn-secondary" download><i class="fas fa-image me-1"></i>Download concept</a>';
+      if (previewUrl) html += '<a href="' + self.esc(previewUrl) + '" class="btn btn-sm knd-btn-secondary" download><i class="fas fa-image me-1"></i>Download preview</a>';
+      html += '</div></div>';
+
+      body.innerHTML = html;
     },
 
     render3dJobInDrawer: function(body, J, jid, closeDrawer) {
@@ -781,9 +879,23 @@
       if (J.tool === 'text2img' || J.tool === 'consistency') {
         html += '<button type="button" class="btn btn-sm knd-btn-secondary labs-details-reuse" data-job-id="' + self.esc(jid) + '"><i class="fas fa-copy me-1"></i>Reuse Settings</button>';
       }
+      var copyText = (J.tool === 'consistency' && (J.base_prompt || J.scene_prompt)) ? ((J.base_prompt || '') + '\n' + (J.scene_prompt || '')).trim() : (J.prompt || '');
+      if (copyText) {
+        var copyAttr = self.esc(copyText).replace(/&/g, '&amp;').replace(/"/g, '&quot;').substring(0, 2000);
+        html += '<button type="button" class="btn btn-sm knd-btn-secondary labs-copy-prompt" data-prompt="' + copyAttr + '"><i class="fas fa-clipboard me-1"></i>Copy prompt</button>';
+      }
       html += '</div></div>';
 
       body.innerHTML = html;
+      body.querySelectorAll('.labs-copy-prompt').forEach(function(b) {
+        b.addEventListener('click', function() {
+          var p = b.getAttribute('data-prompt');
+          if (p != null && typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(p);
+            if (typeof window.kndToast === 'function') window.kndToast('Copied to clipboard', 'success');
+          }
+        });
+      });
       body.querySelectorAll('.labs-details-reuse').forEach(function(b) {
         b.addEventListener('click', function() {
           self.reuseJobSettings(jid, J.tool);

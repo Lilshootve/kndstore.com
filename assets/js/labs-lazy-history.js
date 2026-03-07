@@ -106,7 +106,7 @@
               : '';
             li.innerHTML = '<span class="text-white-50 small">' + formatDate(j.created_at) + '</span>' +
               '<span class="badge bg-' + sc + '">' + status + '</span>' + thumb +
-              '<button type="button" class="btn btn-sm btn-outline-secondary labs-view-details" data-job-id="' + jid + '">View details</button>';
+              '<button type="button" class="btn btn-sm btn-outline-secondary labs-view-details" data-job-id="' + jid + '" data-tool="' + (j.tool || '').replace(/"/g, '&quot;') + '">View details</button>';
             ul.appendChild(li);
           });
           var oldList = document.getElementById('labs-recent-list');
@@ -137,7 +137,7 @@
               '<span class="knd-showcase-card__title">' + toolLabel + '</span>' +
               '<span class="knd-badge ' + statusClass + '">' + status + '</span></div>' +
               '<div class="knd-showcase-card__meta">' + formatDate(j.created_at) + '</div>' +
-              '<button type="button" class="btn btn-sm knd-btn-secondary mt-2 w-100 labs-view-details" data-job-id="' + jid + '"><i class="fas fa-info-circle me-1"></i>Details</button>' +
+              '<button type="button" class="btn btn-sm knd-btn-secondary mt-2 w-100 labs-view-details" data-job-id="' + jid + '" data-tool="' + (j.tool || '').replace(/"/g, '&quot;') + '"><i class="fas fa-info-circle me-1"></i>Details</button>' +
               '</div>';
             gridEl.appendChild(card);
           });
