@@ -114,10 +114,11 @@ try {
     $extraHead .= '<link rel="stylesheet" href="/assets/css/labs-next.css?v=' . (file_exists($labsNextCss) ? filemtime($labsNextCss) : time()) . '">';
     $extraHead .= '<link rel="stylesheet" href="/assets/css/ai-tools.css?v=' . (file_exists($aiCss) ? filemtime($aiCss) : time()) . '">';
     $extraHead .= '<link rel="stylesheet" href="/assets/css/knd-labs.css?v=' . (file_exists($labsCss) ? filemtime($labsCss) : time()) . '">';
+    /* model-viewer for 3D jobs in in-shell viewer drawer */
+    $extraHead .= '<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>';
     if ($currentTool === '3d') {
         $tdCss = __DIR__ . '/assets/css/labs/3d-lab.css';
         $extraHead .= '<link rel="stylesheet" href="/assets/css/labs/3d-lab.css?v=' . (file_exists($tdCss) ? filemtime($tdCss) : time()) . '">';
-        $extraHead .= '<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>';
     }
     if ($currentTool === 'character') {
         $clCss = __DIR__ . '/assets/css/character-lab.css';
