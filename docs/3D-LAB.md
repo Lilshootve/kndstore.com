@@ -1,6 +1,13 @@
 # 3D Lab
 
-Unified 3D generation: text, image, text+image, or recent creations. Safe mode only.
+Unified 3D generation: image, text+image, or recent creations. Safe mode only.
+
+## Supported modes
+
+- **Image** – Active. Image → 3D via Hunyuan 3D 2.1 (ComfyUI)
+- **Text+Image** – Active. Uses image, prompt stored for future use
+- **Recent** – Active. Reuse source image from a previous job
+- **Text only** – Soon (no workflow yet)
 
 ## Routes
 
@@ -17,16 +24,63 @@ mysql < sql/knd_labs_3d_jobs.sql
 mysql < sql/points_ledger_add_3d_lab.sql
 ```
 
-## Worker
+## Worker (local PC)
 
 ```bash
+pip install -r workers/requirements-labs-3d.txt
 python workers/labs_3d_worker.py
 ```
 
-Env: KND_DB_HOST, KND_DB_PORT, KND_DB_NAME, KND_DB_USER, KND_DB_PASS
+### Env vars
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| KND_DB_HOST | 127.0.0.1 | DB host |
+| KND_DB_PORT | 3306 | DB port |
+| KND_DB_NAME | - | DB name |
+| KND_DB_USER | - | DB user |
+| KND_DB_PASS | - | DB password |
+| WORKER_SLEEP_SECONDS | 5 | Poll interval |
+| COMFYUI_3D_URL | http://127.0.0.1:8190 | ComfyUI 3D base URL |
+| COMFYUI_3D_OUTPUT_ROOT | C:\AI\Comfyui3d\...\ComfyUI\output | ComfyUI output dir |
+| COMFYUI_3D_INPUT_ROOT | C:\AI\Comfyui3d\...\ComfyUI\input | ComfyUI input dir |
+| LOCAL_3D_STAGING_DIR | F:\KND\output | Local staging for GLB |
+| COMFYUI_3D_WORKFLOW_FAST | generate fast 3d.json | Fast workflow path |
+| COMFYUI_3D_WORKFLOW_PREMIUM | 3d premium.json | Premium workflow (High/Ultra) |
+| COMFYUI_3D_USE_PREMIUM | 0 | Set 1 to use premium for High/Ultra |
+| COMFYUI_POLL_MAX_SECONDS | 600 | Max wait for ComfyUI job |
+| PUBLIC_SITE_BASE_URL | https://kndstore.com | Base URL for input download |
+| STORAGE_PUBLIC_PREFIX | /storage | Prefix (optional, for path-based URL) |
+| LABS_3D_INPUT_URL_TEMPLATE | {base}/api/labs/3d-lab/input.php?id={public_id} | URL template for input download |
+
+## Architecture
+
+- **Web** (hosting) – 3D Lab page, create/status/history/download API. Input images stored in storage.
+- **Worker** (local PC) – Polls DB, downloads input from `input.php`, runs `run_labs_3d_job.py`
+- **ComfyUI 3D** (local PC) – Hunyuan 3D 2.1, port 8190
+- **Staging** – `F:\KND\output` (local). Not the public URL. For future publish step.
+
+## Pipeline
+
+1. User uploads image → create.php saves to storage (hosting)
+2. Worker leases job, passes `input_image_path`, `public_id`, quality, seed
+3. `run_labs_3d_job.py`:
+   - Downloads input from `GET /api/labs/3d-lab/input.php?id={public_id}` to temp
+   - Copies to ComfyUI input
+   - Loads workflow (fast or premium), sets image + seed
+   - POSTs to ComfyUI /prompt
+   - Polls /history until done
+   - Locates GLB in ComfyUI output
+   - Copies to storage (for download) and staging (F:\KND\output)
+4. Worker updates job: status, glb_path, preview_path, meta_json
+
+## Workflows
+
+- **generate fast 3d.json** – Image→3D, Hy3D21ExportMesh, outputs `3D/Hy3D_xxxxx_.glb`
+- **3d premium.json** – Remesh + texture; current JSON has no ExportMesh. Use fast until premium is updated.
 
 ## TODO
 
-- Connect `run_labs_3d_job.py` to dedicated ComfyUI 3D pipeline (separate from text2img/upscale)
-- Implement wireframe, stats, texture toggle in viewer (model-viewer has limited support; may need Three.js)
-- Smart presets by category (currently stored in LABS_3D_CATEGORY_PRESETS; worker to apply)
+- Wireframe, stats, texture toggle in viewer (may need Three.js)
+- Premium workflow: add ExportMesh node or equivalent
+- Future: publish from `F:\KND\output` to CDN/public URL

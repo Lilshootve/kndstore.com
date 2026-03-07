@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 3D Lab queue worker (DB polling).
-TODO: Connect to dedicated ComfyUI 3D pipeline. Placeholder creates stub GLB for testing.
+Polls knd_labs_3d_jobs, runs run_labs_3d_job.py (ComfyUI 3D integration).
 """
 from __future__ import annotations
 
@@ -37,7 +37,9 @@ def _connect(pym):
 def lease(conn):
     with conn.cursor() as c:
         c.execute(
-            "SELECT id, public_id FROM knd_labs_3d_jobs WHERE status = 'queued' ORDER BY created_at ASC LIMIT 1 FOR UPDATE"
+            """SELECT id, public_id, input_image_path, quality, advanced_params_json, mode
+               FROM knd_labs_3d_jobs
+               WHERE status = 'queued' ORDER BY created_at ASC LIMIT 1 FOR UPDATE"""
         )
         row = c.fetchone()
         if not row:
@@ -52,6 +54,15 @@ def lease(conn):
 
 
 def process(conn, job, root):
+    if not job.get("input_image_path"):
+        with conn.cursor() as c:
+            c.execute(
+                "UPDATE knd_labs_3d_jobs SET status = 'failed', error_message = 'Image-to-3D mode required; text-only not supported yet', completed_at = NOW() WHERE id = %s",
+                (job["id"],),
+            )
+        conn.commit()
+        return
+
     run = root / "workers" / "run_labs_3d_job.py"
     if not run.exists():
         with conn.cursor() as c:
@@ -62,7 +73,21 @@ def process(conn, job, root):
         conn.commit()
         return
 
-    payload = {"job_id": job["id"], "public_id": job["public_id"]}
+    seed = None
+    if job.get("advanced_params_json"):
+        try:
+            adv = json.loads(job["advanced_params_json"])
+            if isinstance(adv, dict) and "seed" in adv:
+                seed = int(adv["seed"]) if adv["seed"] else None
+        except (json.JSONDecodeError, TypeError, ValueError):
+            pass
+    payload = {
+        "job_id": job["id"],
+        "public_id": job["public_id"],
+        "input_image_path": job.get("input_image_path"),
+        "quality": job.get("quality") or "Standard",
+        "seed": seed,
+    }
     proc = subprocess.run(
         [sys.executable, str(run), "--payload", json.dumps(payload)],
         capture_output=True,
@@ -94,26 +119,38 @@ def process(conn, job, root):
         conn.commit()
         return
 
-    glb_rel = None
-    prev_rel = None
-    storage = root / "storage"
-    if out.get("glb_path"):
-        p = Path(out["glb_path"]).resolve()
+    glb_rel = out.get("glb_path_rel")
+    prev_rel = out.get("preview_path_rel")
+    if not glb_rel and out.get("glb_path"):
+        storage = root / "storage"
         try:
-            glb_rel = str(p.relative_to(storage)).replace("\\", "/")
+            glb_rel = str(Path(out["glb_path"]).resolve().relative_to(storage)).replace("\\", "/")
         except ValueError:
             pass
-    if out.get("preview_path"):
-        p = Path(out["preview_path"]).resolve()
+    if not prev_rel and out.get("preview_path"):
+        storage = root / "storage"
         try:
-            prev_rel = str(p.relative_to(storage)).replace("\\", "/")
+            prev_rel = str(Path(out["preview_path"]).resolve().relative_to(storage)).replace("\\", "/")
         except ValueError:
+            pass
+
+    meta_json = None
+    if out.get("meta"):
+        try:
+            meta_json = json.dumps(out["meta"])
+        except (TypeError, ValueError):
             pass
 
     with conn.cursor() as c:
         c.execute(
-            "UPDATE knd_labs_3d_jobs SET status = 'completed', glb_path = COALESCE(%s, glb_path), preview_path = COALESCE(%s, preview_path), completed_at = NOW() WHERE id = %s",
-            (glb_rel, prev_rel, job["id"]),
+            """UPDATE knd_labs_3d_jobs
+               SET status = 'completed',
+                   glb_path = COALESCE(%s, glb_path),
+                   preview_path = COALESCE(%s, preview_path),
+                   meta_json = COALESCE(%s, meta_json),
+                   completed_at = NOW()
+               WHERE id = %s""",
+            (glb_rel, prev_rel, meta_json, job["id"]),
         )
     conn.commit()
 
