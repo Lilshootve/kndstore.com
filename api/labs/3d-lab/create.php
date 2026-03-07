@@ -29,6 +29,8 @@ try {
         json_error('DB_CONNECTION_FAILED', 'Database connection failed.', 500);
     }
 
+    labs_3d_cleanup_stale_jobs($pdo, $userId);
+
     $stmtActive = $pdo->prepare(
         "SELECT COUNT(*) FROM knd_labs_3d_jobs WHERE user_id = ? AND status IN ('queued','processing')"
     );
@@ -48,6 +50,10 @@ try {
     $mode = strtolower(trim((string) ($_POST['mode'] ?? 'text')));
     if (!in_array($mode, ['text', 'image', 'text_image', 'recent'], true)) {
         json_error('INVALID_MODE', 'mode must be text, image, text_image, or recent.', 400);
+    }
+    // Text-only mode not supported yet (no workflow). Image, text_image, recent use image→3D.
+    if ($mode === 'text') {
+        json_error('MODE_NOT_AVAILABLE', 'Text-only mode is coming soon. Use Image or Text+Image.', 400);
     }
 
     $category = labs_3d_validate_category(trim((string) ($_POST['category'] ?? 'Stylized Asset')));

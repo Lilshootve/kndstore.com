@@ -81,3 +81,36 @@ function labs_3d_validate_style(string $s): string {
 function labs_3d_validate_quality(string $q): string {
     return array_key_exists($q, LABS_3D_QUALITY) ? $q : 'Standard';
 }
+
+/**
+ * Mark stale 3D lab jobs (processing/queued too long) as failed.
+ * Call before counting active jobs to avoid blocking users with orphaned jobs.
+ *
+ * @param \PDO $pdo
+ * @param int $userId
+ * @param int $processingMinutes Jobs in 'processing' longer than this = abandoned (default 30)
+ * @param int $queuedMinutes Jobs in 'queued' longer than this = abandoned (default 120)
+ * @return int Number of jobs marked as failed
+ */
+function labs_3d_cleanup_stale_jobs(\PDO $pdo, int $userId, int $processingMinutes = 30, int $queuedMinutes = 120): int {
+    $stmt = $pdo->prepare(
+        "UPDATE knd_labs_3d_jobs SET
+            status = 'failed',
+            error_message = COALESCE(error_message, 'Job abandoned (timeout)'),
+            completed_at = NOW(),
+            updated_at = NOW()
+         WHERE user_id = ?
+         AND (
+             (status = 'processing' AND processing_started_at < DATE_SUB(NOW(), INTERVAL ? MINUTE))
+             OR (status = 'queued' AND created_at < DATE_SUB(NOW(), INTERVAL ? MINUTE))
+         )"
+    );
+    if (!$stmt || !$stmt->execute([$userId, $processingMinutes, $queuedMinutes])) {
+        return 0;
+    }
+    $n = $stmt->rowCount();
+    if ($n > 0) {
+        error_log("labs_3d_cleanup_stale_jobs: user_id={$userId} marked {$n} stale job(s) as failed");
+    }
+    return $n;
+}
