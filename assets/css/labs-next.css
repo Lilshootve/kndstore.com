@@ -806,8 +806,8 @@ body.knd-labs-next {
   flex-direction: column;
   gap: 1.5rem;
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
 }
 
 .ln-t2i-header {
@@ -831,13 +831,24 @@ body.knd-labs-next {
 
 .ln-t2i-grid {
   display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 2rem;
+  grid-template-columns: 1fr 360px;
+  gap: 28px;
+  width: 100%;
   align-items: start;
 }
 
 .ln-t2i-main-col {
   min-width: 0;
+  width: 100%;
+  max-width: none;
+}
+
+/* Right panel fixed width */
+.ln-t2i-params-col {
+  width: 360px;
+  min-width: 360px;
+  position: sticky;
+  top: 1rem;
 }
 
 .ln-t2i-meta {
@@ -860,6 +871,8 @@ body.knd-labs-next {
 }
 
 .ln-t2i-prompt-block {
+  width: 100%;
+  box-sizing: border-box;
   background: rgba(15, 20, 40, 0.38);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -884,13 +897,16 @@ body.knd-labs-next {
   margin-bottom: 0.5rem;
 }
 
-.ln-t2i-prompt-input {
+.ln-t2i-prompt-input,
+#labs-prompt-input {
+  width: 100%;
   min-height: 100px;
   resize: vertical;
   border: none;
   background: transparent;
   font-size: 1rem;
   line-height: 1.5;
+  box-sizing: border-box;
 }
 
 .ln-t2i-prompt-input:focus {
@@ -899,11 +915,6 @@ body.knd-labs-next {
 }
 
 /* Params panel (right column) */
-.ln-t2i-params-col {
-  position: sticky;
-  top: 1rem;
-}
-
 .ln-t2i-params-panel {
   background: rgba(15, 20, 40, 0.38);
   backdrop-filter: blur(14px);
@@ -948,22 +959,30 @@ body.knd-labs-next {
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(8, 12, 25, 0.5);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  width: 100%;
 }
 
-.ln-t2i-preview {
+/* Canvas/preview: full width, large min-height, square aspect for usability */
+#labs-result-preview,
+.ln-t2i-preview,
+.labs-result-preview {
+  width: 100%;
+  min-height: 420px;
+  aspect-ratio: 1 / 1;
+  max-height: 600px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 2.5rem 1.5rem;
-  min-height: 380px;
 }
 
 .ln-t2i-preview img {
   max-width: 100%;
-  max-height: 70vh;
+  max-height: 100%;
   width: auto;
   height: auto;
+  object-fit: contain;
   border-radius: var(--ln-radius-sm);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
@@ -1049,12 +1068,17 @@ body.knd-labs-next {
 
   .ln-t2i-params-col {
     position: static;
+    width: 100%;
+    min-width: 0;
   }
 }
 
 @media (max-width: 768px) {
+  #labs-result-preview,
   .ln-t2i-preview {
     min-height: 280px;
+    aspect-ratio: auto;
+    max-height: none;
     padding: 1.5rem 1rem;
   }
 
