@@ -6,13 +6,14 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 header('Expires: 0');
 
-require_once __DIR__ . '/../includes/session.php';
-require_once __DIR__ . '/../includes/config.php';
-require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/support_credits.php';
-require_once __DIR__ . '/../includes/ai.php';
-require_once __DIR__ . '/../includes/header.php';
-require_once __DIR__ . '/../includes/footer.php';
+require_once __DIR__ . '/../includes/bootstrap.php';
+require_once KND_ROOT . '/includes/session.php';
+require_once KND_ROOT . '/includes/config.php';
+require_once KND_ROOT . '/includes/auth.php';
+require_once KND_ROOT . '/includes/support_credits.php';
+require_once KND_ROOT . '/includes/ai.php';
+require_once KND_ROOT . '/includes/header.php';
+require_once KND_ROOT . '/includes/footer.php';
 
 require_login();
 

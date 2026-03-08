@@ -8,14 +8,19 @@ header('Pragma: no-cache');
 header('Expires: 0');
 
 try {
-    require_once __DIR__ . '/includes/session.php';
-    require_once __DIR__ . '/includes/config.php';
-    require_once __DIR__ . '/includes/auth.php';
-    require_once __DIR__ . '/includes/support_credits.php';
-    require_once __DIR__ . '/includes/ai.php';
-    require_once __DIR__ . '/includes/comfyui.php';
-    require_once __DIR__ . '/includes/header.php';
-    require_once __DIR__ . '/includes/footer.php';
+    $bootstrap = __DIR__ . '/includes/bootstrap.php';
+    if (!is_file($bootstrap)) {
+        $bootstrap = __DIR__ . '/../includes/bootstrap.php';
+    }
+    require_once $bootstrap;
+    require_once KND_ROOT . '/includes/session.php';
+    require_once KND_ROOT . '/includes/config.php';
+    require_once KND_ROOT . '/includes/auth.php';
+    require_once KND_ROOT . '/includes/support_credits.php';
+    require_once KND_ROOT . '/includes/ai.php';
+    require_once KND_ROOT . '/includes/comfyui.php';
+    require_once KND_ROOT . '/includes/header.php';
+    require_once KND_ROOT . '/includes/footer.php';
 
     require_login();
 
@@ -45,7 +50,7 @@ try {
     }
 
     if ($currentTool === 'consistency') {
-        require_once __DIR__ . '/includes/labs_display_helper.php';
+        require_once KND_ROOT . '/includes/labs_display_helper.php';
         $refJobId = isset($_GET['reference_job_id']) ? (int) $_GET['reference_job_id'] : 0;
         $preloadMode = trim($_GET['mode'] ?? '');
         if (!in_array($preloadMode, ['style', 'character', 'both'], true)) $preloadMode = 'style';
