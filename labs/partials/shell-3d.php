@@ -62,6 +62,7 @@ $qualities = defined('LABS_3D_QUALITY') ? LABS_3D_QUALITY : ['Standard' => 'Stan
           </div>
           <div id="l3d-result-actions" class="ln-t2i-actions" style="display:none;">
             <a href="#" id="l3d-download" class="labs-action labs-action--primary" download><i class="fas fa-download"></i>Download GLB</a>
+            <a href="#" id="l3d-view-model" class="labs-action labs-action--primary"><i class="fas fa-cube"></i>View Model</a>
           </div>
           <div id="l3d-status-panel" class="ln-t2i-status" style="display:none;">
             <div class="d-flex align-items-center"><div class="ai-spinner me-2"><i class="fas fa-cog fa-spin"></i></div><span id="l3d-status-text">Processing...</span></div>

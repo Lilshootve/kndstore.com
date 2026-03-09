@@ -41,6 +41,7 @@ $providerFilter = isset($providerFilter) ? $providerFilter : '';
               <a href="#" id="labs-download-btn" class="labs-action labs-action--primary" download><i class="fas fa-download"></i><?php echo t('ai.download'); ?></a>
               <a href="#" id="labs-generate-variations-btn" class="labs-action labs-action--primary"><i class="fas fa-images"></i><?php echo t('labs.generate_variations', 'Generate Variations'); ?></a>
               <a href="/labs?tool=upscale" id="labs-use-input-btn" class="labs-action labs-action--primary"><i class="fas fa-search-plus"></i><?php echo t('labs.send_to_upscale', 'Send to Upscale'); ?></a>
+              <a href="/labs?tool=remove-bg" id="labs-remove-bg-btn" class="labs-action labs-action--primary"><i class="fas fa-eraser"></i><?php echo t('labs.send_to_remove_bg', 'Remove Background'); ?></a>
             </div>
             <div class="labs-result-actions__secondary">
               <a href="#" id="labs-use-style-btn" class="labs-action labs-action--secondary"><i class="fas fa-palette"></i><?php echo t('labs.consistency.use_style', 'Use as Style Reference'); ?></a>

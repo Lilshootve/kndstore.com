@@ -212,6 +212,10 @@
               }
               var useBtn = document.getElementById('labs-use-input-btn');
               if (useBtn) useBtn.href = useInputUrl;
+              var removeBgBtn = document.getElementById('labs-remove-bg-btn');
+              if (removeBgBtn) removeBgBtn.href = '/labs?tool=remove-bg&source_job_id=' + encodeURIComponent(jobId);
+              var send3dBtn = document.getElementById('labs-send-3d-btn');
+              if (send3dBtn) send3dBtn.href = '/labs?tool=3d&source_job_id=' + encodeURIComponent(jobId);
               if (actions) actions.style.display = 'block';
               if (d.data.available_after !== undefined) self.updateBalance(d.data.available_after);
               self.updateBalanceAfter();
@@ -920,6 +924,9 @@
       if (J.status === 'done' && (J.tool === 'text2img' || J.tool === 'consistency')) {
         var mode = (J.tool === 'consistency' && J.mode) ? J.mode : 'style';
         html += '<a href="/labs?tool=upscale&source_job_id=' + encodeURIComponent(jid) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-search-plus me-1"></i>Send to Upscale</a>';
+        if (J.tool === 'text2img') {
+          html += '<a href="/labs?tool=remove-bg&source_job_id=' + encodeURIComponent(jid) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-eraser me-1"></i>Remove Background</a>';
+        }
         html += '<a href="/labs?tool=consistency&reference_job_id=' + encodeURIComponent(jid) + '&mode=' + encodeURIComponent(mode) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-palette me-1"></i>Consistency</a>';
         html += '<a href="/labs?tool=consistency&reference_job_id=' + encodeURIComponent(jid) + '&mode=' + encodeURIComponent(mode) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-images me-1"></i>Variations</a>';
       }
@@ -928,6 +935,7 @@
       }
       if (J.status === 'done' && J.tool === 'remove-bg') {
         html += '<a href="/labs?tool=upscale&source_job_id=' + encodeURIComponent(jid) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-search-plus me-1"></i>Send to Upscale</a>';
+        html += '<a href="/labs?tool=3d&source_job_id=' + encodeURIComponent(jid) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-cube me-1"></i>Send to 3D Lab</a>';
       }
       if (J.status === 'done' && J.tool === 'upscale') {
         html += '<a href="/labs?tool=upscale&source_job_id=' + encodeURIComponent(jid) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-search-plus me-1"></i>Use as input</a>';

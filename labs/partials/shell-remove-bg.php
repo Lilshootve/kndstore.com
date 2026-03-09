@@ -49,6 +49,7 @@ $balance = isset($balance) ? (int) $balance : 0;
           <div id="labs-result-actions" class="labs-result-actions-panel ln-t2i-actions" style="display:none;">
             <a href="#" id="labs-download-btn" class="labs-action labs-action--primary" download><i class="fas fa-download"></i><?php echo t('ai.download', 'Download'); ?></a>
             <a href="/labs?tool=upscale" id="labs-use-input-btn" class="labs-action labs-action--primary"><i class="fas fa-search-plus"></i><?php echo t('labs.send_to_upscale', 'Send to Upscale'); ?></a>
+            <a href="/labs?tool=3d" id="labs-send-3d-btn" class="labs-action labs-action--primary"><i class="fas fa-cube"></i><?php echo t('labs.send_to_3d_lab', 'Send to 3D Lab'); ?></a>
             <button type="button" id="labs-retry-btn" class="labs-action labs-action--secondary"><i class="fas fa-redo"></i><?php echo t('labs.generate_again', 'Generate again'); ?></button>
           </div>
           <div id="labs-status-panel" class="ln-t2i-status" style="display:none;">
@@ -76,6 +77,30 @@ $balance = isset($balance) ? (int) $balance : 0;
   var content = document.getElementById('labs-remove-bg-content');
   var preview = document.getElementById('labs-remove-bg-preview');
   var previewImg = document.getElementById('labs-remove-bg-preview-img');
+  var params = new URLSearchParams(window.location.search);
+  var sourceJobId = params.get('source_job_id');
+
+  if (sourceJobId) {
+    fetch('/api/labs/image.php?job_id=' + encodeURIComponent(sourceJobId) + '&t=' + Date.now(), { credentials: 'same-origin' })
+      .then(function(r) {
+        if (!r.ok) throw new Error('Could not load source image');
+        return r.blob();
+      })
+      .then(function(blob) {
+        var mime = (blob && blob.type && blob.type.indexOf('image/') === 0) ? blob.type : 'image/png';
+        var f = new File([blob], 'source-' + sourceJobId + '.png', { type: mime });
+        var dt = new DataTransfer();
+        dt.items.add(f);
+        if (fileInput) fileInput.files = dt.files;
+        if (previewImg) previewImg.src = URL.createObjectURL(blob);
+        if (preview) preview.style.display = 'block';
+        if (content) content.style.display = 'none';
+        var btn = document.getElementById('labs-submit-btn');
+        if (btn) btn.disabled = false;
+      })
+      .catch(function() {});
+  }
+
   if (dz) dz.addEventListener('click', function(){ if (fileInput) fileInput.click(); });
   if (fileInput) fileInput.addEventListener('change', function(){
     var f = this.files && this.files[0] ? this.files[0] : null;

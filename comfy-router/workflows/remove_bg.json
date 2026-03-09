@@ -1,19 +1,4 @@
 {
-  "1": {
-    "inputs": {
-      "image_path_or_URL": "",
-      "image": "knd_labs_132.png",
-      "upscale_method": "lanczos",
-      "megapixels": 0,
-      "scale_by": 1,
-      "resize_mode": "longest_side",
-      "size": 0
-    },
-    "class_type": "AILab_LoadImage",
-    "_meta": {
-      "title": "Load Image (RMBG) 🖼️"
-    }
-  },
   "2": {
     "inputs": {
       "model": "RMBG-2.0",
@@ -26,7 +11,7 @@
       "background": "Alpha",
       "background_color": "#222222",
       "image": [
-        "1",
+        "8",
         0
       ]
     },
@@ -60,6 +45,21 @@
     "class_type": "Image Save",
     "_meta": {
       "title": "Image Save"
+    }
+  },
+  "8": {
+    "inputs": {
+      "image_path_or_URL": "",
+      "image": "",
+      "upscale_method": "lanczos",
+      "megapixels": 0,
+      "scale_by": 1,
+      "resize_mode": "longest_side",
+      "size": 0
+    },
+    "class_type": "AILab_LoadImage",
+    "_meta": {
+      "title": "Load Image (RMBG) 🖼️"
     }
   }
 }

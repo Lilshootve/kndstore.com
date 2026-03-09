@@ -105,6 +105,8 @@ $mvHistoryUrl = '/api/labs/3d-lab/history.php';
   var uploadInput = document.getElementById('mv-upload-glb');
   var uploadFilename = document.getElementById('mv-upload-filename');
   var uploadClear = document.getElementById('mv-upload-clear');
+  var pageParams = new URLSearchParams(window.location.search || '');
+  var source3dJobId = pageParams.get('source_3d_job_id');
 
   function buildViewerUrl(opts) {
     var model = opts.model || opts.glb;
@@ -167,6 +169,22 @@ $mvHistoryUrl = '/api/labs/3d-lab/history.php';
 
   function showError(msg) {
     if (errorBox) { errorBox.textContent = msg; errorBox.style.display = 'block'; }
+  }
+
+  function loadSource3dJobIfAny() {
+    if (!source3dJobId) return;
+    fetch('/api/labs/3d-lab/status.php?id=' + encodeURIComponent(source3dJobId), { credentials: 'same-origin' })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (!res.ok || !res.data || !res.data.glb_url) return;
+        var j = res.data;
+        var glbUrl = (j.glb_url && j.glb_url.indexOf('/') === 0) ? (BASE + j.glb_url) : j.glb_url;
+        var thumb = (j.preview_url && j.preview_url.indexOf('/') === 0) ? (BASE + j.preview_url) : j.preview_url;
+        var title = (j.public_id || '3D Model');
+        var viewerUrl = buildViewerUrl({ model: glbUrl, thumb: thumb, title: title, description: j.created_at ? ('Created ' + j.created_at) : '' });
+        setViewer(viewerUrl, glbUrl, 'Download GLB', viewerUrl, j.created_at ? '3D Lab · ' + j.created_at : title);
+      })
+      .catch(function() {});
   }
 
   // —— My 3D Lab Creations ——
@@ -299,5 +317,7 @@ $mvHistoryUrl = '/api/labs/3d-lab/history.php';
       }
     });
   }
+
+  loadSource3dJobIfAny();
 })();
 </script>

@@ -184,16 +184,9 @@ def run(payload: dict) -> dict:
     except Exception as e:
         log.warning("staging copy failed (non-fatal): %s", e)
 
-    # Preview: ComfyUI may not produce one; use placeholder path for now
-    preview_path = storage_preview / f"{public_id}.webp"
-    if not preview_path.exists():
-        try:
-            preview_path.write_bytes(b"RIFFxxxxWEBPVP8 ")
-        except Exception:
-            pass
-
     glb_rel = f"{STORAGE_OUTPUT}/{public_id}.glb"
-    prev_rel = f"{STORAGE_PREVIEW}/{public_id}.webp" if preview_path.exists() else None
+    preview_path = None
+    prev_rel = None
 
     meta = {
         "prompt_id": prompt_id,
@@ -206,7 +199,7 @@ def run(payload: dict) -> dict:
         "ok": True,
         "glb_path": str(glb_storage),
         "glb_path_rel": glb_rel,
-        "preview_path": str(preview_path) if prev_rel else None,
+        "preview_path": None,
         "preview_path_rel": prev_rel,
         "staging_path": str(glb_staging),
         "meta": meta,

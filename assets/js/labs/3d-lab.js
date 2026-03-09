@@ -28,6 +28,7 @@
         modelViewer: document.getElementById('l3d-model-viewer'),
         resultActions: document.getElementById('l3d-result-actions'),
         downloadBtn: document.getElementById('l3d-download'),
+        viewModelBtn: document.getElementById('l3d-view-model'),
         statusPanel: document.getElementById('l3d-status-panel'),
         statusText: document.getElementById('l3d-status-text'),
         errorEl: document.getElementById('l3d-error'),
@@ -207,6 +208,31 @@
         }
     }
 
+    function preloadSourceJobImage() {
+        var params = new URLSearchParams(window.location.search || '');
+        var sourceJobId = params.get('source_job_id');
+        if (!sourceJobId || !el.fileInput) return;
+
+        fetch('/api/labs/image.php?job_id=' + encodeURIComponent(sourceJobId) + '&t=' + Date.now(), { credentials: 'same-origin' })
+            .then(function (r) {
+                if (!r.ok) throw new Error('Could not load source image');
+                return r.blob();
+            })
+            .then(function (blob) {
+                var mime = (blob && blob.type && blob.type.indexOf('image/') === 0) ? blob.type : 'image/png';
+                var f = new File([blob], 'source-' + sourceJobId + '.png', { type: mime });
+                var dt = new DataTransfer();
+                dt.items.add(f);
+                el.fileInput.files = dt.files;
+                state.mode = 'image';
+                if (el.modeSelect) el.modeSelect.value = 'image';
+                if (el.modeInput) el.modeInput.value = 'image';
+                toggleModeUI();
+                setFile(f);
+            })
+            .catch(function () {});
+    }
+
     function showImageInViewer() {
         if (state.uploadedGlbFile) { showGlbInViewer(state.uploadedGlbFile); return; }
         var url = getImageUrlForViewer();
@@ -325,6 +351,11 @@
         if (el.modelViewer) el.modelViewer.style.display = 'block';
         if (el.resultActions) { el.resultActions.style.display = 'block'; }
         if (el.downloadBtn) { el.downloadBtn.href = dlUrl; el.downloadBtn.classList.remove('disabled'); }
+        if (el.viewModelBtn) {
+            el.viewModelBtn.href = '/labs?tool=model_viewer&source_3d_job_id=' + encodeURIComponent(job.public_id);
+            el.viewModelBtn.classList.remove('disabled');
+            el.viewModelBtn.removeAttribute('aria-disabled');
+        }
         if (!el.modelViewer) return;
 
         function setModelSrc(url) {
@@ -523,6 +554,17 @@
             });
         }
 
+        if (el.viewModelBtn) {
+            el.viewModelBtn.addEventListener('click', function (e) {
+                var href = el.viewModelBtn.getAttribute('href');
+                var disabled = el.viewModelBtn.classList.contains('disabled') || el.viewModelBtn.getAttribute('aria-disabled') === 'true';
+                if (!href || href === '#' || disabled) return;
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.href = href;
+            });
+        }
+
         var fsBtn = document.getElementById('l3d-fullscreen');
         if (fsBtn) fsBtn.addEventListener('click', function () {
             var target = (el.viewerImageWrap && !el.viewerImageWrap.classList.contains('d-none')) ? el.viewerImageWrap : el.modelViewer;
@@ -532,6 +574,7 @@
 
     bindEvents();
     toggleModeUI();
+    preloadSourceJobImage();
     loadHistory();
     updateViewImageButton();
 })();
