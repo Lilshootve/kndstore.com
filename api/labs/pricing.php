@@ -23,6 +23,9 @@ $pricing = [
     'consistency' => [
         'base' => 5,
     ],
+    'remove_bg' => [
+        'base' => 5,
+    ],
 ];
 
 json_success($pricing);

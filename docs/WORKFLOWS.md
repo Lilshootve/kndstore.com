@@ -33,7 +33,17 @@ define('WORKFLOWS_DIR', '/ruta/custom/workflows');
 
 **Usado por:** `comfy-router` (si llamas POST `/generate` con callbacks)
 
-**Carpeta:** `comfy-router/workflows/`
+**Carpeta canónica:** `workflows/` (raíz del repo)
+
+`comfy-router/workflow_loader.py` ahora resuelve por defecto a `../workflows` para mantener una sola fuente de verdad con Labs PHP.
+
+Compatibilidad legacy: si no existe `workflows/`, usa fallback a `comfy-router/workflows/`.
+
+Override opcional por entorno:
+
+```bash
+WORKFLOWS_DIR=/ruta/custom/workflows
+```
 
 **Mapeo (en `workflow_loader.py`):**
 
@@ -48,7 +58,7 @@ define('WORKFLOWS_DIR', '/ruta/custom/workflows');
 | texture_seamless  | seamless | `texture_seamless.json`         |
 
 **Para agregar un workflow nuevo:**
-1. Pon el `.json` en `comfy-router/workflows/`
+1. Pon el `.json` en `workflows/` (raíz)
 2. Edita `comfy-router/workflow_loader.py` → `WORKFLOW_MAP` para añadir la clave
 
 ---
@@ -56,7 +66,7 @@ define('WORKFLOWS_DIR', '/ruta/custom/workflows');
 ## Comprobando cuál usas
 
 - Si usas **labs** (labs-text-to-image.php, labs-upscale.php) → se usa el **PHP Worker** → workflows en `workflows/`
-- Si usas **ai-tools** o callbacks a `/api/ai/callback` → puede ser **comfy-router** → workflows en `comfy-router/workflows/`
+- Si usas **ai-tools** o callbacks a `/api/ai/callback` → puede ser **comfy-router** → workflows en `workflows/` (raíz, misma fuente)
 - El `worker_config.local.php` tiene `COMFY_URL` → ahí envía el worker el prompt
 
 ---

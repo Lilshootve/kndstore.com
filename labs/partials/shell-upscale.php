@@ -19,7 +19,6 @@ $balance = isset($balance) ? (int) $balance : 0;
       <div class="ln-t2i-main-col">
         <div class="ln-t2i-meta">
           <span id="labs-cost-label" class="ln-t2i-cost"><?php echo t('labs.cost_label', 'Cost: 5 KP'); ?></span>
-          <span id="labs-balance-after" class="ln-t2i-balance-after"></span>
         </div>
         <div class="ln-t2i-prompt-block ln-tool-block">
           <label class="form-label ln-t2i-label"><?php echo t('ai.upscale.upload', 'Source image'); ?></label>

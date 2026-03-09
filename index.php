@@ -75,6 +75,8 @@ setCacheHeaders('html');
 
 <?php echo generateNavigation(); ?>
 
+<div id="home-snap" class="home-snap-sections">
+
 <!-- Hero Section - Fullscreen -->
 <section id="home-fullpage" class="hero-section hero-home-bg home-section-full">
     <div class="container">
@@ -226,8 +228,10 @@ setCacheHeaders('html');
     </div>
 </section>
 
-<!-- Rest of home (one more snap point so scroll can continue past KND Games) -->
-<section class="home-section-full home-section-rest" id="home-rest">
+</div><!-- /#home-snap -->
+
+<!-- Rest of home (normal scrolling starts here) -->
+<section class="home-section-rest" id="home-rest">
 
 <!-- How KND Games Works -->
 <section class="py-5" id="knd-games-how">

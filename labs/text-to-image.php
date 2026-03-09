@@ -306,7 +306,7 @@ echo generateHeader(t('labs.tool_page_title', '{tool} | KND Labs', ['tool' => $t
         <div class="knd-section-title"><?php echo t('labs.credits', 'Credits'); ?></div>
         <p class="text-white mb-2"><strong id="labs-balance"><?php echo number_format($balance); ?></strong> KP</p>
         <p class="knd-muted small mb-3" id="labs-cost-label"><?php echo t('labs.cost_label', 'Cost: 3 KP'); ?></p>
-        <p class="knd-muted small mb-4" id="labs-balance-after"></p>
+
         <a href="/support-credits.php" class="knd-btn-secondary w-100 mb-4">+ <?php echo t('labs.add_credits', 'Add Credits'); ?></a>
         <div class="knd-divider"></div>
         <div class="knd-section-title"><?php echo t('labs.tool_history', 'Recent'); ?></div>

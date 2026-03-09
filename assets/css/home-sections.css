@@ -1,61 +1,52 @@
 /**
  * KND Store - Home fullscreen sections & scroll experience
- * Scroll-snap, KND Labs block, Gallery Preview, reveal animations
+ * Fullscreen sections; el scroll por sección en desktop lo maneja JS.
  */
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&display=swap');
 
 /* -------------------------------------------------------------------------
-   Scroll container: smooth section-based navigation
-   Applied to html when .home-fullpage-active (JS adds to html)
+   Scroll snap (desktop only, activated by JS while user is in intro sections)
    ------------------------------------------------------------------------- */
 html.home-fullpage-active {
-    scroll-snap-type: y mandatory;
+    /* legacy hook; scroll behavior now handled by JS */
     scroll-behavior: smooth;
-}
-html.home-fullpage-active body {
-    scroll-snap-type: y mandatory;
-}
-/* Offset so first section doesn't sit under fixed navbar */
-html.home-fullpage-active {
-    scroll-padding-top: 80px;
 }
 
 /* Fullscreen section base: ocupa viewport, snap al inicio */
 .home-section-full {
-    min-height: 100vh;
-    scroll-snap-align: start;
-    scroll-snap-stop: normal;
+    min-height: calc(100vh - var(--knd-header-height, 80px));
     display: flex;
     flex-direction: column;
     justify-content: center;
     position: relative;
 }
-/* Ajuste cuando el nav está fixed: padding-top para que el contenido no quede oculto */
-.home-section-full:first-of-type {
-    padding-top: 80px;
-    min-height: 100vh;
-    box-sizing: border-box;
-}
-/* Hero inner row: usar altura disponible restante para no forzar overflow */
+/* Hero inner row: ocupa toda la altura de la primera sección */
 #home-fullpage .row.min-vh-100 {
-    min-height: calc(100vh - 80px) !important;
+    min-height: calc(100vh - var(--knd-header-height, 80px)) !important;
 }
 
-/* Móvil: scroll-snap puede ser incómodo; lo hacemos opcional o más suave */
+/* Headings con la fuente del nuevo home */
+.hero-section .hero-title,
+.home-labs-headline,
+.home-gallery-preview-title,
+#lastroll-promo h2,
+.knd-pillar-section .section-title {
+    font-family: 'Chakra Petch', system-ui, sans-serif;
+    letter-spacing: 0.04em;
+}
+
+/* Móvil: scroll natural, sin snap forzado */
 @media (max-width: 767.98px) {
-    html.home-fullpage-active {
-        scroll-snap-type: y proximity;
-    }
     .home-section-full {
-        scroll-snap-stop: normal;
-        min-height: 100vh;
+        min-height: calc(100vh - var(--knd-header-height, 80px));
     }
 }
 
 /* -------------------------------------------------------------------------
-   Hero: ya tiene .hero-section .hero-home-bg; solo asegurar fullscreen
+   Hero: body ya aplica offset; sin padding extra
    ------------------------------------------------------------------------- */
 .home-section-full.hero-section {
-    padding-top: 80px;
+    padding-top: 0;
 }
 
 /* -------------------------------------------------------------------------
@@ -99,7 +90,7 @@ html.home-fullpage-active {
 }
 .home-labs-section .row {
     align-items: center;
-    min-height: calc(100vh - 80px);
+    min-height: calc(100vh - var(--knd-header-height, 80px));
 }
 /* Eyebrow / label */
 .home-labs-eyebrow {
@@ -367,7 +358,7 @@ html.home-fullpage-active {
    Arena section: convertir en fullscreen también
    ------------------------------------------------------------------------- */
 #lastroll-promo.home-section-full {
-    padding-top: 80px;
+    padding-top: var(--knd-header-height, 80px);
     padding-bottom: 2rem;
 }
 #lastroll-promo.home-section-full .container {
@@ -380,9 +371,8 @@ html.home-fullpage-active {
 /* Rest of page: one snap point so user can scroll past KND Games, then scroll normally inside */
 .home-section-rest {
     display: block;
-    justify-content: flex-start;
-    min-height: 100vh;
-    padding-top: 80px;
+    min-height: auto;
+    padding-top: var(--knd-header-height, 80px);
     padding-bottom: 3rem;
 }
 .home-section-rest > .container {

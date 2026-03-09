@@ -26,72 +26,119 @@ function comfyui_upload_image(string $filePath, ?string $baseUrl = null, string 
     $base = $baseUrl ? rtrim($baseUrl, '/') : '';
     if ($base === '') throw new \RuntimeException('ComfyUI config not found');
 
-    $url = $base . '/upload/image';
-    $cfile = new \CURLFile($filePath, mime_content_type($filePath) ?: 'image/png', basename($filePath));
-    $headers = [];
+    $mime = mime_content_type($filePath) ?: 'image/png';
+    $headers = ['Content-Type: multipart/form-data'];
     if ($token !== '') $headers[] = 'X-KND-TOKEN: ' . $token;
 
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => ['image' => $cfile],
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 30,
-        CURLOPT_CONNECTTIMEOUT => 10,
-        CURLOPT_HTTPHEADER => $headers,
-    ]);
-    $body = curl_exec($ch);
-    $err = curl_error($ch);
-    curl_close($ch);
-    if ($err) throw new \RuntimeException('ComfyUI upload failed: ' . $err);
-    $data = json_decode($body, true);
-    if (empty($data['name'])) {
-        throw new \RuntimeException('ComfyUI upload: no filename returned');
+    $tryPaths = ['/api/upload/image', '/upload/image', '/api/upload'];
+    $body = null;
+    $lastErr = '';
+    foreach ($tryPaths as $path) {
+        $url = $base . $path;
+        $cfile = new \CURLFile($filePath, $mime, basename($filePath));
+        $postFields = ['image' => $cfile, 'type' => 'input'];
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $postFields,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_HTTPHEADER => $headers,
+        ]);
+        $body = curl_exec($ch);
+        $err = curl_error($ch);
+        $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($err) {
+            $lastErr = $err;
+            continue;
+        }
+        if ($body !== false && $code >= 200 && $code < 300) break;
+        $lastErr = 'HTTP ' . $code;
     }
-    return $data['name'];
+    if ($body === false || $body === '') {
+        error_log('ComfyUI upload failed: base=' . $base . ' lastErr=' . $lastErr);
+        throw new \RuntimeException('ComfyUI upload failed: ' . ($lastErr ?: 'no response'));
+    }
+    $data = is_string($body) ? json_decode($body, true) : $body;
+    if (!is_array($data)) {
+        $preview = is_string($body) ? substr($body, 0, 200) : '';
+        error_log('ComfyUI upload invalid JSON: base=' . $base . ' preview=' . $preview);
+        throw new \RuntimeException('ComfyUI upload: invalid JSON response. ' . $preview);
+    }
+    $name = $data['name'] ?? $data['filename'] ?? null;
+    if (empty($name) || !is_string($name)) {
+        $preview = json_encode($data);
+        if (strlen($preview) > 250) $preview = substr($preview, 0, 250) . '...';
+        error_log('ComfyUI upload no filename: base=' . $base . ' response=' . $preview);
+        throw new \RuntimeException('ComfyUI upload: no filename returned. Response: ' . $preview);
+    }
+    return $name;
+}
+
+/** Tool → workflow filename (single ComfyUI instance). */
+const COMFYUI_TOOL_WORKFLOW_MAP = [
+    'text2img'         => 'knd-workflow-api.json',
+    'img2img'          => 'knd-workflow-api2.json',
+    'remove-bg'        => 'remove_bg.json',
+    'texture'          => 'texture_generate_pro.json',
+    'texture_seamless' => 'texture_generate_pro.json',
+    'texture_image'    => 'texture_from_image_pro.json',
+    'texture_ultra'    => 'texture_ultra_pro.json',
+    'upscale'          => 'upscale_api.json',
+    'consistency'      => 'consistency_api.json',
+    '3d_fast'          => '3d_fast.json',
+    '3d_premium'       => '3d_premium.json',
+    'character'        => 'knd-workflow-api.json',
+];
+
+/**
+ * Get workflow filename for a tool (for worker dispatcher).
+ */
+function comfyui_workflow_filename_for_tool(string $tool, array $params = []): string {
+    if ($tool === 'img2img') {
+        return COMFYUI_TOOL_WORKFLOW_MAP['img2img'] ?? 'knd-workflow-api2.json';
+    }
+    return COMFYUI_TOOL_WORKFLOW_MAP[$tool] ?? COMFYUI_TOOL_WORKFLOW_MAP['text2img'];
 }
 
 /**
  * Load workflow file path by tool.
  */
-function comfyui_workflow_path(string $tool): string {
+function comfyui_workflow_path(string $tool, array $params = []): string {
     $baseDir = defined('WORKFLOWS_DIR') ? rtrim(WORKFLOWS_DIR, '/\\') : (dirname(__DIR__) . '/workflows');
-    if ($tool === 'upscale') {
-        $path = $baseDir . '/upscale_api.json';
-        if (!is_readable($path)) $path = dirname(__DIR__) . '/KND_MASTER_WORKFLOW_UPSCALE.json';
-    } elseif ($tool === 'consistency') {
-        $path = $baseDir . '/consistency_api.json';
-        if (!is_readable($path)) $path = dirname(__DIR__) . '/KND_MASTER_WORKFLOW_API.json';
-    } elseif ($tool === 'text2img' || $tool === 'character') {
+    $filename = comfyui_workflow_filename_for_tool($tool, $params);
+    $path = $baseDir . '/' . $filename;
+    if (!is_readable($path)) {
+        if ($filename === '3d_fast.json') $path = $baseDir . '/generate fast 3d.json';
+        if ($filename === '3d_premium.json') $path = $baseDir . '/3d premium.json';
+        if ($filename === 'knd-workflow-api2.json') $path = $baseDir . '/knd-workflow-api.json';
+    }
+    if (!is_readable($path)) {
         $path = $baseDir . '/knd-workflow-api.json';
-        if (!is_readable($path)) $path = $baseDir . '/text2img_api.json';
-        if (!is_readable($path)) $path = dirname(__DIR__) . '/KND_MASTER_WORKFLOW_API.json';
-    } else {
-        $path = dirname(__DIR__) . '/KND_MASTER_WORKFLOW_API.json';
     }
     return $path;
 }
 
 /**
- * Load master workflow and inject parameters.
- * @param array $params prompt, negative_prompt, seed, steps, cfg, width, height, image_filename (for upscale), scale, job_id (for upscale)
- * @param string $tool text2img|upscale|character
- * @return array workflow for ComfyUI API
+ * Inject parameters into an already-loaded workflow (for worker dispatcher).
+ * Modifies $wf by reference. Sets prompt, negative_prompt, seed, steps, cfg, width, height, image_filename, filename_prefix.
  */
-function comfyui_inject_workflow(array $params, string $tool = 'text2img'): array {
-    $path = comfyui_workflow_path($tool);
-    if (!is_readable($path)) {
-        throw new \RuntimeException('Workflow file not found: ' . basename($path));
-    }
-    $wf = json_decode(file_get_contents($path), true);
-    if (!is_array($wf)) {
-        throw new \RuntimeException('Invalid workflow JSON');
-    }
+function comfyui_inject_workflow_params(array &$wf, array $params, string $tool = 'text2img'): void {
     $prompt = $params['prompt'] ?? '';
     if ($tool === 'consistency') {
         $base = trim($params['base_prompt'] ?? '');
         $scene = trim($params['scene_prompt'] ?? '');
         $prompt = $base !== '' && $scene !== '' ? $base . ', ' . $scene : ($base ?: $scene ?: 'high quality image');
+    }
+    $textureTools = ['texture', 'texture_image', 'texture_ultra'];
+    if (in_array($tool, $textureTools, true)) {
+        $seamless = !empty($params['seamless']);
+        $prompt = trim($prompt) ?: 'game texture, detailed surface';
+        if ($seamless) {
+            $prompt = 'seamless, tileable, ' . $prompt;
+        }
     }
     $negative = $params['negative_prompt'] ?? 'ugly, blurry, low quality';
     $seed = isset($params['seed']) ? (int) $params['seed'] : random_int(0, 2147483647);
@@ -103,7 +150,7 @@ function comfyui_inject_workflow(array $params, string $tool = 'text2img'): arra
     $height = (int) ($params['height'] ?? 512);
     $width = max(256, min(2048, $width - ($width % 8)));
     $height = max(256, min(2048, $height - ($height % 8)));
-    $batchSize = isset($params['batch_size']) ? max(1, min(4, (int) $params['batch_size'])) : 1;
+    $batchSize = 1;
     $samplerName = $params['sampler_name'] ?? 'dpmpp_2m';
     $scheduler = $params['scheduler'] ?? 'karras';
     $denoise = isset($params['denoise']) ? (float) $params['denoise'] : 1.0;
@@ -140,29 +187,61 @@ function comfyui_inject_workflow(array $params, string $tool = 'text2img'): arra
         if ($ctype === 'EmptyLatentImage') {
             $inputs['width'] = $width;
             $inputs['height'] = $height;
-            $inputs['batch_size'] = $batchSize;
+            $inputs['batch_size'] = 1;
         }
-        if ($ctype === 'LoadImage') {
+        if (array_key_exists('batch_size', $inputs)) {
+            $inputs['batch_size'] = 1;
+        }
+        if ($ctype === 'LoadImage' || $ctype === 'AILab_LoadImage') {
             if (!empty($params['image_filename'])) {
                 $inputs['image'] = $params['image_filename'];
+                if (isset($inputs['image_path_or_URL'])) {
+                    $inputs['image_path_or_URL'] = '';
+                }
             } elseif ($tool === 'consistency' && !empty($params['reference_image_filename'])) {
                 $inputs['image'] = $params['reference_image_filename'];
             }
         }
+        if (in_array($ctype, ['KSampler', 'KSamplerAdvanced'], true) && in_array($tool, $textureTools, true) && isset($params['denoise'])) {
+            $d = (float) $params['denoise'];
+            if (!empty($params['image_filename'])) {
+                $d = max(0.4, min(0.95, $d));
+            }
+            $inputs['denoise'] = $d;
+        }
         if ($ctype === 'CheckpointLoaderSimple' && $tool === 'consistency' && !empty($params['model_ckpt'])) {
             $inputs['ckpt_name'] = $params['model_ckpt'];
-        }
-        if ($ctype === 'SaveImage' && $tool === 'consistency' && isset($params['job_id'])) {
-            $inputs['filename_prefix'] = 'knd_consistency/job_' . (int) $params['job_id'];
         }
         if ($ctype === 'UpscaleModelLoader' && $tool === 'upscale') {
             $model = $params['upscale_model'] ?? '4x-UltraSharp.pth';
             $inputs['model_name'] = comfyui_normalize_upscale_model((string) $model);
         }
-        if ($ctype === 'SaveImage' && $tool === 'upscale' && isset($params['job_id'])) {
-            $inputs['filename_prefix'] = 'knd_upscale/job_' . (int) $params['job_id'];
+        if (($ctype === 'SaveImage' || $ctype === 'Image Save') && isset($params['job_id'])) {
+            $prefix = 'knd_' . preg_replace('/[^a-z0-9_]/', '_', $tool) . '/job_' . (int) $params['job_id'];
+            $inputs['filename_prefix'] = $prefix;
+            if (isset($inputs['output_path']) && is_string($inputs['output_path']) && $inputs['output_path'] !== '') {
+                $inputs['output_path'] = '';
+            }
         }
     }
+}
+
+/**
+ * Load master workflow and inject parameters.
+ * @param array $params prompt, negative_prompt, seed, steps, cfg, width, height, image_filename, job_id, etc.
+ * @param string $tool text2img|img2img|texture|texture_image|texture_ultra|upscale|consistency|3d_fast|3d_premium|character
+ * @return array workflow for ComfyUI API
+ */
+function comfyui_inject_workflow(array $params, string $tool = 'text2img'): array {
+    $path = comfyui_workflow_path($tool, $params);
+    if (!is_readable($path)) {
+        throw new \RuntimeException('Workflow file not found: ' . basename($path));
+    }
+    $wf = json_decode(file_get_contents($path), true);
+    if (!is_array($wf)) {
+        throw new \RuntimeException('Invalid workflow JSON');
+    }
+    comfyui_inject_workflow_params($wf, $params, $tool);
     return $wf;
 }
 
@@ -209,6 +288,56 @@ function comfyui_apply_ipadapter_controlnet(array &$workflow, array $params, ?st
 }
 
 /**
+ * Fetch image bytes from ComfyUI by prompt_id (no DB).
+ * Used by worker when output file is not on disk. Returns first image from history outputs.
+ * @return string|null raw image bytes or null on failure
+ */
+function comfyui_fetch_output_image_bytes(string $promptId, string $baseUrl, string $token = ''): ?string {
+    $hist = comfyui_get_history($promptId, $baseUrl, $token);
+    if (!$hist || !isset($hist['outputs'])) return null;
+    $filename = null;
+    $subfolder = '';
+    $imgType = 'output';
+    foreach ($hist['outputs'] as $nodeOut) {
+        if (!is_array($nodeOut)) continue;
+        foreach (['images', 'gifs'] as $key) {
+            if (!isset($nodeOut[$key]) || !is_array($nodeOut[$key])) continue;
+            foreach ($nodeOut[$key] as $img) {
+                if (!empty($img['filename'])) {
+                    $filename = $img['filename'];
+                    $subfolder = $img['subfolder'] ?? '';
+                    $imgType = $img['type'] ?? 'output';
+                    break 3;
+                }
+            }
+        }
+    }
+    if (!$filename) return null;
+    $params = ['filename' => $filename, 'type' => $imgType];
+    if ($subfolder !== '') $params['subfolder'] = $subfolder;
+    $base = rtrim($baseUrl, '/');
+    $headers = ['Accept: image/*'];
+    if ($token !== '') $headers[] = 'X-KND-TOKEN: ' . $token;
+    foreach (['/view', '/api/view'] as $path) {
+        $url = $base . $path . '?' . http_build_query($params);
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT => 60,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_HTTPHEADER => $headers,
+        ]);
+        $bin = curl_exec($ch);
+        $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($bin !== false && $code >= 200 && $code < 300) return $bin;
+        error_log('ComfyUI fetch output image: ' . $url . ' HTTP ' . $code);
+    }
+    return null;
+}
+
+/**
  * Fetch image bytes from a completed labs job (for upscale source_type=recent).
  * @return string|null raw image bytes or null on failure
  */
@@ -222,40 +351,7 @@ function comfyui_fetch_job_image_bytes(PDO $pdo, int $jobId, int $userId): ?stri
         ? comfyui_get_base_url_runpod($pdo) : comfyui_get_base_url_local($pdo);
     if (!$baseUrl) $baseUrl = comfyui_get_base_url($pdo, null);
     $token = comfyui_get_token($pdo);
-    $hist = comfyui_get_history($job['comfy_prompt_id'], $baseUrl, $token);
-    if (!$hist || !isset($hist['outputs'])) return null;
-    $filename = null;
-    $subfolder = '';
-    $imgType = 'output';
-    foreach ($hist['outputs'] as $nodeOut) {
-        if (isset($nodeOut['images']) && is_array($nodeOut['images'])) {
-            foreach ($nodeOut['images'] as $img) {
-                if (!empty($img['filename'])) {
-                    $filename = $img['filename'];
-                    $subfolder = $img['subfolder'] ?? '';
-                    $imgType = $img['type'] ?? 'output';
-                    break 2;
-                }
-            }
-        }
-    }
-    if (!$filename) return null;
-    $params = ['filename' => $filename, 'type' => $imgType];
-    if ($subfolder !== '') $params['subfolder'] = $subfolder;
-    $url = rtrim($baseUrl, '/') . '/view?' . http_build_query($params);
-    $headers = ['Accept: image/*'];
-    if ($token !== '') $headers[] = 'X-KND-TOKEN: ' . $token;
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_TIMEOUT => 60,
-        CURLOPT_HTTPHEADER => $headers,
-    ]);
-    $bin = curl_exec($ch);
-    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    return ($bin !== false && $code >= 200 && $code < 300) ? $bin : null;
+    return comfyui_fetch_output_image_bytes($job['comfy_prompt_id'], $baseUrl, $token);
 }
 
 /** SDXL-only checkpoint models (KND Labs). SD 1.5 and FLUX excluded. */
@@ -470,6 +566,17 @@ function comfyui_run_prompt(array $workflow, ?string $baseUrl = null, string $to
                 $msg = is_string($err) ? $err : (isset($err['message']) ? $err['message'] : json_encode($err));
             } elseif (isset($data['node_errors'])) {
                 $msg = is_string($data['node_errors']) ? $data['node_errors'] : json_encode($data['node_errors']);
+            } elseif (!empty($data['message'])) {
+                $msg = $data['message'];
+                if (!empty($data['details']) && (is_string($data['details']) ? $data['details'] !== '' : true)) {
+                    $msg .= ' | ' . (is_string($data['details']) ? $data['details'] : json_encode($data['details']));
+                }
+                if (!empty($data['extra_info']) && is_array($data['extra_info'])) {
+                    $msg .= ' | ' . json_encode($data['extra_info']);
+                }
+            }
+            if (isset($data['type']) && $data['type'] === 'prompt_outputs_failed_validation') {
+                $msg = 'Workflow validation failed: ' . $msg . '. Typical causes: (1) Upscale model missing – put 4x-UltraSharp.pth or RealESRGAN_x4plus.pth in ComfyUI/models/upscale_models/ ; (2) LoadImage file not in ComfyUI/input/ (worker must upload first).';
             }
         } elseif ($body) {
             $msg = substr($body, 0, 300);

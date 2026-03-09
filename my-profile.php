@@ -40,7 +40,7 @@ echo generateHeader($seoTitle, $seoDesc, $ogHead);
 
 <?php echo generateNavigation(); ?>
 
-<section class="hero-section profile-page" style="min-height:100vh; padding-top:110px; padding-bottom:60px;">
+<section class="hero-section profile-page" style="min-height:127vh; padding-top:160px; padding-bottom:60px;">
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-12 col-lg-10 col-xl-9">

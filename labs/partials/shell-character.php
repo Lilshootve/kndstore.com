@@ -16,7 +16,6 @@ $kpCostCharacter = isset($kpCostCharacter) ? (int) $kpCostCharacter : 15;
     <div class="ln-t2i-main-col">
       <div class="ln-t2i-meta">
         <span class="ln-t2i-cost">Cost: <strong><?php echo (int) $kpCostCharacter; ?></strong> KP</span>
-        <span class="ln-t2i-balance-after">Balance: <strong id="cl-balance-num"><?php echo number_format($balance); ?></strong> KP</span>
       </div>
       <div class="ln-t2i-canvas-zone">
         <div class="knd-canvas knd-panel-soft ln-t2i-preview-wrap">

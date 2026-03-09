@@ -12,6 +12,9 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/json.php';
 require_once __DIR__ . '/../../includes/settings.php';
 require_once __DIR__ . '/../../includes/storage.php';
+if (file_exists(__DIR__ . '/../../config/labs.php')) {
+    require_once __DIR__ . '/../../config/labs.php';
+}
 require_once __DIR__ . '/../../includes/comfyui.php';
 require_once __DIR__ . '/../../includes/comfyui_provider.php';
 
@@ -42,18 +45,47 @@ try {
     }
 
     $outputPath = $job['output_path'] ?? '';
+    $tool = $job['tool'] ?? '';
     if ($outputPath !== '') {
         $fullPath = storage_path($outputPath);
         $base = realpath(storage_path());
         $resolved = is_file($fullPath) ? realpath($fullPath) : false;
         if ($resolved && $base && strpos($resolved, $base) === 0 && is_readable($fullPath)) {
-            $download = isset($_GET['download']) && $_GET['download'] !== '0' && $_GET['download'] !== '';
-            header('Content-Type: image/png');
-            header('Content-Length: ' . filesize($fullPath));
-            header('X-Content-Type-Options: nosniff');
-            header('Content-Disposition: ' . ($download ? 'attachment' : 'inline') . '; filename="knd_labs_' . $jobId . '.png"');
-            readfile($fullPath);
-            exit;
+            $size = filesize($fullPath);
+            if ($size > 0) {
+                $download = isset($_GET['download']) && $_GET['download'] !== '0' && $_GET['download'] !== '';
+                $ct = 'image/png';
+                if (preg_match('/\.(jpg|jpeg|webp)$/i', $outputPath)) $ct = preg_match('/webp$/i', $outputPath) ? 'image/webp' : 'image/jpeg';
+                header('Content-Type: ' . $ct);
+                header('Content-Length: ' . $size);
+                header('X-Content-Type-Options: nosniff');
+                header('Content-Disposition: ' . ($download ? 'attachment' : 'inline') . '; filename="knd_labs_' . $jobId . '.png"');
+                readfile($fullPath);
+                exit;
+            }
+            error_log('api/labs/image: job_id=' . $jobId . ' output_path empty or invalid file: ' . $fullPath);
+        } else {
+            error_log('api/labs/image: job_id=' . $jobId . ' output_path not readable or outside storage: ' . $fullPath);
+        }
+    }
+
+    // Fallback: serve from KND_FINAL_IMAGE_DIR when worker saves there (e.g. F:\KND\output) and server can read it
+    if ($tool !== '' && defined('KND_FINAL_IMAGE_DIR') && KND_FINAL_IMAGE_DIR !== '') {
+        $fallbackDir = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, KND_FINAL_IMAGE_DIR), DIRECTORY_SEPARATOR);
+        $baseName = 'job_' . $jobId . '_' . $tool . '.';
+        foreach (['png', 'jpg', 'jpeg', 'webp'] as $ext) {
+            $path = $fallbackDir . DIRECTORY_SEPARATOR . $baseName . $ext;
+            if (is_file($path) && is_readable($path) && filesize($path) > 0) {
+                $size = filesize($path);
+                $ct = $ext === 'webp' ? 'image/webp' : ($ext === 'png' ? 'image/png' : 'image/jpeg');
+                $download = isset($_GET['download']) && $_GET['download'] !== '0' && $_GET['download'] !== '';
+                header('Content-Type: ' . $ct);
+                header('Content-Length: ' . (string) $size);
+                header('X-Content-Type-Options: nosniff');
+                header('Content-Disposition: ' . ($download ? 'attachment' : 'inline') . '; filename="knd_labs_' . $jobId . '.png"');
+                readfile($path);
+                exit;
+            }
         }
     }
 

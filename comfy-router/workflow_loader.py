@@ -6,12 +6,17 @@ Loads JSON from workflows/ and injects payload params into node inputs.
 import copy
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger("workflow_loader")
 
-WORKFLOWS_DIR = Path(__file__).resolve().parent / "workflows"
+_DEFAULT_ROOT_WORKFLOWS = Path(__file__).resolve().parent.parent / "workflows"
+_LEGACY_LOCAL_WORKFLOWS = Path(__file__).resolve().parent / "workflows"
+WORKFLOWS_DIR = Path(os.getenv("WORKFLOWS_DIR", str(_DEFAULT_ROOT_WORKFLOWS))).resolve()
+if not WORKFLOWS_DIR.exists():
+    WORKFLOWS_DIR = _LEGACY_LOCAL_WORKFLOWS
 
 # Map job type + preset -> workflow filename (without .json)
 WORKFLOW_MAP = {

@@ -4,6 +4,23 @@
  * Compatible con Bootstrap navbar. Sin librerías externas.
  */
 
+/* Altura del header para offset del contenido (navbar min-height en knd-ui = 80px) */
+:root {
+  --knd-header-height: 80px;
+}
+@media (max-width: 991.98px) {
+  :root {
+    --knd-header-height: 80px;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Offset global: el contenido empieza debajo del header fixed
+   ------------------------------------------------------------------------- */
+body {
+  padding-top: var(--knd-header-height) !important;
+}
+
 /* -------------------------------------------------------------------------
    Base: header fijo para poder animar translateY (override sticky si existe)
    ------------------------------------------------------------------------- */
@@ -50,13 +67,4 @@
   transform: translateY(-100%);
 }
 
-/* Asegurar que el contenido bajo el header no salte (navbar es fixed) */
-body {
-  padding-top: 0;
-}
-
-/* Bootstrap fixed-top ya suele añadir padding; por si acaso en páginas sin hero */
-.site-header + main,
-.site-header ~ #particles-bg {
-  /* Sin cambios; el layout actual ya contempla el nav fixed */
-}
+/* particles-bg y primer bloque quedan ya desplazados por body padding-top */

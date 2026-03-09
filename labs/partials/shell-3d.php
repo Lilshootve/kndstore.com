@@ -23,7 +23,6 @@ $qualities = defined('LABS_3D_QUALITY') ? LABS_3D_QUALITY : ['Standard' => 'Stan
       <div class="ln-t2i-main-col">
         <div class="ln-t2i-meta">
           <span class="ln-t2i-cost">Cost: <strong id="l3d-cost"><?php echo (int) $kpCost3d; ?></strong> KP</span>
-          <span class="ln-t2i-balance-after">Balance: <strong id="l3d-balance"><?php echo number_format($balance); ?></strong> KP</span>
         </div>
         <div class="ln-t2i-canvas-zone">
           <div class="knd-canvas knd-panel-soft ln-t2i-preview-wrap" id="l3d-result-wrapper">

@@ -506,6 +506,23 @@
         if (el.submit) el.submit.addEventListener('click', function (e) { e.preventDefault(); onSubmit(); });
         if (el.viewImageBtn) el.viewImageBtn.addEventListener('click', function (e) { e.preventDefault(); showImageInViewer(); });
 
+        // Ensure Download GLB button always triggers a download, even if other handlers cancel clicks.
+        if (el.downloadBtn) {
+            el.downloadBtn.addEventListener('click', function (e) {
+                var href = el.downloadBtn.getAttribute('href');
+                var disabled = el.downloadBtn.classList.contains('disabled') || el.downloadBtn.getAttribute('aria-disabled') === 'true';
+                if (!href || href === '#' || disabled) return;
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                    var w = window.open(href, '_blank');
+                    if (w) w.opener = null;
+                } catch (err) {
+                    window.location.href = href;
+                }
+            });
+        }
+
         var fsBtn = document.getElementById('l3d-fullscreen');
         if (fsBtn) fsBtn.addEventListener('click', function () {
             var target = (el.viewerImageWrap && !el.viewerImageWrap.classList.contains('d-none')) ? el.viewerImageWrap : el.modelViewer;

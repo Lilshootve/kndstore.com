@@ -44,7 +44,7 @@ try {
     }
 
     $currentTool = isset($_GET['tool']) ? trim($_GET['tool']) : 'text2img';
-    $allowedTools = ['text2img', 'upscale', 'consistency', 'texture', '3d', 'character'];
+    $allowedTools = ['text2img', 'upscale', 'consistency', 'remove-bg', 'texture', '3d', 'character', 'model_viewer'];
     if (!in_array($currentTool, $allowedTools, true)) {
         $currentTool = 'text2img';
     }
@@ -115,7 +115,7 @@ try {
     $labsNextCss = __DIR__ . '/assets/css/labs-next.css';
     $aiCss = __DIR__ . '/assets/css/ai-tools.css';
     $labsCss = __DIR__ . '/assets/css/knd-labs.css';
-    $extraHead = '<script>window.KND_PRICING={"text2img":{"standard":3,"high":6},"upscale":{"2x":5,"4x":8},"character":{"base":15},"consistency":{"base":5}};</script>';
+    $extraHead = '<script>window.KND_PRICING={"text2img":{"standard":3,"high":6},"upscale":{"2x":5,"4x":8},"character":{"base":15},"consistency":{"base":5},"remove_bg":{"base":5},"texture":{"base":10}};</script>';
     $extraHead .= '<link rel="stylesheet" href="/assets/css/labs-next.css?v=' . (file_exists($labsNextCss) ? filemtime($labsNextCss) : time()) . '">';
     $extraHead .= '<link rel="stylesheet" href="/assets/css/ai-tools.css?v=' . (file_exists($aiCss) ? filemtime($aiCss) : time()) . '">';
     $extraHead .= '<link rel="stylesheet" href="/assets/css/knd-labs.css?v=' . (file_exists($labsCss) ? filemtime($labsCss) : time()) . '">';
@@ -152,9 +152,12 @@ try {
         <li><a href="/labs?tool=text2img" class="ln-tool<?php echo $currentTool === 'text2img' ? ' ln-tool-active' : ''; ?>"<?php echo $currentTool === 'text2img' ? ' aria-current="page"' : ''; ?>><i class="fas fa-palette"></i><span>Text2Img</span></a></li>
         <li><a href="/labs?tool=upscale" class="ln-tool<?php echo $currentTool === 'upscale' ? ' ln-tool-active' : ''; ?>"<?php echo $currentTool === 'upscale' ? ' aria-current="page"' : ''; ?>><i class="fas fa-search-plus"></i><span>Upscale</span></a></li>
         <li><a href="/labs?tool=consistency" class="ln-tool<?php echo $currentTool === 'consistency' ? ' ln-tool-active' : ''; ?>"<?php echo $currentTool === 'consistency' ? ' aria-current="page"' : ''; ?>><i class="fas fa-lock"></i><span>Consistency</span></a></li>
+        <li><a href="/labs?tool=remove-bg" class="ln-tool<?php echo $currentTool === 'remove-bg' ? ' ln-tool-active' : ''; ?>"<?php echo $currentTool === 'remove-bg' ? ' aria-current="page"' : ''; ?>><i class="fas fa-eraser"></i><span>Remove Background</span></a></li>
         <li><a href="/labs?tool=texture" class="ln-tool<?php echo $currentTool === 'texture' ? ' ln-tool-active' : ''; ?>"<?php echo $currentTool === 'texture' ? ' aria-current="page"' : ''; ?>><i class="fas fa-border-all"></i><span>Texture Lab</span></a></li>
         <li><a href="/labs?tool=3d" class="ln-tool<?php echo $currentTool === '3d' ? ' ln-tool-active' : ''; ?>"<?php echo $currentTool === '3d' ? ' aria-current="page"' : ''; ?>><i class="fas fa-cube"></i><span>3D Lab</span></a></li>
         <li><a href="/labs?tool=character" class="ln-tool<?php echo $currentTool === 'character' ? ' ln-tool-active' : ''; ?>"<?php echo $currentTool === 'character' ? ' aria-current="page"' : ''; ?>><i class="fas fa-user-astronaut"></i><span>Character Lab</span></a></li>
+        <li><a href="/labs?tool=model_viewer" class="ln-tool<?php echo $currentTool === 'model_viewer' ? ' ln-tool-active' : ''; ?>"<?php echo $currentTool === 'model_viewer' ? ' aria-current="page"' : ''; ?>><i class="fas fa-cube"></i><span>Model Viewer</span></a></li>
+        <li><button type="button" class="ln-tool-viewer-link" id="ln-open-viewer" aria-label="Open job details viewer"><i class="fas fa-external-link-alt"></i><span>View job details</span></button></li>
       </ul>
     </nav>
     <div class="ln-sidebar-sep" aria-hidden="true"></div>
@@ -201,7 +204,7 @@ try {
           <?php foreach ($recentJobs as $j):
             $status = $j['status'] ?? 'pending';
             $tool = $j['tool'] ?? 'text2img';
-            $toolIcon = $tool === 'text2img' ? 'palette' : ($tool === 'upscale' ? 'search-plus' : ($tool === 'consistency' ? 'lock' : 'user-astronaut'));
+            $toolIcon = $tool === 'text2img' ? 'palette' : ($tool === 'upscale' ? 'search-plus' : ($tool === 'consistency' ? 'lock' : ($tool === 'remove-bg' ? 'eraser' : ($tool === 'texture' ? 'border-all' : 'user-astronaut'))));
             $hasImage = ($status === 'done') && !empty($j['image_url']);
             $imgSrc = $hasImage ? ('/api/labs/image.php?job_id=' . (int)$j['id']) : '';
           ?>
@@ -240,9 +243,15 @@ try {
 <script>
 (function() {
   function run() {
-    if (typeof KNDLabs !== 'undefined' && !window.__labsShellViewBound) {
-      window.__labsShellViewBound = true;
-      KNDLabs.init({});
+    if (typeof KNDLabs === 'undefined') return;
+    var currentTool = '<?php echo addslashes($currentTool); ?>';
+    // Only init here for tools that do NOT have their own KNDLabs.init in the partial (3d, character).
+    // text2img, upscale, consistency, texture already call KNDLabs.init in shell-*.php; a second init would add a duplicate submit listener and send the job twice to the queue.
+    if (currentTool === '3d' || currentTool === 'character') {
+      if (!window.__labsShellViewBound) {
+        window.__labsShellViewBound = true;
+        KNDLabs.init({});
+      }
     }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
@@ -256,6 +265,26 @@ try {
       .then(function(r) { return r.json(); })
       .then(function(d) { if (d.ok) window.location.reload(); });
   });
+})();
+(function() {
+  var btn = document.getElementById('ln-open-viewer');
+  var drawer = document.getElementById('labs-details-drawer');
+  var backdrop = document.getElementById('labs-details-backdrop');
+  var body = document.getElementById('labs-details-body');
+  var closeBtn = document.getElementById('labs-details-close');
+  function closeViewer() {
+    if (drawer) drawer.classList.remove('is-open');
+    if (backdrop) backdrop.classList.remove('is-visible');
+  }
+  if (btn && drawer && body) {
+    btn.addEventListener('click', function() {
+      body.innerHTML = '<p class="text-white-50 mb-0">Click a job in <strong>Recent</strong> below to view its details.</p>';
+      if (drawer) drawer.classList.add('is-open');
+      if (backdrop) backdrop.classList.add('is-visible');
+    });
+  }
+  if (backdrop) backdrop.addEventListener('click', closeViewer);
+  if (closeBtn) closeBtn.addEventListener('click', closeViewer);
 })();
 </script>
 <?php

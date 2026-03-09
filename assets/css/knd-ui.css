@@ -93,6 +93,8 @@ body {
   background-size: 100% 100%, 48px 48px, 48px 48px;
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&display=swap');
+
 .navbar-nav .nav-link {
   color: var(--knd-text-alt) !important;
   font-size: 0.9rem;
@@ -100,6 +102,8 @@ body {
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
   transition: color var(--knd-transition), background var(--knd-transition);
+  font-family: 'Chakra Petch', system-ui, sans-serif;
+  letter-spacing: 0.04em;
 }
 
 .navbar-nav .nav-link:hover {
@@ -196,10 +200,18 @@ body {
 
 .footer h5 {
   color: var(--knd-accent-soft) !important;
+  font-family: 'Chakra Petch', system-ui, sans-serif;
+  letter-spacing: 0.04em;
 }
 
 .footer a:hover {
   color: var(--knd-accent-soft) !important;
+}
+
+.footer a,
+.footer p,
+.footer li {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .glow-text {

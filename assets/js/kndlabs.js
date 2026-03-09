@@ -45,6 +45,7 @@
           self.bindPromptValidation();
           self.bindAdvancedToggle();
           self.bindViewDetails();
+          self.bindLabsActionLinks();
           self.bindRecentFilter();
           self.bindPrivateCheck();
           self.bindUseLastPrompt();
@@ -95,6 +96,7 @@
         var scale = s ? s.value : '2';
         return (p.upscale && p.upscale[scale + 'x']) || (scale === '4' ? 8 : 5);
       }
+      if (key === 'remove_bg') return (p.remove_bg && p.remove_bg.base) || 5;
       if (key === 'consistency') return (p.consistency && p.consistency.base) || 5;
       return (p.character && p.character.base) || 15;
     },
@@ -289,6 +291,9 @@
     },
 
     submitForm: function(formEl) {
+      if (this._submitting) return;
+      this._submitting = true;
+
       var tool = this.config.jobType || formEl.querySelector('[name="tool"]')?.value || 'text2img';
       var apiUrl = API_GENERATE;
       var fd;
@@ -335,6 +340,7 @@
         })
         .then(function(d) {
           if (submitBtn) submitBtn.disabled = false;
+          self._submitting = false;
             if (d.ok && d.data && d.data.job_id) {
             if (d.data.available_after !== undefined) self.updateBalance(d.data.available_after);
             if (self.config.keepFormOnSuccess !== false) { /* keep form (prompt, etc.) for variations */ } else { formEl.reset(); }
@@ -354,6 +360,7 @@
         })
         .catch(function(err) {
           if (submitBtn) submitBtn.disabled = false;
+          self._submitting = false;
           var msg = (err && err.message) ? err.message : 'Network error. Check console.';
           if (typeof kndToast !== 'undefined') kndToast(msg, 'error');
           else alert(msg);
@@ -369,7 +376,9 @@
         e.preventDefault();
         e.stopPropagation();
         var prompt = form.querySelector('[name="prompt"]');
-        if (prompt && self.config.jobType !== 'upscale') {
+        var textureMode = form.querySelector('[name="texture_mode"]') ? form.querySelector('[name="texture_mode"]').value : 'text';
+        var skipPromptCheck = self.config.jobType === 'upscale' || self.config.jobType === 'remove-bg' || (self.config.jobType === 'texture' && textureMode === 'image');
+        if (prompt && !skipPromptCheck) {
           if (!prompt.value || prompt.value.trim().length === 0) {
             if (typeof kndToast !== 'undefined') kndToast('Prompt is required', 'error');
             else alert('Prompt is required');
@@ -377,7 +386,7 @@
           }
         }
         var imageInput = form.querySelector('[name="image"]');
-        if (imageInput && self.config.jobType === 'upscale') {
+        if (imageInput && (self.config.jobType === 'upscale' || self.config.jobType === 'remove-bg')) {
           if (!imageInput.files || !imageInput.files.length) {
             if (typeof kndToast !== 'undefined') kndToast('Image is required', 'error');
             else alert('Image is required');
@@ -399,6 +408,21 @@
           if (!cnImg || !cnImg.files || !cnImg.files.length) {
             if (typeof kndToast !== 'undefined') kndToast('Control image required when ControlNet is enabled', 'error');
             else alert('Control image required when ControlNet is enabled');
+            return;
+          }
+        }
+        if (self.config.jobType === 'texture') {
+          if (textureMode === 'image' || textureMode === 'image_prompt') {
+            var texImg = form.querySelector('[name="image"]');
+            if (!texImg || !texImg.files || !texImg.files.length) {
+              if (typeof kndToast !== 'undefined') kndToast(textureMode === 'image' ? 'Image is required for Image to Texture.' : 'Image is required for Image + Prompt.', 'error');
+              else alert('Image is required');
+              return;
+            }
+          }
+          if (textureMode === 'image_prompt' && (!prompt || !prompt.value || prompt.value.trim().length === 0)) {
+            if (typeof kndToast !== 'undefined') kndToast('Prompt is required for Image + Prompt mode.', 'error');
+            else alert('Prompt is required');
             return;
           }
         }
@@ -518,7 +542,7 @@
       var form = document.getElementById(this.config.formId || 'labs-comfy-form');
       if (!form) return;
       var btn = form.querySelector('[type="submit"]') || document.getElementById('generateBtn') || document.getElementById('labs-submit-btn');
-      if (this.config.jobType === 'upscale') {
+      if (this.config.jobType === 'upscale' || this.config.jobType === 'remove-bg') {
         var img = form.querySelector('[name="image"]');
         var hasFile = img && img.files && img.files.length > 0;
         if (btn) btn.disabled = !hasFile;
@@ -587,6 +611,35 @@
         actionsEl.innerHTML = actions.join(' ');
       }
       panel.style.display = 'block';
+    },
+
+    /**
+     * Ensure all <a class="labs-action"> with valid href work on left-click (fix for
+     * links that only worked via right-click "Open in new tab"). Applies to all shells.
+     */
+    bindLabsActionLinks: function() {
+      document.addEventListener('click', function(e) {
+        var link = e.target.closest('a.labs-action');
+        if (!link || link.tagName !== 'A') return;
+        var rawHref = link.getAttribute('href');
+        if (!rawHref || rawHref === '#') return;
+        if (link.classList.contains('disabled') || link.getAttribute('aria-disabled') === 'true') return;
+        var href = link.href || rawHref;
+        if (!href || href === '#' || href === window.location.origin + window.location.pathname + '#') return;
+        e.preventDefault();
+        e.stopPropagation();
+        var openInNew = link.target === '_blank' || link.hasAttribute('download');
+        try {
+          if (openInNew) {
+            var w = window.open(href, '_blank', 'noopener');
+            if (w) w.opener = null;
+          } else {
+            window.location.href = href;
+          }
+        } catch (err) {
+          window.location.href = href;
+        }
+      }, true);
     },
 
     bindViewDetails: function() {
@@ -666,7 +719,7 @@
           .then(function(d) {
             if (!d.ok || !d.data) { body.innerHTML = '<p class="text-white-50">Job not found.</p>'; return; }
             self.renderComfyJobInDrawer(body, d.data, jid, closeDrawer);
-            var toolLabel = (d.data.tool === 'text2img' ? 'Text2Img' : d.data.tool === 'upscale' ? 'Upscale' : d.data.tool === 'consistency' ? 'Consistency' : d.data.tool === 'texture_seamless' ? 'Texture Lab' : d.data.tool || 'Job');
+            var toolLabel = (d.data.tool === 'text2img' ? 'Text2Img' : d.data.tool === 'upscale' ? 'Upscale' : d.data.tool === 'remove-bg' ? 'Remove Background' : d.data.tool === 'consistency' ? 'Consistency' : d.data.tool === 'texture' || d.data.tool === 'texture_seamless' ? 'Texture Lab' : d.data.tool || 'Job');
             self._setDrawerTitle(toolLabel);
           })
           .catch(function() { body.innerHTML = '<p class="text-danger small">Could not load job.</p>'; });
@@ -714,7 +767,7 @@
           .then(function(d) {
             if (!d.ok || !d.data) { body.innerHTML = '<p class="text-white-50">Job not found.</p>'; return; }
             self.renderComfyJobInDrawer(body, d.data, jid, closeDrawer);
-            var toolLabel = (d.data.tool === 'text2img' ? 'Text2Img' : d.data.tool === 'upscale' ? 'Upscale' : d.data.tool === 'consistency' ? 'Consistency' : d.data.tool === 'texture_seamless' ? 'Texture Lab' : d.data.tool || 'Job');
+            var toolLabel = (d.data.tool === 'text2img' ? 'Text2Img' : d.data.tool === 'upscale' ? 'Upscale' : d.data.tool === 'remove-bg' ? 'Remove Background' : d.data.tool === 'consistency' ? 'Consistency' : d.data.tool === 'texture' || d.data.tool === 'texture_seamless' ? 'Texture Lab' : d.data.tool || 'Job');
             openDrawer(toolLabel);
           })
           .catch(function() { body.innerHTML = '<p class="text-danger small">Could not load job.</p>'; });
@@ -831,7 +884,7 @@
       var imgUrl = J.image_url || (API_IMAGE + '?job_id=' + encodeURIComponent(jid));
       var imgUrlEsc = imgUrl.replace(/"/g, '&quot;');
       var sizeStr = (J.width && J.height) ? J.width + '\u00D7' + J.height : '';
-      var toolLabel = (J.tool === 'text2img' ? 'Text2Img' : J.tool === 'upscale' ? 'Upscale' : J.tool === 'consistency' ? 'Consistency' : J.tool || '—');
+      var toolLabel = (J.tool === 'text2img' ? 'Text2Img' : J.tool === 'upscale' ? 'Upscale' : J.tool === 'remove-bg' ? 'Remove Background' : J.tool === 'consistency' ? 'Consistency' : J.tool === 'texture' || J.tool === 'texture_seamless' ? 'Texture Lab' : J.tool || '—');
 
       var html = '';
       html += '<div class="labs-job-viewer-preview knd-details-preview">';
@@ -870,13 +923,19 @@
         html += '<a href="/labs?tool=consistency&reference_job_id=' + encodeURIComponent(jid) + '&mode=' + encodeURIComponent(mode) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-palette me-1"></i>Consistency</a>';
         html += '<a href="/labs?tool=consistency&reference_job_id=' + encodeURIComponent(jid) + '&mode=' + encodeURIComponent(mode) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-images me-1"></i>Variations</a>';
       }
+      if (J.status === 'done' && J.tool === 'texture') {
+        html += '<a href="/labs?tool=upscale&source_job_id=' + encodeURIComponent(jid) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-search-plus me-1"></i>Send to Upscale</a>';
+      }
+      if (J.status === 'done' && J.tool === 'remove-bg') {
+        html += '<a href="/labs?tool=upscale&source_job_id=' + encodeURIComponent(jid) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-search-plus me-1"></i>Send to Upscale</a>';
+      }
       if (J.status === 'done' && J.tool === 'upscale') {
         html += '<a href="/labs?tool=upscale&source_job_id=' + encodeURIComponent(jid) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-search-plus me-1"></i>Use as input</a>';
       }
       if (J.status === 'done') {
         html += '<a href="' + imgUrlEsc + '" class="btn btn-sm knd-btn-secondary" download><i class="fas fa-download me-1"></i>Download</a>';
       }
-      if (J.tool === 'text2img' || J.tool === 'consistency') {
+      if (J.tool === 'text2img' || J.tool === 'consistency' || J.tool === 'texture') {
         html += '<button type="button" class="btn btn-sm knd-btn-secondary labs-details-reuse" data-job-id="' + self.esc(jid) + '"><i class="fas fa-copy me-1"></i>Reuse Settings</button>';
       }
       var copyText = (J.tool === 'consistency' && (J.base_prompt || J.scene_prompt)) ? ((J.base_prompt || '') + '\n' + (J.scene_prompt || '')).trim() : (J.prompt || '');
@@ -934,6 +993,25 @@
             set('cfg', J.cfg);
             set('sampler', J.sampler_name || J.sampler);
             set('model', J.model);
+          } else if (tool === 'texture') {
+            set('prompt', J.prompt);
+            set('negative_prompt', J.negative_prompt);
+            set('texture_mode', J.texture_mode || 'text');
+            set('steps', J.steps);
+            set('cfg', J.cfg);
+            set('denoise', J.denoise);
+            var modeEl = form.querySelector('[name="texture_mode"]');
+            var modeChips = form.querySelectorAll('.texture-mode-chip');
+            if (modeEl && modeChips.length) {
+              modeEl.value = J.texture_mode || 'text';
+              modeChips.forEach(function(ch) { ch.classList.toggle('active', ch.getAttribute('data-mode') === (J.texture_mode || 'text')); });
+              var promptBlock = document.getElementById('labs-texture-prompt-block');
+              var imageBlock = document.getElementById('labs-texture-image-block');
+              if (promptBlock) promptBlock.style.display = (modeEl.value === 'image') ? 'none' : 'block';
+              if (imageBlock) imageBlock.style.display = (modeEl.value === 'text') ? 'none' : 'block';
+            }
+            var seamlessEl = form.querySelector('[name="texture_seamless"]');
+            if (seamlessEl) seamlessEl.checked = !!J.seamless;
           } else {
             set('prompt', J.prompt);
             set('negative_prompt', J.negative_prompt);

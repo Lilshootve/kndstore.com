@@ -23,6 +23,9 @@ require_once __DIR__ . '/../../includes/labs_image_helper.php';
 const LABS_TMP_DIR = 'uploads/labs/tmp';
 const MAX_REF_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB
 
+/** Tools accepted by POST tool= or type= (type is legacy). Do not remove entries. */
+const LABS_ALLOWED_TOOLS = ['text2img', 'img2img', 'remove-bg', 'upscale', 'character', 'texture', 'texture_seamless', 'texture_image', 'texture_ultra', 'consistency', '3d_fast', '3d_premium'];
+
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         json_error('METHOD_NOT_ALLOWED', 'POST only.', 405);
@@ -35,15 +38,35 @@ try {
         json_error('DB_CONNECTION_FAILED', 'Database connection failed.', 500);
     }
 
-    $tool = trim($_POST['tool'] ?? '');
-    $allowed = ['text2img', 'upscale', 'character'];
-    if (!in_array($tool, $allowed, true)) {
-        json_error('INVALID_TOOL', 'tool must be one of: ' . implode(', ', $allowed));
+    $tool = trim((string) ($_POST['tool'] ?? $_POST['type'] ?? ''));
+    if ($tool === 'character_create' || $tool === 'character_variation') {
+        $tool = 'character';
+    }
+    if ($tool === 'texture_seamless') {
+        $tool = 'texture';
+    }
+    if ($tool === 'remove_bg' || $tool === 'removebg') {
+        $tool = 'remove-bg';
+    }
+    if (!in_array($tool, LABS_ALLOWED_TOOLS, true)) {
+        json_error('INVALID_TOOL', 'tool must be one of: ' . implode(', ', LABS_ALLOWED_TOOLS));
     }
 
     $prompt = trim($_POST['prompt'] ?? '');
-    if (strlen($prompt) < 1 && $tool !== 'upscale') {
-        json_error('INVALID_INPUT', 'prompt is required.');
+    $promptOptionalTools = ['upscale', 'consistency', 'remove-bg'];
+    if (!in_array($tool, $promptOptionalTools, true) && strlen($prompt) < 1) {
+        if ($tool === 'texture' || $tool === 'texture_image') {
+            $textureMode = trim($_POST['texture_mode'] ?? ($tool === 'texture_image' ? 'image_prompt' : 'text'));
+            if (!in_array($textureMode, ['text', 'image', 'image_prompt'], true)) $textureMode = 'text';
+            if ($textureMode !== 'image' && strlen($prompt) < 1) {
+                json_error('INVALID_INPUT', 'Prompt is required for this mode.');
+            }
+        } elseif ($tool !== 'img2img') {
+            json_error('INVALID_INPUT', 'prompt is required.');
+        }
+    }
+    if ($tool === 'img2img' && strlen($prompt) < 1) {
+        $prompt = 'high quality image';
     }
     if (strlen($prompt) > 500) {
         json_error('INVALID_INPUT', 'Prompt max 500 characters.');
@@ -83,8 +106,22 @@ try {
     $costKp = 0;
     if ($tool === 'text2img') {
         $costKp = $quality === 'high' ? 6 : 3;
+    } elseif ($tool === 'img2img') {
+        $costKp = 4;
     } elseif ($tool === 'upscale') {
         $costKp = $scale === 4 ? 8 : 5;
+    } elseif ($tool === 'remove-bg') {
+        $costKp = 5;
+    } elseif (in_array($tool, ['texture', 'texture_image'], true)) {
+        $costKp = 10;
+    } elseif ($tool === 'texture_ultra') {
+        $costKp = 15;
+    } elseif ($tool === '3d_fast') {
+        $costKp = 12;
+    } elseif ($tool === '3d_premium') {
+        $costKp = 25;
+    } elseif ($tool === 'consistency') {
+        $costKp = 15;
     } else {
         $costKp = 15;
     }
@@ -104,11 +141,16 @@ try {
         'cfg' => $cfg,
         'width' => $width,
         'height' => $height,
-        'batch_size' => max(1, min(4, (int) ($_POST['batch_size'] ?? 1))),
+        'batch_size' => 1,
         'sampler_name' => trim($_POST['sampler_name'] ?? 'dpmpp_2m'),
         'scheduler' => trim($_POST['scheduler'] ?? 'karras'),
         'denoise' => isset($_POST['denoise']) ? (float) $_POST['denoise'] : 1.0,
     ];
+
+    if (in_array($tool, ['texture', 'texture_image'], true)) {
+        $params['texture_mode'] = in_array(trim($_POST['texture_mode'] ?? 'text'), ['text', 'image', 'image_prompt'], true) ? trim($_POST['texture_mode']) : ($tool === 'texture_image' ? 'image_prompt' : 'text');
+        $params['seamless'] = !empty($_POST['texture_seamless']);
+    }
 
     $ipadapterEnabled = $tool === 'text2img' && !empty($_POST['ipadapter_enabled']);
     $controlnetEnabled = $tool === 'text2img' && !empty($_POST['controlnet_enabled']);
@@ -165,13 +207,45 @@ try {
             json_error('INVALID_IMAGE', 'Image upload required for upscale.');
         }
         $tmpPath = $_FILES['image']['tmp_name'];
-        $imageFilename = comfyui_upload_image($tmpPath, $baseUrl, $token);
-        $params['image_filename'] = $imageFilename;
+        $valid = labs_validate_image($tmpPath, MAX_REF_IMAGE_BYTES, 2048);
+        if (!$valid['ok']) json_error('INVALID_IMAGE', $valid['error'] ?? 'Invalid image.', 400);
+        // Do not upload to ComfyUI here (server may not reach ComfyUI). Worker will download from image_url and upload.
         $params['scale'] = $scale;
         $upscaleDenoise = (float) ($_POST['upscale_denoise'] ?? 0.10);
         $params['upscale_denoise'] = max(0, min(0.35, round($upscaleDenoise / 0.05) * 0.05));
         $upscaleModel = trim($_POST['upscale_model'] ?? '4x-UltraSharp.pth');
         $params['upscale_model'] = in_array($upscaleModel, ['4x-UltraSharp.pth', 'RealESRGAN_x4plus.pth'], true) ? $upscaleModel : '4x-UltraSharp.pth';
+    }
+
+    if ($tool === 'remove-bg') {
+        if (empty($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+            json_error('INVALID_IMAGE', 'Image upload required for background removal.');
+        }
+        $tmpPath = $_FILES['image']['tmp_name'];
+        $valid = labs_validate_image($tmpPath, MAX_REF_IMAGE_BYTES, 4096);
+        if (!$valid['ok']) json_error('INVALID_IMAGE', $valid['error'] ?? 'Invalid image.', 400);
+    }
+
+    if ($tool === 'img2img') {
+        if (empty($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+            json_error('INVALID_IMAGE', 'Image upload required for img2img.');
+        }
+        $tmpPath = $_FILES['image']['tmp_name'];
+        $valid = labs_validate_image($tmpPath, MAX_REF_IMAGE_BYTES, 2048);
+        if (!$valid['ok']) json_error('INVALID_IMAGE', $valid['error'] ?? 'Invalid image.', 400);
+        $imageFilename = comfyui_upload_image($tmpPath, $baseUrl, $token);
+        $params['image_filename'] = $imageFilename;
+    }
+
+    if ($tool === 'texture_image' || ($tool === 'texture' && in_array($params['texture_mode'] ?? 'text', ['image', 'image_prompt'], true))) {
+        if (empty($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+            json_error('INVALID_IMAGE', 'Image upload required for Image to Texture or texture_image.');
+        }
+        $tmpPath = $_FILES['image']['tmp_name'];
+        $valid = labs_validate_image($tmpPath, MAX_REF_IMAGE_BYTES, 2048);
+        if (!$valid['ok']) json_error('INVALID_IMAGE', $valid['error'] ?? 'Invalid image.', 400);
+        $imageFilename = comfyui_upload_image($tmpPath, $baseUrl, $token);
+        $params['image_filename'] = $imageFilename;
     }
 
     $overrideCkpt = settings_get($pdo, 'comfyui_default_ckpt', '');
@@ -185,7 +259,7 @@ try {
     ]);
     $payloadJson = json_encode($payload);
 
-    $qualityCol = ($tool === 'text2img') ? $quality : (($tool === 'upscale') ? (string) $scale . 'x' : 'base');
+    $qualityCol = ($tool === 'text2img') ? $quality : (($tool === 'upscale') ? (string) $scale . 'x' : (($tool === 'texture') ? ($params['seamless'] ? 'seamless' : 'standard') : 'base'));
     $priority = 100;
 
     $stmt = $pdo->prepare(
@@ -198,6 +272,24 @@ try {
     $jobId = (int) $pdo->lastInsertId();
 
     $siteBase = rtrim(defined('SITE_URL') ? SITE_URL : 'https://kndstore.com', '/');
+    if ($tool === 'upscale' && !empty($_FILES['image']['tmp_name']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $tmpDir = storage_path(LABS_TMP_DIR);
+        if (!is_dir($tmpDir)) @mkdir($tmpDir, 0755, true);
+        $destPath = $tmpDir . DIRECTORY_SEPARATOR . 'job_' . $jobId . '_input.png';
+        if (!labs_image_to_png($_FILES['image']['tmp_name'], $destPath)) {
+            json_error('STORAGE_ERROR', 'Could not save upscale input image.', 500);
+        }
+        $params['image_url'] = $siteBase . '/api/labs/tmp_image.php?job_id=' . $jobId . '&slot=input';
+    }
+    if ($tool === 'remove-bg' && !empty($_FILES['image']['tmp_name']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $tmpDir = storage_path(LABS_TMP_DIR);
+        if (!is_dir($tmpDir)) @mkdir($tmpDir, 0755, true);
+        $destPath = $tmpDir . DIRECTORY_SEPARATOR . 'job_' . $jobId . '_input.png';
+        if (!labs_image_to_png($_FILES['image']['tmp_name'], $destPath)) {
+            json_error('STORAGE_ERROR', 'Could not save remove-bg input image.', 500);
+        }
+        $params['image_url'] = $siteBase . '/api/labs/tmp_image.php?job_id=' . $jobId . '&slot=input';
+    }
     if ($ipadapterEnabled && !empty($_FILES['ipadapter_image']['tmp_name']) && $_FILES['ipadapter_image']['error'] === UPLOAD_ERR_OK) {
         $valid = labs_validate_image($_FILES['ipadapter_image']['tmp_name'], MAX_REF_IMAGE_BYTES, 2048);
         if (!$valid['ok']) json_error('INVALID_IMAGE', $valid['error'] ?? 'Invalid reference image.', 400);
@@ -232,7 +324,7 @@ try {
 
     ai_spend_points($pdo, $userId, $jobId, $costKp);
 
-    $avgSeconds = ['text2img' => 60, 'upscale' => 40, 'character' => 45];
+    $avgSeconds = ['text2img' => 60, 'upscale' => 40, 'remove-bg' => 35, 'character' => 45, 'texture' => 50];
     $avgSec = $avgSeconds[$tool] ?? 60;
 
     $stmtQ = $pdo->query("SELECT COUNT(*) FROM knd_labs_jobs WHERE status = 'queued'");

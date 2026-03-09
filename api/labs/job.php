@@ -67,6 +67,10 @@ try {
         $data['scale'] = $payload['scale'] ?? 2;
         $data['upscale_model'] = $payload['upscale_model'] ?? '';
     }
+    if ($tool === 'texture') {
+        $data['texture_mode'] = $payload['texture_mode'] ?? 'text';
+        $data['seamless'] = !empty($payload['seamless']);
+    }
 
     json_success($data);
 } catch (\Throwable $e) {

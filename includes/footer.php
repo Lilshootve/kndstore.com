@@ -3,181 +3,211 @@
 
 // Función para generar el footer completo
 function generateFooter() {
-    $footer = '    <!-- Footer -->' . "\n";
-    $footer .= '    <footer class="footer py-5 position-relative">' . "\n";
-    $footer .= '        <div class="container position-relative z-2">' . "\n";
-    $footer .= '            <div class="row g-5">' . "\n";
-    $footer .= '                <div class="col-lg-6">' . "\n";
-    $footer .= '                    <h3 class="mb-4">' . "\n";
-    $footer .= '                        <span class="glow-text">KND STORE</span>' . "\n";
-    $footer .= '                    </h3>' . "\n";
-    $footer .= '                    <p class="mb-4" style="opacity: 0.8;">' . "\n";
-    $footer .= '                        ' . t('footer.about_text') . "\n";
-    $footer .= '                    </p>' . "\n";
-    $footer .= '                    <div class="d-flex mt-4">' . "\n";
-    $footer .= '                        <a href="https://discord.gg/zjP3u5Yztx" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon me-3" title="Discord">' . "\n";
-    $footer .= '                            <i class="fab fa-discord"></i>' . "\n";
-    $footer .= '                        </a>' . "\n";
-    $footer .= '                        <a href="https://www.instagram.com/kndofficialstore" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon me-3" title="Instagram">' . "\n";
-    $footer .= '                            <i class="fab fa-instagram"></i>' . "\n";
-    $footer .= '                        </a>' . "\n";
-    $footer .= '                        <a href="https://x.com/knd_store" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon me-3" title="X">' . "\n";
-    $footer .= '                            <i class="fab fa-x-twitter"></i>' . "\n";
-    $footer .= '                        </a>' . "\n";
-    $footer .= '                        <a href="https://www.tiktok.com/@kndstoreofficial" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon" title="TikTok">' . "\n";
-    $footer .= '                            <i class="fab fa-tiktok"></i>' . "\n";
-    $footer .= '                        </a>' . "\n";
-    $footer .= '                    </div>' . "\n";
-    $footer .= '                </div>' . "\n";
-    $footer .= '                ' . "\n";
-    $footer .= '                <div class="col-lg-6">' . "\n";
-    $footer .= '                    <div class="row">' . "\n";
-    $footer .= '                        <div class="col-md-6">' . "\n";
-    $footer .= '                            <h5 class="mb-4">' . t('footer.navigation.title') . '</h5>' . "\n";
-    $footer .= '                            <ul class="list-unstyled">' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="/faq.php" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.faq') . '</a></li>' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="/contact.php" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.contact') . '</a></li>' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="/privacy.php" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.privacy') . '</a></li>' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="/game-fairness" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.game_fairness', 'Game Fairness') . '</a></li>' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="/privacy.php#cookies-policy" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.cookies') . '</a></li>' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="/track-order.php" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.navigation.track_order') . '</a></li>' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="#" class="text-decoration-none knd-cookie-settings-link" style="opacity: 0.8;">' . t('footer.navigation.cookie_settings') . '</a></li>' . "\n";
-    $footer .= '                            </ul>' . "\n";
-    $footer .= '                            <h5 class="mb-4 mt-4">' . t('footer.arena.title', 'Arena') . '</h5>' . "\n";
-    $footer .= '                            <ul class="list-unstyled">' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="/arena" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.arena.knd_arena', 'KND Arena') . '</a></li>' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="/how-knd-arena-works" class="text-decoration-none" style="opacity: 0.8;">' . t('footer.arena.how_it_works', 'How Arena Works') . '</a></li>' . "\n";
-    $footer .= '                            </ul>' . "\n";
-    $footer .= '                            <h5 class="mb-4 mt-4">' . t('footer.tools.title', 'Tools') . '</h5>' . "\n";
-    $footer .= '                            <ul class="list-unstyled">' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="/labs" class="text-decoration-none" style="opacity: 0.8;"><i class="fas fa-microscope me-2" style="color: var(--knd-neon-blue);"></i>' . t('footer.tools.knd_labs', 'KND Labs') . '</a></li>' . "\n";
-    $footer .= '                                <li class="mb-3"><a href="/labs-3d-lab.php" class="text-decoration-none" style="opacity: 0.8;"><i class="fas fa-cube me-2" style="color: var(--knd-neon-blue);"></i>3D Lab</a></li>' . "\n";
-    $footer .= '                            </ul>' . "\n";
-    $footer .= '                        </div>' . "\n";
-    $footer .= '                        ' . "\n";
-    $footer .= '                        <div class="col-md-6">' . "\n";
-    $footer .= '                            <h5 class="mb-4">' . t('footer.contact.title') . '</h5>' . "\n";
-    $footer .= '                            <ul class="list-unstyled">' . "\n";
-    $footer .= '                                <li class="mb-3 d-flex align-items-center">' . "\n";
-    $footer .= '                                    <i class="fas fa-envelope me-3" style="color: var(--knd-neon-blue);"></i>' . "\n";
-    $footer .= '                                    <span style="opacity: 0.8;">info@kndstore.com</span>' . "\n";
-    $footer .= '                                </li>' . "\n";
-    $footer .= '                                <li class="mb-3 d-flex align-items-center">' . "\n";
-    $footer .= '                                    <i class="fas fa-headset me-3" style="color: var(--knd-neon-blue);"></i>' . "\n";
-    $footer .= '                                    <span style="opacity: 0.8;">' . t('footer.contact.support_247') . '</span>' . "\n";
-    $footer .= '                                </li>' . "\n";
-    $footer .= '                                <li class="mb-3 d-flex align-items-center">' . "\n";
-    $footer .= '                                    <i class="fab fa-discord me-3" style="color: var(--knd-neon-blue);"></i>' . "\n";
-    $footer .= '                                    <a href="https://discord.gg/zjP3u5Yztx" target="_blank" rel="noopener" class="text-decoration-none" style="opacity: 0.8;">Discord: KND Store</a>' . "\n";
-    $footer .= '                                </li>' . "\n";
-    $footer .= '                            </ul>' . "\n";
-    $footer .= '                            ' . "\n";
-    $footer .= '                                                        <h6 class="mt-4 mb-3">' . t('footer.payments.title') . '</h6>' . "\n";
-                            $footer .= '                            <div class="d-flex flex-wrap footer-payment-icons">' . "\n";
-                            $footer .= '                                <div class="me-3 mb-3 footer-payment-icon"><i class="fab fa-cc-paypal fa-2x" style="color: var(--knd-electric-purple);" title="PayPal"></i></div>' . "\n";
-                            $footer .= '                                <div class="me-3 mb-3 footer-payment-icon"><i class="fab fa-cc-visa fa-2x" style="color: var(--knd-electric-purple);" title="Visa"></i></div>' . "\n";
-                            $footer .= '                                <div class="me-3 mb-3 footer-payment-icon"><i class="fas fa-wallet fa-2x" style="color: var(--knd-electric-purple);" title="Binance Pay"></i></div>' . "\n";
-                            $footer .= '                                <div class="me-3 mb-3 footer-payment-icon"><i class="fas fa-university fa-2x" style="color: var(--knd-electric-purple);" title="Bank Transfer / ACH / Wire"></i></div>' . "\n";
-                            $footer .= '                            </div>' . "\n";
-    $footer .= '                        </div>' . "\n";
-    $footer .= '                    </div>' . "\n";
-    $footer .= '                </div>' . "\n";
-    $footer .= '            </div>' . "\n";
-    $footer .= '            ' . "\n";
-    $footer .= '            <hr class="my-5" style="border-color: rgba(138, 43, 226, 0.2);">' . "\n";
-    $footer .= '            ' . "\n";
-    $footer .= '            <div class="text-center pt-3">' . "\n";
-    $footer .= '                <p class="mb-1" style="opacity: 0.7; font-size: 0.9rem;">' . "\n";
-    $footer .= '                    ' . (defined('KND_MEANING_TEXT') ? KND_MEANING_TEXT : 'KND = <strong>Knowledge ‘N Development</strong> — knowledge turned into fast, secure, innovative digital solutions.') . "\n";
-    $footer .= '                </p>' . "\n";
-    $footer .= '                <p class="mb-0" style="opacity: 0.7;">' . "\n";
-    $footer .= '                    ' . t('footer.copyright', null, ['year' => date('Y')]) . "\n";
-    $footer .= '                </p>' . "\n";
-    $footer .= '            </div>' . "\n";
-    $footer .= '        </div>' . "\n";
-    $footer .= '        ' . "\n";
-    $footer .= '        <!-- Efecto de partículas para el footer -->' . "\n";
-    $footer .= '        <div id="particles-footer" class="position-absolute top-0 left-0 w-100 h-100" style="z-index: 1;"></div>' . "\n";
-    $footer .= '    </footer>' . "\n";
-    $footer .= '' . "\n";
-    $footer .= '    <!-- Cookie Consent Banner & Modal -->' . "\n";
-    $footer .= '    <div id="knd-cookie-banner" class="knd-cookie-banner">' . "\n";
-    $footer .= '        <div class="knd-cookie-banner-inner glass-card-neon">' . "\n";
-    $footer .= '            <div class="knd-cookie-banner-text">' . "\n";
-    $footer .= '                <h5 class="mb-2" data-knd-cookie-title>' . t('cookie.title') . '</h5>' . "\n";
-    $footer .= '                <p class="mb-0 small" data-knd-cookie-message>' . t('cookie.message') . '</p>' . "\n";
-    $footer .= '            </div>' . "\n";
-    $footer .= '            <div class="knd-cookie-banner-actions">' . "\n";
-    $footer .= '                <button type="button" id="knd-cookie-reject-all" class="btn btn-sm btn-outline-light me-2">' . t('cookie.btn.reject_all') . '</button>' . "\n";
-    $footer .= '                <button type="button" id="knd-cookie-customize" class="btn btn-sm btn-outline-neon me-2">' . t('cookie.btn.customize') . '</button>' . "\n";
-    $footer .= '                <button type="button" id="knd-cookie-accept-all" class="btn btn-sm btn-neon-primary">' . t('cookie.btn.accept_all') . '</button>' . "\n";
-    $footer .= '            </div>' . "\n";
-    $footer .= '        </div>' . "\n";
-    $footer .= '    </div>' . "\n";
-    $footer .= '' . "\n";
-    $footer .= '    <div id="knd-cookie-modal" class="knd-cookie-modal">' . "\n";
-    $footer .= '        <div class="knd-cookie-modal-backdrop"></div>' . "\n";
-    $footer .= '        <div class="knd-cookie-modal-dialog glass-card-neon">' . "\n";
-    $footer .= '            <div class="knd-cookie-modal-header d-flex justify-content-between align-items-center mb-3">' . "\n";
-    $footer .= '                <h5 class="mb-0" data-knd-cookie-title>' . t('cookie.title') . '</h5>' . "\n";
-    $footer .= '                <button type="button" class="btn btn-sm btn-outline-light" data-knd-cookie-close>&times;</button>' . "\n";
-    $footer .= '            </div>' . "\n";
-    $footer .= '            <div class="knd-cookie-modal-body">' . "\n";
-    $footer .= '                <p class="small mb-3" data-knd-cookie-message>' . t('cookie.message') . '</p>' . "\n";
-    $footer .= '                <div class="knd-cookie-category mb-3">' . "\n";
-    $footer .= '                    <div class="d-flex justify-content-between align-items-center">' . "\n";
-    $footer .= '                        <div>' . "\n";
-    $footer .= '                            <strong>' . t('cookie.category.necessary') . '</strong>' . "\n";
-    $footer .= '                            <p class="small mb-0 text-white-50">' . t('cookie.category.necessary_desc') . '</p>' . "\n";
-    $footer .= '                        </div>' . "\n";
-    $footer .= '                        <div class="form-check form-switch mb-0">' . "\n";
-    $footer .= '                            <input class="form-check-input" type="checkbox" checked disabled>' . "\n";
-    $footer .= '                        </div>' . "\n";
-    $footer .= '                    </div>' . "\n";
-    $footer .= '                </div>' . "\n";
-    $footer .= '                <div class="knd-cookie-category mb-3">' . "\n";
-    $footer .= '                    <div class="d-flex justify-content-between align-items-center">' . "\n";
-    $footer .= '                        <div>' . "\n";
-    $footer .= '                            <strong>' . t('cookie.category.preferences') . '</strong>' . "\n";
-    $footer .= '                            <p class="small mb-0 text-white-50">' . t('cookie.category.preferences_desc') . '</p>' . "\n";
-    $footer .= '                        </div>' . "\n";
-    $footer .= '                        <div class="form-check form-switch mb-0">' . "\n";
-    $footer .= '                            <input class="form-check-input" type="checkbox" id="knd-consent-preferences">' . "\n";
-    $footer .= '                        </div>' . "\n";
-    $footer .= '                    </div>' . "\n";
-    $footer .= '                </div>' . "\n";
-    $footer .= '                <div class="knd-cookie-category mb-3">' . "\n";
-    $footer .= '                    <div class="d-flex justify-content-between align-items-center">' . "\n";
-    $footer .= '                        <div>' . "\n";
-    $footer .= '                            <strong>' . t('cookie.category.analytics') . '</strong>' . "\n";
-    $footer .= '                            <p class="small mb-0 text-white-50">' . t('cookie.category.analytics_desc') . '</p>' . "\n";
-    $footer .= '                        </div>' . "\n";
-    $footer .= '                        <div class="form-check form-switch mb-0">' . "\n";
-    $footer .= '                            <input class="form-check-input" type="checkbox" id="knd-consent-analytics">' . "\n";
-    $footer .= '                        </div>' . "\n";
-    $footer .= '                    </div>' . "\n";
-    $footer .= '                </div>' . "\n";
-    $footer .= '                <div class="knd-cookie-category mb-3">' . "\n";
-    $footer .= '                    <div class="d-flex justify-content-between align-items-center">' . "\n";
-    $footer .= '                        <div>' . "\n";
-    $footer .= '                            <strong>' . t('cookie.category.marketing') . '</strong>' . "\n";
-    $footer .= '                            <p class="small mb-0 text-white-50">' . t('cookie.category.marketing_desc') . '</p>' . "\n";
-    $footer .= '                        </div>' . "\n";
-    $footer .= '                        <div class="form-check form-switch mb-0">' . "\n";
-    $footer .= '                            <input class="form-check-input" type="checkbox" id="knd-consent-marketing">' . "\n";
-    $footer .= '                        </div>' . "\n";
-    $footer .= '                    </div>' . "\n";
-    $footer .= '                </div>' . "\n";
-    $footer .= '                <p class="small text-white-50 mt-3 mb-0">' . t('cookie.note') . '</p>' . "\n";
-    $footer .= '            </div>' . "\n";
-    $footer .= '            <div class="knd-cookie-modal-footer mt-3 d-flex flex-column flex-md-row justify-content-between align-items-stretch">' . "\n";
-    $footer .= '                <button type="button" id="knd-cookie-modal-reject-all" class="btn btn-outline-light mb-2 mb-md-0 flex-fill me-md-2">' . t('cookie.btn.reject_all') . '</button>' . "\n";
-    $footer .= '                <button type="button" id="knd-cookie-save-preferences" class="btn btn-neon-primary flex-fill">' . t('cookie.btn.save_preferences') . '</button>' . "\n";
-    $footer .= '            </div>' . "\n";
-    $footer .= '        </div>' . "\n";
-    $footer .= '    </div>' . "\n";
-    
-    return $footer;
+    ob_start();
+    ?>
+    <!-- Footer -->
+    <footer class="footer py-5 position-relative">
+        <div class="container position-relative z-2">
+            <div class="row g-5">
+
+                <div class="col-lg-6">
+                    <h3 class="mb-4">
+                        <span class="glow-text">KND STORE</span>
+                    </h3>
+
+                    <p class="mb-4" style="opacity: 0.8;">
+                        <?= t('footer.about_text') ?>
+                    </p>
+
+                    <div class="d-flex mt-4">
+                        <a href="https://discord.gg/zjP3u5Yztx" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon me-3" title="Discord">
+                            <i class="fab fa-discord"></i>
+                        </a>
+                        <a href="https://www.instagram.com/kndofficialstore" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon me-3" title="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://x.com/knd_store" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon me-3" title="X">
+                            <i class="fab fa-x-twitter"></i>
+                        </a>
+                        <a href="https://www.tiktok.com/@kndstoreofficial" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon" title="TikTok">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="row g-4">
+
+                        <!-- Navigation -->
+                        <div class="col-md-4">
+                            <h5 class="mb-4"><?= t('footer.navigation.title') ?></h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-3"><a href="/faq.php" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.navigation.faq') ?></a></li>
+                                <li class="mb-3"><a href="/contact.php" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.navigation.contact') ?></a></li>
+                                <li class="mb-3"><a href="/privacy.php" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.navigation.privacy') ?></a></li>
+                                <li class="mb-3"><a href="/game-fairness" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.navigation.game_fairness', 'Game Fairness') ?></a></li>
+                                <li class="mb-3"><a href="/privacy.php#cookies-policy" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.navigation.cookies') ?></a></li>
+                                <li class="mb-3"><a href="/track-order.php" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.navigation.track_order') ?></a></li>
+                                <li class="mb-3"><a href="#" class="text-decoration-none knd-cookie-settings-link" style="opacity: 0.8;"><?= t('footer.navigation.cookie_settings') ?></a></li>
+                            </ul>
+                        </div>
+
+                        <!-- Arena + Tools -->
+                        <div class="col-md-4">
+                            <h5 class="mb-4"><?= t('footer.arena.title', 'Arena') ?></h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-3"><a href="/arena" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.arena.knd_arena', 'KND Arena') ?></a></li>
+                                <li class="mb-3"><a href="/how-knd-arena-works" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.arena.how_it_works', 'How Arena Works') ?></a></li>
+                            </ul>
+
+                            <h5 class="mb-4 mt-4"><?= t('footer.tools.title', 'Tools') ?></h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-3">
+                                    <a href="/labs" class="text-decoration-none" style="opacity: 0.8;">
+                                        <i class="fas fa-microscope me-2" style="color: var(--knd-neon-blue);"></i><?= t('footer.tools.knd_labs', 'KND Labs') ?>
+                                    </a>
+                                </li>
+                                <li class="mb-3">
+                                    <a href="/labs?tool=3d" class="text-decoration-none" style="opacity: 0.8;">
+                                        <i class="fas fa-cube me-2" style="color: var(--knd-neon-blue);"></i>3D Lab
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Contact + Payments -->
+                        <div class="col-md-4">
+                            <h5 class="mb-4"><?= t('footer.contact.title') ?></h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-3 d-flex align-items-center">
+                                    <i class="fas fa-envelope me-3" style="color: var(--knd-neon-blue);"></i>
+                                    <span style="opacity: 0.8;">info@kndstore.com</span>
+                                </li>
+                                <li class="mb-3 d-flex align-items-center">
+                                    <i class="fas fa-headset me-3" style="color: var(--knd-neon-blue);"></i>
+                                    <span style="opacity: 0.8;"><?= t('footer.contact.support_247') ?></span>
+                                </li>
+                                <li class="mb-3 d-flex align-items-center">
+                                    <i class="fab fa-discord me-3" style="color: var(--knd-neon-blue);"></i>
+                                    <a href="https://discord.gg/zjP3u5Yztx" target="_blank" rel="noopener" class="text-decoration-none" style="opacity: 0.8;">Discord: KND Store</a>
+                                </li>
+                            </ul>
+
+                            <h6 class="mt-4 mb-3"><?= t('footer.payments.title') ?></h6>
+                            <div class="d-flex footer-payment-icons">
+                                <div class="me-3 mb-3 footer-payment-icon"><i class="fab fa-cc-paypal fa-2x" style="color: var(--knd-electric-purple);" title="PayPal"></i></div>
+                                <div class="me-3 mb-3 footer-payment-icon"><i class="fab fa-cc-visa fa-2x" style="color: var(--knd-electric-purple);" title="Visa"></i></div>
+                                <div class="me-3 mb-3 footer-payment-icon"><i class="fas fa-wallet fa-2x" style="color: var(--knd-electric-purple);" title="Binance Pay"></i></div>
+                                <div class="me-3 mb-3 footer-payment-icon"><i class="fas fa-university fa-2x" style="color: var(--knd-electric-purple);" title="Bank Transfer / ACH / Wire"></i></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-5" style="border-color: rgba(138, 43, 226, 0.2);">
+
+            <div class="text-center pt-3">
+                <p class="mb-1" style="opacity: 0.7; font-size: 0.9rem;">
+                    <?= defined('KND_MEANING_TEXT')
+                        ? KND_MEANING_TEXT
+                        : 'KND = <strong>Knowledge ‘N Development</strong> — knowledge turned into fast, secure, innovative digital solutions.' ?>
+                </p>
+                <p class="mb-0" style="opacity: 0.7;">
+                    <?= t('footer.copyright', null, ['year' => date('Y')]) ?>
+                </p>
+            </div>
+        </div>
+
+        <!-- Efecto de partículas para el footer -->
+        <div id="particles-footer" class="position-absolute top-0 left-0 w-100 h-100" style="z-index: 1;"></div>
+    </footer>
+
+    <!-- Cookie Consent Banner & Modal -->
+    <div id="knd-cookie-banner" class="knd-cookie-banner">
+        <div class="knd-cookie-banner-inner glass-card-neon">
+            <div class="knd-cookie-banner-text">
+                <h5 class="mb-2" data-knd-cookie-title><?= t('cookie.title') ?></h5>
+                <p class="mb-0 small" data-knd-cookie-message><?= t('cookie.message') ?></p>
+            </div>
+            <div class="knd-cookie-banner-actions">
+                <button type="button" id="knd-cookie-reject-all" class="btn btn-sm btn-outline-light me-2"><?= t('cookie.btn.reject_all') ?></button>
+                <button type="button" id="knd-cookie-customize" class="btn btn-sm btn-outline-neon me-2"><?= t('cookie.btn.customize') ?></button>
+                <button type="button" id="knd-cookie-accept-all" class="btn btn-sm btn-neon-primary"><?= t('cookie.btn.accept_all') ?></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="knd-cookie-modal" class="knd-cookie-modal">
+        <div class="knd-cookie-modal-backdrop"></div>
+        <div class="knd-cookie-modal-dialog glass-card-neon">
+            <div class="knd-cookie-modal-header d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0" data-knd-cookie-title><?= t('cookie.title') ?></h5>
+                <button type="button" class="btn btn-sm btn-outline-light" data-knd-cookie-close>&times;</button>
+            </div>
+            <div class="knd-cookie-modal-body">
+                <p class="small mb-3" data-knd-cookie-message><?= t('cookie.message') ?></p>
+
+                <div class="knd-cookie-category mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong><?= t('cookie.category.necessary') ?></strong>
+                            <p class="small mb-0 text-white-50"><?= t('cookie.category.necessary_desc') ?></p>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" checked disabled>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="knd-cookie-category mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong><?= t('cookie.category.preferences') ?></strong>
+                            <p class="small mb-0 text-white-50"><?= t('cookie.category.preferences_desc') ?></p>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="knd-consent-preferences">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="knd-cookie-category mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong><?= t('cookie.category.analytics') ?></strong>
+                            <p class="small mb-0 text-white-50"><?= t('cookie.category.analytics_desc') ?></p>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="knd-consent-analytics">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="knd-cookie-category mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong><?= t('cookie.category.marketing') ?></strong>
+                            <p class="small mb-0 text-white-50"><?= t('cookie.category.marketing_desc') ?></p>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="knd-consent-marketing">
+                        </div>
+                    </div>
+                </div>
+
+                <p class="small text-white-50 mt-3 mb-0"><?= t('cookie.note') ?></p>
+            </div>
+
+            <div class="knd-cookie-modal-footer mt-3 d-flex flex-column flex-md-row justify-content-between align-items-stretch">
+                <button type="button" id="knd-cookie-modal-reject-all" class="btn btn-outline-light mb-2 mb-md-0 flex-fill me-md-2"><?= t('cookie.btn.reject_all') ?></button>
+                <button type="button" id="knd-cookie-save-preferences" class="btn btn-neon-primary flex-fill"><?= t('cookie.btn.save_preferences') ?></button>
+            </div>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
 }
 
 // Función para generar los scripts comunes

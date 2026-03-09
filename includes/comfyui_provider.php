@@ -17,7 +17,7 @@ function comfyui_get_provider_mode(PDO $pdo): string {
 }
 
 function comfyui_get_base_url_local(PDO $pdo): string {
-    $url = settings_get($pdo, 'comfyui_base_url_local', 'https://comfy.kndstore.com');
+    $url = settings_get($pdo, 'comfyui_base_url_local', 'http://127.0.0.1:8190');
     return rtrim((string) $url, '/');
 }
 
