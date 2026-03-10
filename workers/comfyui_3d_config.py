@@ -9,12 +9,27 @@ from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[1]
 
+
+def _pick_existing_path(candidates: list[str], fallback: str) -> str:
+    for c in candidates:
+        try:
+            if c and Path(c).exists():
+                return c
+        except Exception:
+            pass
+    return fallback
+
 COMFYUI_3D_URL = os.getenv("COMFYUI_3D_URL", "http://127.0.0.1:8190")
 # Output folder for GLB (e.g. F:\KND\output\3D with Hy3D_00006_.glb); may be symlinked from ComfyUI output
-COMFYUI_3D_OUTPUT_ROOT = os.getenv(
-    "COMFYUI_3D_OUTPUT_ROOT",
-    r"F:\KND\output",
+_default_output_root = _pick_existing_path(
+    [
+        r"C:\AI\Comfyui3d\Comfyui3d\ComfyUI_windows_portable\ComfyUI\output",
+        r"F:\KND\output",
+    ],
+    r"C:\AI\Comfyui3d\Comfyui3d\ComfyUI_windows_portable\ComfyUI\output",
 )
+
+COMFYUI_3D_OUTPUT_ROOT = os.getenv("COMFYUI_3D_OUTPUT_ROOT", _default_output_root)
 COMFYUI_3D_INPUT_ROOT = os.getenv(
     "COMFYUI_3D_INPUT_ROOT",
     r"C:\AI\Comfyui3d\Comfyui3d\ComfyUI_windows_portable\ComfyUI\input",
