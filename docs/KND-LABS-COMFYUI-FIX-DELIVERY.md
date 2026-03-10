@@ -30,7 +30,7 @@
 | `includes/comfyui.php` | `comfyui_upload_image`: logs en fallo (base, lastErr, respuesta). Nueva `comfyui_fetch_output_image_bytes(promptId, baseUrl, token)` que obtiene la primera imagen del history y la descarga por `/view` o `/api/view`. `comfyui_fetch_job_image_bytes` ahora delega en esa función. |
 | `workers/labs_worker.php` | `workerUploadToComfyui`: prueba `/upload/image` y `/api/upload/image`, log de cada intento (URL + HTTP code). Carga de `KND_FINAL_IMAGE_DIR` desde config. Tras polling: obtener imagen desde disco o `comfyui_fetch_output_image_bytes`, validar bytes y extensión, guardar en storage y, si existe, en `KND_FINAL_IMAGE_DIR`. Logs de origen, tamaño, rutas y fallos. |
 | `api/labs/image.php` | Validación de tamaño > 0 al servir desde `output_path`. Content-Type según extensión (png/jpg/webp). Logs cuando el archivo no es válido o no está en storage. |
-| `docs/KND-LABS-COMFYUI.md` | Sección de rutas (COMFY_OUTPUT_DIR, KND_FINAL_IMAGE_DIR, LABS_UPLOAD_DIR). Flujo del worker actualizado (obtener imagen, guardar en storage y en KND_FINAL_IMAGE_DIR). |
+| `docs/KND-LABS-COMFYUI.md` | Sección de rutas (COMFY_OUTPUT_DIR, KND_FINAL_IMAGE_DIR, LABS_UPLOAD_DIR). Flujo del worker actualizado (obtener imagen, guardar en storage y en    ). |
 | `docs/KND-LABS-COMFYUI-FIX-DELIVERY.md` | Este documento (diagnóstico, archivos, resumen, pruebas). |
 
 ---
