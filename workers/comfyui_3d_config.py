@@ -19,7 +19,7 @@ def _pick_existing_path(candidates: list[str], fallback: str) -> str:
             pass
     return fallback
 
-COMFYUI_3D_URL = os.getenv("COMFYUI_3D_URL", "http://127.0.0.1:8190")
+COMFYUI_3D_URL = os.getenv("COMFYUI_3D_URL", "http://127.0.0.1:8188")
 # Output folder for GLB (e.g. F:\KND\output\3D with Hy3D_00006_.glb); may be symlinked from ComfyUI output
 _default_output_root = _pick_existing_path(
     [
@@ -36,8 +36,14 @@ COMFYUI_3D_INPUT_ROOT = os.getenv(
 )
 LOCAL_3D_STAGING_DIR = os.getenv("LOCAL_3D_STAGING_DIR", r"F:\KND\output")
 
-WORKFLOW_FAST = os.getenv("COMFYUI_3D_WORKFLOW_FAST", str(_ROOT / "generate fast 3d.json"))
-WORKFLOW_PREMIUM = os.getenv("COMFYUI_3D_WORKFLOW_PREMIUM", str(_ROOT / "3d premium.json"))
+WORKFLOW_FAST = os.getenv(
+    "COMFYUI_3D_WORKFLOW_FAST",
+    str(_ROOT / "comfy-router" / "workflows" / "generate fast 3d.json"),
+)
+WORKFLOW_PREMIUM = os.getenv(
+    "COMFYUI_3D_WORKFLOW_PREMIUM",
+    str(_ROOT / "comfy-router" / "workflows" / "3d premium.json"),
+)
 
 COMFYUI_3D_OUTPUT_SUBFOLDER = "3D"
 COMFYUI_3D_FILENAME_PREFIX = "Hy3D"

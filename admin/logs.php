@@ -50,6 +50,7 @@ $actions = $pdo->query("SELECT DISTINCT action FROM admin_audit_logs ORDER BY ac
     <title>Audit Logs | KND Admin</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/admin.css">
     <style>
         body { background: #0a0a0f; color: #e8ecf0; padding: 2rem 0; }
         .card { background: rgba(12,15,22,.85); border: 1px solid rgba(255,255,255,.08); }
@@ -59,7 +60,7 @@ $actions = $pdo->query("SELECT DISTINCT action FROM admin_audit_logs ORDER BY ac
         .meta-json { font-size: 0.8rem; max-width: 300px; overflow: hidden; text-overflow: ellipsis; }
     </style>
 </head>
-<body>
+<body class="admin-page">
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="fas fa-list-alt me-2" style="color:#00d4ff"></i>Audit Logs</h2>

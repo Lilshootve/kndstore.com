@@ -49,7 +49,7 @@ $balance = isset($balance) ? (int) $balance : 0;
           <div id="labs-result-actions" class="labs-result-actions-panel ln-t2i-actions" style="display:none;">
             <a href="#" id="labs-download-btn" class="labs-action labs-action--primary" download><i class="fas fa-download"></i><?php echo t('ai.download', 'Download'); ?></a>
             <a href="/labs?tool=upscale" id="labs-use-input-btn" class="labs-action labs-action--primary"><i class="fas fa-search-plus"></i><?php echo t('labs.send_to_upscale', 'Send to Upscale'); ?></a>
-            <a href="/labs?tool=3d" id="labs-send-3d-btn" class="labs-action labs-action--primary"><i class="fas fa-cube"></i><?php echo t('labs.send_to_3d_lab', 'Send to 3D Lab'); ?></a>
+            <a href="/labs?tool=3d_vertex" id="labs-send-3d-btn" class="labs-action labs-action--primary"><i class="fas fa-cube"></i><?php echo t('labs.send_to_3d_lab', 'Send to 3D Vertex'); ?></a>
             <button type="button" id="labs-retry-btn" class="labs-action labs-action--secondary"><i class="fas fa-redo"></i><?php echo t('labs.generate_again', 'Generate again'); ?></button>
           </div>
           <div id="labs-status-panel" class="ln-t2i-status" style="display:none;">

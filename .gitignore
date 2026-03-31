@@ -4,6 +4,8 @@ includes/secrets.local.php
 includes/paypal_secrets.local.php
 config/*.local.php
 workers/worker_config.local.php
+.env
+!.env.example
 
 # Storage data files — never overwrite server data on deploy
 storage/*.json

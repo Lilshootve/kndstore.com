@@ -17,9 +17,7 @@ try {
     if (!$pdo) json_error('DB_CONNECTION_FAILED', 'Database connection failed.', 500);
 
     $sql = "SELECT id, code, slot, name, rarity, price_kp, asset_path FROM knd_avatar_items WHERE is_active = 1 ORDER BY slot, rarity, price_kp";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
-    $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $items = avatar_get_shop_items($pdo);
 
     $data = ['items' => $items];
     $isLocal = in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1']);

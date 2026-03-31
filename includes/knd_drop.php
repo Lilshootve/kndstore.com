@@ -5,6 +5,7 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/support_credits.php';
 require_once __DIR__ . '/knd_xp.php';
 require_once __DIR__ . '/knd_badges.php';
+require_once __DIR__ . '/knd_avatar.php';
 
 if (!defined('DROP_ENTRY_KP')) define('DROP_ENTRY_KP', 100);
 if (!defined('DROP_COOLDOWN_SEC')) define('DROP_COOLDOWN_SEC', 3);
@@ -174,13 +175,16 @@ function select_rarity_with_pity(PDO $pdo, int $userId): array {
 }
 
 /**
- * Select random avatar item by rarity
+ * Select random avatar item by rarity.
+ * Only returns items that exist in mw_avatars (Mind Wars avatars) - matched by name.
  */
 function select_avatar_item_by_rarity(PDO $pdo, string $rarity): ?array {
+    avatar_sync_items_from_assets($pdo);
     $stmt = $pdo->prepare(
-        "SELECT id, code, slot, name, rarity, asset_path 
-         FROM knd_avatar_items 
-         WHERE rarity = ? AND is_active = 1
+        "SELECT ai.id, ai.code, ai.slot, ai.name, ai.rarity, ai.asset_path
+         FROM knd_avatar_items ai
+         INNER JOIN mw_avatars mw ON LOWER(TRIM(mw.name)) = LOWER(TRIM(ai.name))
+         WHERE mw.rarity = ? AND ai.is_active = 1
          ORDER BY RAND()
          LIMIT 1"
     );

@@ -90,6 +90,7 @@ const COMFYUI_TOOL_WORKFLOW_MAP = [
     'consistency'      => 'consistency_api.json',
     '3d_fast'          => '3d_fast.json',
     '3d_premium'       => '3d_premium.json',
+    '3d_vertex'        => 'KND Character Lab.json',
     'character'        => 'knd-workflow-api.json',
 ];
 
@@ -113,6 +114,7 @@ function comfyui_workflow_path(string $tool, array $params = []): string {
     if (!is_readable($path)) {
         if ($filename === '3d_fast.json') $path = $baseDir . '/generate fast 3d.json';
         if ($filename === '3d_premium.json') $path = $baseDir . '/3d premium.json';
+        if ($filename === 'KND Character Lab.json') $path = dirname(__DIR__) . '/comfy-router/workflows/KND Character Lab.json';
         if ($filename === 'knd-workflow-api2.json') $path = $baseDir . '/knd-workflow-api.json';
     }
     if (!is_readable($path)) {
@@ -160,6 +162,58 @@ function comfyui_inject_workflow_params(array &$wf, array $params, string $tool 
     if (!in_array($samplerName, $allowedSamplers, true)) $samplerName = 'euler';
     $allowedSchedulers = ['normal', 'karras', 'exponential', 'sgm_uniform', 'simple'];
     if (!in_array($scheduler, $allowedSchedulers, true)) $scheduler = 'normal';
+
+    if ($tool === '3d_vertex') {
+        $meshSteps = max(10, min(120, (int) ($params['steps'] ?? 50)));
+        $meshGuidance = max(1.0, min(20.0, (float) ($params['cfg'] ?? 7.5)));
+        $textureSize = (int) ($params['texture_size'] ?? 2048);
+        if (!in_array($textureSize, [1024, 2048], true)) $textureSize = 2048;
+        $maxFaces = max(50000, min(500000, (int) ($params['max_faces'] ?? 200000)));
+        $quality = strtolower(trim((string) ($params['quality'] ?? 'standard')));
+        $texSteps = $quality === 'high' ? 40 : 30;
+        $texGuidance = $quality === 'high' ? 4.5 : 3.0;
+        $prefix = isset($params['job_id']) ? ('knd_3d_vertex/job_' . (int) $params['job_id']) : 'knd_3d_vertex/model';
+        $vertexImage = (string) ($params['image_filename'] ?? '');
+
+        foreach ($wf as $nid => $node) {
+            if (!is_array($node) || empty($node['class_type'])) continue;
+            $ctype = $node['class_type'];
+            $inputs = &$wf[$nid]['inputs'];
+            if (!is_array($inputs)) $inputs = [];
+
+            if (($ctype === 'LoadImage' || $ctype === 'AILab_LoadImage' || $ctype === 'Hy3D21LoadImageWithTransparency') && $vertexImage !== '') {
+                if (isset($inputs['image'])) $inputs['image'] = $vertexImage;
+            }
+            if ($ctype === 'Hy3DMeshGenerator') {
+                $inputs['steps'] = $meshSteps;
+                $inputs['guidance_scale'] = $meshGuidance;
+                $inputs['seed'] = $seed;
+            }
+            if ($ctype === 'Hy3DMultiViewsGenerator') {
+                $inputs['steps'] = $texSteps;
+                $inputs['guidance_scale'] = $texGuidance;
+                $inputs['texture_size'] = $textureSize;
+                $inputs['seed'] = $seed;
+            }
+            if ($ctype === 'INTConstant' && isset($inputs['value'])) {
+                $inputs['value'] = $maxFaces;
+            }
+            if ($ctype === 'StringConstant' && isset($inputs['string'])) {
+                $inputs['string'] = $prefix;
+            }
+            if ($ctype === 'Hy3D21ExportMesh' && isset($inputs['filename_prefix'])) {
+                $inputs['filename_prefix'] = $prefix;
+                if (isset($inputs['file_format'])) $inputs['file_format'] = 'glb';
+            }
+            if ($ctype === 'Preview3D' && isset($inputs['image']) && $vertexImage !== '') {
+                $inputs['image'] = $vertexImage;
+            }
+            if ($ctype === 'SaveImage' && isset($params['job_id'])) {
+                $inputs['filename_prefix'] = $prefix . '_preview';
+            }
+        }
+        return;
+    }
 
     $injectedPositive = false;
     foreach ($wf as $nid => $node) {

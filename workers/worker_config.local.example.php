@@ -1,12 +1,13 @@
 <?php
+require_once dirname(__DIR__) . '/includes/env.php';
 
 return [
 
     // URL de tu sitio
-    'API_BASE' => 'https://kndstore.com',
+    'API_BASE' => knd_env_required('KND_API_BASE'),
 
     // token secreto del worker (debe coincidir con el servidor)
-    'WORKER_TOKEN' => 'KND_2026!Secure$Panel#91',
+    'WORKER_TOKEN' => knd_env_required('KND_WORKER_TOKEN'),
 
     // ID del worker (para logs)
     'WORKER_ID' => 'GPU-PC-01',

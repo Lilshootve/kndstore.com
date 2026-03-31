@@ -27,9 +27,13 @@ try {
 
     $userId = current_user_id();
     $fragments = get_user_fragments($pdo, $userId);
+    $pityCounter = get_user_pity($pdo, $userId);
+    $pityBoost = min($pityCounter * (defined('PITY_BOOST_PER_DROP') ? PITY_BOOST_PER_DROP : 2), defined('PITY_MAX_BOOST') ? PITY_MAX_BOOST : 30);
 
     json_success([
         'fragments' => $fragments,
+        'pity_boost' => $pityBoost,
+        'drops_since_rare' => $pityCounter,
     ]);
 } catch (\Throwable $e) {
     error_log('api/avatar/fragments: ' . $e->getMessage());

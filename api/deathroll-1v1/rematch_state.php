@@ -38,7 +38,7 @@ $stmt = $pdo->prepare(
      FROM deathroll_rematch_offers o
      JOIN users u ON u.id = o.offered_by_user_id
      WHERE o.game_id = ?
-     ORDER BY o.created_at DESC
+     ORDER BY (o.status = \'pending\') DESC, o.id DESC
      LIMIT 1'
 );
 $stmt->execute([$game['id']]);
@@ -50,6 +50,7 @@ if (!$offer) {
 
 json_success([
     'has_offer' => true,
+    'offer_id' => (int) $offer['id'],
     'offer_status' => $offer['status'],
     'offered_by' => (int) $offer['offered_by_user_id'],
     'offered_by_username' => $offer['offered_by_username'],

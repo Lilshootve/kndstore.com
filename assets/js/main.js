@@ -285,16 +285,6 @@ function updateOrderBadge() {
         }
     }
     
-    // Actualizar badge en la barra lateral de scroll
-    const scrollBadge = document.getElementById('scroll-order-count');
-    if (scrollBadge) {
-        if (totalQty > 0) {
-            scrollBadge.textContent = totalQty;
-            scrollBadge.style.display = 'inline-flex';
-        } else {
-            scrollBadge.style.display = 'none';
-        }
-    }
 }
 
 // Función para mostrar notificación en la parte inferior izquierda

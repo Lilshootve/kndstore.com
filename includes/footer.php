@@ -6,118 +6,28 @@ function generateFooter() {
     ob_start();
     ?>
     <!-- Footer -->
-    <footer class="footer py-5 position-relative">
-        <div class="container position-relative z-2">
-            <div class="row g-5">
+    <footer class="footer knd-footer-shell site-footer-wrap py-4 position-relative z-2">
+        <div class="knd-footer-hero">
+            <div class="footer-brand">⬡ KND — <?= t('footer.tagline_knd', "Knowledge 'N Development") ?></div>
+            <div class="footer-sub"><?= t('footer.tagline_sub', 'Where digital innovation begins') ?></div>
+        </div>
 
-                <div class="col-lg-6">
-                    <h3 class="mb-4">
-                        <span class="glow-text">KND STORE</span>
-                    </h3>
-
-                    <p class="mb-4" style="opacity: 0.8;">
-                        <?= t('footer.about_text') ?>
-                    </p>
-
-                    <div class="d-flex mt-4">
-                        <a href="https://discord.gg/zjP3u5Yztx" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon me-3" title="Discord">
-                            <i class="fab fa-discord"></i>
-                        </a>
-                        <a href="https://www.instagram.com/kndofficialstore" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon me-3" title="Instagram">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="https://x.com/knd_store" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon me-3" title="X">
-                            <i class="fab fa-x-twitter"></i>
-                        </a>
-                        <a href="https://www.tiktok.com/@kndstoreofficial" target="_blank" rel="noopener" class="btn btn-outline-neon btn-icon" title="TikTok">
-                            <i class="fab fa-tiktok"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-lg-6">
-                    <div class="row g-4">
-
-                        <!-- Navigation -->
-                        <div class="col-md-4">
-                            <h5 class="mb-4"><?= t('footer.navigation.title') ?></h5>
-                            <ul class="list-unstyled">
-                                <li class="mb-3"><a href="/faq.php" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.navigation.faq') ?></a></li>
-                                <li class="mb-3"><a href="/contact.php" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.navigation.contact') ?></a></li>
-                                <li class="mb-3"><a href="/privacy.php" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.navigation.privacy') ?></a></li>
-                                <li class="mb-3"><a href="/game-fairness" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.navigation.game_fairness', 'Game Fairness') ?></a></li>
-                                <li class="mb-3"><a href="/privacy.php#cookies-policy" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.navigation.cookies') ?></a></li>
-                                <li class="mb-3"><a href="/track-order.php" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.navigation.track_order') ?></a></li>
-                                <li class="mb-3"><a href="#" class="text-decoration-none knd-cookie-settings-link" style="opacity: 0.8;"><?= t('footer.navigation.cookie_settings') ?></a></li>
-                            </ul>
-                        </div>
-
-                        <!-- Arena + Tools -->
-                        <div class="col-md-4">
-                            <h5 class="mb-4"><?= t('footer.arena.title', 'Arena') ?></h5>
-                            <ul class="list-unstyled">
-                                <li class="mb-3"><a href="/arena" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.arena.knd_arena', 'KND Arena') ?></a></li>
-                                <li class="mb-3"><a href="/how-knd-arena-works" class="text-decoration-none" style="opacity: 0.8;"><?= t('footer.arena.how_it_works', 'How Arena Works') ?></a></li>
-                            </ul>
-
-                            <h5 class="mb-4 mt-4"><?= t('footer.tools.title', 'Tools') ?></h5>
-                            <ul class="list-unstyled">
-                                <li class="mb-3">
-                                    <a href="/labs" class="text-decoration-none" style="opacity: 0.8;">
-                                        <i class="fas fa-microscope me-2" style="color: var(--knd-neon-blue);"></i><?= t('footer.tools.knd_labs', 'KND Labs') ?>
-                                    </a>
-                                </li>
-                                <li class="mb-3">
-                                    <a href="/labs?tool=3d" class="text-decoration-none" style="opacity: 0.8;">
-                                        <i class="fas fa-cube me-2" style="color: var(--knd-neon-blue);"></i>3D Lab
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <!-- Contact + Payments -->
-                        <div class="col-md-4">
-                            <h5 class="mb-4"><?= t('footer.contact.title') ?></h5>
-                            <ul class="list-unstyled">
-                                <li class="mb-3 d-flex align-items-center">
-                                    <i class="fas fa-envelope me-3" style="color: var(--knd-neon-blue);"></i>
-                                    <span style="opacity: 0.8;">info@kndstore.com</span>
-                                </li>
-                                <li class="mb-3 d-flex align-items-center">
-                                    <i class="fas fa-headset me-3" style="color: var(--knd-neon-blue);"></i>
-                                    <span style="opacity: 0.8;"><?= t('footer.contact.support_247') ?></span>
-                                </li>
-                                <li class="mb-3 d-flex align-items-center">
-                                    <i class="fab fa-discord me-3" style="color: var(--knd-neon-blue);"></i>
-                                    <a href="https://discord.gg/zjP3u5Yztx" target="_blank" rel="noopener" class="text-decoration-none" style="opacity: 0.8;">Discord: KND Store</a>
-                                </li>
-                            </ul>
-
-                            <h6 class="mt-4 mb-3"><?= t('footer.payments.title') ?></h6>
-                            <div class="d-flex footer-payment-icons">
-                                <div class="me-3 mb-3 footer-payment-icon"><i class="fab fa-cc-paypal fa-2x" style="color: var(--knd-electric-purple);" title="PayPal"></i></div>
-                                <div class="me-3 mb-3 footer-payment-icon"><i class="fab fa-cc-visa fa-2x" style="color: var(--knd-electric-purple);" title="Visa"></i></div>
-                                <div class="me-3 mb-3 footer-payment-icon"><i class="fas fa-wallet fa-2x" style="color: var(--knd-electric-purple);" title="Binance Pay"></i></div>
-                                <div class="me-3 mb-3 footer-payment-icon"><i class="fas fa-university fa-2x" style="color: var(--knd-electric-purple);" title="Bank Transfer / ACH / Wire"></i></div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <hr class="my-5" style="border-color: rgba(138, 43, 226, 0.2);">
-
-            <div class="text-center pt-3">
-                <p class="mb-1" style="opacity: 0.7; font-size: 0.9rem;">
-                    <?= defined('KND_MEANING_TEXT')
-                        ? KND_MEANING_TEXT
-                        : 'KND = <strong>Knowledge ‘N Development</strong> — knowledge turned into fast, secure, innovative digital solutions.' ?>
-                </p>
-                <p class="mb-0" style="opacity: 0.7;">
-                    <?= t('footer.copyright', null, ['year' => date('Y')]) ?>
-                </p>
-            </div>
+        <div class="knd-footer-meta position-relative z-2">
+            <p class="knd-footer-meaning">
+                <?= defined('KND_MEANING_TEXT')
+                    ? KND_MEANING_TEXT
+                    : 'KND = <strong>Knowledge ‘N Development</strong> — knowledge turned into fast, secure, innovative digital solutions.' ?>
+            </p>
+            <p class="knd-footer-legal">
+                <a href="/privacy.php"><?= t('footer.navigation.privacy') ?></a>
+                <span class="knd-footer-dot" aria-hidden="true">·</span>
+                <a href="/privacy.php#cookies-policy"><?= t('footer.navigation.cookies') ?></a>
+                <span class="knd-footer-dot" aria-hidden="true">·</span>
+                <a href="#" class="knd-cookie-settings-link"><?= t('footer.navigation.cookie_settings') ?></a>
+                <span class="knd-footer-dot" aria-hidden="true">·</span>
+                <a href="/contact.php"><?= t('footer.navigation.contact') ?></a>
+            </p>
+            <p class="knd-footer-copy"><?= t('footer.copyright', null, ['year' => date('Y')]) ?></p>
         </div>
 
         <!-- Efecto de partículas para el footer -->
@@ -223,31 +133,34 @@ function generateScripts() {
     
     // Bootstrap JS con preload
     $scripts .= '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>' . "\n";
+    // Account / orders dropdown (knd-dropdown-toggle) — required on all pages using generateScripts()
+    $ne = __DIR__ . '/../assets/js/navigation-extend.js';
+    $scripts .= '<script src="/assets/js/navigation-extend.js?v=' . (file_exists($ne) ? filemtime($ne) : 0) . '" defer></script>' . "\n";
     
     // Particles.js con preload
     $scripts .= '<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>' . "\n";
     
     // Header dinámico (scroll: ocultar/mostrar, estado scrolled)
     $scripts .= '<script src="/assets/js/header-dynamic.js" defer></script>' . "\n";
+    $sf = __DIR__ . '/../assets/js/knd-starfield.js';
+    $scripts .= '<script src="/assets/js/knd-starfield.js?v=' . (file_exists($sf) ? filemtime($sf) : 0) . '" defer></script>' . "\n";
     // Custom JS optimizado
-    $scripts .= '<script src="assets/js/main.js" defer></script>' . "\n";
+    $scripts .= '<script src="/assets/js/main.js" defer></script>' . "\n";
     
     // Gestor de consentimiento de cookies
-    $scripts .= '<script src="assets/js/cookies-consent.js" defer></script>' . "\n";
+    $scripts .= '<script src="/assets/js/cookies-consent.js" defer></script>' . "\n";
     
     // Mobile Optimization JS
-    $scripts .= '<script src="assets/js/mobile-optimization.js" defer></script>' . "\n";
+    $scripts .= '<script src="/assets/js/mobile-optimization.js" defer></script>' . "\n";
     
-    // Scroll suave por bloques
-    $scripts .= '<script src="assets/js/scroll-smooth.js" defer></script>' . "\n";
-
     // Confetti (Legendary) - toast/xp-fx/level-up loaded in header for early availability
-    $scripts .= '<script src="assets/js/knd-confetti.js" defer></script>' . "\n";
+    $scripts .= '<script src="/assets/js/knd-confetti.js" defer></script>' . "\n";
     
     // Partículas footer (único canvas, deferred para no bloquear render)
     $scripts .= '<script>' . "\n";
     $scripts .= 'var _particlesInited = false;' . "\n";
     $scripts .= 'function initParticles() {' . "\n";
+    $scripts .= '  if (document.body && document.body.classList.contains("arena-info-page")) return;' . "\n";
     $scripts .= '  if (_particlesInited) return;' . "\n";
     $scripts .= '  if (typeof particlesJS === "undefined") { setTimeout(initParticles, 150); return; }' . "\n";
     $scripts .= '  var el = document.getElementById("particles-footer");' . "\n";
@@ -257,7 +170,7 @@ function generateScripts() {
     $scripts .= '  particlesJS("particles-footer", {' . "\n";
     $scripts .= '  particles: {' . "\n";
     $scripts .= '    number: { value: 45, density: { enable: true, value_area: 900 } },' . "\n";
-    $scripts .= '    color: { value: ["#35C2FF", "#8B5CFF", "#67D5FF"] },' . "\n";
+    $scripts .= '    color: { value: ["#00E8FF", "#D44FFF", "#67D5FF"] },' . "\n";
     $scripts .= '    shape: {' . "\n";
     $scripts .= '      type: "circle",' . "\n";
     $scripts .= '      stroke: {' . "\n";
@@ -287,7 +200,7 @@ function generateScripts() {
     $scripts .= '        sync: false' . "\n";
     $scripts .= '      }' . "\n";
     $scripts .= '    },' . "\n";
-    $scripts .= '    line_linked: { enable: true, distance: 130, color: "#35C2FF", opacity: 0.6, width: 1 },' . "\n";
+    $scripts .= '    line_linked: { enable: true, distance: 130, color: "#00E8FF", opacity: 0.55, width: 1 },' . "\n";
     $scripts .= '    move: { enable: true, speed: 4,' . "\n";
     $scripts .= '      direction: "none",' . "\n";
     $scripts .= '      random: false,' . "\n";
@@ -305,6 +218,7 @@ function generateScripts() {
     $scripts .= '  retina_detect: true });' . "\n";
     $scripts .= '}' . "\n";
     $scripts .= 'function scheduleParticles() {' . "\n";
+    $scripts .= '  if (document.body && document.body.classList.contains("arena-info-page")) return;' . "\n";
     $scripts .= '  var el = document.getElementById("particles-footer");' . "\n";
     $scripts .= '  if (!el) return;' . "\n";
     $scripts .= '  if ("IntersectionObserver" in window) {' . "\n";
@@ -322,8 +236,6 @@ function generateScripts() {
     $scripts .= '</script>' . "\n";
     
     // Panel de personalización de colores
-    $scripts .= generateColorPanel();
-    
     // Support AI Chat Widget
     $scripts .= '<link rel="stylesheet" href="/assets/css/support-chat.css">' . "\n";
     $scripts .= '<button id="knd-chat-btn" class="knd-chat-btn" title="Support" aria-label="Open support chat"><i class="fas fa-headset"></i></button>' . "\n";

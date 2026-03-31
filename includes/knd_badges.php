@@ -90,6 +90,10 @@ function badges_get_user_milestones(PDO $pdo, int $userId): array {
         'collector' => 0,
         'legendary_pull' => 0,
         'level' => 0,
+        'mind_wars_wins' => 0,
+        'mind_wars_streak' => 0,
+        'mind_wars_special' => 0,
+        'mind_wars_legendary' => 0,
     ];
     
     // Generator count: completed labs jobs
@@ -128,6 +132,143 @@ function badges_get_user_milestones(PDO $pdo, int $userId): array {
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     $milestones['level'] = $row ? (int)$row['level'] : 1;
     
+    // Mind Wars milestones (tables may not exist in older installs)
+    try {
+        // PvE wins: battles without participants
+        $stmt = $pdo->prepare(
+            "SELECT COUNT(*) FROM knd_mind_wars_battles b
+             WHERE b.user_id = ? AND b.result = 'win'
+             AND NOT EXISTS (SELECT 1 FROM knd_mind_wars_battle_participants p WHERE p.battle_id = b.id)"
+        );
+        $stmt->execute([$userId]);
+        $pveWins = (int)$stmt->fetchColumn();
+        
+        // PvP wins: from participants
+        $stmt = $pdo->prepare(
+            "SELECT COUNT(*) FROM knd_mind_wars_battle_participants p
+             JOIN knd_mind_wars_battles b ON b.id = p.battle_id
+             WHERE p.user_id = ? AND b.result IS NOT NULL
+             AND ((p.side = 'player' AND b.result = 'win') OR (p.side = 'enemy' AND b.result = 'lose'))"
+        );
+        $stmt->execute([$userId]);
+        $pvpWins = (int)$stmt->fetchColumn();
+        
+        $milestones['mind_wars_wins'] = $pveWins + $pvpWins;
+        
+        // Win streak: battles ordered by created_at DESC, count consecutive wins
+        $battles = [];
+        $stmt = $pdo->prepare(
+            "SELECT b.result, b.created_at FROM knd_mind_wars_battles b
+             WHERE b.user_id = ? AND b.result IS NOT NULL
+             AND NOT EXISTS (SELECT 1 FROM knd_mind_wars_battle_participants p WHERE p.battle_id = b.id)
+             ORDER BY b.created_at DESC"
+        );
+        $stmt->execute([$userId]);
+        while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $battles[] = ['won' => $r['result'] === 'win', 'created_at' => $r['created_at']];
+        }
+        $stmt = $pdo->prepare(
+            "SELECT b.result, b.created_at, p.side FROM knd_mind_wars_battle_participants p
+             JOIN knd_mind_wars_battles b ON b.id = p.battle_id
+             WHERE p.user_id = ? AND b.result IS NOT NULL
+             ORDER BY b.created_at DESC"
+        );
+        $stmt->execute([$userId]);
+        while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $won = ($r['side'] === 'player' && $r['result'] === 'win') || ($r['side'] === 'enemy' && $r['result'] === 'lose');
+            $battles[] = ['won' => $won, 'created_at' => $r['created_at']];
+        }
+        usort($battles, function ($a, $b) {
+            return strcmp($b['created_at'], $a['created_at']);
+        });
+        $streak = 0;
+        foreach ($battles as $b) {
+            if ($b['won']) {
+                $streak++;
+            } else {
+                break;
+            }
+        }
+        $milestones['mind_wars_streak'] = $streak;
+        
+        // Special uses: count action_type='special' in battle_log_json
+        $specialCount = 0;
+        $stmt = $pdo->prepare(
+            "SELECT b.id, b.battle_log_json, b.user_id FROM knd_mind_wars_battles b
+             WHERE b.user_id = ? AND b.battle_log_json IS NOT NULL
+             AND NOT EXISTS (SELECT 1 FROM knd_mind_wars_battle_participants p WHERE p.battle_id = b.id)"
+        );
+        $stmt->execute([$userId]);
+        while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $log = json_decode($r['battle_log_json'], true);
+            if (is_array($log)) {
+                foreach ($log as $e) {
+                    if (isset($e['action_type']) && $e['action_type'] === 'special' && isset($e['actor']) && $e['actor'] === 'player') {
+                        $specialCount++;
+                    }
+                }
+            }
+        }
+        $stmt = $pdo->prepare(
+            "SELECT b.id, b.battle_log_json FROM knd_mind_wars_battle_participants p
+             JOIN knd_mind_wars_battles b ON b.id = p.battle_id
+             WHERE p.user_id = ? AND b.battle_log_json IS NOT NULL"
+        );
+        $stmt->execute([$userId]);
+        while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $stmtSide = $pdo->prepare("SELECT side FROM knd_mind_wars_battle_participants WHERE battle_id = ? AND user_id = ?");
+            $stmtSide->execute([$r['id'], $userId]);
+            $userSide = $stmtSide->fetchColumn();
+            $log = json_decode($r['battle_log_json'], true);
+            if (is_array($log)) {
+                foreach ($log as $e) {
+                    if (isset($e['action_type']) && $e['action_type'] === 'special' && isset($e['actor']) && $e['actor'] === $userSide) {
+                        $specialCount++;
+                    }
+                }
+            }
+        }
+        $milestones['mind_wars_special'] = $specialCount;
+        
+        // Legendary defeated: PvE enemy_avatar_id in legendary, or PvP defeated opponent's legendary
+        $legendaryCount = 0;
+        $stmt = $pdo->prepare(
+            "SELECT COUNT(*) FROM knd_mind_wars_battles b
+             JOIN knd_avatar_items ai ON ai.id = b.enemy_avatar_id AND ai.rarity = 'legendary'
+             WHERE b.user_id = ? AND b.result = 'win'
+             AND NOT EXISTS (SELECT 1 FROM knd_mind_wars_battle_participants p WHERE p.battle_id = b.id)"
+        );
+        $stmt->execute([$userId]);
+        $legendaryCount += (int)$stmt->fetchColumn();
+        $stmt = $pdo->prepare(
+            "SELECT b.id FROM knd_mind_wars_battle_participants p
+             JOIN knd_mind_wars_battles b ON b.id = p.battle_id
+             WHERE p.user_id = ? AND b.result IS NOT NULL
+             AND ((p.side = 'player' AND b.result = 'win') OR (p.side = 'enemy' AND b.result = 'lose'))"
+        );
+        $stmt->execute([$userId]);
+        $wonBattleIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        foreach ($wonBattleIds as $bid) {
+            $stmtDefeated = $pdo->prepare(
+                "SELECT p2.avatar_item_id FROM knd_mind_wars_battle_participants p
+                 JOIN knd_mind_wars_battle_participants p2 ON p2.battle_id = p.battle_id AND p2.user_id != p.user_id
+                 WHERE p.battle_id = ? AND p.user_id = ?"
+            );
+            $stmtDefeated->execute([$bid, $userId]);
+            $defeatedAvatarId = $stmtDefeated->fetchColumn();
+            if ($defeatedAvatarId) {
+                $stmtLeg = $pdo->prepare("SELECT 1 FROM knd_avatar_items WHERE id = ? AND rarity = 'legendary'");
+                $stmtLeg->execute([$defeatedAvatarId]);
+                if ($stmtLeg->fetch()) {
+                    $legendaryCount++;
+                }
+            }
+        }
+        $milestones['mind_wars_legendary'] = $legendaryCount;
+    } catch (Throwable $e) {
+        // Mind Wars tables may not exist
+    }
+    
     return $milestones;
 }
 
@@ -138,7 +279,7 @@ function badges_get_user_milestones(PDO $pdo, int $userId): array {
  * @return array Array of newly granted badge codes
  */
 function badges_check_and_grant(PDO $pdo, int $userId, string $unlockType): array {
-    $validTypes = ['generator', 'drop', 'collector', 'legendary_pull', 'level'];
+    $validTypes = ['generator', 'drop', 'collector', 'legendary_pull', 'level', 'mind_wars_wins', 'mind_wars_streak', 'mind_wars_special', 'mind_wars_legendary'];
     if (!in_array($unlockType, $validTypes, true)) {
         return [];
     }
@@ -181,7 +322,7 @@ function badges_check_and_grant(PDO $pdo, int $userId, string $unlockType): arra
  */
 function badges_check_all(PDO $pdo, int $userId): array {
     $allNewBadges = [];
-    $types = ['generator', 'drop', 'collector', 'legendary_pull', 'level'];
+    $types = ['generator', 'drop', 'collector', 'legendary_pull', 'level', 'mind_wars_wins', 'mind_wars_streak', 'mind_wars_special', 'mind_wars_legendary'];
     
     foreach ($types as $type) {
         $newBadges = badges_check_and_grant($pdo, $userId, $type);

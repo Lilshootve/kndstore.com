@@ -32,7 +32,16 @@ body.knd-labs-next {
   display: flex;
   background:
     linear-gradient(180deg, rgba(5, 7, 15, 0.52) 0%, rgba(5, 7, 15, 0.72) 50%, rgba(5, 7, 15, 0.68) 100%),
-    url('/assets/images/background-lab.webp') center center / cover no-repeat fixed;
+    url('/assets/images/background-lab.webp');
+  background-position:
+    center center,
+    calc(50% + var(--ln-bg-shift-x, 0px)) calc(50% + var(--ln-bg-shift-y, 0px));
+  background-size:
+    auto,
+    cover;
+  background-repeat: no-repeat;
+  background-attachment: scroll, fixed;
+  transition: background-position 240ms ease-out;
 }
 
 /* Prevent inner wrappers from hiding the background (override any solid fills) */
@@ -64,6 +73,8 @@ body.knd-labs-next .ln-tool-content-wrap {
   --ln-radius-sm: 8px;
   --ln-radius-glass: 16px;
   --ln-transition: 0.2s ease;
+  --ln-bg-shift-x: 0px;
+  --ln-bg-shift-y: 0px;
 }
 
 /* ---- App shell ---- */
@@ -360,6 +371,7 @@ body.knd-labs-next .ln-app {
   margin: 0 auto;
   width: 100%;
   position: relative;
+  animation: ln-content-rise 320ms ease-out;
 }
 
 /* Text2Img workspace: use full width from sidebar to right edge */
@@ -758,6 +770,7 @@ body.knd-labs-next .ln-app {
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.03);
   padding: 1rem 2rem 1.25rem;
   transition: box-shadow var(--ln-transition);
+  animation: ln-content-rise 360ms ease-out;
 }
 .ln-recent:hover {
   box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -823,6 +836,7 @@ body.knd-labs-next .ln-app {
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  animation: ln-card-fade-in 280ms ease-out both;
 }
 
 .ln-job-card:hover {
@@ -844,6 +858,11 @@ body.knd-labs-next .ln-app {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 280ms ease;
+}
+
+.ln-job-card:hover .ln-job-card-thumb img {
+  transform: scale(1.04);
 }
 
 .ln-job-card-icon {
@@ -874,11 +893,13 @@ body.knd-labs-next .ln-app {
   border-radius: 4px;
   background: rgba(17, 22, 42, 0.8);
   color: var(--ln-text-muted);
+  transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
 }
 
 .ln-job-card[data-status="done"] .ln-job-card-status {
   background: rgba(124, 92, 255, 0.2);
   color: var(--ln-accent);
+  transform: translateY(-1px);
 }
 
 .ln-recent-empty {
@@ -1436,4 +1457,58 @@ body.knd-labs-next .knd-details-drawer__body {
 .ln-tool-viewer-link i {
   font-size: 0.75rem;
   opacity: 0.9;
+}
+
+.ln-sidebar {
+  animation: ln-sidebar-in 300ms ease-out;
+}
+
+.ln-bg-motion-ready::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 15% 20%, rgba(77, 163, 255, 0.08), transparent 65%),
+    radial-gradient(55% 45% at 80% 70%, rgba(124, 92, 255, 0.08), transparent 70%);
+  opacity: 0.9;
+  animation: ln-atmosphere-float 9s ease-in-out infinite alternate;
+}
+
+.ln-bg-motion-ready > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes ln-sidebar-in {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes ln-content-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ln-card-fade-in {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ln-atmosphere-float {
+  0% { transform: translate3d(-1%, -1%, 0) scale(1); }
+  100% { transform: translate3d(1%, 1%, 0) scale(1.02); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln-app,
+  .ln-sidebar,
+  .ln-editor,
+  .ln-recent,
+  .ln-job-card,
+  .ln-bg-motion-ready::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }

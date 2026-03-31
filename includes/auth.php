@@ -57,20 +57,30 @@ function is_email_verified(): bool {
 
 /**
  * Redirect to login if not authenticated. Use at top of protected pages.
+ * Preserves embed=1 when redirecting from embed context (e.g. arena iframe) so auth renders without header.
  */
 function require_login(): void {
     if (!is_logged_in()) {
-        header('Location: /auth.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+        $url = '/auth.php?redirect=' . urlencode($_SERVER['REQUEST_URI'] ?? '/');
+        if (isset($_GET['embed']) && $_GET['embed'] === '1') {
+            $url .= '&embed=1';
+        }
+        header('Location: ' . $url);
         exit;
     }
 }
 
 /**
  * Redirect to auth page if email not verified. Call after require_login().
+ * Preserves embed=1 when redirecting from embed context.
  */
 function require_verified_email(): void {
     if (!is_email_verified()) {
-        header('Location: /auth.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+        $url = '/auth.php?redirect=' . urlencode($_SERVER['REQUEST_URI'] ?? '/');
+        if (isset($_GET['embed']) && $_GET['embed'] === '1') {
+            $url .= '&embed=1';
+        }
+        header('Location: ' . $url);
         exit;
     }
 }

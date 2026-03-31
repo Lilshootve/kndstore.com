@@ -20,7 +20,6 @@ const urlsToCache = [
     '/assets/css/font-awesome-fix.css',
     '/assets/js/main.js',
     '/assets/js/mobile-optimization.js',
-    '/assets/js/scroll-smooth.js',
     '/assets/js/font-awesome-fix.js',
     '/assets/images/knd-logo.png',
     '/assets/images/favicon.ico',
@@ -139,7 +138,17 @@ self.addEventListener('activate', event => {
 // Interceptar peticiones de red con estrategias optimizadas
 self.addEventListener('fetch', event => {
     const { request } = event;
+    
+    // No interceptar blob: (texturas embebidas en GLB, etc.)
+    if (request.url.startsWith('blob:')) {
+        return;
+    }
+
     const url = new URL(request.url);
+    // GLB/3D models: siempre ir a red, no cachear (evita 404 cacheados)
+    if (url.pathname.endsWith('.glb') || url.pathname.endsWith('.gltf')) {
+        return;
+    }
     
     // Solo manejar peticiones GET
     if (request.method !== 'GET') {

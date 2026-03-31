@@ -10,7 +10,7 @@
   },
   "13": {
     "inputs": {
-      "model": "model.fp16 .ckpt",
+      "model": "Hunyuan3d-dit-v2-1.ckpt",
       "steps": 30,
       "guidance_scale": 5,
       "seed": 372966002566644,
@@ -27,7 +27,7 @@
   },
   "14": {
     "inputs": {
-      "model_name": "model.fp16.ckpt"
+      "model_name": "hy2_1_vae.ckpt"
     },
     "class_type": "Hy3D21VAELoader",
     "_meta": {
@@ -193,6 +193,43 @@
     "class_type": "Hy3DInPaint",
     "_meta": {
       "title": "Hunyuan 3D 2.1 InPaint"
+    }
+  },
+  "24": {
+    "inputs": {
+      "images": [
+        "22",
+        1
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Vista previa de imagen"
+    }
+  },
+  "25": {
+    "inputs": {
+      "images": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Vista previa de imagen"
+    }
+  },
+  "26": {
+    "inputs": {
+      "filename_prefix": [
+        "22",
+        3
+      ],
+      "image": ""
+    },
+    "class_type": "SaveGLB",
+    "_meta": {
+      "title": "GuardarGLB"
     }
   }
 }

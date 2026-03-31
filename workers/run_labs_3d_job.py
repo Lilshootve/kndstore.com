@@ -50,22 +50,10 @@ STORAGE_PREVIEW = "labs/3d-lab/preview"
 
 
 def _pick_workflow(quality: str) -> str:
-    """
-    Map quality to workflow.
-    - Fast: Standard/Draft (has Hy3D21ExportMesh, outputs GLB)
-    - Premium: High/Ultra (3d premium.json - remesh+texture; has no ExportMesh in current JSON,
-      so use fast for now. Set COMFYUI_3D_USE_PREMIUM=1 to try premium when workflow is updated.)
-    """
-    use_premium = False
-    try:
-        import os
-        use_premium = os.getenv("COMFYUI_3D_USE_PREMIUM", "").strip() in ("1", "true", "yes")
-    except Exception:
-        pass
-    if use_premium:
-        q = (quality or "").lower()
-        if q in ("high", "ultra") and Path(WORKFLOW_PREMIUM).is_file():
-            return WORKFLOW_PREMIUM
+    """Map quality to fixed 3D workflows."""
+    q = (quality or "").strip().lower()
+    if q == "high":
+        return WORKFLOW_PREMIUM
     return WORKFLOW_FAST
 
 

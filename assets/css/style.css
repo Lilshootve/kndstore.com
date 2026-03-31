@@ -1060,19 +1060,20 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Base: overridden by knd-ui.css minimal sci-fi buttons */
 .btn-neon-primary {
-    border: 1px solid rgba(53, 194, 255, 0.5);
-    color: #67D5FF;
-    background: rgba(53, 194, 255, 0.12);
+    border: 1px solid rgba(130, 214, 241, 0.55);
+    color: #d8f6ff;
+    background: rgba(12, 22, 36, 0.82);
+    background-image: none;
     font-weight: 500;
     letter-spacing: 0.04em;
 }
 
 .btn-neon-primary:hover,
 .btn-neon-primary:focus {
-    background: rgba(53, 194, 255, 0.18);
-    border-color: #35C2FF;
+    background: rgba(17, 34, 52, 0.9);
+    border-color: rgba(136, 226, 255, 0.9);
     color: #fff;
-    box-shadow: 0 0 20px rgba(53, 194, 255, 0.15);
+    box-shadow: 0 0 20px rgba(53, 194, 255, 0.2);
 }
 
 .btn-outline-neon {
@@ -1755,16 +1756,17 @@ body.about-page,
 }
 
 .btn-primary {
-    background: rgba(53, 194, 255, 0.12);
-    border: 1px solid rgba(53, 194, 255, 0.5);
-    color: #67D5FF;
+    background: rgba(12, 22, 36, 0.82);
+    border: 1px solid rgba(130, 214, 241, 0.55);
+    color: #d8f6ff;
+    background-image: none;
 }
 
 .btn-primary:hover {
-    background: rgba(53, 194, 255, 0.18);
-    border-color: var(--knd-neon-blue);
+    background: rgba(17, 34, 52, 0.9);
+    border-color: rgba(136, 226, 255, 0.9);
     color: #fff;
-    box-shadow: 0 0 20px rgba(53, 194, 255, 0.15);
+    box-shadow: 0 0 20px rgba(53, 194, 255, 0.2);
 }
 
 .btn-outline-light {
@@ -2276,22 +2278,32 @@ body.about-page,
     animation: fadeInUp 0.8s ease-out;
 }
 
-/* Scrollbar */
+/* Scrollbar - Minimalist sci-fi premium (cyan/black) */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 212, 255, 0.5) transparent;
+}
+
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--knd-black);
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(45deg, var(--knd-neon-blue), var(--knd-electric-purple));
-    border-radius: 5px;
+    background: rgba(0, 212, 255, 0.35);
+    border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(45deg, var(--knd-electric-purple), var(--knd-neon-blue));
+    background: rgba(0, 212, 255, 0.6);
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: rgba(0, 212, 255, 0.8);
 }
 
 /* Loading Animation */
@@ -4933,99 +4945,6 @@ body {
     scroll-behavior: smooth;
 }
 
-/* Botones de navegación rápida */
-.scroll-nav {
-    position: fixed;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.scroll-nav-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--knd-neon-blue) 0%, var(--knd-electric-purple) 100%);
-    border: none;
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 15px rgba(37, 156, 174, 0.3);
-}
-
-.scroll-nav-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 25px rgba(37, 156, 174, 0.5);
-}
-
-/* Estilos para el enlace de pedido en scroll-nav */
-.scroll-nav-link {
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-
-.scroll-nav-link:hover {
-    text-decoration: none;
-    color: white;
-}
-
-.scroll-nav-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #ff4444;
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.7rem;
-    font-weight: 600;
-    border: 2px solid var(--knd-black);
-    box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
-}
-
-/* Indicador de progreso de scroll */
-.scroll-progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: rgba(44, 44, 44, 0.5);
-    z-index: 1001;
-}
-
-.scroll-progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, var(--knd-neon-blue) 0%, var(--knd-electric-purple) 100%);
-    width: 0%;
-    transition: width 0.3s ease;
-}
-
-/* Responsive para scroll nav */
-@media (max-width: 768px) {
-    .scroll-nav {
-        right: 10px;
-    }
-    
-    .scroll-nav-btn {
-        width: 35px;
-        height: 35px;
-        font-size: 16px;
-    }
-}
-
 /* ===== OPCIONES DE FONDOS ALTERNATIVOS ===== */
 
 
@@ -5062,6 +4981,113 @@ body {
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-top: 20px;
+}
+
+/* ===== GLOBAL VIDEO BACKGROUND (PROJECT-WIDE) ===== */
+body.knd-video-bg-only {
+    background: #05070f !important;
+}
+
+body.knd-video-bg-only .knd-global-video-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    background: #05070f;
+}
+
+body.knd-video-bg-only .knd-global-video-bg video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+body.knd-video-bg-only .knd-global-video-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.50), rgba(0, 0, 0, 0.72)),
+        radial-gradient(circle at center, rgba(0, 180, 255, 0.10), transparent 55%);
+}
+
+body.knd-video-bg-only #particles-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: transparent !important;
+}
+
+body.knd-video-bg-only .site-header,
+body.knd-video-bg-only .navbar,
+body.knd-video-bg-only header,
+body.knd-video-bg-only main,
+body.knd-video-bg-only section,
+body.knd-video-bg-only footer,
+body.knd-video-bg-only .hero-section {
+    position: relative;
+    z-index: 3;
+}
+
+/* Keep header/dropdowns above all content layers */
+body.knd-video-bg-only .site-header,
+body.knd-video-bg-only .navbar {
+    z-index: 5000 !important;
+}
+
+body.knd-video-bg-only .knd-dropdown-menu,
+body.knd-video-bg-only #ordersDropdownMenu {
+    z-index: 6000 !important;
+}
+
+/* Disable static page backgrounds so only video remains visible */
+body.knd-video-bg-only,
+body.knd-video-bg-only .hero-section,
+body.knd-video-bg-only .arena-hero,
+body.knd-video-bg-only .labs-tool-section,
+body.knd-video-bg-only .labs-hub-hero,
+body.knd-video-bg-only .ln-app,
+body.knd-video-bg-only .arena-app {
+    background-image: none !important;
+}
+
+body.knd-video-bg-only .hero-section,
+body.knd-video-bg-only .arena-hero,
+body.knd-video-bg-only .labs-tool-section,
+body.knd-video-bg-only .labs-hub-hero,
+body.knd-video-bg-only .ln-app,
+body.knd-video-bg-only .arena-app,
+body.knd-video-bg-only main,
+body.knd-video-bg-only section {
+    background-color: transparent !important;
+}
+
+/* Keep a single video layer across pages */
+body.knd-video-bg-only .knd-auth-video-bg,
+body.knd-video-bg-only .knd-auth-video-overlay,
+body.knd-video-bg-only .knd-home-video-bg,
+body.knd-video-bg-only .knd-home-video-overlay,
+body.knd-video-bg-only .knd-profile-video-bg,
+body.knd-video-bg-only .knd-profile-video-overlay,
+body.knd-video-bg-only .knd-arena-video-bg,
+body.knd-video-bg-only .knd-arena-video-overlay {
+    display: none !important;
+}
+
+body.knd-video-bg-only .hero-section::before,
+body.knd-video-bg-only .hero-section::after,
+body.knd-video-bg-only .arena-hero::before,
+body.knd-video-bg-only .arena-hero::after,
+body.knd-video-bg-only .labs-tool-section::before,
+body.knd-video-bg-only .labs-tool-section::after,
+body.knd-video-bg-only .labs-hub-hero::before,
+body.knd-video-bg-only .labs-hub-hero::after,
+body.knd-video-bg-only .ln-body::before,
+body.knd-video-bg-only .ln-editor::before {
+    background-image: none !important;
 }
 
 .instructions {
@@ -6933,4 +6959,93 @@ body.avatar-modal-open { overflow: hidden; }
 }
 .avatar-items-grid .avatar-shop-card.frame-equipped {
   box-shadow: 0 0 12px rgba(167, 139, 250, 0.15);
+}
+
+/* ==========================================================================
+   GLOBAL HEADER UNIFICATION
+   Use the same header style as index.php across entire site
+   ========================================================================== */
+.site-header.navbar,
+.site-header.navbar.header-scrolled,
+.site-header.navbar:not(.header-scrolled) {
+  background: linear-gradient(to bottom, rgba(3, 8, 24, 0.96), rgba(3, 8, 24, 0.92)) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(0, 229, 255, 0.25) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Disable old neon scan lines from legacy navbar */
+.site-header.navbar::before,
+.site-header.navbar::after {
+  display: none !important;
+  content: none !important;
+}
+
+.site-header .navbar-brand img {
+  max-height: 40px;
+  width: auto;
+}
+
+.site-header .navbar-nav .nav-link {
+  position: relative;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  padding-inline: 0.9rem;
+  color: rgba(231, 236, 255, 0.78) !important;
+  text-shadow: none !important;
+}
+
+.site-header .navbar-nav .nav-link.active,
+.site-header .navbar-nav .nav-link:focus,
+.site-header .navbar-nav .nav-link:hover {
+  color: #ffffff !important;
+}
+
+.site-header .navbar-nav .nav-link::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 0.1rem;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--knd-neon-blue), var(--knd-electric-purple));
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.2s ease-out;
+  z-index: 1;
+}
+
+.site-header .navbar-nav .nav-link.active::after,
+.site-header .navbar-nav .nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* Reusable select button style */
+.knd-btn-select {
+  border: 1px solid rgba(37, 156, 174, 0.45);
+  background: linear-gradient(180deg, rgba(37, 156, 174, 0.18), rgba(37, 156, 174, 0.08));
+  color: #c8f5fb;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+}
+
+.knd-btn-select:hover,
+.knd-btn-select:focus {
+  border-color: rgba(37, 156, 174, 0.9);
+  color: #ffffff;
+  background: linear-gradient(180deg, rgba(37, 156, 174, 0.35), rgba(37, 156, 174, 0.16));
+  box-shadow: 0 0 0 0.2rem rgba(37, 156, 174, 0.18);
+}
+
+.knd-btn-select.is-selected,
+.knd-btn-select:disabled {
+  border-color: rgba(96, 165, 250, 0.95);
+  color: #ffffff;
+  background: linear-gradient(180deg, rgba(96, 165, 250, 0.42), rgba(37, 156, 174, 0.28));
+  opacity: 1;
 }

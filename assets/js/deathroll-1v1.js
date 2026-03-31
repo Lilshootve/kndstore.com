@@ -2,6 +2,23 @@
 (function () {
     'use strict';
 
+    /* ── Inject game-over animation CSS ── */
+    var _lrStyle = document.createElement('style');
+    _lrStyle.textContent = [
+        '@keyframes lrGoLine{to{transform:scaleX(1)}}',
+        '@keyframes lrGoPop{to{opacity:1;transform:scale(1)}}',
+        '@keyframes lrGoSlam{to{opacity:1;transform:translateY(0) scaleX(1)}}',
+        '@keyframes lrGoFade{to{opacity:1;transform:translateY(0)}}',
+        '@keyframes lrConfetti{0%{opacity:.9;transform:translateY(0) rotate(0)}50%{opacity:.8}100%{opacity:0;transform:translateY(320px) rotate(var(--rot,600deg))}}',
+        '.lr-go-kp{margin-top:10px;font-family:var(--lr-FM,"Share Tech Mono",monospace);font-size:1rem;letter-spacing:1.5px}',
+        '.lr-go-kp.win{color:#00ff99}',
+        '.lr-go-kp.lose{color:rgba(255,255,255,.45)}',
+        '.lr-go-stat{text-align:center;opacity:0;transform:translateY(10px);animation:lrGoFade .4s ease forwards}',
+        '.lr-go-sv{font-family:var(--lr-FD,Orbitron,monospace);font-size:22px;font-weight:700;color:var(--lr-c,#00e8ff);text-shadow:0 0 10px rgba(0,232,255,.4)}',
+        '.lr-go-sl{font-family:var(--lr-FM,"Share Tech Mono",monospace);font-size:7px;letter-spacing:2.5px;color:rgba(155,215,235,.4);text-transform:uppercase;margin-top:2px}',
+    ].join('\n');
+    document.head.appendChild(_lrStyle);
+
     // ── Utilities ───────────────────────────────────────────
     function post(url, data) {
         var fd = new FormData();
@@ -45,6 +62,14 @@
     }
 
     function initLobby() {
+        /* Bootstrap modals must sit on document.body so they are not clipped by
+         * .lobby-content overflow:hidden / stacked under scanlines (z-index 9999). */
+        document.querySelectorAll('.modal').forEach(function (m) {
+            if (m.parentNode !== document.body) {
+                document.body.appendChild(m);
+            }
+        });
+
         function refreshLobby() {
             get('/api/deathroll-1v1/lobby_state.php')
                 .then(function (d) {
@@ -90,8 +115,8 @@
             var html = '';
             users.forEach(function (u) {
                 var isMe = u.username === MY_USERNAME;
-                html += '<li class="d-flex align-items-center mb-2">';
-                html += '<span class="me-2" style="width:8px;height:8px;border-radius:50%;background:#00ff88;display:inline-block;"></span>';
+                html += '<li class="lastroll-online-item d-flex align-items-center mb-2">';
+                html += '<span class="lastroll-online-dot me-2"></span>';
                 html += '<span' + (isMe ? ' class="fw-bold"' : '') + '>' + escHtml(u.username) + (isMe ? ' (you)' : '') + '</span>';
                 html += '</li>';
             });
@@ -132,7 +157,11 @@
                     entry_kp: eKp ? eKp.value : '100'
                 }).then(function (d) {
                     if (d.ok) {
-                        window.location.href = d.data.join_url;
+                        var url = d.data.join_url;
+                        if (window.self !== window.top && url) {
+                            url += (url.indexOf('?') >= 0 ? '&' : '?') + 'embed=1';
+                        }
+                        window.location.href = url;
                     } else {
                         var el = document.getElementById('create-result');
                         el.innerHTML = '<div class="alert alert-danger mb-0">' + d.error.message + '</div>';
@@ -158,7 +187,12 @@
             }).then(function (d) {
                 if (d.ok) {
                     if (typeof d.data.my_kp_balance !== 'undefined') updateNavBadge(d.data.my_kp_balance);
-                    window.location.href = '/death-roll-game.php?code=' + code;
+                    var embed = (window.self !== window.top);
+                    var url = d.data.join_url || ('/death-roll-game.php?code=' + encodeURIComponent(code));
+                    if (embed) {
+                        url += (url.indexOf('?') >= 0 ? '&' : '?') + 'embed=1';
+                    }
+                    window.location.href = url;
                 } else {
                     var alertEl = document.getElementById('join-alert');
                     if (alertEl) {
@@ -205,12 +239,13 @@
             rooms.forEach(function (r) {
                 var statusBadge = '';
                 var actionBtn = '';
+                var embedQ = (window.self !== window.top) ? '&embed=1' : '';
                 if (r.status === 'waiting') {
                     statusBadge = '<span class="badge bg-warning text-dark">Waiting</span>';
-                    actionBtn = '<a href="/death-roll-game.php?code=' + r.code + '" class="btn btn-sm btn-outline-neon">Enter</a>';
+                    actionBtn = '<a href="/death-roll-game.php?code=' + r.code + embedQ + '" class="btn btn-sm btn-outline-neon">Enter</a>';
                 } else if (r.status === 'playing') {
                     statusBadge = '<span class="badge bg-success">Playing</span>';
-                    actionBtn = '<a href="/death-roll-game.php?code=' + r.code + '" class="btn btn-sm btn-neon-primary">Enter</a>';
+                    actionBtn = '<a href="/death-roll-game.php?code=' + r.code + embedQ + '" class="btn btn-sm btn-neon-primary">Enter</a>';
                 } else {
                     var reasonTag = '';
                     if (r.finished_reason === 'timeout') reasonTag = ' <small class="text-white-50">(timeout)</small>';
@@ -223,7 +258,7 @@
                     } else {
                         statusBadge = '<span class="badge bg-secondary">Finished</span>' + reasonTag;
                     }
-                    actionBtn = '<a href="/death-roll-game.php?code=' + r.code + '" class="btn btn-sm btn-outline-light">View</a>';
+                    actionBtn = '<a href="/death-roll-game.php?code=' + r.code + embedQ + '" class="btn btn-sm btn-outline-light">View</a>';
                 }
 
                 var oppText = r.opponent ? 'vs ' + escHtml(r.opponent) : '<span class="text-white-50">no opponent</span>';
@@ -308,6 +343,7 @@
             diceTickTimer = setInterval(function () {
                 var m = localCurrentMax > 1 ? localCurrentMax : 1000;
                 setDiceValue(Math.floor(Math.random() * m) + 1);
+                if (window.LastRollSFX) window.LastRollSFX.playRollTick();
                 tickCount++;
                 if (tickCount >= maxTicks) { clearInterval(diceTickTimer); diceTickTimer = null; }
             }, 60);
@@ -323,7 +359,9 @@
             if (diceSafetyTimer) { clearTimeout(diceSafetyTimer); diceSafetyTimer = null; }
             diceWrap.className = 'dr-hud-card dr-result';
             setDiceValue(finalValue);
-            if (diceStatus) diceStatus.textContent = 'Ready';
+            var isCritical = parseInt(finalValue) === 1;
+            if (window.LastRollSFX) window.LastRollSFX.playLand(isCritical);
+            if (diceStatus) diceStatus.textContent = isCritical ? 'FATAL!' : 'Ready';
         }
 
         function stopDiceRoll(finalValue) {
@@ -363,9 +401,12 @@
             diceWrap.className = 'dr-hud-card dr-opp-pop';
             setDiceValue(value || '\u2014');
             if (diceStatus) diceStatus.textContent = (TEXTS.rolled || 'rolled') + ' ' + value;
+            var isCrit = parseInt(value) === 1;
+            if (window.LastRollSFX) window.LastRollSFX.playLand(isCrit);
         }
 
         var TURN_DURATION = 8;
+        var activeTurnDuration = TURN_DURATION;
         var anchorSecondsLeft = null;
         var anchorAt = null;
         var anchorTurnStartedAt = null;
@@ -378,6 +419,7 @@
             }
 
             var dur = s.game.turn_duration || TURN_DURATION;
+            activeTurnDuration = dur;
             var srvLeft = Math.max(0, Math.min(dur, s.game.turn_seconds_left));
             var turnChanged = (s.game.turn_started_at !== anchorTurnStartedAt) || (s.game.turn_user_id !== anchorTurnUserId);
 
@@ -411,13 +453,19 @@
         function updateTimerDisplay() {
             if (anchorSecondsLeft === null || anchorAt === null || !timerBar) return;
             var elapsed = (Date.now() - anchorAt) / 1000;
-            var left = Math.max(0, Math.min(TURN_DURATION, anchorSecondsLeft - elapsed));
+            var dur = activeTurnDuration || TURN_DURATION;
+            var left = Math.max(0, Math.min(dur, anchorSecondsLeft - elapsed));
             var secs = Math.ceil(left);
 
             timerBar.style.display = 'block';
             timerValue.textContent = secs;
+            /* SFX tick on each second change */
+            if (secs !== timerValue._lastSecs && secs <= 5) {
+                if (window.LastRollSFX) window.LastRollSFX.playTimerTick(secs <= 3);
+            }
+            timerValue._lastSecs = secs;
 
-            var pct = (left / TURN_DURATION) * 100;
+            var pct = dur > 0 ? (left / dur) * 100 : 0;
             timerProgress.style.width = pct + '%';
 
             if (left <= 2) {
@@ -438,7 +486,6 @@
         }
 
         function pollState() {
-            if (isRolling) return;
             get('/api/deathroll-1v1/state.php?code=' + GAME_CODE)
                 .then(function (d) {
                     if (d.ok) {
@@ -455,28 +502,46 @@
 
             var p1Card = document.getElementById('player1-card');
             var p2Card = document.getElementById('player2-card');
+            p1Card.classList.remove('active');
+            p2Card.classList.remove('active');
             p1Card.style.borderColor = 'rgba(37,156,174,0.3)';
             p2Card.style.borderColor = 'rgba(174,37,101,0.3)';
             if (s.game.status === 'playing' && s.game.turn_user_id) {
                 if (s.players.p1 && s.game.turn_user_id === s.players.p1.id) {
+                    p1Card.classList.add('active');
                     p1Card.style.borderColor = '#259cae';
                 } else if (s.players.p2 && s.game.turn_user_id === s.players.p2.id) {
+                    p2Card.classList.add('active');
                     p2Card.style.borderColor = '#ae2565';
                 }
             }
 
             var maxEl = document.getElementById('current-max-display');
-            maxEl.textContent = s.game.current_max;
+            var newMax = parseInt(s.game.current_max) || 0;
+            var oldMax = parseInt(maxEl.textContent) || newMax;
+            
+            /* Dramatic count-down animation when max changes */
+            if (newMax !== oldMax && newMax < oldMax && newMax > 0) {
+                animateMaxCounter(maxEl, oldMax, newMax, 600);
+                /* Danger zone SFX */
+                if (newMax <= 10 && oldMax > 10 && window.LastRollSFX) window.LastRollSFX.playDanger();
+            } else {
+                maxEl.textContent = s.game.current_max;
+            }
+            
+            maxEl.classList.remove('danger', 'warning');
             var initMaxEl = document.getElementById('initial-max-value');
             if (initMaxEl && s.game.initial_max) {
                 initMaxEl.textContent = Number(s.game.initial_max).toLocaleString();
             }
             if (s.game.current_max <= 10) {
+                maxEl.classList.add('danger');
                 maxEl.style.color = '#ff4444';
             } else if (s.game.current_max <= 50) {
+                maxEl.classList.add('warning');
                 maxEl.style.color = '#ffaa00';
             } else {
-                maxEl.style.color = 'var(--knd-neon-blue)';
+                maxEl.style.color = '';
             }
 
             var statusEl = document.getElementById('game-status-text');
@@ -510,7 +575,7 @@
             if (s.game.status === 'waiting') {
                 turnInfo.textContent = TEXTS.waitingP2 || 'Waiting for opponent...';
                 btnRoll.disabled = true;
-            } else if (s.game.status === 'playing') {
+            } else if (s.game.status === 'playing' && !isRolling) {
                 if (s.me.can_roll) {
                     turnInfo.innerHTML = '<span style="color: var(--knd-neon-blue);">' + (TEXTS.yourTurn || 'Your turn!') + '</span>';
                     btnRoll.disabled = false;
@@ -521,6 +586,8 @@
                     turnInfo.textContent = oppName + "'s turn...";
                     btnRoll.disabled = true;
                 }
+            } else if (s.game.status === 'playing' && isRolling) {
+                /* keep Rolling… UI; do not re-enable from stale poll */
             } else {
                 turnInfo.textContent = '';
                 btnRoll.disabled = true;
@@ -570,11 +637,12 @@
             rolls.forEach(function (r, i) {
                 var isFatal = parseInt(r.roll_value) === 1;
                 var color = isFatal ? '#ff4444' : (parseInt(r.roll_value) <= 10 ? '#ffaa00' : '#ccc');
-                html += '<div class="d-flex justify-content-between align-items-center py-1 border-bottom border-secondary' + (isFatal ? ' bg-danger bg-opacity-10' : '') + '">';
+                var itemClass = 'd-flex justify-content-between align-items-center py-1 roll-item' + (isFatal ? ' fatal' : '') + ' border-bottom border-secondary';
+                html += '<div class="' + itemClass + '">';
                 html += '<span class="small">';
                 html += '<strong>' + escHtml(r.username) + '</strong> ';
                 html += (TEXTS.rolled || 'rolled') + ' ';
-                html += '<span style="color:' + color + '; font-weight:700;">' + r.roll_value + '</span>';
+                html += '<span class="roll-value" style="color:' + color + '; font-weight:700;">' + r.roll_value + '</span>';
                 html += ' <span class="text-white-50">/ ' + r.max_value + '</span>';
                 html += '</span>';
                 html += '<span class="text-white-50 small">#' + (i + 1) + '</span>';
@@ -594,31 +662,164 @@
             var iWon = s.game.winner_user_id === MY_USER_ID;
             var isTimeout = s.game.finished_reason === 'timeout';
 
+            /* SFX */
+            if (window.LastRollSFX) {
+                if (iWon) window.LastRollSFX.playVictory();
+                else window.LastRollSFX.playDefeat();
+            }
+
             var kpMsg = '';
             if (s.game.charged && s.game.payout_kp) {
                 kpMsg = iWon
-                    ? '<div class="mt-2" style="font-size:.95rem;"><i class="fas fa-coins me-1" style="color:var(--knd-neon-blue);"></i>+' + Number(s.game.payout_kp).toLocaleString() + ' KP</div>'
-                    : '<div class="mt-2 text-white-50" style="font-size:.85rem;"><i class="fas fa-coins me-1"></i>&minus;' + Number(s.game.entry_kp).toLocaleString() + ' KP</div>';
+                    ? '<div class="lr-go-kp win"><i class="fas fa-coins"></i> +' + Number(s.game.payout_kp).toLocaleString() + ' KP</div>'
+                    : '<div class="lr-go-kp lose"><i class="fas fa-coins"></i> &minus;' + Number(s.game.entry_kp).toLocaleString() + ' KP</div>';
             }
 
+            panel.classList.remove('win', 'lose');
+            panel.classList.add(iWon ? 'win' : 'lose');
+
+            /* Build epic result HTML */
+            var mainText = isTimeout
+                ? (iWon ? (TEXTS.timeoutOpponent || 'Opponent timed out!') : (TEXTS.timeoutYou || 'You lost by timeout!'))
+                : (iWon ? (TEXTS.youWin || 'YOU WIN!') : (TEXTS.youLose || 'YOU LOSE!'));
+
+            var accentColor = iWon ? 'var(--lr-green, #00ff99)' : 'var(--lr-red, #ff2255)';
+            var bgGrad = iWon
+                ? 'linear-gradient(180deg, rgba(0,255,136,.06), rgba(0,40,30,.15))'
+                : 'linear-gradient(180deg, rgba(255,34,85,.06), rgba(40,0,10,.15))';
+
+            panel.style.background = bgGrad;
+            panel.style.border = '1px solid ' + (iWon ? 'rgba(0,255,136,.25)' : 'rgba(255,34,85,.25)');
+            panel.style.position = 'relative';
+            panel.style.overflow = 'hidden';
+
+            /* Top accent line */
+            var accentLine = '<div style="position:absolute;top:0;left:0;right:0;height:2px;background:' + accentColor + ';box-shadow:0 0 20px ' + accentColor + ';transform:scaleX(0);animation:lrGoLine .5s cubic-bezier(.2,.8,.2,1) forwards;"></div>';
+
+            /* Confetti for win */
+            var confettiHtml = '';
             if (iWon) {
-                icon.innerHTML = '\uD83C\uDFC6';
-                text.innerHTML = (isTimeout ? (TEXTS.timeoutOpponent || 'Opponent timed out!') : (TEXTS.youWin || 'YOU WIN!')) + kpMsg;
-                text.style.color = '#00ff88';
-                panel.style.background = 'rgba(0,255,136,0.05)';
-                panel.style.border = '2px solid rgba(0,255,136,0.3)';
-            } else {
-                icon.innerHTML = isTimeout ? '\u23F0' : '\uD83D\uDC80';
-                text.innerHTML = (isTimeout ? (TEXTS.timeoutYou || 'You lost by timeout!') : (TEXTS.youLose || 'YOU LOSE!')) + kpMsg;
-                text.style.color = '#ff4444';
-                panel.style.background = 'rgba(255,68,68,0.05)';
-                panel.style.border = '2px solid rgba(255,68,68,0.3)';
+                var colors = ['#00e8ff','#9b30ff','#ffcc00','#00ff99','#ff2255','#fff'];
+                for (var ci = 0; ci < 35; ci++) {
+                    var c = colors[Math.floor(Math.random() * colors.length)];
+                    confettiHtml += '<div style="position:absolute;left:' + (Math.random()*100) + '%;top:-8px;width:' + (3+Math.random()*5) + 'px;height:' + (5+Math.random()*8) + 'px;background:' + c + ';border-radius:' + (Math.random()>.5?'50%':'1px') + ';opacity:0;animation:lrConfetti ' + (2+Math.random()*2.5) + 's ease-in ' + (Math.random()*1) + 's forwards;"></div>';
+                }
             }
+
+            /* Result icon: only timeout (no trophy/skull on win/lose) */
+            var iconBlock = '';
+            if (isTimeout) {
+                iconBlock =
+                    '<div class="lr-go-icon" style="font-size:3.5rem;margin-bottom:8px;filter:drop-shadow(0 0 20px ' + accentColor + ');opacity:0;animation:lrGoPop .5s cubic-bezier(.15,1.2,.3,1) .2s forwards;">' +
+                    '⏰' +
+                    '</div>';
+            }
+
+            /* Stats */
+            var totalRolls = s.rolls ? s.rolls.length : 0;
+            var myRolls = s.rolls ? s.rolls.filter(function(r){ return r.username === MY_USERNAME; }).length : 0;
+            var lowestRoll = s.rolls && s.rolls.length ? Math.min.apply(null, s.rolls.map(function(r){ return parseInt(r.roll_value); })) : 0;
+
+            panel.innerHTML = accentLine + confettiHtml +
+                '<div style="position:relative;z-index:2;">' +
+                iconBlock +
+                /* Title */
+                '<div style="font-family:var(--lr-FD,Orbitron,monospace);font-size:clamp(28px,5vw,42px);font-weight:900;letter-spacing:6px;color:' + accentColor + ';text-shadow:0 0 30px ' + accentColor + ';opacity:0;animation:lrGoSlam .4s cubic-bezier(.15,1,.3,1) .4s forwards;">' +
+                    mainText +
+                '</div>' +
+                kpMsg +
+                /* Stats row */
+                '<div style="display:flex;gap:20px;justify-content:center;margin-top:16px;">' +
+                    '<div class="lr-go-stat" style="animation-delay:.7s"><div class="lr-go-sv" id="lr-go-rolls">0</div><div class="lr-go-sl">TOTAL ROLLS</div></div>' +
+                    '<div class="lr-go-stat" style="animation-delay:.85s"><div class="lr-go-sv" id="lr-go-myr">0</div><div class="lr-go-sl">YOUR ROLLS</div></div>' +
+                    '<div class="lr-go-stat" style="animation-delay:1s"><div class="lr-go-sv" id="lr-go-low">0</div><div class="lr-go-sl">LOWEST ROLL</div></div>' +
+                '</div>' +
+                /* Buttons — appended after animation */
+                '<div id="lr-go-btns" style="margin-top:18px;opacity:0;animation:lrGoFade .4s ease 1.6s forwards;">' +
+                    '<button id="btn-rematch-request" class="btn lastroll-btn-primary" style="margin-right:8px;">' +
+                        '<i class="fas fa-redo me-2"></i>' + (TEXTS.rematch || 'Rematch') +
+                    '</button>' +
+                    '<a href="' + (typeof lobbyUrl !== 'undefined' ? lobbyUrl : '/death-roll-lobby.php') + '" class="btn lastroll-btn-secondary">' +
+                        '<i class="fas fa-arrow-left me-2"></i>' + (TEXTS.backLobby || 'Lobby') +
+                    '</a>' +
+                '</div>' +
+                '<div id="rematch-status" class="mt-3" style="display:none;"></div>' +
+                '</div>';
+
             panel.style.display = 'block';
+
+            /* Animate stat count-ups */
+            setTimeout(function () { animateCountUp('lr-go-rolls', totalRolls, 500); }, 700);
+            setTimeout(function () { animateCountUp('lr-go-myr', myRolls, 500); }, 850);
+            setTimeout(function () { animateCountUp('lr-go-low', lowestRoll, 500); }, 1000);
+
+            /* Re-bind rematch button */
+            setTimeout(function () {
+                var newBtn = document.getElementById('btn-rematch-request');
+                if (newBtn) {
+                    btnRematchReq = newBtn;
+                    newBtn.addEventListener('click', function () {
+                        if (rematchOffered) return;
+                        newBtn.disabled = true;
+                        newBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+                        post('/api/deathroll-1v1/rematch_offer.php', {
+                            csrf_token: CSRF,
+                            code: GAME_CODE
+                        }).then(function (d) {
+                            if (d.ok) {
+                                rematchOffered = true;
+                                newBtn.innerHTML = '<i class="fas fa-hourglass-half me-2"></i>' + (TEXTS.rematchWaiting || 'Waiting...');
+                            } else {
+                                alert(d.error.message);
+                                newBtn.disabled = false;
+                                newBtn.innerHTML = '<i class="fas fa-redo me-2"></i>Rematch';
+                            }
+                        }).catch(function () {
+                            newBtn.disabled = false;
+                            newBtn.innerHTML = '<i class="fas fa-redo me-2"></i>Rematch';
+                        });
+                    });
+                }
+            }, 100);
+        }
+
+        /* ── Animate counter from 0 to target ── */
+        function animateCountUp(elId, target, duration) {
+            var el = document.getElementById(elId);
+            if (!el) return;
+            var t0 = performance.now();
+            function tick() {
+                var p = Math.min((performance.now() - t0) / duration, 1);
+                var ease = 1 - Math.pow(1 - p, 3);
+                el.textContent = Math.round(target * ease);
+                if (p < 1) requestAnimationFrame(tick);
+            }
+            tick();
+        }
+
+        /* ── Animate max counter dramatically ── */
+        function animateMaxCounter(el, from, to, duration) {
+            var t0 = performance.now();
+            function tick() {
+                var p = Math.min((performance.now() - t0) / duration, 1);
+                var ease = 1 - Math.pow(1 - p, 3);
+                var val = Math.round(from + (to - from) * ease);
+                el.textContent = val;
+                /* Shake during count */
+                if (p < 1) {
+                    var shake = (1 - p) * 3;
+                    el.style.transform = 'translateX(' + ((Math.random() - 0.5) * shake) + 'px)';
+                    requestAnimationFrame(tick);
+                } else {
+                    el.textContent = to;
+                    el.style.transform = '';
+                }
+            }
+            tick();
         }
 
         // ── Rematch flow ─────────────────────────────────────
-        var rematchPopupShown = false;
+        var lastRematchOfferShownId = null;
         var rematchPopupInstance = null;
         var rematchAutoDeclineTimer = null;
         var REMATCH_COUNTDOWN = 10;
@@ -657,9 +858,10 @@
             if (offerPanel) offerPanel.style.display = 'none';
         }
 
-        function showRematchPopup(opponentName) {
-            if (rematchPopupShown || typeof Swal === 'undefined') return;
-            rematchPopupShown = true;
+        function showRematchPopup(opponentName, offerId) {
+            if (typeof Swal === 'undefined') return;
+            if (offerId != null && offerId === lastRematchOfferShownId) return;
+            if (offerId != null) lastRematchOfferShownId = offerId;
 
             var secondsLeft = REMATCH_COUNTDOWN;
 
@@ -687,8 +889,10 @@
                 if (rematchAutoDeclineTimer) { clearInterval(rematchAutoDeclineTimer); rematchAutoDeclineTimer = null; }
                 if (result.isConfirmed) {
                     respondRematch('accept').then(function (d) {
-                        if (d.ok && d.data.new_code) {
-                            window.location.href = d.data.join_url;
+                        if (d.ok && d.data.join_url) {
+                            var url = d.data.join_url;
+                            if (window.self !== window.top) url += (url.indexOf('?') >= 0 ? '&' : '?') + 'embed=1';
+                            window.location.href = url;
                         }
                     });
                 } else {
@@ -731,14 +935,16 @@
 
             if (rs.offer_status === 'accepted' && rs.new_code) {
                 closeRematchPopup();
-                window.location.href = '/death-roll-game.php?code=' + rs.new_code;
+                var url = '/death-roll-game.php?code=' + rs.new_code;
+                if (window.self !== window.top) url += '&embed=1';
+                window.location.href = url;
                 return;
             }
 
             if (rs.offer_status === 'pending') {
-                if (rs.offered_to === MY_USER_ID) {
-                    showRematchPopup(rs.offered_by_username || 'Opponent');
-                } else if (rs.offered_by === MY_USER_ID) {
+                if (Number(rs.offered_to) === Number(MY_USER_ID)) {
+                    showRematchPopup(rs.offered_by_username || 'Opponent', rs.offer_id);
+                } else if (Number(rs.offered_by) === Number(MY_USER_ID)) {
                     rematchOffered = true;
                     if (btnRematchReq) {
                         btnRematchReq.disabled = true;
@@ -753,6 +959,7 @@
 
             if (rs.offer_status === 'declined') {
                 closeRematchPopup();
+                lastRematchOfferShownId = null;
                 if (statusEl) {
                     statusEl.innerHTML = '<span class="text-warning"><i class="fas fa-times-circle me-2"></i>' + (TEXTS.rematchDeclined || 'Opponent declined.') + '</span>';
                     statusEl.style.display = 'block';
@@ -801,6 +1008,7 @@
             isRolling = true;
             btnRoll.disabled = true;
             btnRoll.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Rolling...';
+            if (window.LastRollSFX) window.LastRollSFX.playClick();
             startDiceRoll();
 
             post('/api/deathroll-1v1/roll.php', {

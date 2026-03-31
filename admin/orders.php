@@ -309,6 +309,7 @@ require_once __DIR__ . '/../includes/header.php';
 require_once __DIR__ . '/../includes/footer.php';
 
 echo generateHeader('Admin - Orders', 'KND Store order management');
+echo generateAdminBar();
 ?>
 <style>
 .admin-lux { --knd-cyan: #00d4ff; --knd-magenta: #ff00ff; }

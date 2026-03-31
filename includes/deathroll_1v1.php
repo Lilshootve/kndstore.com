@@ -200,8 +200,9 @@ function build_game_state(PDO $pdo, array $game, int $currentUserId): array {
         $p2 = $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    $turnUid = isset($game['turn_user_id']) ? (int) $game['turn_user_id'] : 0;
     $canRoll = ($game['status'] === 'playing')
-        && ((int)$game['turn_user_id'] === $currentUserId);
+        && ($turnUid === (int) $currentUserId);
 
     $stmt = $pdo->prepare(
         'SELECT r.max_value, r.roll_value, r.created_at, u.username

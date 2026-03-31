@@ -107,6 +107,7 @@ $mvHistoryUrl = '/api/labs/3d-lab/history.php';
   var uploadClear = document.getElementById('mv-upload-clear');
   var pageParams = new URLSearchParams(window.location.search || '');
   var source3dJobId = pageParams.get('source_3d_job_id');
+  var sourceJobId = pageParams.get('source_job_id');
 
   function buildViewerUrl(opts) {
     var model = opts.model || opts.glb;
@@ -187,6 +188,25 @@ $mvHistoryUrl = '/api/labs/3d-lab/history.php';
       .catch(function() {});
   }
 
+  function loadSourceJobIfAny() {
+    if (!sourceJobId) return;
+    fetch('/api/labs/job.php?job_id=' + encodeURIComponent(sourceJobId), { credentials: 'same-origin' })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (!res.ok || !res.data) return;
+        var j = res.data;
+        var outputPath = (j.output_path || '').toLowerCase();
+        if (!outputPath || outputPath.indexOf('.glb') === -1) return;
+        var modelUrl = '/api/labs/image.php?job_id=' + encodeURIComponent(sourceJobId);
+        var downloadUrl = modelUrl + '&download=1';
+        var title = '3D Vertex Job #' + sourceJobId;
+        var desc = j.created_at ? ('Created ' + j.created_at) : 'Generated model';
+        var viewerUrl = buildViewerUrl({ model: modelUrl, title: title, description: desc });
+        setViewer(viewerUrl, downloadUrl, 'Download GLB', viewerUrl, desc, 'knd_labs_' + sourceJobId + '.glb');
+      })
+      .catch(function() {});
+  }
+
   // —— My 3D Lab Creations ——
   if (list3d) {
     fetch(HISTORY_API + '?limit=24', { credentials: 'same-origin' })
@@ -195,7 +215,7 @@ $mvHistoryUrl = '/api/labs/3d-lab/history.php';
         var jobs = (res.ok && res.data && res.data.jobs) ? res.data.jobs : [];
         var withGlb = jobs.filter(function(j) { return j.glb_url; });
         if (withGlb.length === 0) {
-          list3d.innerHTML = '<p class="text-white-50 small mb-0">No 3D creations yet. Create one in <a href="/labs?tool=3d" class="text-decoration-underline">3D Lab</a>.</p>';
+          list3d.innerHTML = '<p class="text-white-50 small mb-0">No 3D creations yet. Create one in <a href="/labs?tool=3d_vertex" class="text-decoration-underline">3D Vertex</a>.</p>';
           return;
         }
         var html = '<ul class="list-unstyled mb-0">';
@@ -226,7 +246,7 @@ $mvHistoryUrl = '/api/labs/3d-lab/history.php';
         });
       })
       .catch(function() {
-        list3d.innerHTML = '<p class="text-white-50 small mb-0">Could not load. <a href="/labs?tool=3d">Open 3D Lab</a></p>';
+        list3d.innerHTML = '<p class="text-white-50 small mb-0">Could not load. <a href="/labs?tool=3d_vertex">Open 3D Vertex</a></p>';
       });
   }
 
@@ -319,5 +339,6 @@ $mvHistoryUrl = '/api/labs/3d-lab/history.php';
   }
 
   loadSource3dJobIfAny();
+  loadSourceJobIfAny();
 })();
 </script>

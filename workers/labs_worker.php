@@ -11,6 +11,7 @@ declare(strict_types=1);
 $projectRoot = dirname(__DIR__);
 chdir($projectRoot);
 
+require_once $projectRoot . '/includes/env.php';
 require_once $projectRoot . '/includes/comfyui.php';
 require_once $projectRoot . '/includes/storage.php';
 if (file_exists($projectRoot . '/config/labs.php')) {
@@ -26,31 +27,15 @@ $workerId = $opts['worker-id'] ?? 'http-' . gethostname();
 $cfg = load_worker_config();
 
 function load_worker_config(): array {
-    $projectRoot = dirname(__DIR__);
-    if (file_exists($projectRoot . '/config/comfyui.php')) {
-        require_once $projectRoot . '/config/comfyui.php';
-    }
-    $path = __DIR__ . '/worker_config.local.php';
-    if (is_readable($path)) {
-        $c = (array) include $path;
-        if (isset($c['COMFY_URL']) && !isset($c['COMFYUI_BASE'])) {
-            $c['COMFYUI_BASE'] = $c['COMFY_URL'];
-        }
-        return $c;
-    }
-    $comfyBase = getenv('COMFYUI_URL') ?: getenv('COMFYUI_BASE_URL');
-    if ($comfyBase === '' || $comfyBase === false) {
-        $comfyBase = defined('COMFYUI_BASE_URL') ? COMFYUI_BASE_URL : 'http://127.0.0.1:8190';
-    }
-    $finalImageDir = getenv('KND_FINAL_IMAGE_DIR') ?: (defined('KND_FINAL_IMAGE_DIR') ? KND_FINAL_IMAGE_DIR : '');
     return [
-        'API_BASE'             => getenv('KND_API_BASE') ?: 'https://kndstore.com',
-        'WORKER_TOKEN'         => getenv('KND_WORKER_TOKEN') ?: '',
-        'COMFYUI_BASE'         => $comfyBase,
-        'COMFYUI_TOKEN'        => getenv('COMFYUI_TOKEN') ?: '',
-        'COMFY_INPUT_DIR'      => getenv('COMFY_INPUT_DIR') ?: '',
-        'COMFY_OUTPUT_DIR'     => getenv('COMFY_OUTPUT_DIR') ?: '',
-        'KND_FINAL_IMAGE_DIR'  => $finalImageDir,
+        'API_BASE'             => knd_env_required('KND_API_BASE'),
+        'WORKER_TOKEN'         => knd_env_required('KND_WORKER_TOKEN'),
+        'COMFYUI_BASE'         => knd_env_required('COMFYUI_URL'),
+        'COMFYUI_3D_URL'       => (string) knd_env('COMFYUI_3D_URL', ''),
+        'COMFYUI_TOKEN'        => (string) knd_env('COMFYUI_TOKEN', ''),
+        'COMFY_INPUT_DIR'      => (string) knd_env('COMFY_INPUT_DIR', ''),
+        'COMFY_OUTPUT_DIR'     => (string) knd_env('COMFY_OUTPUT_DIR', ''),
+        'KND_FINAL_IMAGE_DIR'  => (string) knd_env('KND_FINAL_IMAGE_DIR', ''),
     ];
 }
 
@@ -156,6 +141,30 @@ function workerDownloadFile(string $url, array $headers): ?string {
     return ($body !== false && $code >= 200 && $code < 300) ? $body : null;
 }
 
+function workerFetchComfyOutputBytes(string $baseUrl, string $filename, string $subfolder = '', string $type = 'output', string $token = ''): ?string {
+    $base = rtrim($baseUrl, '/');
+    $params = ['filename' => $filename, 'type' => $type ?: 'output'];
+    if ($subfolder !== '') $params['subfolder'] = $subfolder;
+    $headers = ['Accept: */*'];
+    if ($token !== '') $headers[] = 'X-KND-TOKEN: ' . $token;
+    foreach (['/view', '/api/view'] as $path) {
+        $url = $base . $path . '?' . http_build_query($params);
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT => 90,
+            CURLOPT_CONNECTTIMEOUT => 15,
+            CURLOPT_HTTPHEADER => $headers,
+        ]);
+        $body = curl_exec($ch);
+        $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($body !== false && $code >= 200 && $code < 300) return $body;
+    }
+    return null;
+}
+
 function workerCreatePlaceholderImage(): string {
     $tmp = tempnam(sys_get_temp_dir(), 'knd_ph');
     if (!$tmp) throw new \RuntimeException('Could not create temp file');
@@ -241,17 +250,19 @@ function comfyui_get_history_standalone(string $promptId, string $baseUrl, strin
 }
 
 if (empty($cfg['WORKER_TOKEN']) || empty($cfg['API_BASE'])) {
-    logWorker('ERROR: Set API_BASE and WORKER_TOKEN in workers/worker_config.local.php');
+    logWorker('ERROR: Missing required .env values KND_API_BASE or KND_WORKER_TOKEN');
     exit(1);
 }
 
 $apiBase = rtrim($cfg['API_BASE'], '/');
 $workerToken = $cfg['WORKER_TOKEN'];
-// Prefer COMFYUI_LOCAL cuando el worker corre en el mismo PC que ComfyUI (evita túnel)
-$comfyBase = rtrim($cfg['COMFYUI_LOCAL'] ?? $cfg['COMFYUI_BASE'] ?? $cfg['COMFY_URL'] ?? 'https://comfy.kndstore.com', '/');
+// Use strict .env values (no hardcoded fallback URLs).
+$comfyBase = rtrim((string) ($cfg['COMFYUI_BASE'] ?? ''), '/');
+$comfy3dRaw = $cfg['COMFYUI_3D_URL'] ?? $cfg['COMFYUI_BASE'] ?? '';
+$comfyBase3d = rtrim((string) $comfy3dRaw, '/');
 $comfyToken = $cfg['COMFYUI_TOKEN'] ?? '';
-$comfyOutputDir = $cfg['COMFY_OUTPUT_DIR'] ?? (defined('COMFY_OUTPUT_DIR') ? COMFY_OUTPUT_DIR : '');
-$kndFinalImageDir = $cfg['KND_FINAL_IMAGE_DIR'] ?? (defined('KND_FINAL_IMAGE_DIR') ? KND_FINAL_IMAGE_DIR : '');
+$comfyOutputDir = $cfg['COMFY_OUTPUT_DIR'] ?? '';
+$kndFinalImageDir = $cfg['KND_FINAL_IMAGE_DIR'] ?? '';
 if ($kndFinalImageDir !== '') $kndFinalImageDir = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $kndFinalImageDir), DIRECTORY_SEPARATOR);
 $headers = ['X-KND-WORKER-TOKEN: ' . $workerToken];
 
@@ -277,7 +288,7 @@ do {
     $tool = $payload['tool'] ?? 'text2img';
     $attempts = (int) ($job['attempts'] ?? 1);
 
-    $allowedTools = ['text2img', 'img2img', 'remove-bg', 'texture', 'texture_seamless', 'texture_image', 'texture_ultra', 'upscale', 'consistency', '3d_fast', '3d_premium', 'character'];
+    $allowedTools = ['text2img', 'img2img', 'remove-bg', 'texture', 'texture_seamless', 'texture_image', 'texture_ultra', 'upscale', 'consistency', '3d_fast', '3d_premium', '3d_vertex', 'character'];
     if (!in_array($tool, $allowedTools, true)) {
         httpPost($apiBase . '/api/labs/queue/fail.php', $headers, [
             'job_id' => $jobId,
@@ -305,7 +316,8 @@ do {
     $refinerEnabled = !empty($payload['refiner_enabled']);
     $overrideCkpt = $payload['override_ckpt'] ?? null;
 
-    if (($tool === 'upscale' || $tool === 'remove-bg') && !empty($payload['image_url'])) {
+    $jobComfyBase = ($tool === '3d_vertex') ? $comfyBase3d : $comfyBase;
+    if (($tool === 'upscale' || $tool === 'remove-bg' || $tool === '3d_vertex') && !empty($payload['image_url'])) {
         $imgData = workerDownloadFile($payload['image_url'], $headers);
         if (!$imgData) {
             httpPost($apiBase . '/api/labs/queue/fail.php', $headers, [
@@ -332,7 +344,7 @@ do {
             continue;
         }
         try {
-            $payload['image_filename'] = workerUploadToComfyui($tmpFile, $comfyBase, $comfyToken);
+            $payload['image_filename'] = workerUploadToComfyui($tmpFile, $jobComfyBase, $comfyToken);
         } finally {
             @unlink($tmpFile);
         }
@@ -354,7 +366,7 @@ do {
         $tmpFile = tempnam(sys_get_temp_dir(), 'knd_img');
         if ($tmpFile && file_put_contents($tmpFile, $imgData) !== false) {
             try {
-                $payload['image_filename'] = workerUploadToComfyui($tmpFile, $comfyBase, $comfyToken);
+                $payload['image_filename'] = workerUploadToComfyui($tmpFile, $jobComfyBase, $comfyToken);
             } finally {
                 @unlink($tmpFile);
             }
@@ -383,7 +395,7 @@ do {
             $tmp = tempnam(sys_get_temp_dir(), 'knd_ref');
             if ($tmp && file_put_contents($tmp, $imgData) !== false) {
                 try {
-                    $payload['reference_image_filename'] = workerUploadToComfyui($tmp, $comfyBase, $comfyToken);
+                    $payload['reference_image_filename'] = workerUploadToComfyui($tmp, $jobComfyBase, $comfyToken);
                 } finally {
                     @unlink($tmp);
                 }
@@ -449,6 +461,9 @@ do {
             case '3d_premium':
                 $workflowFile = '3d_premium.json';
                 break;
+            case '3d_vertex':
+                $workflowFile = 'KND Character Lab.json';
+                break;
             default:
                 throw new \Exception('Unknown tool: ' . $tool);
         }
@@ -471,7 +486,7 @@ do {
             // consistency: workflow already has checkpoint in params
         } elseif (in_array($tool, ['texture', 'texture_image', 'texture_ultra'], true)) {
             // texture: uses own checkpoint in workflow JSON, no IPAdapter/ControlNet
-        } elseif (in_array($tool, ['3d_fast', '3d_premium'], true)) {
+        } elseif (in_array($tool, ['3d_fast', '3d_premium', '3d_vertex'], true)) {
             // 3D: workflow has its own models
         } else {
             comfyui_apply_checkpoint($workflow, $model, $refinerEnabled, $overrideCkpt);
@@ -485,7 +500,7 @@ do {
                 $tmp = tempnam(sys_get_temp_dir(), 'knd_ctrl');
                 if (!$tmp || file_put_contents($tmp, $imgData) === false) throw new \RuntimeException('Could not save control image.');
                 try {
-                    $controlFilename = workerUploadToComfyui($tmp, $comfyBase, $comfyToken);
+                    $controlFilename = workerUploadToComfyui($tmp, $jobComfyBase, $comfyToken);
                 } finally {
                     @unlink($tmp);
                 }
@@ -496,7 +511,7 @@ do {
                 $tmp = tempnam(sys_get_temp_dir(), 'knd_ref');
                 if (!$tmp || file_put_contents($tmp, $imgData) === false) throw new \RuntimeException('Could not save reference image.');
                 try {
-                    $refFilename = workerUploadToComfyui($tmp, $comfyBase, $comfyToken);
+                    $refFilename = workerUploadToComfyui($tmp, $jobComfyBase, $comfyToken);
                 } finally {
                     @unlink($tmp);
                 }
@@ -504,7 +519,7 @@ do {
             if (!$controlFilename) {
                 $ph = workerCreatePlaceholderImage();
                 try {
-                    $controlFilename = workerUploadToComfyui($ph, $comfyBase, $comfyToken);
+                    $controlFilename = workerUploadToComfyui($ph, $jobComfyBase, $comfyToken);
                 } finally {
                     @unlink($ph);
                 }
@@ -512,7 +527,7 @@ do {
             if (!$refFilename) {
                 $ph = workerCreatePlaceholderImage();
                 try {
-                    $refFilename = workerUploadToComfyui($ph, $comfyBase, $comfyToken);
+                    $refFilename = workerUploadToComfyui($ph, $jobComfyBase, $comfyToken);
                 } finally {
                     @unlink($ph);
                 }
@@ -523,7 +538,7 @@ do {
         if (is_dir($debugDir) || @mkdir($debugDir, 0755, true)) {
             @file_put_contents($debugDir . '/last_workflow.json', json_encode($workflow, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         }
-        $result = comfyui_run_prompt($workflow, $comfyBase, $comfyToken);
+        $result = comfyui_run_prompt($workflow, $jobComfyBase, $comfyToken);
         $promptId = $result['prompt_id'];
     } catch (\Throwable $e) {
         $msg = $e->getMessage();
@@ -539,17 +554,18 @@ do {
         continue;
     }
 
-    logWorker("Job $jobId: ComfyUI prompt_id=$promptId, polling $comfyBase/history/...");
+    logWorker("Job $jobId: ComfyUI prompt_id=$promptId, polling $jobComfyBase/history/...");
     $maxPoll = 120;
     $pollInterval = 1;
     $imageUrl = null;
     $outputFilename = null;
     $outputSubfolder = '';
+    $outputType = 'output';
     $pollError = null;
     $lastHistDebug = null;
     for ($i = 0; $i < $maxPoll; $i++) {
         sleep($pollInterval);
-        $hist = comfyui_get_history_standalone($promptId, $comfyBase, $comfyToken);
+        $hist = comfyui_get_history_standalone($promptId, $jobComfyBase, $comfyToken);
         if (!$hist) continue;
         if (isset($hist['status']['status_str']) && $hist['status']['status_str'] === 'error') {
             $err = $hist['status']['messages'] ?? 'ComfyUI error';
@@ -558,14 +574,22 @@ do {
         }
         $outputs = $hist['outputs'] ?? [];
         if (!is_array($outputs)) $outputs = [];
+        $bucketOrder = ($tool === '3d_vertex')
+            ? ['meshes', 'mesh', 'files', 'glbs', 'images', 'gifs']
+            : ['images', 'gifs', 'meshes', 'mesh', 'files', 'glbs'];
         foreach ($outputs as $nodeOut) {
             if (!is_array($nodeOut)) continue;
-            foreach (['images', 'gifs'] as $key) {
+            foreach ($bucketOrder as $key) {
                 if (!isset($nodeOut[$key]) || !is_array($nodeOut[$key])) continue;
                 foreach ($nodeOut[$key] as $img) {
-                    if (!empty($img['filename'])) {
+                    if (is_array($img) && !empty($img['filename'])) {
+                        $candidate = (string) $img['filename'];
+                        if ($tool === '3d_vertex' && strtolower((string) pathinfo($candidate, PATHINFO_EXTENSION)) !== 'glb' && in_array($key, ['images', 'gifs'], true)) {
+                            continue;
+                        }
                         $outputFilename = $img['filename'];
                         $outputSubfolder = $img['subfolder'] ?? '';
+                        $outputType = $img['type'] ?? 'output';
                         $imageUrl = '/api/labs/image.php?job_id=' . $jobId;
                         break 4;
                     }
@@ -615,16 +639,23 @@ do {
             }
         }
         if ($imageBytes === null) {
-            $imageBytes = comfyui_fetch_output_image_bytes($promptId, $comfyBase, $comfyToken);
-            $imageSource = $imageSource ?: 'view:' . $comfyBase . '/view';
+            $imageBytes = workerFetchComfyOutputBytes($jobComfyBase, (string) $outputFilename, (string) $outputSubfolder, (string) $outputType, $comfyToken);
+            if ($imageBytes === null) {
+                $imageBytes = comfyui_fetch_output_image_bytes($promptId, $jobComfyBase, $comfyToken);
+            }
+            $imageSource = $imageSource ?: 'view:' . $jobComfyBase . '/view';
         }
     }
 
     if ($imageBytes !== null && $imageBytes !== '') {
-        $ext = 'png';
-        if (preg_match('/^\x89PNG/', $imageBytes)) $ext = 'png';
-        elseif (preg_match('/^\xff\xd8\xff/', $imageBytes)) $ext = 'jpg';
-        elseif (substr($imageBytes, 0, 4) === 'RIFF' && substr($imageBytes, 8, 4) === 'WEBP') $ext = 'webp';
+        $ext = strtolower((string) pathinfo((string) $outputFilename, PATHINFO_EXTENSION));
+        if ($ext === '') {
+            $ext = 'png';
+            if (preg_match('/^\x89PNG/', $imageBytes)) $ext = 'png';
+            elseif (preg_match('/^\xff\xd8\xff/', $imageBytes)) $ext = 'jpg';
+            elseif (substr($imageBytes, 0, 4) === 'RIFF' && substr($imageBytes, 8, 4) === 'WEBP') $ext = 'webp';
+            elseif (substr($imageBytes, 0, 4) === 'glTF') $ext = 'glb';
+        }
         $size = strlen($imageBytes);
         if ($size === 0) {
             logWorker("Job $jobId: image bytes empty, cannot save");
@@ -665,7 +696,7 @@ do {
         logWorker("Job $jobId failed: $pollError");
     } elseif ($imageUrl) {
         $pathForComplete = null;
-        if ($imageBytes !== null && $imageBytes !== '' && isset($ext)) {
+        if ($imageBytes !== null && $imageBytes !== '' && isset($ext) && in_array($ext, ['png', 'jpg', 'jpeg', 'webp'], true)) {
             $uploaded = workerUploadOutputImage($apiBase, $headers, $jobId, $tool, $imageBytes, $ext);
             if ($uploaded !== null) {
                 $pathForComplete = $uploaded;
@@ -681,6 +712,8 @@ do {
         ];
         if ($pathForComplete !== null) {
             $postData['output_path'] = str_replace('\\', '/', $pathForComplete);
+        } elseif ($outputPathRel !== null) {
+            $postData['output_path'] = str_replace('\\', '/', $outputPathRel);
         }
         $r = httpPost($apiBase . '/api/labs/queue/complete.php', $headers, $postData);
         if ($r['ok']) {

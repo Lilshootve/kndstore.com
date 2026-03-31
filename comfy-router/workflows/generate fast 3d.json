@@ -1,7 +1,7 @@
 {
   "12": {
     "inputs": {
-      "image": "Diseño sin título (6).png"
+      "image": "KND_AVATAR (1).png"
     },
     "class_type": "Hy3D21LoadImageWithTransparency",
     "_meta": {
@@ -10,10 +10,10 @@
   },
   "13": {
     "inputs": {
-      "model": "model.fp16 .ckpt",
+      "model": "Hunyuan3d-dit-v2-1.ckpt",
       "steps": 30,
       "guidance_scale": 5,
-      "seed": 491516054437577,
+      "seed": 754795910469634,
       "attention_mode": "sdpa",
       "image": [
         "12",
@@ -27,7 +27,7 @@
   },
   "14": {
     "inputs": {
-      "model_name": "model.fp16.ckpt"
+      "model_name": "hy2_1_vae.ckpt"
     },
     "class_type": "Hy3D21VAELoader",
     "_meta": {
@@ -99,6 +99,19 @@
     "class_type": "Hy3D21ExportMesh",
     "_meta": {
       "title": "Hunyuan 3D 2.1 Export Mesh"
+    }
+  },
+  "26": {
+    "inputs": {
+      "model_file": [
+        "23",
+        0
+      ],
+      "image": ""
+    },
+    "class_type": "Preview3D",
+    "_meta": {
+      "title": "Vista previa 3D"
     }
   }
 }

@@ -199,6 +199,7 @@ echo generateHeader($toolName . ' | KND Labs', 'Create optimized 3D models from 
         </div>
         <div id="l3d-result-actions" class="labs-result-actions-panel mt-4 px-3" style="display:none;">
           <a href="#" id="l3d-download" class="labs-action labs-action--primary" download><i class="fas fa-download"></i>Download GLB</a>
+          <a href="#" id="l3d-view-model" class="labs-action labs-action--primary"><i class="fas fa-cube"></i>View Model</a>
         </div>
         <div id="l3d-status-panel" class="mt-3 px-3" style="display:none;">
           <div class="d-flex align-items-center">

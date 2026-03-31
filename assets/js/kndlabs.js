@@ -19,6 +19,7 @@
   var API_CHARACTER_STATUS = '/api/character-lab/status.php';
   var API_CHARACTER_DOWNLOAD = '/api/character-lab/download.php';
   var BASE_URL = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+  var UI_STATES = ['idle', 'queued', 'processing', 'done', 'failed'];
 
   var KNDLabs = {
     config: {},
@@ -49,6 +50,7 @@
           self.bindRecentFilter();
           self.bindPrivateCheck();
           self.bindUseLastPrompt();
+          self.bindBackgroundMotion();
           self.updateCostLabel();
           self.updateBalanceAfter();
           self.updateSubmitButton();
@@ -85,7 +87,7 @@
     getCost: function() {
       var p = this.pricing;
       var key = this.config.pricingKey || 'text2img';
-      if (!p) return key === 'text2img' ? 3 : (key === 'upscale' ? 5 : 15);
+      if (!p) return key === 'text2img' ? 3 : (key === 'upscale' ? 5 : (key === '3d_vertex' ? 20 : 15));
       if (key === 'text2img') {
         var q = document.getElementById(this.config.qualitySelectId);
         var qual = q ? q.value : 'standard';
@@ -98,6 +100,11 @@
       }
       if (key === 'remove_bg') return (p.remove_bg && p.remove_bg.base) || 5;
       if (key === 'consistency') return (p.consistency && p.consistency.base) || 5;
+      if (key === '3d_vertex') {
+        var qv = document.getElementById('labs-vertex-quality');
+        var qualv = qv ? qv.value : 'standard';
+        return (p['3d_vertex'] && p['3d_vertex'][qualv]) || (qualv === 'high' ? 30 : 20);
+      }
       return (p.character && p.character.base) || 15;
     },
 
@@ -146,6 +153,8 @@
       if (actions) actions.style.display = 'none';
       if (errorEl) errorEl.style.display = 'none';
       if (text) text.textContent = 'Processing...';
+      this.setUiState('queued');
+      this.setPreviewState('processing');
       this.updateStepper('queued');
 
       var self = this;
@@ -154,6 +163,8 @@
         pollCount++;
         if (pollCount > POLL_MAX_COUNT) {
           self.stopPoll();
+          self.setUiState('failed');
+          self.setPreviewState('failed');
           if (panel) panel.style.display = 'none';
           if (errorEl) {
             errorEl.textContent = 'Taking too long. Ensure ComfyUI is running and config/comfyui.php has COMFYUI_BASE_URL set.';
@@ -171,6 +182,7 @@
             var stage = d.data.stage || st;
             self.updateStepper(stage);
             if (st === 'queued') {
+              self.setUiState('queued');
               var pos = d.data.queue_position;
               var eta = d.data.eta_seconds;
               msg = 'En cola';
@@ -181,12 +193,15 @@
                 msg += ' ~ETA ' + (m > 0 ? m + 'm ' : '') + s + 's';
               }
             } else if (st === 'processing') {
+              self.setUiState('processing');
               msg = 'Generando…';
             }
             if (text) text.textContent = msg;
 
             if (st === 'failed') {
               self.stopPoll();
+              self.setUiState('failed');
+              self.setPreviewState('failed');
               if (panel) panel.style.display = 'none';
               if (errorEl) {
                 errorEl.textContent = d.data.error_message || 'Failed';
@@ -196,6 +211,8 @@
             } else if (st === 'done' || st === 'completed') {
               self.stopPoll();
               if (panel) panel.style.display = 'none';
+              self.setUiState('done');
+              self.setPreviewState('done');
               self.updateStepper('done');
               var proxyPreview = API_IMAGE + '?job_id=' + encodeURIComponent(jobId);
               var proxyDownload = API_IMAGE + '?job_id=' + encodeURIComponent(jobId) + '&download=1';
@@ -203,22 +220,34 @@
               if (preview) {
                 var tool = self.config.jobType || 'text2img';
                 var mode = 'style';
-                preview.innerHTML = '<img src="' + proxyPreview + '" alt="Result" class="img-fluid rounded" style="max-height:400px;" data-job-id="' + jobId + '" data-job-tool="' + tool + '" data-job-mode="' + mode + '">';
+                if (tool === '3d_vertex') {
+                  preview.innerHTML = '<model-viewer src="' + proxyPreview + '" camera-controls auto-rotate exposure="0.9" style="width:100%;height:400px;background:#050816;border-radius:12px;"></model-viewer>';
+                } else {
+                  preview.innerHTML = '<img src="' + proxyPreview + '" alt="Result" class="img-fluid rounded" style="max-height:400px;" data-job-id="' + jobId + '" data-job-tool="' + tool + '" data-job-mode="' + mode + '">';
+                }
+                window.requestAnimationFrame(function() {
+                  preview.classList.add('labs-result-ready');
+                });
               }
               var dlBtn = document.getElementById('labs-download-btn');
               if (dlBtn) {
                 dlBtn.href = proxyDownload;
-                dlBtn.download = 'knd-labs-output.png';
+                dlBtn.download = (self.config.jobType === '3d_vertex') ? 'knd-labs-output.glb' : 'knd-labs-output.png';
               }
               var useBtn = document.getElementById('labs-use-input-btn');
               if (useBtn) useBtn.href = useInputUrl;
               var removeBgBtn = document.getElementById('labs-remove-bg-btn');
               if (removeBgBtn) removeBgBtn.href = '/labs?tool=remove-bg&source_job_id=' + encodeURIComponent(jobId);
               var send3dBtn = document.getElementById('labs-send-3d-btn');
-              if (send3dBtn) send3dBtn.href = '/labs?tool=3d&source_job_id=' + encodeURIComponent(jobId);
+              if (send3dBtn) send3dBtn.href = '/labs?tool=3d_vertex&source_job_id=' + encodeURIComponent(jobId);
+              var viewModelBtn = document.getElementById('labs-view-model-btn');
+              if (viewModelBtn && self.config.jobType === '3d_vertex') {
+                viewModelBtn.href = '/labs?tool=model_viewer&source_job_id=' + encodeURIComponent(jobId);
+              }
               if (actions) actions.style.display = 'block';
               if (d.data.available_after !== undefined) self.updateBalance(d.data.available_after);
               self.updateBalanceAfter();
+              self.refreshRecentLists();
               self.currentJobId = null;
               self.lastJobId = jobId;
               var imgEl = preview ? preview.querySelector('img[data-job-id]') : null;
@@ -247,11 +276,56 @@
       this.pollTimer = setInterval(poll, POLL_INTERVAL);
     },
 
+    refreshRecentLists: function() {
+      if (!window.LabsLazyHistory || typeof window.LabsLazyHistory.load !== 'function') return;
+      var tool = this.config.jobType || 'text2img';
+      var labels = {
+        'text2img': 'Canvas',
+        'upscale': 'Upscale',
+        'remove-bg': 'Remove Background',
+        'consistency': 'Consistency',
+        'texture': 'Texture Lab',
+        '3d_vertex': '3D Vertex',
+        'character': 'Character Lab'
+      };
+      var hasProviderFilter = tool === 'text2img';
+      window.LabsLazyHistory.load({
+        tool: tool,
+        limit: 5,
+        toolLabel: labels[tool] || 'Labs',
+        hasProviderFilter: hasProviderFilter
+      });
+    },
+
     stopPoll: function() {
       if (this.pollTimer) {
         clearInterval(this.pollTimer);
         this.pollTimer = null;
       }
+    },
+
+    setUiState: function(state) {
+      var app = document.getElementById('ln-app') || document.body;
+      if (!app) return;
+      UI_STATES.forEach(function(s) {
+        app.classList.remove('labs-ui-' + s);
+      });
+      if (UI_STATES.indexOf(state) >= 0) {
+        app.classList.add('labs-ui-' + state);
+      } else {
+        app.classList.add('labs-ui-idle');
+      }
+    },
+
+    setPreviewState: function(state) {
+      var preview = document.getElementById('labs-result-preview');
+      if (!preview) return;
+      UI_STATES.forEach(function(s) {
+        preview.classList.remove('is-' + s);
+      });
+      if (UI_STATES.indexOf(state) >= 0) preview.classList.add('is-' + state);
+      preview.classList.remove('labs-result-ready');
+      if (state === 'done') preview.classList.add('labs-result-ready');
     },
 
     updateStepper: function(stage) {
@@ -265,6 +339,9 @@
         dot.classList.toggle('active', i <= idx);
         dot.classList.toggle('current', s === stage);
       });
+      if (stage === 'queued') this.setUiState('queued');
+      else if (stage === 'picked' || stage === 'generating') this.setUiState('processing');
+      else if (stage === 'done') this.setUiState('done');
     },
 
     buildConsistencyFormData: function(formEl) {
@@ -314,6 +391,8 @@
 
       var self = this;
       var preview = document.getElementById('labs-result-preview');
+      this.setUiState('processing');
+      this.setPreviewState('processing');
       if (preview) {
         preview.innerHTML = '<div class="labs-processing-anim">' +
           '<div class="labs-processing-rings">' +
@@ -381,7 +460,7 @@
         e.stopPropagation();
         var prompt = form.querySelector('[name="prompt"]');
         var textureMode = form.querySelector('[name="texture_mode"]') ? form.querySelector('[name="texture_mode"]').value : 'text';
-        var skipPromptCheck = self.config.jobType === 'upscale' || self.config.jobType === 'remove-bg' || (self.config.jobType === 'texture' && textureMode === 'image');
+        var skipPromptCheck = self.config.jobType === 'upscale' || self.config.jobType === 'remove-bg' || self.config.jobType === '3d_vertex' || (self.config.jobType === 'texture' && textureMode === 'image');
         if (prompt && !skipPromptCheck) {
           if (!prompt.value || prompt.value.trim().length === 0) {
             if (typeof kndToast !== 'undefined') kndToast('Prompt is required', 'error');
@@ -390,7 +469,7 @@
           }
         }
         var imageInput = form.querySelector('[name="image"]');
-        if (imageInput && (self.config.jobType === 'upscale' || self.config.jobType === 'remove-bg')) {
+        if (imageInput && (self.config.jobType === 'upscale' || self.config.jobType === 'remove-bg' || self.config.jobType === '3d_vertex')) {
           if (!imageInput.files || !imageInput.files.length) {
             if (typeof kndToast !== 'undefined') kndToast('Image is required', 'error');
             else alert('Image is required');
@@ -513,7 +592,7 @@
 
     bindPromptValidation: function() {
       var self = this;
-      if (self.config.jobType === 'upscale') return;
+      if (self.config.jobType === 'upscale' || self.config.jobType === 'remove-bg' || self.config.jobType === '3d_vertex') return;
       var prompt = document.getElementById('labs-prompt-input') || document.querySelector('[name="prompt"]');
       var hint = document.getElementById('labs-prompt-hint');
       function check() {
@@ -546,7 +625,7 @@
       var form = document.getElementById(this.config.formId || 'labs-comfy-form');
       if (!form) return;
       var btn = form.querySelector('[type="submit"]') || document.getElementById('generateBtn') || document.getElementById('labs-submit-btn');
-      if (this.config.jobType === 'upscale' || this.config.jobType === 'remove-bg') {
+      if (this.config.jobType === 'upscale' || this.config.jobType === 'remove-bg' || this.config.jobType === '3d_vertex') {
         var img = form.querySelector('[name="image"]');
         var hasFile = img && img.files && img.files.length > 0;
         if (btn) btn.disabled = !hasFile;
@@ -659,7 +738,13 @@
       }
       function openDrawer(title) {
         if (drawerTitle && title) drawerTitle.textContent = title;
-        if (drawer) drawer.classList.add('is-open');
+        if (drawer) {
+          drawer.classList.add('is-open');
+          drawer.classList.add('is-animating-in');
+          window.setTimeout(function() {
+            drawer.classList.remove('is-animating-in');
+          }, 260);
+        }
         if (backdrop) backdrop.classList.add('is-visible');
       }
 
@@ -692,7 +777,7 @@
         var jid = String(jobId || '');
         var tool = String(toolType || '').toLowerCase();
         if (!jid) return;
-        body.innerHTML = '<div class="labs-job-viewer-loading"><i class="fas fa-spinner fa-spin fa-2x text-white-50"></i><p class="text-white-50 small mt-2 mb-0">Loading job…</p></div>';
+        self.setDrawerBodyLoading(body, true);
         if (self._drawer) self._drawer.classList.add('is-open');
         if (self._backdrop) self._backdrop.classList.add('is-visible');
         self._setDrawerTitle('View details');
@@ -700,36 +785,39 @@
           fetch(API_3D_STATUS + '?id=' + encodeURIComponent(jid), { credentials: 'same-origin' })
             .then(function(r) { return r.json(); })
             .then(function(d) {
-              if (!d.ok || !d.data) { body.innerHTML = '<p class="text-white-50">Job not found.</p>'; return; }
+              if (!d.ok || !d.data) { self.setDrawerBodyLoading(body, false, '<p class="text-white-50">Job not found.</p>'); return; }
               self.render3dJobInDrawer(body, d.data, jid, closeDrawer);
               self._setDrawerTitle('3D Lab');
             })
-            .catch(function() { body.innerHTML = '<p class="text-danger small">Could not load job.</p>'; });
+            .catch(function() { self.setDrawerBodyLoading(body, false, '<p class="text-danger small">Could not load job.</p>'); });
           return;
         }
         if (isCharacterJob(jid, tool)) {
           fetch(API_CHARACTER_STATUS + '?id=' + encodeURIComponent(jid), { credentials: 'same-origin' })
             .then(function(r) { return r.json(); })
             .then(function(d) {
-              if (!d.ok || !d.data) { body.innerHTML = '<p class="text-white-50">Job not found.</p>'; return; }
+              if (!d.ok || !d.data) { self.setDrawerBodyLoading(body, false, '<p class="text-white-50">Job not found.</p>'); return; }
               self.renderCharacterJobInDrawer(body, d.data, jid, closeDrawer);
               self._setDrawerTitle('Character Lab');
             })
-            .catch(function() { body.innerHTML = '<p class="text-danger small">Could not load job.</p>'; });
+            .catch(function() { self.setDrawerBodyLoading(body, false, '<p class="text-danger small">Could not load job.</p>'); });
           return;
         }
         fetch(API_JOB + '?job_id=' + encodeURIComponent(jid), { credentials: 'same-origin' })
           .then(function(r) { return r.json(); })
           .then(function(d) {
-            if (!d.ok || !d.data) { body.innerHTML = '<p class="text-white-50">Job not found.</p>'; return; }
+            if (!d.ok || !d.data) { self.setDrawerBodyLoading(body, false, '<p class="text-white-50">Job not found.</p>'); return; }
             self.renderComfyJobInDrawer(body, d.data, jid, closeDrawer);
-            var toolLabel = (d.data.tool === 'text2img' ? 'Text2Img' : d.data.tool === 'upscale' ? 'Upscale' : d.data.tool === 'remove-bg' ? 'Remove Background' : d.data.tool === 'consistency' ? 'Consistency' : d.data.tool === 'texture' || d.data.tool === 'texture_seamless' ? 'Texture Lab' : d.data.tool || 'Job');
+            var toolLabel = (d.data.tool === 'text2img' ? 'Text2Img' : d.data.tool === 'upscale' ? 'Upscale' : d.data.tool === 'remove-bg' ? 'Remove Background' : d.data.tool === 'consistency' ? 'Consistency' : d.data.tool === 'texture' || d.data.tool === 'texture_seamless' ? 'Texture Lab' : d.data.tool === '3d_vertex' ? '3D Vertex' : d.data.tool || 'Job');
             self._setDrawerTitle(toolLabel);
           })
-          .catch(function() { body.innerHTML = '<p class="text-danger small">Could not load job.</p>'; });
+          .catch(function() { self.setDrawerBodyLoading(body, false, '<p class="text-danger small">Could not load job.</p>'); });
       };
 
       document.addEventListener('click', function(e) {
+        if (e.target.closest('#site-header') || e.target.closest('.knd-nav-offcanvas')) {
+          return;
+        }
         var btn = e.target.closest('.labs-view-details') || e.target.closest('.ln-job-card');
         if (!btn) return;
         e.preventDefault();
@@ -740,46 +828,62 @@
 
         var body = document.getElementById('labs-details-body');
         if (!body) return;
-        body.innerHTML = '<div class="labs-job-viewer-loading"><i class="fas fa-spinner fa-spin fa-2x text-white-50"></i><p class="text-white-50 small mt-2 mb-0">Loading job…</p></div>';
+        self.setDrawerBodyLoading(body, true);
         openDrawer(typeof window !== 'undefined' && window.t ? window.t('labs.view_details', 'View details') : 'View details');
 
         if (is3dJob(jid, tool)) {
           fetch(API_3D_STATUS + '?id=' + encodeURIComponent(jid), { credentials: 'same-origin' })
             .then(function(r) { return r.json(); })
             .then(function(d) {
-              if (!d.ok || !d.data) { body.innerHTML = '<p class="text-white-50">Job not found.</p>'; return; }
+              if (!d.ok || !d.data) { self.setDrawerBodyLoading(body, false, '<p class="text-white-50">Job not found.</p>'); return; }
               self.render3dJobInDrawer(body, d.data, jid, closeDrawer);
               openDrawer('3D Lab');
             })
-            .catch(function() { body.innerHTML = '<p class="text-danger small">Could not load job.</p>'; });
+            .catch(function() { self.setDrawerBodyLoading(body, false, '<p class="text-danger small">Could not load job.</p>'); });
           return;
         }
         if (isCharacterJob(jid, tool)) {
           fetch(API_CHARACTER_STATUS + '?id=' + encodeURIComponent(jid), { credentials: 'same-origin' })
             .then(function(r) { return r.json(); })
             .then(function(d) {
-              if (!d.ok || !d.data) { body.innerHTML = '<p class="text-white-50">Job not found.</p>'; return; }
+              if (!d.ok || !d.data) { self.setDrawerBodyLoading(body, false, '<p class="text-white-50">Job not found.</p>'); return; }
               self.renderCharacterJobInDrawer(body, d.data, jid, closeDrawer);
               openDrawer('Character Lab');
             })
-            .catch(function() { body.innerHTML = '<p class="text-danger small">Could not load job.</p>'; });
+            .catch(function() { self.setDrawerBodyLoading(body, false, '<p class="text-danger small">Could not load job.</p>'); });
           return;
         }
 
         fetch(API_JOB + '?job_id=' + encodeURIComponent(jid), { credentials: 'same-origin' })
           .then(function(r) { return r.json(); })
           .then(function(d) {
-            if (!d.ok || !d.data) { body.innerHTML = '<p class="text-white-50">Job not found.</p>'; return; }
+            if (!d.ok || !d.data) { self.setDrawerBodyLoading(body, false, '<p class="text-white-50">Job not found.</p>'); return; }
             self.renderComfyJobInDrawer(body, d.data, jid, closeDrawer);
-            var toolLabel = (d.data.tool === 'text2img' ? 'Text2Img' : d.data.tool === 'upscale' ? 'Upscale' : d.data.tool === 'remove-bg' ? 'Remove Background' : d.data.tool === 'consistency' ? 'Consistency' : d.data.tool === 'texture' || d.data.tool === 'texture_seamless' ? 'Texture Lab' : d.data.tool || 'Job');
+            var toolLabel = (d.data.tool === 'text2img' ? 'Text2Img' : d.data.tool === 'upscale' ? 'Upscale' : d.data.tool === 'remove-bg' ? 'Remove Background' : d.data.tool === 'consistency' ? 'Consistency' : d.data.tool === 'texture' || d.data.tool === 'texture_seamless' ? 'Texture Lab' : d.data.tool === '3d_vertex' ? '3D Vertex' : d.data.tool || 'Job');
             openDrawer(toolLabel);
           })
-          .catch(function() { body.innerHTML = '<p class="text-danger small">Could not load job.</p>'; });
+          .catch(function() { self.setDrawerBodyLoading(body, false, '<p class="text-danger small">Could not load job.</p>'); });
       });
+    },
+
+    setDrawerBodyLoading: function(bodyEl, isLoading, fallbackHtml) {
+      if (!bodyEl) return;
+      bodyEl.classList.toggle('is-loading', !!isLoading);
+      if (isLoading) {
+        bodyEl.innerHTML = '' +
+          '<div class="labs-job-viewer-loading labs-job-viewer-loading--skeleton">' +
+            '<div class="labs-loading-skeleton labs-loading-skeleton--media"></div>' +
+            '<div class="labs-loading-skeleton labs-loading-skeleton--line"></div>' +
+            '<div class="labs-loading-skeleton labs-loading-skeleton--line short"></div>' +
+          '</div>';
+      } else if (fallbackHtml) {
+        bodyEl.innerHTML = fallbackHtml;
+      }
     },
 
     renderCharacterJobInDrawer: function(body, J, jid, closeDrawer) {
       var self = this;
+      if (body) body.classList.remove('is-loading');
       var previewUrl = (J.preview_url && J.preview_url.indexOf('/') === 0) ? (BASE_URL + J.preview_url) : J.preview_url;
       var conceptUrl = (J.concept_url && J.concept_url.indexOf('/') === 0) ? (BASE_URL + J.concept_url) : J.concept_url;
       var glbUrl = J.has_glb ? (BASE_URL + API_CHARACTER_DOWNLOAD + '?id=' + encodeURIComponent(jid) + '&format=glb') : null;
@@ -815,6 +919,7 @@
 
     render3dJobInDrawer: function(body, J, jid, closeDrawer) {
       var self = this;
+      if (body) body.classList.remove('is-loading');
       var previewUrl = (J.preview_url && J.preview_url.indexOf('/') === 0) ? (BASE_URL + J.preview_url) : J.preview_url;
       var glbUrl = (J.glb_url && J.glb_url.indexOf('/') === 0) ? (BASE_URL + J.glb_url) : J.glb_url;
       var hasGlb = !!J.has_glb && !!glbUrl;
@@ -885,14 +990,18 @@
 
     renderComfyJobInDrawer: function(body, J, jid, closeDrawer) {
       var self = this;
+      if (body) body.classList.remove('is-loading');
       var imgUrl = J.image_url || (API_IMAGE + '?job_id=' + encodeURIComponent(jid));
+      var isGlb = !!(J.output_path && /\.glb$/i.test(J.output_path));
       var imgUrlEsc = imgUrl.replace(/"/g, '&quot;');
       var sizeStr = (J.width && J.height) ? J.width + '\u00D7' + J.height : '';
-      var toolLabel = (J.tool === 'text2img' ? 'Text2Img' : J.tool === 'upscale' ? 'Upscale' : J.tool === 'remove-bg' ? 'Remove Background' : J.tool === 'consistency' ? 'Consistency' : J.tool === 'texture' || J.tool === 'texture_seamless' ? 'Texture Lab' : J.tool || '—');
+      var toolLabel = (J.tool === 'text2img' ? 'Text2Img' : J.tool === 'upscale' ? 'Upscale' : J.tool === 'remove-bg' ? 'Remove Background' : J.tool === 'consistency' ? 'Consistency' : J.tool === 'texture' || J.tool === 'texture_seamless' ? 'Texture Lab' : J.tool === '3d_vertex' ? '3D Vertex' : J.tool || '—');
 
       var html = '';
       html += '<div class="labs-job-viewer-preview knd-details-preview">';
-      if (J.status === 'done' && imgUrl) {
+      if (J.status === 'done' && imgUrl && isGlb) {
+        html += '<model-viewer src="' + imgUrlEsc + '" camera-controls auto-rotate style="width:100%;height:100%;min-height:220px;background:#050816;"></model-viewer>';
+      } else if (J.status === 'done' && imgUrl) {
         html += '<img src="' + imgUrlEsc + '" alt="Result" class="labs-job-viewer-img">';
       } else {
         html += '<div class="d-flex align-items-center justify-content-center text-white-50" style="min-height:220px;"><i class="fas fa-image fa-3x opacity-50"></i><span class="ms-2">' + (J.status || 'No preview') + '</span></div>';
@@ -935,13 +1044,16 @@
       }
       if (J.status === 'done' && J.tool === 'remove-bg') {
         html += '<a href="/labs?tool=upscale&source_job_id=' + encodeURIComponent(jid) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-search-plus me-1"></i>Send to Upscale</a>';
-        html += '<a href="/labs?tool=3d&source_job_id=' + encodeURIComponent(jid) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-cube me-1"></i>Send to 3D Lab</a>';
+        html += '<a href="/labs?tool=3d_vertex&source_job_id=' + encodeURIComponent(jid) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-cube me-1"></i>Send to 3D Vertex</a>';
       }
       if (J.status === 'done' && J.tool === 'upscale') {
         html += '<a href="/labs?tool=upscale&source_job_id=' + encodeURIComponent(jid) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-search-plus me-1"></i>Use as input</a>';
       }
       if (J.status === 'done') {
         html += '<a href="' + imgUrlEsc + '" class="btn btn-sm knd-btn-secondary" download><i class="fas fa-download me-1"></i>Download</a>';
+        if (J.tool === '3d_vertex' && isGlb) {
+          html += '<a href="/labs?tool=model_viewer&source_job_id=' + encodeURIComponent(jid) + '" class="btn btn-sm knd-btn-secondary"><i class="fas fa-cube me-1"></i>View in Model Viewer</a>';
+        }
       }
       if (J.tool === 'text2img' || J.tool === 'consistency' || J.tool === 'texture') {
         html += '<button type="button" class="btn btn-sm knd-btn-secondary labs-details-reuse" data-job-id="' + self.esc(jid) + '"><i class="fas fa-copy me-1"></i>Reuse Settings</button>';
@@ -1095,6 +1207,56 @@
         }
         self.submitForm(form);
       });
+    },
+
+    bindBackgroundMotion: function() {
+      var app = document.getElementById('ln-app');
+      if (!app || app.dataset.bgMotionBound === '1') return;
+      var shouldReduce = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (shouldReduce) return;
+
+      app.dataset.bgMotionBound = '1';
+
+      var pointerX = 0;
+      var pointerY = 0;
+      var scrollY = 0;
+      var ticking = false;
+
+      function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+      function paint() {
+        ticking = false;
+        var x = clamp(pointerX, -18, 18);
+        var y = clamp(pointerY + (scrollY * -0.04), -20, 20);
+        app.style.setProperty('--ln-bg-shift-x', x.toFixed(2) + 'px');
+        app.style.setProperty('--ln-bg-shift-y', y.toFixed(2) + 'px');
+      }
+      function requestPaint() {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(paint);
+      }
+
+      window.addEventListener('pointermove', function(e) {
+        var cx = window.innerWidth / 2;
+        var cy = window.innerHeight / 2;
+        pointerX = (e.clientX - cx) / 45;
+        pointerY = (e.clientY - cy) / 45;
+        requestPaint();
+      }, { passive: true });
+
+      window.addEventListener('scroll', function() {
+        scrollY = window.scrollY || window.pageYOffset || 0;
+        requestPaint();
+      }, { passive: true });
+
+      window.addEventListener('mouseleave', function() {
+        pointerX = 0;
+        pointerY = 0;
+        requestPaint();
+      }, { passive: true });
+
+      app.classList.add('ln-bg-motion-ready');
+      requestPaint();
     }
   };
 

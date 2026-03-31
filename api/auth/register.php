@@ -61,20 +61,34 @@ try {
     $verifyCode = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
     $codeExpires = gmdate('Y-m-d H:i:s', strtotime('+15 minutes'));
 
-    $stmt = $pdo->prepare(
-        'INSERT INTO users (username, email, password_hash, email_verified, email_verify_code, email_verify_expires, created_at, updated_at)
-         VALUES (?, ?, ?, 0, ?, ?, ?, ?)'
-    );
-    $stmt->execute([
-        $username,
-        strtolower($email),
-        $hash,
-        $verifyCode,
-        $codeExpires,
-        $now,
-        $now,
-    ]);
-    $userId = (int) $pdo->lastInsertId();
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare(
+            'INSERT INTO users (username, email, password_hash, email_verified, email_verify_code, email_verify_expires, created_at, updated_at)
+             VALUES (?, ?, ?, 0, ?, ?, ?, ?)'
+        );
+        $stmt->execute([
+            $username,
+            strtolower($email),
+            $hash,
+            $verifyCode,
+            $codeExpires,
+            $now,
+            $now,
+        ]);
+        $userId = (int) $pdo->lastInsertId();
+
+        $expiresAt = gmdate('Y-m-d H:i:s', strtotime('+12 months'));
+        $pdo->prepare(
+            "INSERT INTO points_ledger (user_id, source_type, source_id, entry_type, status, points, available_at, expires_at, created_at)
+             VALUES (?, 'adjustment', 0, 'earn', 'available', ?, ?, ?, ?)"
+        )->execute([$userId, WELCOME_BONUS_KP, $now, $expiresAt, $now]);
+
+        $pdo->commit();
+    } catch (\Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
 
     auth_login($userId, $username);
 
@@ -87,10 +101,11 @@ try {
     }
 
     json_success([
-        'user_id'        => $userId,
-        'username'       => $username,
-        'email_pending'  => true,
-        'mail_sent'      => $mailSent,
+        'user_id'         => $userId,
+        'username'        => $username,
+        'email_pending'   => true,
+        'mail_sent'       => $mailSent,
+        'welcome_bonus_kp' => WELCOME_BONUS_KP,
     ]);
 } catch (\Throwable $e) {
     error_log('register error: ' . $e->getMessage());

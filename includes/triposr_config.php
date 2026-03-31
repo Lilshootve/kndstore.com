@@ -3,26 +3,19 @@
  * InstantMesh 3D configuration loader.
  * Endpoints remain /api/triposr/* for backward compatibility.
  *
- * Preferred constants: INSTANTMESH_API_URL, INSTANTMESH_CALLBACK_SECRET.
- * Fallback: TRIPOSR_API_URL, TRIPOSR_CALLBACK_SECRET (legacy).
+ * Reads strict values from .env:
+ * INSTANTMESH_API_URL and INSTANTMESH_CALLBACK_SECRET.
  *
  * Add to includes/config.php:
  *   require_once __DIR__ . '/triposr_config.php';
  */
+require_once __DIR__ . '/env.php';
 
-if (!defined('INSTANTMESH_API_URL') && !defined('TRIPOSR_API_URL')) {
-    $secrets = __DIR__ . '/../config/triposr_secrets.local.php';
-    if (file_exists($secrets)) {
-        require_once $secrets;
-    }
-}
-
-// INSTANTMESH_* preferred; fallback to TRIPOSR_* for backward compatibility
 if (!defined('INSTANTMESH_API_URL')) {
-    define('INSTANTMESH_API_URL', defined('TRIPOSR_API_URL') ? TRIPOSR_API_URL : '');
+    define('INSTANTMESH_API_URL', knd_env_required('INSTANTMESH_API_URL'));
 }
 if (!defined('INSTANTMESH_CALLBACK_SECRET')) {
-    define('INSTANTMESH_CALLBACK_SECRET', defined('TRIPOSR_CALLBACK_SECRET') ? TRIPOSR_CALLBACK_SECRET : '');
+    define('INSTANTMESH_CALLBACK_SECRET', knd_env_required('INSTANTMESH_CALLBACK_SECRET'));
 }
 if (!defined('TRIPOSR_API_URL')) {
     define('TRIPOSR_API_URL', INSTANTMESH_API_URL);

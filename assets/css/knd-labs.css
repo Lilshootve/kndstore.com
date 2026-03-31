@@ -349,10 +349,14 @@
     overflow-y: auto;
     transform: translateX(100%);
     transition: transform 0.3s ease;
+    /* z-index above topbar; when closed, must not steal header/clicks */
+    pointer-events: none;
 }
 
 .knd-details-drawer.is-open {
     transform: translateX(0);
+    pointer-events: auto;
+    z-index: 10100;
 }
 
 .knd-details-drawer__backdrop {
@@ -368,6 +372,23 @@
 .knd-details-drawer__backdrop.is-visible {
     opacity: 1;
     pointer-events: auto;
+    z-index: 10090;
+}
+
+/*
+ * Drawer (1050) sits above default topbar (1020). Use a high z-index on Labs so the bar + account
+ * menu stay above fixed layers (hub hero, job drawer, knd-ui .knd-dropdown-menu { z-index:1050 !important }).
+ */
+body.knd-labs-next .topbar.site-header,
+body.ln-page .topbar.site-header,
+body.labs-hub-page .topbar.site-header {
+    z-index: 10050 !important;
+}
+
+body.knd-labs-next .topbar .knd-dropdown-menu.open,
+body.ln-page .topbar .knd-dropdown-menu.open,
+body.labs-hub-page .topbar .knd-dropdown-menu.open {
+    z-index: 10200 !important;
 }
 
 .knd-details-drawer__header {
@@ -653,6 +674,14 @@
     isolation: isolate;
 }
 
+/* Hub (/labs/index.php): section has full-viewport fixed layers — let clicks pass except on content */
+body.labs-hub-page .labs-hub-hero {
+    pointer-events: none;
+}
+body.labs-hub-page .labs-hub-hero > .container {
+    pointer-events: auto;
+}
+
 .labs-tool-section::before,
 .labs-hub-hero::before {
     content: '';
@@ -741,4 +770,122 @@
 .arena-hero > .container {
     position: relative;
     z-index: 2;
+}
+
+/* ========================================
+   Labs state-driven motion layer
+   ======================================== */
+#labs-result-preview {
+    transition: transform 220ms ease, opacity 220ms ease, box-shadow 260ms ease;
+    will-change: transform, opacity;
+}
+
+#labs-result-preview.is-processing {
+    opacity: 0.98;
+}
+
+#labs-result-preview.is-failed {
+    animation: labs-preview-shake 240ms ease;
+}
+
+#labs-result-preview.labs-result-ready img,
+#labs-result-preview.labs-result-ready model-viewer {
+    animation: labs-result-reveal 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.labs-stepper-dot {
+    transform: scale(1);
+    transition: background 0.24s ease, box-shadow 0.24s ease, transform 0.2s ease;
+}
+
+.labs-stepper-dot.active {
+    transform: scale(1.05);
+}
+
+.labs-stepper-dot.current {
+    animation: labs-stepper-pulse 1.1s ease-in-out infinite;
+}
+
+.labs-ui-processing .labs-processing-label {
+    letter-spacing: 0.12em;
+}
+
+.labs-ui-done #labs-result-actions,
+.labs-ui-done .labs-result-actions-panel {
+    animation: labs-result-actions-in 240ms ease-out;
+}
+
+.knd-details-drawer.is-open.is-animating-in {
+    animation: labs-drawer-in 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.knd-details-drawer__body.is-loading {
+    min-height: 240px;
+}
+
+.labs-job-viewer-loading--skeleton {
+    align-items: stretch;
+    gap: 0.75rem;
+}
+
+.labs-loading-skeleton {
+    border-radius: 10px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.13) 37%, rgba(255, 255, 255, 0.04) 63%);
+    background-size: 220% 100%;
+    animation: labs-skeleton-shimmer 1.1s linear infinite;
+}
+
+.labs-loading-skeleton--media {
+    width: 100%;
+    min-height: 170px;
+}
+
+.labs-loading-skeleton--line {
+    width: 100%;
+    height: 16px;
+}
+
+.labs-loading-skeleton--line.short {
+    width: 62%;
+}
+
+@keyframes labs-result-reveal {
+    from { opacity: 0; transform: scale(0.985) translateY(4px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes labs-stepper-pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 8px #00d4ff; }
+    50% { transform: scale(1.2); box-shadow: 0 0 14px #00d4ff; }
+}
+
+@keyframes labs-result-actions-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes labs-skeleton-shimmer {
+    from { background-position: 180% 0; }
+    to { background-position: -35% 0; }
+}
+
+@keyframes labs-drawer-in {
+    from { transform: translateX(100%); opacity: 0.85; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes labs-preview-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #labs-result-preview,
+    .labs-stepper-dot,
+    .labs-loading-skeleton,
+    .knd-details-drawer.is-open.is-animating-in {
+        animation: none !important;
+        transition: none !important;
+    }
 }

@@ -51,7 +51,7 @@ try {
         SELECT ai.id, ai.name, ai.asset_path
         FROM knd_user_avatar_inventory inv
         INNER JOIN knd_avatar_items ai ON ai.id = inv.item_id
-        WHERE inv.user_id = ? AND inv.item_id = ?
+        WHERE inv.user_id = ? AND inv.item_id = ? AND ai.is_active = 1
         LIMIT 1
     ");
     $stmt->execute([$userId, $itemId]);

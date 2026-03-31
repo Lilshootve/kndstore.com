@@ -26,6 +26,10 @@ $pricing = [
     'remove_bg' => [
         'base' => 5,
     ],
+    '3d_vertex' => [
+        'standard' => 20,
+        'high' => 30,
+    ],
 ];
 
 json_success($pricing);

@@ -49,8 +49,10 @@
 
 # Headers de seguridad
 <IfModule mod_headers.c>
-    # Viewer page needs wasm-unsafe-eval for model-viewer (Three.js/meshopt)
+    # Pages that run Three.js + meshopt WASM (model-viewer, hologram lab, squad arena GLB)
     SetEnvIf Request_URI "^/viewer/" KND_VIEWER_PAGE
+    SetEnvIf Request_URI "^/tools/hologram-lab/" KND_VIEWER_PAGE
+    SetEnvIf Request_URI "^/squad-arena-v2/" KND_VIEWER_PAGE
 
     # Protección XSS
     Header always set X-XSS-Protection "1; mode=block"
@@ -70,10 +72,10 @@
     # HSTS (HTTP Strict Transport Security)
     Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
     
-    # Content Security Policy: viewer needs wasm-unsafe-eval for GLB loader
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://code.jquery.com https://www.paypal.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net data:; img-src 'self' data: https: https://www.paypalobjects.com; frame-src 'self' https://www.paypal.com https://www.sandbox.paypal.com; connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com https://www.paypal.com https://www.paypalobjects.com https://api-m.paypal.com;" env=KND_VIEWER_PAGE
+    # Content Security Policy: viewer needs wasm-unsafe-eval + unpkg for Three.js/GLB
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://code.jquery.com https://www.paypal.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https: https://www.paypalobjects.com; media-src 'self' data: blob:; frame-src 'self' https://www.paypal.com https://www.sandbox.paypal.com; connect-src 'self' blob: https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com https://www.paypal.com https://www.paypalobjects.com https://api-m.paypal.com;" env=KND_VIEWER_PAGE
     # Content Security Policy (rest of site, includes PayPal LIVE)
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://code.jquery.com https://www.paypal.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net data:; img-src 'self' data: https: https://www.paypalobjects.com; frame-src 'self' https://www.paypal.com https://www.sandbox.paypal.com; connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com https://www.paypal.com https://www.paypalobjects.com https://api-m.paypal.com;" env=!KND_VIEWER_PAGE
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' blob: https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://code.jquery.com https://www.paypal.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net data:; img-src 'self' data: blob: https: https://www.paypalobjects.com; media-src 'self' data: blob:; frame-src 'self' https://www.paypal.com https://www.sandbox.paypal.com; connect-src 'self' blob: https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com https://www.paypal.com https://www.paypalobjects.com https://api-m.paypal.com;" env=!KND_VIEWER_PAGE
     
     # Service Worker Scope
     <Files "sw.js">
@@ -113,8 +115,16 @@
     # KND Arena friendly URL
     RewriteRule ^arena/?$ /knd-arena.php [L]
 
-    # KND Drop Chamber friendly URL
-    RewriteRule ^drop/?$ /knd-drop.php [L]
+    # Legacy Mind Wars Squad Arena (v1) -> v2
+    # Keep v2 as the only implementation; legacy routes now just redirect.
+    RewriteRule ^squad-arena/mind-wars-select\.php$ /squad-arena-v2/squad-selector.php [R=301,L]
+    RewriteRule ^squad-arena/squad-arena\.php$ /squad-arena-v2/squad-selector.php [R=301,L]
+    RewriteRule ^squad-arena/battle-launcher\.php$ /squad-arena-v2/squad-selector.php [R=301,L]
+    RewriteRule ^squad-arena/battle-result\.php$ /squad-arena-v2/squad-selector.php [R=301,L]
+    RewriteRule ^squad-arena/.*$ /squad-arena-v2/squad-selector.php [R=301,L]
+
+    # KND Drop (Neural Link — current drop; knd-drop.php is legacy)
+    RewriteRule ^drop/?$ /games/knd-neural-link/drops.php [L]
 
     # KND LastRoll friendly URLs
     RewriteRule ^lastroll/?$ /death-roll-lobby.php [L]
@@ -149,6 +159,10 @@
     RewriteRule ^labs/3d-lab/?$ /labs-3d-lab.php [L]
     RewriteRule ^labs/jobs\.php$ /labs-jobs.php [L]
     RewriteRule ^labs/job\.php$ /labs-job.php [L]
+
+    # Hologram viewer (unified)
+    RewriteRule ^hologram-viewer\.html$ /tools/hologram-lab/index.html [L,R=301]
+    RewriteRule ^hologram-lab/?$ /tools/hologram-lab/index.html [L]
 </IfModule>
 
 # Configuración de compresión adicional
@@ -197,6 +211,7 @@ ErrorDocument 500 /500.html
     AddType application/javascript .js
     AddType text/css .css
     AddType image/svg+xml .svg
+    AddType model/gltf-binary .glb
     AddType application/font-woff .woff
     AddType application/font-woff2 .woff2
     AddType application/x-font-ttf .ttf

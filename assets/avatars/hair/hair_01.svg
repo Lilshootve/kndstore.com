@@ -1,4 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <path d="M34 27c3-9 11-14 16-14s13 5 16 14c-3-2-6-3-9-3 2 2 3 5 3 7-4-3-10-5-16-5s-12 2-16 5c0-2 1-5 3-7-3 0-6 1-9 3z" fill="var(--av-primary,#6d4cff)" stroke="#9aa4b2" stroke-width="1.2" stroke-linejoin="round"></path>
-  <path d="M38 24c4-5 7-7 12-7s8 2 12 7" fill="none" stroke="var(--av-accent,#19d3ff)" stroke-width="1.1" stroke-linecap="round" opacity=".55"></path>
-</svg>

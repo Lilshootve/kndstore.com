@@ -1,7 +1,7 @@
 <?php
 /**
  * GET /api/labs/image.php?job_id=XXX[&download=1]
- * Serves image via proxy (avoids CORS). download=1 forces attachment.
+ * Serves job output via proxy (image/model). download=1 forces attachment.
  */
 header('Cache-Control: no-store, no-cache');
 ini_set('display_errors', '0');
@@ -41,7 +41,7 @@ try {
     if (!$job) json_error('JOB_NOT_FOUND', 'Job not found.', 404);
 
     if (($job['status'] ?? '') !== 'done') {
-        json_error('NO_IMAGE', 'Image not ready.', 409);
+        json_error('NO_OUTPUT', 'Output not ready.', 409);
     }
 
     $outputPath = $job['output_path'] ?? '';
@@ -54,12 +54,17 @@ try {
             $size = filesize($fullPath);
             if ($size > 0) {
                 $download = isset($_GET['download']) && $_GET['download'] !== '0' && $_GET['download'] !== '';
-                $ct = 'image/png';
-                if (preg_match('/\.(jpg|jpeg|webp)$/i', $outputPath)) $ct = preg_match('/webp$/i', $outputPath) ? 'image/webp' : 'image/jpeg';
+                $ext = strtolower((string) pathinfo($outputPath, PATHINFO_EXTENSION));
+                $ct = 'application/octet-stream';
+                if ($ext === 'png') $ct = 'image/png';
+                elseif ($ext === 'jpg' || $ext === 'jpeg') $ct = 'image/jpeg';
+                elseif ($ext === 'webp') $ct = 'image/webp';
+                elseif ($ext === 'glb') $ct = 'model/gltf-binary';
+                elseif ($ext === 'obj') $ct = 'text/plain';
                 header('Content-Type: ' . $ct);
                 header('Content-Length: ' . $size);
                 header('X-Content-Type-Options: nosniff');
-                header('Content-Disposition: ' . ($download ? 'attachment' : 'inline') . '; filename="knd_labs_' . $jobId . '.png"');
+                header('Content-Disposition: ' . ($download ? 'attachment' : 'inline') . '; filename="knd_labs_' . $jobId . ($ext ? ('.' . $ext) : '') . '"');
                 readfile($fullPath);
                 exit;
             }
@@ -73,16 +78,16 @@ try {
     if ($tool !== '' && defined('KND_FINAL_IMAGE_DIR') && KND_FINAL_IMAGE_DIR !== '') {
         $fallbackDir = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, KND_FINAL_IMAGE_DIR), DIRECTORY_SEPARATOR);
         $baseName = 'job_' . $jobId . '_' . $tool . '.';
-        foreach (['png', 'jpg', 'jpeg', 'webp'] as $ext) {
+        foreach (['png', 'jpg', 'jpeg', 'webp', 'glb'] as $ext) {
             $path = $fallbackDir . DIRECTORY_SEPARATOR . $baseName . $ext;
             if (is_file($path) && is_readable($path) && filesize($path) > 0) {
                 $size = filesize($path);
-                $ct = $ext === 'webp' ? 'image/webp' : ($ext === 'png' ? 'image/png' : 'image/jpeg');
+                $ct = $ext === 'webp' ? 'image/webp' : ($ext === 'png' ? 'image/png' : ($ext === 'glb' ? 'model/gltf-binary' : 'image/jpeg'));
                 $download = isset($_GET['download']) && $_GET['download'] !== '0' && $_GET['download'] !== '';
                 header('Content-Type: ' . $ct);
                 header('Content-Length: ' . (string) $size);
                 header('X-Content-Type-Options: nosniff');
-                header('Content-Disposition: ' . ($download ? 'attachment' : 'inline') . '; filename="knd_labs_' . $jobId . '.png"');
+                header('Content-Disposition: ' . ($download ? 'attachment' : 'inline') . '; filename="knd_labs_' . $jobId . '.' . $ext . '"');
                 readfile($path);
                 exit;
             }
@@ -90,7 +95,7 @@ try {
     }
 
     $promptId = $job['comfy_prompt_id'] ?? '';
-    if (!$promptId) json_error('NO_IMAGE', 'No ComfyUI prompt for this job.', 409);
+    if (!$promptId) json_error('NO_OUTPUT', 'No ComfyUI prompt for this job.', 409);
 
     $baseUrl = null;
     $provider = $job['provider'] ?? null;
@@ -102,31 +107,38 @@ try {
     if (!$baseUrl) $baseUrl = comfyui_get_base_url($pdo, null);
     $token = comfyui_get_token($pdo);
 
-    $history = comfyui_get_history($promptId, $baseUrl, $token);
+    $historyRaw = comfyui_get_history($promptId, $baseUrl, $token);
+    $history = $historyRaw;
+    // Some ComfyUI deployments wrap history as: { "<promptId>": { ... } }
+    if (is_array($historyRaw) && isset($historyRaw[$promptId]) && is_array($historyRaw[$promptId])) {
+        $history = $historyRaw[$promptId];
+    }
     $filename = null;
     $subfolder = '';
     $imgType = 'output';
     if (is_array($history['outputs'] ?? null)) {
         foreach ($history['outputs'] as $nodeOutputs) {
-            if (isset($nodeOutputs['images']) && is_array($nodeOutputs['images'])) {
-                foreach ($nodeOutputs['images'] as $img) {
+            if (!is_array($nodeOutputs)) continue;
+            foreach (['images', 'gifs', 'meshes', 'mesh', 'files', 'glbs'] as $bucket) {
+                if (!isset($nodeOutputs[$bucket]) || !is_array($nodeOutputs[$bucket])) continue;
+                foreach ($nodeOutputs[$bucket] as $img) {
                     if (!empty($img['filename'])) {
                         $filename = $img['filename'];
                         $subfolder = $img['subfolder'] ?? '';
                         $imgType = $img['type'] ?? 'output';
-                        break 2;
+                        break 3;
                     }
                 }
             }
         }
     }
-    if (!$filename) json_error('FETCH_FAILED', 'Could not resolve image from ComfyUI history.', 502);
+    if (!$filename) json_error('FETCH_FAILED', 'Could not resolve output from ComfyUI history.', 502);
 
     $params = ['filename' => $filename, 'type' => $imgType];
     if ($subfolder !== '') $params['subfolder'] = $subfolder;
     $imageUrl = rtrim($baseUrl, '/') . '/view?' . http_build_query($params);
 
-    $headers = ['Accept: image/*'];
+    $headers = ['Accept: */*'];
     if ($token !== '') $headers[] = 'X-KND-TOKEN: ' . $token;
 
     $ch = curl_init($imageUrl);
@@ -144,16 +156,17 @@ try {
     curl_close($ch);
 
     if ($bin === false || $code < 200 || $code >= 300) {
-        json_error('FETCH_FAILED', 'Could not fetch image from ComfyUI.', 502);
+        json_error('FETCH_FAILED', 'Could not fetch output from ComfyUI.', 502);
     }
 
     $download = isset($_GET['download']) && $_GET['download'] !== '0' && $_GET['download'] !== '';
-    $filename = 'knd_labs_' . $jobId . '.png';
+    $ext = strtolower((string) pathinfo($filename, PATHINFO_EXTENSION));
+    $downloadName = 'knd_labs_' . $jobId . ($ext ? ('.' . $ext) : '');
 
-    header('Content-Type: ' . ($ct ?: 'image/png'));
+    header('Content-Type: ' . ($ct ?: 'application/octet-stream'));
     header('Content-Length: ' . strlen($bin));
     header('X-Content-Type-Options: nosniff');
-    header('Content-Disposition: ' . ($download ? 'attachment' : 'inline') . '; filename="' . $filename . '"');
+    header('Content-Disposition: ' . ($download ? 'attachment' : 'inline') . '; filename="' . $downloadName . '"');
 
     echo $bin;
     exit;

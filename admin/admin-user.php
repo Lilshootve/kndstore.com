@@ -218,9 +218,10 @@ if ($isCreate) {
     admin_require_perm('admin_users.create');
     require_once __DIR__ . '/../includes/header.php';
     echo generateHeader('Create Admin', 'Create new admin user');
+    echo generateAdminBar();
     ?>
     <style>
-    .au-dash { --cyan: #00d4ff; min-height:100vh; background:#0a0a0f; color:#e8ecf0; padding-top:100px; padding-bottom:60px; }
+    .au-dash { --cyan: var(--c, #00e8ff); min-height:100vh; background: var(--void, #010508); color:#e8ecf0; padding-top:24px; padding-bottom:60px; }
     .au-card { background:rgba(12,15,22,.85); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:1.5rem; max-width:420px; }
     .au-topbar { margin-bottom:1.5rem; }
     </style>
@@ -286,9 +287,10 @@ $canReset = admin_has_perm('admin_users.reset_password');
 
 require_once __DIR__ . '/../includes/header.php';
 echo generateHeader('Admin: ' . htmlspecialchars($admin['username']), 'Admin user detail');
+echo generateAdminBar();
 ?>
 <style>
-.au-dash { --cyan: #00d4ff; min-height:100vh; background:#0a0a0f; color:#e8ecf0; padding-top:100px; padding-bottom:60px; }
+.au-dash { --cyan: var(--c, #00e8ff); min-height:100vh; background: var(--void, #010508); color:#e8ecf0; padding-top:24px; padding-bottom:60px; }
 .au-card { background:rgba(12,15,22,.85); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; }
 .au-topbar { margin-bottom:1.5rem; }
 </style>

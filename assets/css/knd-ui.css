@@ -23,6 +23,19 @@
   --knd-radius: 12px;
   --knd-radius-sm: 8px;
   --knd-shadow: 0 0 24px rgba(53, 194, 255, 0.15);
+  --knd-btn-primary-start: rgba(90, 229, 255, 0.94);
+  --knd-btn-primary-mid: rgba(112, 160, 255, 0.92);
+  --knd-btn-primary-end: rgba(139, 92, 255, 0.9);
+  --knd-btn-primary-border: rgba(181, 227, 255, 0.48);
+  --knd-btn-primary-text: #f5fbff;
+  --knd-btn-primary-shadow:
+    0 14px 34px rgba(5, 16, 38, 0.66),
+    0 0 0 1px rgba(120, 206, 255, 0.22),
+    0 0 30px rgba(88, 166, 255, 0.28);
+  --knd-btn-primary-shadow-hover:
+    0 18px 42px rgba(5, 16, 38, 0.76),
+    0 0 0 1px rgba(150, 222, 255, 0.42),
+    0 0 44px rgba(110, 176, 255, 0.4);
   --knd-spacing: 1rem;
   --knd-transition: 0.2s ease;
 }
@@ -223,7 +236,7 @@ body {
 
 /* === Hero sections === */
 /* Solo aplicar gradiente por defecto; excluir las que tienen imagen de fondo propia */
-.hero-section:not(.hero-home-bg):not(.hero-catalog-bg):not(.hero-apparel-bg):not(.hero-contact-bg):not(.about-hero-bg):not(.hero-custom-design-bg):not(.arena-hero) {
+.hero-section:not(.hero-home-bg):not(.hero-catalog-bg):not(.hero-apparel-bg):not(.hero-contact-bg):not(.about-hero-bg):not(.hero-custom-design-bg):not(.arena-hero):not(.knd-profile-neural-page) {
   background: linear-gradient(180deg, rgba(11, 25, 45, 0.6) 0%, transparent 60%) !important;
 }
 
@@ -246,21 +259,22 @@ body {
 /* === Botones: minimal sci-fi (global) === */
 .btn-neon-primary,
 .btn-primary {
-  background: rgba(53, 194, 255, 0.12) !important;
-  border: 1px solid rgba(53, 194, 255, 0.5) !important;
-  color: var(--knd-accent-soft) !important;
+  background: rgba(12, 22, 36, 0.82) !important;
+  border: 1px solid rgba(130, 214, 241, 0.55) !important;
+  color: #d8f6ff !important;
   font-weight: 500 !important;
   letter-spacing: 0.04em !important;
   box-shadow: none !important;
+  background-image: none !important;
   transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease !important;
 }
 
 .btn-neon-primary:hover,
 .btn-primary:hover {
-  background: rgba(53, 194, 255, 0.18) !important;
-  border-color: var(--knd-accent) !important;
+  background: rgba(17, 34, 52, 0.9) !important;
+  border-color: rgba(136, 226, 255, 0.9) !important;
   color: #fff !important;
-  box-shadow: 0 0 20px rgba(53, 194, 255, 0.15) !important;
+  box-shadow: 0 0 20px rgba(53, 194, 255, 0.2) !important;
 }
 
 .btn-outline-neon {
@@ -358,20 +372,49 @@ body {
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
   font-weight: 600;
-  color: #fff;
-  background: linear-gradient(135deg, var(--knd-accent) 0%, var(--knd-violet) 100%);
-  border: none;
-  border-radius: 10px;
+  letter-spacing: 0.04em;
+  color: var(--knd-btn-primary-text);
+  background:
+    radial-gradient(circle at 18% -20%, rgba(255, 255, 255, 0.58), transparent 46%),
+    linear-gradient(135deg, var(--knd-btn-primary-start) 0%, var(--knd-btn-primary-mid) 52%, var(--knd-btn-primary-end) 100%);
+  border: 1px solid var(--knd-btn-primary-border);
+  border-radius: 12px;
   cursor: pointer;
   text-decoration: none;
-  box-shadow: var(--knd-shadow);
-  transition: all var(--knd-transition);
+  box-shadow: var(--knd-btn-primary-shadow);
+  text-shadow: 0 1px 2px rgba(6, 12, 30, 0.4);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  transition:
+    transform var(--knd-transition),
+    box-shadow var(--knd-transition),
+    border-color var(--knd-transition),
+    filter var(--knd-transition);
 }
 
 .knd-btn-primary:hover {
-  opacity: 0.95;
   transform: translateY(-2px);
-  color: #fff;
+  color: var(--knd-btn-primary-text);
+  border-color: rgba(201, 238, 255, 0.62);
+  filter: saturate(1.08) brightness(1.04);
+  box-shadow: var(--knd-btn-primary-shadow-hover);
+}
+
+.knd-btn-primary:focus-visible {
+  outline: none;
+  color: var(--knd-btn-primary-text);
+  box-shadow:
+    var(--knd-btn-primary-shadow-hover),
+    0 0 0 3px rgba(214, 243, 255, 0.26);
+}
+
+.knd-btn-primary:active {
+  transform: translateY(0);
+  filter: saturate(0.98) brightness(0.98);
+  box-shadow:
+    0 10px 24px rgba(5, 16, 38, 0.62),
+    0 0 0 1px rgba(120, 206, 255, 0.3),
+    0 0 22px rgba(88, 166, 255, 0.26);
 }
 
 .knd-btn-secondary {

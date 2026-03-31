@@ -113,9 +113,10 @@ try {
 
 require_once __DIR__ . '/../includes/header.php';
 echo generateHeader('User Management', 'Admin user management');
+echo generateAdminBar();
 ?>
 <style>
-.au-dash { --cyan: #00d4ff; min-height:100vh; background:#0a0a0f; color:#e8ecf0; padding-top:100px; padding-bottom:60px; }
+.au-dash { --cyan: var(--c, #00e8ff); min-height:100vh; background: var(--void, #010508); color:#e8ecf0; padding-top:24px; padding-bottom:60px; }
 .au-card { background:rgba(12,15,22,.85); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:1.25rem; }
 .au-topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem; }
 .au-topbar h1 { font-size:1.5rem; font-weight:700; margin:0; }

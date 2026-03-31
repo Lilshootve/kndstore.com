@@ -224,6 +224,7 @@ if ($selectedUserId > 0) {
 
 require_once __DIR__ . '/../includes/header.php';
 echo generateHeader('KND Points Wallet Inspector', 'Admin wallet inspector');
+echo generateAdminBar();
 ?>
 <style>
 .wi-dash { --cyan: #00d4ff; min-height:100vh; background:#0a0a0f; color:#e8ecf0; padding-top:100px; padding-bottom:60px; }

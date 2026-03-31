@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../../includes/env.php';
+
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
@@ -110,43 +112,22 @@ if (empty($messages)) {
     json_error(400, 'No valid messages.');
 }
 
-// ── Load secrets ──
-
-$secretsPath = __DIR__ . '/../../config/openai_secrets.local.php';
-$resolvedPath = realpath($secretsPath) ?: $secretsPath;
-
-if (!file_exists($secretsPath)) {
-    support_log('config_error', [
-        'type' => 'missing_secrets',
-        'expected' => $secretsPath,
-        'resolved' => $resolvedPath,
-        '__DIR__' => __DIR__,
-    ]);
-    json_error(500, 'Support AI configuration error.', [
-        'error_type' => 'missing_secrets',
-        'expected_path' => $secretsPath,
-        'resolved_path' => $resolvedPath,
-        '__DIR__' => __DIR__,
-        'file_exists' => false,
-    ]);
-}
-
-$secrets = require $secretsPath;
-if (!is_array($secrets)) {
-    support_log('config_error', ['type' => 'secrets_not_array', 'path' => $resolvedPath]);
-    json_error(500, 'Support AI configuration error.', [
-        'error_type' => 'secrets_not_array',
-        'path' => $resolvedPath,
-    ]);
-}
-
-$apiKey = trim($secrets['api_key'] ?? '');
-if ($apiKey === '') {
-    support_log('config_error', ['type' => 'missing_api_key', 'path' => $resolvedPath]);
+// ── Load API key strictly from .env ──
+try {
+    $apiKey = trim(knd_env_required('OPENAI_API_KEY'));
+} catch (Throwable $e) {
+    support_log('config_error', ['type' => 'missing_api_key', 'error' => $e->getMessage()]);
     json_error(500, 'Support AI configuration error.', [
         'error_type' => 'missing_api_key',
-        'path' => $resolvedPath,
-        'keys_found' => array_keys($secrets),
+        'source' => 'OPENAI_API_KEY',
+    ]);
+}
+
+if ($apiKey === '') {
+    support_log('config_error', ['type' => 'missing_api_key']);
+    json_error(500, 'Support AI configuration error.', [
+        'error_type' => 'missing_api_key',
+        'source' => 'OPENAI_API_KEY',
     ]);
 }
 

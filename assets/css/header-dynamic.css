@@ -4,14 +4,9 @@
  * Compatible con Bootstrap navbar. Sin librerías externas.
  */
 
-/* Altura del header para offset del contenido (navbar min-height en knd-ui = 80px) */
+/* Altura del header para offset del contenido (topbar concept ≈ 56px) */
 :root {
-  --knd-header-height: 80px;
-}
-@media (max-width: 991.98px) {
-  :root {
-    --knd-header-height: 80px;
-  }
+  --knd-header-height: 56px;
 }
 
 /* -------------------------------------------------------------------------
@@ -37,27 +32,21 @@ body {
 }
 
 /* -------------------------------------------------------------------------
-   Estado inicial: en el hero (top de la página)
-   Semi transparente + backdrop blur, minimalista
+   Estado inicial y scrolled (legacy navbar only — not knd-skin topbar)
    ------------------------------------------------------------------------- */
-.site-header:not(.header-scrolled) {
-  background: rgba(6, 10, 18, 0.4) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 1px 0 0 rgba(103, 213, 255, 0.06);
+body:not(.knd-skin) .site-header:not(.header-scrolled),
+body:not(.knd-skin) .site-header.header-scrolled {
+  background: linear-gradient(to bottom, rgba(3, 8, 24, 0.96), rgba(3, 8, 24, 0.92)) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(0, 229, 255, 0.25) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9) !important;
 }
 
-/* -------------------------------------------------------------------------
-   Estado scrolled: usuario ha bajado (ej. > 80px)
-   Fondo más sólido, blur sutil, sombra/glow para sensación estable
-   ------------------------------------------------------------------------- */
-.site-header.header-scrolled {
-  background: rgba(6, 10, 18, 0.88) !important;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow:
-    0 1px 0 0 rgba(103, 213, 255, 0.1),
-    0 4px 24px rgba(0, 0, 0, 0.35);
+body.knd-skin .site-header.header-scrolled {
+  background: rgba(1, 5, 8, 0.95) !important;
+  border-bottom-color: rgba(0, 232, 255, 0.12) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.65) !important;
 }
 
 /* -------------------------------------------------------------------------
@@ -68,3 +57,14 @@ body {
 }
 
 /* particles-bg y primer bloque quedan ya desplazados por body padding-top */
+
+/* Logo brand: logo.png + hexagon SVG */
+.knd-logo-brand {
+  gap: 0.25rem;
+}
+.knd-logo-hex {
+  width: 24px;
+  height: 24px;
+  color: #00e5ff;
+  flex-shrink: 0;
+}

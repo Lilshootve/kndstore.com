@@ -34,6 +34,7 @@ $extraCss = '<link rel="stylesheet" href="/assets/css/ai-tools.css?v=' . (file_e
 $extraCss .= '<link rel="stylesheet" href="/assets/css/knd-labs.css?v=' . (file_exists($labsCss) ? filemtime($labsCss) : time()) . '">';
 echo generateHeader(t('labs.meta.title', 'KND Labs | KND Store'), t('labs.meta.desc', 'AI-powered asset creation'), $extraCss);
 ?>
+<script>document.body.classList.add('labs-hub-page');</script>
 <div id="particles-bg"></div>
 <?php echo generateNavigation(); ?>
 
@@ -130,5 +131,4 @@ echo generateHeader(t('labs.meta.title', 'KND Labs | KND Store'), t('labs.meta.d
   </div>
 </section>
 
-<script src="/assets/js/navigation-extend.js"></script>
 <?php echo generateFooter(); echo generateScripts(); ?>

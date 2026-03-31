@@ -1,3 +1,0 @@
--- Seed first owner account
--- Generate hash: php -r "echo password_hash('your_password', PASSWORD_DEFAULT);"
--- Or use: php admin/seed_owner.php admin YourPassword

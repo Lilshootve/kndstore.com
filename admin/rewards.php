@@ -92,13 +92,14 @@ if ($editId > 0) {
     <title>Admin - Rewards Catalog</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/admin.css">
     <style>
         body { background: #0a0f1e; color: #e0e0e0; }
         .card { background: rgba(15,20,40,0.95); border: 1px solid rgba(37,156,174,0.2); }
         .table { color: #e0e0e0; }
     </style>
 </head>
-<body>
+<body class="admin-page">
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1><i class="fas fa-gift me-2"></i>Rewards Catalog</h1>

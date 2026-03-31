@@ -8,8 +8,6 @@ require_once __DIR__ . '/includes/session.php';
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/csrf.php';
-require_once __DIR__ . '/includes/header.php';
-require_once __DIR__ . '/includes/footer.php';
 require_once __DIR__ . '/includes/support_credits.php';
 
 require_login();
@@ -38,140 +36,176 @@ try {
     error_log('above-under page error: ' . $e->getMessage());
 }
 
-$seoTitle = t('au.page_title', 'KND Insight') . ' | KND Arena';
-$seoDesc  = t('au.page_desc', 'KND Insight — predict if the number is above or under, and win KND Points. A next-gen prediction game in KND Arena.');
-$ogHead   = '    <meta property="og:title" content="' . htmlspecialchars($seoTitle) . '">' . "\n";
-$ogHead  .= '    <meta property="og:description" content="' . htmlspecialchars($seoDesc) . '">' . "\n";
-$ogHead  .= '    <meta property="og:type" content="website">' . "\n";
-$ogHead  .= '    <meta name="twitter:card" content="summary_large_image">' . "\n";
-echo generateHeader($seoTitle, $seoDesc, $ogHead);
-?>
+$au_entry_options = [
+    ['v' => 10, 'label' => '10'],
+    ['v' => 25, 'label' => '25'],
+    ['v' => 50, 'label' => '50'],
+    ['v' => 100, 'label' => '100'],
+    ['v' => 200, 'label' => '200'],
+    ['v' => 500, 'label' => '500'],
+    ['v' => 1000, 'label' => '1K'],
+    ['v' => 2500, 'label' => '2.5K'],
+    ['v' => 5000, 'label' => '5K'],
+];
 
-<div id="particles-bg"></div>
+$seoTitle = t('au.page_title', 'KND Insight') . ' | KND Games';
+$seoDesc  = t('au.page_desc', 'KND Insight — predict if the number is above or under, and win KND Points.');
 
-<?php echo generateNavigation(); ?>
+$embed = isset($_GET['embed']) && $_GET['embed'] === '1';
 
-<section class="hero-section" style="min-height:100vh; padding-top:110px; padding-bottom:60px;">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-7 col-lg-6">
+/* Lobby payload (Mind Wars shell — same as Knowledge Duel) */
+$L = [
+    'user' => ['username' => '', 'level' => 1, 'xp_fill_pct' => 0],
+    'currencies' => ['knd_points_available' => 0, 'fragments_total' => 0],
+    'season' => [],
+    'ranking' => [],
+    'selected_avatar' => null,
+    'hero_image_url' => null,
+    'missions' => [],
+    'avatars' => [],
+    'notifications' => ['unread_count' => 0],
+    'online_hint' => 0,
+];
+if (!$embed) {
+    require_once __DIR__ . '/includes/mw_lobby.php';
+    $pdoL = getDBConnection();
+    $uidL = (int) current_user_id();
+    if ($pdoL && $uidL > 0) {
+        try {
+            $L = mw_build_lobby_data_payload($pdoL, $uidL);
+        } catch (\Throwable $e) {
+            error_log('above-under lobby payload: ' . $e->getMessage());
+        }
+    }
+}
 
-        <!-- Header -->
-        <div class="text-center mb-4">
-          <span class="badge bg-warning text-dark fw-bold px-3 py-1 mb-2" style="font-size:.75rem;">BETA</span>
-          <h1 class="glow-text mb-2" style="font-size:2.2rem;">
-            <i class="fas fa-eye me-2"></i><?php echo t('au.title', 'KND Insight'); ?>
-          </h1>
-          <p class="text-white-50 mb-0"><?php echo t('au.subtitle', 'Pick a side. Roll the number. 1–5 = Under, 6–10 = Above.'); ?></p>
-        </div>
+$auArenaCss = __DIR__ . '/assets/css/knd-insight-arena.css';
+$insightLobbyCss = __DIR__ . '/assets/css/insight-lobby.css';
+$lobbyCss = __DIR__ . '/games/mind-wars/lobby.css';
+$mwCardCss = __DIR__ . '/games/mind-wars/mw-avatar-cards.css';
+$levelsCss = __DIR__ . '/assets/css/levels.css';
+$vArena = file_exists($auArenaCss) ? filemtime($auArenaCss) : 0;
+$vLobbyShell = file_exists($insightLobbyCss) ? filemtime($insightLobbyCss) : 0;
+$vLo = file_exists($lobbyCss) ? filemtime($lobbyCss) : 0;
+$vMw = file_exists($mwCardCss) ? filemtime($mwCardCss) : 0;
+$vL = file_exists($levelsCss) ? filemtime($levelsCss) : 0;
+$mwCardJs = __DIR__ . '/games/mind-wars/mw-avatar-card.js';
+$kdShellJs = __DIR__ . '/games/mind-wars/kd-lobby-shell.js';
+$vMwJ = file_exists($mwCardJs) ? filemtime($mwCardJs) : 0;
+$vKs = file_exists($kdShellJs) ? filemtime($kdShellJs) : 0;
 
-        <!-- Balance Card -->
-        <div class="glass-card-neon p-3 mb-4 text-center">
-          <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
-            <div>
-              <span class="text-white-50 small"><?php echo t('au.your_balance', 'Your KND Points'); ?></span><br>
-              <span id="au-balance" style="font-size:1.8rem; font-weight:900; font-family:'Orbitron',monospace; color:var(--knd-neon-blue, #00d4ff);"><?php echo number_format($balance); ?></span>
-              <span class="text-white-50 small">KP</span>
-            </div>
-            <div style="border-left:1px solid rgba(255,255,255,.1); padding-left:16px;">
-              <label class="text-white-50 small d-block mb-1"><?php echo t('au.entry_label', 'Entry'); ?></label>
-              <select id="au-entry-select" class="form-select form-select-sm" style="width:auto; display:inline-block; background:#111; color:#fff; border-color:rgba(0,212,255,.3); font-weight:700; min-width:110px;">
-                <option value="10">10 KP</option>
-                <option value="25">25 KP</option>
-                <option value="50">50 KP</option>
-                <option value="100">100 KP</option>
-                <option value="200" selected>200 KP</option>
-                <option value="500">500 KP</option>
-                <option value="1000">1,000 KP</option>
-                <option value="2500">2,500 KP</option>
-                <option value="5000">5,000 KP</option>
-              </select>
-              <div class="mt-1">
-                <span class="text-white-50 small"><?php echo t('au.win_payout', 'Win'); ?>: </span>
-                <strong id="au-payout-preview" style="color:#4ade80;">340 KP</strong>
-              </div>
-            </div>
-          </div>
-        </div>
+$gamePartial = __DIR__ . '/games/knd-insight/partials/game_board.php';
 
-        <!-- SVG HUD Dice -->
-        <div class="text-center mb-4">
-          <div id="au-dice-wrap" class="dr-hud-card" style="display:inline-flex;">
-            <svg id="au-dice-svg" width="120" height="120" viewBox="0 0 120 120" aria-label="dice">
-              <rect x="14" y="14" width="92" height="92" rx="18" class="dr-dice-plate"/>
-              <rect x="20" y="20" width="80" height="80" rx="14" class="dr-dice-glow"/>
-              <text id="au-dice-num" x="60" y="72" text-anchor="middle" class="dr-dice-text">&mdash;</text>
-              <circle cx="40" cy="40" r="3" class="dr-dice-pip"/>
-              <circle cx="80" cy="60" r="3" class="dr-dice-pip"/>
-              <circle cx="40" cy="80" r="3" class="dr-dice-pip"/>
-            </svg>
-            <div id="au-dice-status" class="dr-dice-status">Ready</div>
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="d-flex gap-3 justify-content-center mb-3">
-          <button id="btn-under" class="btn btn-lg au-btn-choice au-btn-under">
-            <i class="fas fa-arrow-down me-2"></i>UNDER<br><span class="small fw-normal" style="opacity:.6;">1 – 5</span>
-          </button>
-          <button id="btn-above" class="btn btn-lg au-btn-choice au-btn-above">
-            <i class="fas fa-arrow-up me-2"></i>ABOVE<br><span class="small fw-normal" style="opacity:.6;">6 – 10</span>
-          </button>
-        </div>
-
-        <!-- Result Banner -->
-        <div id="au-result-banner" class="mb-4" style="display:none;"></div>
-
-        <!-- History -->
-        <div class="glass-card-neon p-3">
-          <h5 class="mb-3"><i class="fas fa-history me-2"></i><?php echo t('au.history', 'Recent Rolls'); ?></h5>
-          <div class="table-responsive">
-            <table class="table table-sm table-dark mb-0" style="--bs-table-bg:transparent;">
-              <thead><tr>
-                <th><?php echo t('au.choice_col', 'Choice'); ?></th>
-                <th><?php echo t('au.rolled_col', 'Rolled'); ?></th>
-                <th><?php echo t('au.result_col', 'Result'); ?></th>
-                <th>KP</th>
-                <th>XP</th>
-              </tr></thead>
-              <tbody id="au-history-body">
-                <?php foreach ($history as $h): ?>
-                <tr>
-                  <td><?php echo strtoupper($h['choice']); ?></td>
-                  <td style="font-family:Orbitron,monospace;font-weight:700;"><?php echo (int)$h['rolled_value']; ?></td>
-                  <td><?php echo (int)$h['is_win']
-                        ? '<span class="badge bg-success">WIN</span>'
-                        : '<span class="badge bg-danger">LOSE</span>'; ?></td>
-                  <td><?php echo (int)$h['is_win'] ? '+' . (int)$h['payout_points'] : '−' . (int)$h['entry_points']; ?> KP</td>
-                  <td>+<?php echo (int)$h['xp_awarded']; ?> XP</td>
-                </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
-          </div>
-          <?php if (empty($history)): ?>
-          <p class="text-white-50 text-center small mt-2 mb-0"><?php echo t('au.no_history', 'No rolls yet. Make your first prediction!'); ?></p>
-          <?php endif; ?>
-        </div>
-
-        <!-- Back link -->
-        <div class="text-center mt-4">
-          <a href="/knd-arena.php" class="text-white-50 small" style="text-decoration:underline;">
-            <i class="fas fa-arrow-left me-1"></i><?php echo t('arena.back', 'Back to Arena'); ?>
-          </a>
-        </div>
-
-      </div>
+if ($embed) {
+    header('Content-Type: text/html; charset=utf-8');
+    $ogHead = '';
+    $ogHead .= '<link rel="stylesheet" href="/assets/css/knd-insight-arena.css?v=' . $vArena . '">' . "\n";
+    ?>
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?php echo htmlspecialchars($seoTitle); ?></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?v=<?php echo @filemtime(__DIR__ . '/assets/css/style.css'); ?>">
+    <link rel="stylesheet" href="/assets/css/knd-ui.css?v=<?php echo file_exists(__DIR__ . '/assets/css/knd-ui.css') ? filemtime(__DIR__ . '/assets/css/knd-ui.css') : 0; ?>">
+    <link rel="stylesheet" href="/assets/css/knd-insight-arena.css?v=<?php echo $vArena; ?>">
+    <link rel="stylesheet" href="/assets/css/arena-embed.css?v=<?php echo file_exists(__DIR__ . '/assets/css/arena-embed.css') ? filemtime(__DIR__ . '/assets/css/arena-embed.css') : 0; ?>">
+</head>
+<body class="arena-embed insight-context insight-page">
+<div class="arena-embed-inner">
+<div class="insight-page">
+<section class="hero-section" style="min-height:100vh; padding-top:12px; padding-bottom:32px;">
+  <div class="container-fluid px-2 px-md-3">
+    <div class="text-center mb-2">
+      <span class="badge rounded-pill mb-2" style="font-size:0.7rem;letter-spacing:0.1em;background:rgba(139,92,246,.2);border:1px solid rgba(139,92,246,.35);color:#c4b5fd;">BETA</span>
+      <p class="text-white-50 small mb-3 mb-md-4"><?php echo t('au.subtitle', 'Pick a side. Roll the number. 1–5 = Under, 6–10 = Above.'); ?></p>
     </div>
+<?php
+    require $gamePartial;
+?>
   </div>
 </section>
-
+</div>
 <script src="/assets/js/navigation-extend.js"></script>
-<?php echo generateFooter(); ?>
+<script>var AU_CSRF = <?php echo json_encode($csrfToken); ?>;</script>
+<script src="/assets/js/above-under.js?v=<?php echo @filemtime(__DIR__ . '/assets/js/above-under.js'); ?>"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</div></body></html>
+<?php
+    exit;
+}
 
+require_once __DIR__ . '/includes/favicon_links.php';
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><?php echo htmlspecialchars($seoTitle, ENT_QUOTES, 'UTF-8'); ?></title>
+<meta name="description" content="<?php echo htmlspecialchars($seoDesc, ENT_QUOTES, 'UTF-8'); ?>">
+<?php echo generateFaviconLinks(); ?>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/assets/css/levels.css?v=<?php echo (int) $vL; ?>">
+<link rel="stylesheet" href="/games/mind-wars/lobby.css?v=<?php echo (int) $vLo; ?>">
+<link rel="stylesheet" href="/games/mind-wars/mw-avatar-cards.css?v=<?php echo (int) $vMw; ?>">
+<link rel="stylesheet" href="/assets/css/knd-insight-arena.css?v=<?php echo (int) $vArena; ?>">
+<link rel="stylesheet" href="/assets/css/insight-lobby.css?v=<?php echo (int) $vLobbyShell; ?>">
+</head>
+<body>
+<div id="toast-container"></div>
+<div id="loading-screen">
+  <div class="ls-logo"><?php echo htmlspecialchars(t('au.loading_logo', 'KND INSIGHT'), ENT_QUOTES, 'UTF-8'); ?></div>
+  <div class="ls-sub">KND Games</div>
+  <div class="ls-bar-wrap">
+    <div class="ls-bar"><div class="ls-fill" id="ls-fill"></div></div>
+    <div class="ls-msg" id="ls-msg">LOADING…</div>
+  </div>
+</div>
+<div id="bg-layer">
+  <canvas id="star-canvas"></canvas>
+  <div class="horizon"></div>
+  <div class="persp-floor"></div>
+</div>
+<div class="lobby-shell">
+<?php require __DIR__ . '/games/mind-wars/lobby-partials/topbar.php'; ?>
+<div class="lobby-content">
+<?php require __DIR__ . '/games/mind-wars/lobby-partials/panels_left.php'; ?>
+<div class="center-col insight-lobby-center">
+  <div class="insight-lobby-hero">
+    <span class="insight-lobby-badge">BETA</span>
+    <h1 class="insight-lobby-title"><?php echo htmlspecialchars(t('au.hero_title', 'PREDICTION ARENA'), ENT_QUOTES, 'UTF-8'); ?></h1>
+    <p class="insight-lobby-sub"><?php echo t('au.subtitle', 'Pick a side. Roll the number. 1–5 = Under, 6–10 = Above.'); ?></p>
+  </div>
+<?php require $gamePartial; ?>
+</div>
+<?php
+$mwShellGame = 'insight';
+require __DIR__ . '/games/mind-wars/lobby-partials/panels_right.php';
+?>
+</div>
+<nav class="bottom-nav" aria-label="KND Games navigation">
+  <a class="bnav-item" href="/games/mind-wars/lobby.php"><div class="bnav-icon">🏠</div><div class="bnav-label">LOBBY</div></a>
+  <a class="bnav-item" href="/tools/cards/index.html"><div class="bnav-icon">⬡</div><div class="bnav-label">AVATARS</div></a>
+  <a class="bnav-item bnav-item--neural-link" href="/games/knd-neural-link/drops.php" title="KND Neural Link"><div class="bnav-icon" aria-hidden="true">🧬</div><div class="bnav-label">NEURAL LINK</div></a>
+  <a class="bnav-item" href="/leaderboard.php"><div class="bnav-icon">🏆</div><div class="bnav-label">RANKS</div></a>
+  <a class="bnav-item" href="/games/mind-wars/lobby.php"><div class="bnav-icon">🎒</div><div class="bnav-label">BAG</div></a>
+</nav>
+</div>
 <script>
+window.MW_LOBBY_CSRF = <?php echo json_encode($csrfToken, JSON_UNESCAPED_UNICODE); ?>;
+window.MW_LOBBY_INITIAL = <?php echo json_encode($L, JSON_UNESCAPED_UNICODE | (defined('JSON_INVALID_UTF8_SUBSTITUTE') ? JSON_INVALID_UTF8_SUBSTITUTE : 0)); ?>;
+window.MW_SHELL_GAME = 'insight';
 var AU_CSRF = <?php echo json_encode($csrfToken); ?>;
 </script>
+<script src="/games/mind-wars/mw-avatar-card.js?v=<?php echo (int) $vMwJ; ?>"></script>
+<script src="/games/mind-wars/kd-lobby-shell.js?v=<?php echo (int) $vKs; ?>"></script>
 <script src="/assets/js/above-under.js?v=<?php echo @filemtime(__DIR__ . '/assets/js/above-under.js'); ?>"></script>
-
-<?php echo generateScripts(); ?>
+</body>
+</html>

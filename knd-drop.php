@@ -37,8 +37,17 @@ try {
         }
 
         $stmt = $pdo->prepare(
-            'SELECT rarity, reward_kp, entry_kp, xp_awarded, created_at
-             FROM knd_drops WHERE user_id = ? ORDER BY id DESC LIMIT 10'
+            "SELECT d.rarity, COALESCE(i.rarity, d.rarity) AS rarity_display, d.reward_kp, d.entry_kp, d.xp_awarded, d.created_at,
+                    i.name AS item_name,
+                    i.asset_path AS item_asset_path,
+                    r.was_duplicate,
+                    r.fragments_awarded
+             FROM knd_drops d
+             LEFT JOIN knd_user_drop_rewards r ON r.drop_id = d.id AND r.user_id = d.user_id
+             LEFT JOIN knd_avatar_items i ON i.id = r.reward_item_id
+             WHERE d.user_id = ?
+             ORDER BY d.id DESC
+             LIMIT 10"
         );
         $stmt->execute([$userId]);
         $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -53,7 +62,32 @@ $ogHead   = '    <meta property="og:title" content="' . htmlspecialchars($seoTit
 $ogHead  .= '    <meta property="og:description" content="' . htmlspecialchars($seoDesc) . '">' . "\n";
 $ogHead  .= '    <meta property="og:type" content="website">' . "\n";
 $ogHead  .= '    <meta name="twitter:card" content="summary_large_image">' . "\n";
-echo generateHeader($seoTitle, $seoDesc, $ogHead);
+$ogHead  .= '    <link rel="stylesheet" href="/assets/css/knd-drop.css?v=' . (file_exists(__DIR__ . '/assets/css/knd-drop.css') ? filemtime(__DIR__ . '/assets/css/knd-drop.css') : 0) . '">' . "\n";
+
+$embed = isset($_GET['embed']) && $_GET['embed'] === '1';
+if ($embed) {
+    header('Content-Type: text/html; charset=utf-8');
+    ?>
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?php echo htmlspecialchars($seoTitle); ?></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css?v=<?php echo @filemtime(__DIR__ . '/assets/css/style.css'); ?>">
+    <link rel="stylesheet" href="/assets/css/knd-ui.css?v=<?php echo file_exists(__DIR__ . '/assets/css/knd-ui.css') ? filemtime(__DIR__ . '/assets/css/knd-ui.css') : 0; ?>">
+    <link rel="stylesheet" href="/assets/css/knd-drop.css?v=<?php echo file_exists(__DIR__ . '/assets/css/knd-drop.css') ? filemtime(__DIR__ . '/assets/css/knd-drop.css') : 0; ?>">
+<link rel="stylesheet" href="/assets/css/arena-embed.css?v=<?php echo file_exists(__DIR__ . '/assets/css/arena-embed.css') ? filemtime(__DIR__ . '/assets/css/arena-embed.css') : 0; ?>">
+</head>
+<body class="arena-embed">
+<div class="arena-embed-inner">
+<?php
+}
+if (!$embed) {
+    echo generateHeader($seoTitle, $seoDesc, $ogHead);
+}
 
 $entryKp = defined('DROP_ENTRY_KP') ? DROP_ENTRY_KP : 100;
 
@@ -86,8 +120,10 @@ $rarityColors = [
 ];
 ?>
 
+<?php if (!$embed): ?>
 <div id="particles-bg"></div>
 <?php echo generateNavigation(); ?>
+<?php endif; ?>
 
 <section class="hero-section" style="min-height:100vh; padding-top:110px; padding-bottom:60px;">
 <div class="container">
@@ -97,9 +133,6 @@ $rarityColors = [
       <!-- Header -->
       <div class="text-center mb-4">
         <span class="badge bg-warning text-dark fw-bold px-3 py-1 mb-2" style="font-size:.75rem;">BETA</span>
-        <h1 class="glow-text mb-2" style="font-size:2.2rem;">
-          <i class="fas fa-box-open me-2"></i>KND Drop Chamber
-        </h1>
         <?php if ($season): ?>
         <p class="mb-1" style="color:var(--knd-neon-blue,#00d4ff); font-size:1rem; font-weight:600;">
           <?php echo htmlspecialchars($season['name']); ?> (Season I)
@@ -107,6 +140,9 @@ $rarityColors = [
         <p class="text-white-50 small mb-0">
           Ends in: <span id="drop-countdown" style="font-family:'Orbitron',monospace; color:#fb923c;">—</span>
         </p>
+        <div id="drop-season-progress" class="drop-season-progress" style="display:none;">
+          <div id="drop-season-progress-bar" class="drop-season-progress-bar" style="width:0%;"></div>
+        </div>
         <?php else: ?>
         <p class="text-white-50">No active season right now. Check back soon.</p>
         <?php endif; ?>
@@ -115,7 +151,7 @@ $rarityColors = [
       <?php if ($season): ?>
 
       <!-- Balance + Entry + Fragments -->
-      <div class="glass-card-neon p-3 mb-4 text-center">
+      <div id="drop-balance-strip" class="glass-card-neon p-3 mb-4 text-center drop-balance-strip">
         <div class="d-flex justify-content-center align-items-center gap-4 flex-wrap">
           <div>
             <span class="text-white-50 small">Your KP</span><br>
@@ -126,13 +162,27 @@ $rarityColors = [
             <span style="font-size:1.4rem; font-weight:700; color:#fb923c;"><?php echo number_format($entryKp); ?> KP</span>
           </div>
           <div style="border-left:1px solid rgba(255,255,255,.1); padding-left:16px;">
-            <span class="text-white-50 small"><i class="fas fa-gem me-1"></i>Fragments</span><br>
+            <span class="text-white-50 small" title="Duplicates convert to fragments for the Fragment Shop"><i class="fas fa-gem me-1"></i>Fragments</span><br>
             <span id="drop-fragments" style="font-size:1.4rem; font-weight:700; color:#a78bfa;">—</span>
           </div>
+          <div id="drop-pity-wrap" style="border-left:1px solid rgba(255,255,255,.1); padding-left:16px; display:none;">
+            <span class="text-white-50 small" title="Increases rare+ chance after common/special drops"><i class="fas fa-arrow-trend-up me-1"></i>Pity</span><br>
+            <span id="drop-pity" style="font-size:1.2rem; font-weight:700; color:#a78bfa;">—</span>
+          </div>
+          <div id="drop-limit-wrap" style="border-left:1px solid rgba(255,255,255,.1); padding-left:16px;">
+            <span class="text-white-50 small" title="Max 10 drops per hour"><i class="fas fa-gauge-high me-1"></i>Drops</span><br>
+            <span id="drop-limit" style="font-size:1.2rem; font-weight:700; color:#22c55e;">—</span>
+            <span id="drop-limit-reset" class="text-white-50 small mt-0" style="font-size:.7rem; display:none;"></span>
+          </div>
+        </div>
+        <div class="drop-economy-links">
+          <a href="/support-credits.php">How to get KP</a>
+          <span class="text-white-50 mx-1">·</span>
+          <a href="/rewards.php">Redeem rewards</a>
         </div>
       </div>
 
-<!-- Reward Table -->
+<!-- Reward Table (mini-cards) -->
 <div class="glass-card-neon p-3 mb-4">
   <h5 class="mb-3 text-center" style="font-size:.95rem;">
     <i class="fas fa-gem me-2" style="color:var(--knd-neon-blue,#00d4ff);"></i>
@@ -147,6 +197,7 @@ $rarityColors = [
       'epic' => 6,
       'legendary' => 2,
     ];
+    $fragmentTooltip = 'Duplicates convert to fragments for the Fragment Shop';
   ?>
 
   <div class="row g-2 text-center">
@@ -154,7 +205,7 @@ $rarityColors = [
       $chance = $rewardChances[$rarity] ?? 0;
     ?>
     <div class="col-6 col-md-3">
-      <div class="p-2 rounded" style="background:<?php echo $colors['bg']; ?>; border:1px solid <?php echo $colors['border']; ?>;">
+      <div class="drop-reward-mini" style="background:<?php echo $colors['bg']; ?>; border:1px solid <?php echo $colors['border']; ?>;" data-tooltip="<?php echo htmlspecialchars($fragmentTooltip); ?>">
         <div class="fw-bold text-uppercase" style="font-size:.7rem; color:<?php echo $colors['text']; ?>; letter-spacing:.05em;">
           <?php echo $rarity; ?>
         </div>
@@ -179,38 +230,94 @@ $rarityColors = [
           <?php for ($i = 1; $i <= 12; $i++): ?>
           <div class="drop-capsule" data-idx="<?php echo $i; ?>">
             <div class="drop-capsule-inner">
-              <i class="fas fa-cube"></i>
+              <i class="fas fa-box-open"></i>
             </div>
+            <span class="drop-capsule-hint"><?php echo number_format($entryKp); ?> KP</span>
           </div>
           <?php endfor; ?>
         </div>
       </div>
 
-      <!-- Result -->
+      <!-- Result (fallback when modal closed) -->
       <div id="drop-result" class="mb-4" style="display:none;"></div>
 
-      <!-- History -->
+      <!-- Reveal Modal (full-screen) -->
+      <div id="drop-reveal-overlay" class="drop-reveal-overlay" aria-hidden="true">
+        <button type="button" class="drop-reveal-close" id="drop-reveal-close" aria-label="Close">&times;</button>
+        <div class="drop-reveal-stage">
+          <div id="drop-reveal-capsule" class="drop-reveal-capsule">
+            <div class="knd-drop-scanner" aria-hidden="true">
+              <div class="knd-drop-scanner-ring"></div>
+              <div class="knd-drop-scanner-ring knd-drop-scanner-ring--delay"></div>
+              <div class="knd-drop-scanner-core"></div>
+            </div>
+          </div>
+          <div id="drop-reveal-item" class="drop-reveal-item">
+            <div class="drop-reveal-rays" aria-hidden="true">
+              <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                <line x1="200" y1="200" x2="200" y2="20" stroke="currentColor" stroke-width="2" opacity="0.4"/>
+                <line x1="200" y1="200" x2="350" y2="80" stroke="currentColor" stroke-width="2" opacity="0.4"/>
+                <line x1="200" y1="200" x2="350" y2="320" stroke="currentColor" stroke-width="2" opacity="0.4"/>
+                <line x1="200" y1="200" x2="200" y2="380" stroke="currentColor" stroke-width="2" opacity="0.4"/>
+                <line x1="200" y1="200" x2="50" y2="320" stroke="currentColor" stroke-width="2" opacity="0.4"/>
+                <line x1="200" y1="200" x2="50" y2="80" stroke="currentColor" stroke-width="2" opacity="0.4"/>
+                <line x1="200" y1="200" x2="80" y2="50" stroke="currentColor" stroke-width="2" opacity="0.4"/>
+                <line x1="200" y1="200" x2="320" y2="50" stroke="currentColor" stroke-width="2" opacity="0.4"/>
+                <line x1="200" y1="200" x2="320" y2="350" stroke="currentColor" stroke-width="2" opacity="0.4"/>
+                <line x1="200" y1="200" x2="80" y2="350" stroke="currentColor" stroke-width="2" opacity="0.4"/>
+              </svg>
+            </div>
+            <div id="drop-reveal-card" class="drop-reveal-card"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onboarding Modal -->
+      <div id="drop-intro-overlay" class="drop-intro-overlay" aria-hidden="true">
+        <div class="drop-intro-modal">
+          <h3><i class="fas fa-box-open me-2"></i>Welcome to Drop Chamber</h3>
+          <p>Spend <strong><?php echo number_format($entryKp); ?> KP</strong> to open a capsule and discover avatar items.</p>
+          <p><strong>KP</strong> = web credits. <strong>XP</strong> = account experience. <strong>KE</strong> = avatar experience.</p>
+          <p>Duplicates convert to <strong>fragments</strong> you can redeem in the Fragment Shop.</p>
+          <button type="button" class="btn btn-neon-primary drop-intro-cta" id="drop-intro-close">Got it</button>
+        </div>
+      </div>
+
+      <!-- History (cards) -->
       <div class="glass-card-neon p-3">
         <h5 class="mb-3"><i class="fas fa-history me-2"></i>Recent Drops</h5>
-        <div class="table-responsive">
-          <table class="table table-sm table-dark mb-0" style="--bs-table-bg:transparent; font-size:.8rem;">
-            <thead><tr><th>Rarity</th><th>Reward</th><th>XP</th><th>Date</th></tr></thead>
-            <tbody id="drop-history">
+        <div id="drop-history" class="drop-history-cards">
               <?php foreach ($history as $h):
-                $rc = $rarityColors[$h['rarity']] ?? $rarityColors['common'];
+                $rowRarity = $h['rarity_display'] ?? $h['rarity'];
+                $rc = $rarityColors[$rowRarity] ?? $rarityColors['common'];
+                $itemName = trim((string)($h['item_name'] ?? ''));
+                $isDuplicate = !empty($h['was_duplicate']);
+                $fragmentsAwarded = (int)($h['fragments_awarded'] ?? 0);
+                $assetPath = trim((string)($h['item_asset_path'] ?? ''));
               ?>
-              <tr>
-                <td><span class="badge" style="background:<?php echo $rc['bg']; ?>; color:<?php echo $rc['text']; ?>; border:1px solid <?php echo $rc['border']; ?>;"><?php echo ucfirst($h['rarity']); ?></span></td>
-                <td><?php echo (int)$h['reward_kp'] > 0 ? '+' . number_format((int)$h['reward_kp']) . ' KP' : '<span class="text-white-50">No drop</span>'; ?></td>
-                <td>+<?php echo (int)$h['xp_awarded']; ?> XP</td>
-                <td class="text-white-50"><?php echo date('M j H:i', strtotime($h['created_at'])); ?></td>
-              </tr>
+              <div class="drop-history-card">
+                <?php if ($assetPath): ?>
+                <img src="<?php echo htmlspecialchars($assetPath); ?>" alt="" class="drop-history-card-thumb" style="border:1px solid <?php echo $rc['border']; ?>;">
+                <?php else: ?>
+                <div class="drop-history-card-thumb" style="background:<?php echo $rc['bg']; ?>; border:1px solid <?php echo $rc['border']; ?>; display:flex; align-items:center; justify-content:center;"><i class="fas fa-image text-white-50"></i></div>
+                <?php endif; ?>
+                <div class="drop-history-card-info">
+                  <div class="drop-history-card-name" style="color:<?php echo $rc['text']; ?>;">
+                    <?php echo $itemName !== '' ? htmlspecialchars($itemName) : 'Avatar Item'; ?>
+                    <?php if ($isDuplicate && $fragmentsAwarded > 0): ?>
+                      <span style="color:#a78bfa;"> +<?php echo $fragmentsAwarded; ?> frags</span>
+                    <?php endif; ?>
+                  </div>
+                  <div class="drop-history-card-meta">
+                    <span class="badge" style="background:<?php echo $rc['bg']; ?>; color:<?php echo $rc['text']; ?>; border:1px solid <?php echo $rc['border']; ?>; font-size:.65rem;"><?php echo ucfirst((string)$rowRarity); ?></span>
+                    +<?php echo (int)$h['xp_awarded']; ?> XP · <?php echo date('M j H:i', strtotime($h['created_at'])); ?>
+                  </div>
+                </div>
+              </div>
               <?php endforeach; ?>
               <?php if (empty($history)): ?>
-              <tr><td colspan="4" class="text-center text-white-50">No drops yet.</td></tr>
+              <div class="text-center text-white-50 py-3 drop-history-empty">No drops yet.</div>
               <?php endif; ?>
-            </tbody>
-          </table>
         </div>
       </div>
 
@@ -227,45 +334,29 @@ $rarityColors = [
 </div>
 </section>
 
-<style>
-.drop-capsule {
-  width: 72px; height: 72px; border-radius: 14px; cursor: pointer;
-  background: rgba(12,15,22,.7); border: 2px solid rgba(0,212,255,.2);
-  display: flex; align-items: center; justify-content: center;
-  transition: all .25s ease; position: relative;
-}
-.drop-capsule:hover {
-  border-color: rgba(0,212,255,.6); box-shadow: 0 0 18px rgba(0,212,255,.2);
-  transform: translateY(-3px);
-}
-.drop-capsule.disabled { pointer-events: none; opacity: .4; }
-.drop-capsule.active {
-  border-color: #00d4ff; box-shadow: 0 0 30px rgba(0,212,255,.5);
-  transform: scale(1.15); z-index: 2;
-}
-.drop-capsule-inner {
-  font-size: 1.6rem; color: rgba(0,212,255,.5); transition: all .3s;
-}
-.drop-capsule:hover .drop-capsule-inner { color: #00d4ff; }
-.drop-capsule.active .drop-capsule-inner { color: #fff; }
-@keyframes drop-scan {
-  0%   { box-shadow: 0 0 10px rgba(0,212,255,.3); }
-  50%  { box-shadow: 0 0 40px rgba(0,212,255,.7); }
-  100% { box-shadow: 0 0 10px rgba(0,212,255,.3); }
-}
-.drop-capsule.scanning { animation: drop-scan .6s ease-in-out infinite; }
-.drop-rarity-common    { border-color: rgba(160,174,192,.6) !important; box-shadow: 0 0 20px rgba(160,174,192,.3) !important; }
-.drop-rarity-rare      { border-color: rgba(66,153,225,.6) !important;  box-shadow: 0 0 20px rgba(66,153,225,.3) !important; }
-.drop-rarity-epic      { border-color: rgba(159,122,234,.6) !important; box-shadow: 0 0 25px rgba(159,122,234,.4) !important; }
-.drop-rarity-legendary { border-color: rgba(236,201,75,.7) !important;  box-shadow: 0 0 35px rgba(236,201,75,.5) !important; }
-</style>
+<?php if ($embed): ?>
+<script src="/assets/js/navigation-extend.js"></script>
+<script src="/assets/js/knd-drop-audio.js?v=<?php echo file_exists(__DIR__ . '/assets/js/knd-drop-audio.js') ? filemtime(__DIR__ . '/assets/js/knd-drop-audio.js') : 0; ?>"></script>
+<script>
+var DROP_CSRF = <?php echo json_encode($csrfToken); ?>;
+var DROP_ENDS_AT = <?php echo $season ? json_encode($season['ends_at']) : 'null'; ?>;
+var DROP_STARTS_AT = <?php echo $season && !empty($season['starts_at']) ? json_encode($season['starts_at']) : 'null'; ?>;
+var DROP_ENTRY = <?php echo $entryKp; ?>;
+</script>
+<script src="/assets/js/knd-drop.js?v=<?php echo @filemtime(__DIR__ . '/assets/js/knd-drop.js'); ?>"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</div></body></html>
+<?php exit; endif; ?>
 
 <script src="/assets/js/navigation-extend.js"></script>
+<script src="/assets/js/knd-drop-audio.js?v=<?php echo file_exists(__DIR__ . '/assets/js/knd-drop-audio.js') ? filemtime(__DIR__ . '/assets/js/knd-drop-audio.js') : 0; ?>"></script>
 <?php echo generateFooter(); ?>
 
 <script>
 var DROP_CSRF = <?php echo json_encode($csrfToken); ?>;
 var DROP_ENDS_AT = <?php echo $season ? json_encode($season['ends_at']) : 'null'; ?>;
+var DROP_STARTS_AT = <?php echo $season && !empty($season['starts_at']) ? json_encode($season['starts_at']) : 'null'; ?>;
 var DROP_ENTRY = <?php echo $entryKp; ?>;
 </script>
 <script src="/assets/js/knd-drop.js?v=<?php echo @filemtime(__DIR__ . '/assets/js/knd-drop.js'); ?>"></script>

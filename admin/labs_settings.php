@@ -53,6 +53,7 @@ $tokenMasked = $tokenVal !== '' ? (substr($tokenVal, 0, 8) . '…') : '';
 
 require_once __DIR__ . '/../includes/header.php';
 echo generateHeader('Labs Settings | KND Admin', 'ComfyUI Provider configuration');
+echo generateAdminBar();
 ?>
 <style>
 .labs-admin { --cyan: #00d4ff; min-height: 100vh; background: #0a0a0f; color: #e8ecf0; padding: 100px 1rem 2rem; }

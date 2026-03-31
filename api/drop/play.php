@@ -9,6 +9,8 @@ require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 require_once __DIR__ . '/../../includes/rate_limit.php';
+
+define('DROP_MAX_PER_HOUR', 10);
 require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/json.php';
 require_once __DIR__ . '/../../includes/knd_drop.php';
@@ -28,7 +30,23 @@ try {
     $userId = current_user_id();
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
-    rate_limit_guard($pdo, "drop_user:{$userId}", 10, 3600);
+    // User rate limit: 10 drops/hour — return friendly error with resets_at
+    $userStatus = rate_limit_status($pdo, "drop_user:{$userId}", DROP_MAX_PER_HOUR, 3600);
+    if ($userStatus['remaining'] <= 0) {
+        http_response_code(429);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'ok' => false,
+            'error' => [
+                'code' => 'RATE_LIMITED',
+                'message' => 'Hourly limit reached. Max ' . DROP_MAX_PER_HOUR . ' drops per hour.',
+                'resets_at' => $userStatus['resets_at'],
+                'max' => DROP_MAX_PER_HOUR,
+            ],
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    rate_limit_guard($pdo, "drop_user:{$userId}", DROP_MAX_PER_HOUR, 3600);
     rate_limit_guard($pdo, "drop_ip:{$ip}", 30, 3600);
 
     if (has_risk_flag($pdo, $userId)) {

@@ -3,6 +3,10 @@
 
 (function() {
     'use strict';
+    if (window.__kndNavigationExtendInit) {
+        return;
+    }
+    window.__kndNavigationExtendInit = true;
 
     // ─── Nav item injection (Apparel / Custom Design) ───
 
@@ -11,7 +15,6 @@
         var navList = document.querySelector('#navbarNav .navbar-nav');
 
         if (!navList) {
-            setTimeout(extendNavigation, 100);
             return;
         }
 
@@ -48,6 +51,7 @@
     // ─── Orders dropdown (ID-based, single implementation) ───
 
     var DESKTOP_BP = 992;
+    var lastTouchToggleAt = 0;
 
     function getToggle() { return document.getElementById('ordersDropdownToggle'); }
     function getMenu()   { return document.getElementById('ordersDropdownMenu'); }
@@ -78,7 +82,16 @@
         var toggle = getToggle();
         var menu   = getMenu();
         if (!toggle || !menu) return;
-        if (toggle === e.target || toggle.contains(e.target)) {
+        var isToggleTarget = (toggle === e.target || toggle.contains(e.target));
+
+        // Mobile browsers often dispatch a synthetic click right after touchend.
+        // Ignore that click to prevent immediate open->close flicker.
+        if (isToggleTarget && (Date.now() - lastTouchToggleAt) < 700) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
+        if (isToggleTarget) {
             e.preventDefault();
             e.stopPropagation();
             if (isOpen()) closeDropdown();
@@ -114,6 +127,7 @@
         var menu   = getMenu();
         if (!toggle || !menu) return;
         if (toggle !== e.target && !toggle.contains(e.target)) return;
+        lastTouchToggleAt = Date.now();
         e.preventDefault();
         e.stopPropagation();
         if (isOpen()) closeDropdown();
@@ -156,5 +170,4 @@
         bindCollapseReset();
     }
 
-    setTimeout(extendNavigation, 200);
 })();

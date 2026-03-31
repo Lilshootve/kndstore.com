@@ -116,6 +116,8 @@ try {
     unset($_SESSION['sc_badge_cache']);
 
     $state['my_kp_balance'] = get_available_points($pdo, $userId);
+    $state['code'] = $game['code'];
+    $state['join_url'] = '/death-roll-game.php?code=' . $game['code'];
     json_success($state);
 } catch (Throwable $e) {
     if ($pdo && $pdo->inTransaction()) {

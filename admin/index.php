@@ -135,6 +135,7 @@ $navCards = [
     ['title' => 'Wallet Inspector', 'desc' => 'Audit and manage user KND Points balances', 'href' => '/admin/knd-points.php', 'icon' => 'fa-wallet', 'perm' => 'payments.view', 'badge' => null],
     ['title' => 'Rewards Catalog', 'desc' => 'Manage rewards catalog and stock', 'href' => '/admin/rewards.php', 'icon' => 'fa-gift', 'perm' => 'rewards.edit', 'badge' => $scRequestedRedemptions],
     ['title' => 'Leaderboard', 'desc' => 'Reset season, stats or all XP', 'href' => '/admin/leaderboard.php', 'icon' => 'fa-trophy', 'perm' => 'leaderboard.view', 'badge' => null],
+    ['title' => 'Avatar Stats', 'desc' => 'Edit mind, focus, speed, luck per avatar', 'href' => '/admin/avatar-balance.php', 'icon' => 'fa-chart-bar', 'perm' => 'system.storage_diag', 'badge' => null],
     ['title' => 'Audit Logs', 'desc' => 'View admin audit logs with filters', 'href' => '/admin/logs.php', 'icon' => 'fa-list-alt', 'perm' => 'logs.view', 'badge' => null],
     ['title' => 'Admin Users', 'desc' => 'Manage admin accounts, roles and permissions (owner only)', 'href' => '/admin/admin-users.php', 'icon' => 'fa-user-shield', 'perm' => 'admin_users.view', 'badge' => null],
     ['title' => 'Create Test Order', 'desc' => 'Generate a synthetic order for testing', 'href' => '/admin/test_order.php', 'icon' => 'fa-flask', 'perm' => 'system.create_test_order', 'badge' => null],
@@ -147,9 +148,10 @@ $navCards = [
 
 require_once __DIR__ . '/../includes/header.php';
 echo generateHeader('KND Admin', 'Admin dashboard');
+echo generateAdminBar();
 ?>
 <style>
-.admin-dash { --cyan: #00d4ff; min-height: 100vh; background: #0a0a0f; color: #e8ecf0; padding-top: 100px; }
+.admin-dash { --cyan: var(--c, #00e8ff); min-height: 100vh; background: var(--void, #010508); color: #e8ecf0; padding-top: 24px; }
 .kpi-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
 .kpi-card { background: rgba(12,15,22,.85); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 1.25rem 1.5rem; }
 .kpi-value { font-size: 2rem; font-weight: 700; color: var(--cyan); line-height: 1.1; }
@@ -173,7 +175,6 @@ echo generateHeader('KND Admin', 'Admin dashboard');
 <div class="container">
     <div class="admin-topbar">
         <h1><i class="fas fa-terminal me-2" style="color:var(--cyan)"></i>KND Admin</h1>
-        <a href="/admin/?logout=1" class="btn btn-outline-light btn-sm">Logout</a>
     </div>
 
     <div class="kpi-strip">

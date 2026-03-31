@@ -59,6 +59,12 @@ try {
 
     // Refresh status from ComfyUI if still running
     if ($job['status'] === 'pending' || $job['status'] === 'processing') {
+        $jobTool = (string) ($job['tool'] ?? '');
+        if ($jobTool === '3d_vertex') {
+            $stmt2 = $pdo->prepare("UPDATE knd_labs_jobs SET status = 'processing', updated_at = NOW() WHERE id = ?");
+            if ($stmt2) $stmt2->execute([$jobId]);
+            $job['status'] = 'processing';
+        } else {
         $promptId = $job['comfy_prompt_id'] ?? '';
         $historyRaw = $promptId ? comfyui_get_history($promptId, $baseUrl, $token) : null;
 
@@ -119,9 +125,10 @@ try {
                 $job['status'] = 'processing';
             }
         }
+        }
     }
 
-    $avgSeconds = ['text2img' => 60, 'upscale' => 40, 'remove-bg' => 35, 'character' => 45, 'consistency' => 45];
+    $avgSeconds = ['text2img' => 60, 'upscale' => 40, 'remove-bg' => 35, 'character' => 45, 'consistency' => 45, '3d_vertex' => 180];
     $avgSec = $avgSeconds[$job['tool'] ?? 'text2img'] ?? 60;
 
     $queuePosition = null;

@@ -40,10 +40,8 @@ const LABS_3D_STYLES = [
 ];
 
 const LABS_3D_QUALITY = [
-    'Draft' => 'Draft',
     'Standard' => 'Standard',
     'High' => 'High',
-    'Ultra' => 'Ultra',
 ];
 
 /** Smart preset hints by category (for worker / future ComfyUI) */

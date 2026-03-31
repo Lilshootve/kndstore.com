@@ -24,7 +24,7 @@ const LABS_TMP_DIR = 'uploads/labs/tmp';
 const MAX_REF_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB
 
 /** Tools accepted by POST tool= or type= (type is legacy). Do not remove entries. */
-const LABS_ALLOWED_TOOLS = ['text2img', 'img2img', 'remove-bg', 'upscale', 'character', 'texture', 'texture_seamless', 'texture_image', 'texture_ultra', 'consistency', '3d_fast', '3d_premium'];
+const LABS_ALLOWED_TOOLS = ['text2img', 'img2img', 'remove-bg', 'upscale', 'character', 'texture', 'texture_seamless', 'texture_image', 'texture_ultra', 'consistency', '3d_fast', '3d_premium', '3d_vertex'];
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -53,7 +53,7 @@ try {
     }
 
     $prompt = trim($_POST['prompt'] ?? '');
-    $promptOptionalTools = ['upscale', 'consistency', 'remove-bg'];
+    $promptOptionalTools = ['upscale', 'consistency', 'remove-bg', '3d_vertex'];
     if (!in_array($tool, $promptOptionalTools, true) && strlen($prompt) < 1) {
         if ($tool === 'texture' || $tool === 'texture_image') {
             $textureMode = trim($_POST['texture_mode'] ?? ($tool === 'texture_image' ? 'image_prompt' : 'text'));
@@ -122,6 +122,8 @@ try {
         $costKp = 25;
     } elseif ($tool === 'consistency') {
         $costKp = 15;
+    } elseif ($tool === '3d_vertex') {
+        $costKp = $quality === 'high' ? 30 : 20;
     } else {
         $costKp = 15;
     }
@@ -225,6 +227,19 @@ try {
         $valid = labs_validate_image($tmpPath, MAX_REF_IMAGE_BYTES, 4096);
         if (!$valid['ok']) json_error('INVALID_IMAGE', $valid['error'] ?? 'Invalid image.', 400);
     }
+    if ($tool === '3d_vertex') {
+        if (empty($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+            json_error('INVALID_IMAGE', 'Image upload required for 3D Vertex.');
+        }
+        $tmpPath = $_FILES['image']['tmp_name'];
+        $valid = labs_validate_image($tmpPath, MAX_REF_IMAGE_BYTES, 4096);
+        if (!$valid['ok']) json_error('INVALID_IMAGE', $valid['error'] ?? 'Invalid image.', 400);
+        $params['texture_size'] = (int) ($_POST['texture_size'] ?? 2048);
+        if (!in_array($params['texture_size'], [1024, 2048], true)) $params['texture_size'] = 2048;
+        $params['max_faces'] = (int) ($_POST['max_faces'] ?? 200000);
+        $params['max_faces'] = max(50000, min(500000, $params['max_faces']));
+        $params['quality'] = $quality;
+    }
 
     if ($tool === 'img2img') {
         if (empty($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
@@ -290,6 +305,15 @@ try {
         }
         $params['image_url'] = $siteBase . '/api/labs/tmp_image.php?job_id=' . $jobId . '&slot=input';
     }
+    if ($tool === '3d_vertex' && !empty($_FILES['image']['tmp_name']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $tmpDir = storage_path(LABS_TMP_DIR);
+        if (!is_dir($tmpDir)) @mkdir($tmpDir, 0755, true);
+        $destPath = $tmpDir . DIRECTORY_SEPARATOR . 'job_' . $jobId . '_input.png';
+        if (!labs_image_to_png($_FILES['image']['tmp_name'], $destPath)) {
+            json_error('STORAGE_ERROR', 'Could not save 3D Vertex input image.', 500);
+        }
+        $params['image_url'] = $siteBase . '/api/labs/tmp_image.php?job_id=' . $jobId . '&slot=input';
+    }
     if ($ipadapterEnabled && !empty($_FILES['ipadapter_image']['tmp_name']) && $_FILES['ipadapter_image']['error'] === UPLOAD_ERR_OK) {
         $valid = labs_validate_image($_FILES['ipadapter_image']['tmp_name'], MAX_REF_IMAGE_BYTES, 2048);
         if (!$valid['ok']) json_error('INVALID_IMAGE', $valid['error'] ?? 'Invalid reference image.', 400);
@@ -324,7 +348,7 @@ try {
 
     ai_spend_points($pdo, $userId, $jobId, $costKp);
 
-    $avgSeconds = ['text2img' => 60, 'upscale' => 40, 'remove-bg' => 35, 'character' => 45, 'texture' => 50];
+    $avgSeconds = ['text2img' => 60, 'upscale' => 40, 'remove-bg' => 35, 'character' => 45, 'texture' => 50, '3d_vertex' => 180];
     $avgSec = $avgSeconds[$tool] ?? 60;
 
     $stmtQ = $pdo->query("SELECT COUNT(*) FROM knd_labs_jobs WHERE status = 'queued'");

@@ -265,6 +265,7 @@ try {
 
 require_once __DIR__ . '/../includes/header.php';
 echo generateHeader('User #' . $userId, 'Admin user detail');
+echo generateAdminBar();
 ?>
 <style>
 .ud-dash { --cyan: #00d4ff; min-height:100vh; background:#0a0a0f; color:#e8ecf0; padding-top:100px; padding-bottom:60px; }

@@ -3,6 +3,7 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/knd_xp.php';
+require_once __DIR__ . '/knd_avatar.php';
 
 define('XP_MAX_LEVEL', 30);
 
@@ -90,11 +91,14 @@ function profile_xp_progress(int $xp, int $level): array {
  * Requires login (caller must check).
  */
 function profile_get_data(PDO $pdo, int $userId): array {
+    avatar_sync_items_from_assets($pdo);
     $username = null;
     $favoriteAvatar = null;
     try {
         $stmt = $pdo->prepare('
-            SELECT u.username, u.favorite_avatar_id, i.asset_path AS favorite_avatar_path, i.name AS favorite_avatar_name
+            SELECT u.username, u.favorite_avatar_id,
+                   i.asset_path AS favorite_avatar_path, i.name AS favorite_avatar_name, i.rarity AS favorite_avatar_rarity,
+                   i.code AS favorite_avatar_code, i.slot AS favorite_avatar_slot
             FROM users u
             LEFT JOIN knd_avatar_items i ON u.favorite_avatar_id = i.id
             WHERE u.id = ? LIMIT 1
@@ -108,7 +112,11 @@ function profile_get_data(PDO $pdo, int $userId): array {
                     'id'         => (int) $u['favorite_avatar_id'],
                     'asset_path' => $u['favorite_avatar_path'],
                     'name'       => $u['favorite_avatar_name'] ?? 'KND Avatar',
+                    'rarity'     => $u['favorite_avatar_rarity'] ?? 'common',
+                    'code'       => (string) ($u['favorite_avatar_code'] ?? ''),
+                    'slot'       => (string) ($u['favorite_avatar_slot'] ?? ''),
                 ];
+                $favoriteAvatar['thumb_path'] = avatar_item_thumb_url($pdo, $favoriteAvatar);
             }
         }
     } catch (\Throwable $e) {
@@ -160,17 +168,20 @@ function profile_get_data(PDO $pdo, int $userId): array {
         }
     } catch (\Throwable $e) { /* table may not exist */ }
 
-    // Above/Under: from above_under_rolls
-    $aboveUnder = ['rolls' => 0, 'wins' => 0, 'winrate' => null];
+    // Above/Under: from above_under_rolls (net_kp = sum of payout - entry per roll)
+    $aboveUnder = ['rolls' => 0, 'wins' => 0, 'winrate' => null, 'net_kp' => 0];
     try {
         $stmt = $pdo->prepare(
-            "SELECT COUNT(*) AS rolls, SUM(is_win) AS wins FROM above_under_rolls WHERE user_id = ?"
+            "SELECT COUNT(*) AS rolls, SUM(is_win) AS wins,
+                    COALESCE(SUM(payout_points - entry_points), 0) AS net_kp
+             FROM above_under_rolls WHERE user_id = ?"
         );
         $stmt->execute([$userId]);
         $au = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($au) {
             $aboveUnder['rolls'] = (int) ($au['rolls'] ?? 0);
             $aboveUnder['wins'] = (int) ($au['wins'] ?? 0);
+            $aboveUnder['net_kp'] = (int) ($au['net_kp'] ?? 0);
             $aboveUnder['winrate'] = $aboveUnder['rolls'] > 0
                 ? round(100 * $aboveUnder['wins'] / $aboveUnder['rolls'], 1) : null;
         }

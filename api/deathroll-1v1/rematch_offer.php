@@ -64,6 +64,7 @@ if ($existing) {
     $stmt->execute([$existing['offered_to_user_id']]);
     $toUser = $stmt->fetch(PDO::FETCH_ASSOC);
     json_success([
+        'offer_id' => (int) $existing['id'],
         'offer_status' => 'pending',
         'offered_by' => (int) $existing['offered_by_user_id'],
         'offered_to' => (int) $existing['offered_to_user_id'],
@@ -84,6 +85,7 @@ $stmt->execute([$opponent]);
 $oppUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
 json_success([
+    'offer_id' => (int) $pdo->lastInsertId(),
     'offer_status' => 'pending',
     'offered_by' => $userId,
     'offered_to' => $opponent,

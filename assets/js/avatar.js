@@ -11,6 +11,10 @@
   let shopItems = [];
   let svgCache = {};
 
+  function isSvgAsset(path) {
+    return /\.svg(?:\?|#|$)/i.test(path || '');
+  }
+
   async function fetchSvg(path) {
     if (svgCache[path]) return svgCache[path];
     try {
@@ -56,8 +60,16 @@
         if (!itemId) continue;
         const item = itemMap[itemId];
         if (!item || !item.asset_path) continue;
-        svg = await fetchSvg(item.asset_path);
-        if (!svg) continue;
+        if (isSvgAsset(item.asset_path)) {
+          svg = await fetchSvg(item.asset_path);
+          if (!svg) continue;
+        } else {
+          const layer = document.createElement('div');
+          layer.className = 'avatar-layer';
+          layer.innerHTML = `<img src="${item.asset_path}" alt="" loading="lazy" decoding="async">`;
+          inner.appendChild(layer);
+          continue;
+        }
       }
       const layer = document.createElement('div');
       layer.className = 'avatar-layer';

@@ -43,8 +43,8 @@ if ($pdo) {
 
 function labs_breadcrumb(string $toolName): void {
     echo '<nav aria-label="breadcrumb"><ol class="breadcrumb">';
-    echo '<li class="breadcrumb-item"><a href="/">' . htmlspecialchars(t('nav.home', 'Home')) . '</a></li>';
-    echo '<li class="breadcrumb-item"><a href="/labs">' . htmlspecialchars(t('labs.title', 'KND Labs')) . '</a></li>';
+    echo '<li class="breadcrumb-item"><a href="/">' . t('nav.home', 'Home') . '</a></li>';
+    echo '<li class="breadcrumb-item"><a href="/labs">' . t('labs.title', 'KND Labs') . '</a></li>';
     echo '<li class="breadcrumb-item active" aria-current="page">' . htmlspecialchars($toolName) . '</li>';
     echo '</ol></nav>';
 }
